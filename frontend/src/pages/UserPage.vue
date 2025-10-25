@@ -112,6 +112,7 @@
 import SelectedUsers from '../components/SelectedUsers.vue'
 import { generateMockUsers } from '../utils/generateMockUsers.js'
 import { openUserPopup } from '../utils/showPop.js'
+import axios from '../utils/axiosInstance'
 //import { toastMsg } from '../utils/toastUtil.js'
 
 export default {
@@ -171,12 +172,12 @@ export default {
   methods: {
     async loadUsers() {
       try {
-        const res = await fetch(`${import.meta.env.BASE_URL}db.json`, { cache: 'no-store' })
-        if (!res.ok) throw new Error('db.json not found')
-        const json = await res.json()
+        const res = await axios.get('/users', { headers: { 'Cache-Control': 'no-store' } })
+        // axios는 기본적으로 res.data에 응답이 들어감
+        const json = res.data
         this.users = Array.isArray(json) ? json : json.users || []
       } catch (e) {
-        console.warn('db.json 로드 실패 → 목업 생성으로 대체합니다.', e)
+        // API /api/users 로드 실패 → 목업 생성으로 대체
         this.users = generateMockUsers(100, { seed: 42 })
       }
     },
@@ -209,7 +210,7 @@ export default {
           })
         }
       } catch (error) {
-        console.error('팝업 에러:', error)
+        // 팝업 에러
         this.$toast('팝업을 여는 중 오류가 발생했습니다', {
           type: 'error',
           duration: 3000,

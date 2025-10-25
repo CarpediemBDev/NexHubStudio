@@ -29,6 +29,7 @@ export default {
     return {
       // [FIXED] api 제거
       rows: [], // db.json에서 로드
+      rows: [], // /api/users에서 로드
       datafields: [
         { name: 'userId', type: 'string' },
         { name: 'name', type: 'string' },
@@ -49,10 +50,10 @@ export default {
   },
   methods: {
     async loadUsers() {
-      const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
-      const res = await fetch(url)
-      const data = await res.json()
-      this.rows = Array.isArray(data) ? data : data.users || []
+      // axios로 /api/users 호출
+      const res = await this.$axios.get('/users', { headers: { 'Cache-Control': 'no-store' } })
+      const json = res.data
+      this.rows = Array.isArray(json) ? json : json.users || []
     },
     add() {
       this.$refs.grd?.add({ name: '', dept: '', role: '' })

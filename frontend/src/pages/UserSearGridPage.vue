@@ -180,12 +180,12 @@ export default {
   methods: {
     async loadUsers() {
       try {
-        const res = await fetch(`${import.meta.env.BASE_URL}db.json`, { cache: 'no-store' })
-        if (!res.ok) throw new Error('db.json not found')
-        const json = await res.json()
+        // axios로 /api/users 호출
+        const res = await this.$axios.get('/users', { headers: { 'Cache-Control': 'no-store' } })
+        const json = res.data
         this.users = Array.isArray(json) ? json : json.users || []
       } catch (e) {
-        console.warn('db.json 로드 실패 → 목업 생성으로 대체합니다.', e)
+        // /api/users 로드 실패 → 목업 생성으로 대체
         this.users = generateMockUsers(100, { seed: 42 })
       }
     },
