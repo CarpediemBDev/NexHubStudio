@@ -5,7 +5,9 @@ server:
 spring:
   application:
     name: userpop-backend
-
+  mvc:
+    servlet:
+      path: /api
   # H2 Database Configuration
   datasource:
     url: jdbc:h2:file:./data/userpop
