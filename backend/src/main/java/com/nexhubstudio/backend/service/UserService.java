@@ -2,7 +2,7 @@ package com.nexhubstudio.backend.service;
 
 import com.nexhubstudio.backend.domain.User;
 import com.nexhubstudio.backend.dto.UserDto;
-import com.nexhubstudio.backend.repository.UserRepository;
+import com.nexhubstudio.backend.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -11,17 +11,31 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+
+    public int createUser(User user) {
+        return userMapper.insertUser(user);
+    }
+
+    public int updateUser(User user) {
+        return userMapper.updateUser(user);
+    }
+
+    public int deleteUser(String userId) {
+        return userMapper.deleteUser(userId);
+    }
+
     @Autowired
-    private UserRepository userRepository;
+    private UserMapper userMapper;
 
     public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream()
+        return userMapper.findAll().stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
     public Optional<UserDto> getUserById(String userId) {
-        return userRepository.findById(userId).map(this::toDto);
+        User user = userMapper.findById(userId);
+        return Optional.ofNullable(user).map(this::toDto);
     }
 
     // Entity → DTO 변환
