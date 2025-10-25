@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1-create-user-table" author="copilot">
+        <createTable tableName="users">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)"/>
+            <column name="dept" type="varchar(50)"/>
+            <column name="role" type="varchar(50)"/>
+            <column name="email" type="varchar(100)"/>
+            <column name="phone" type="varchar(30)"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2-insert-user-initial-data" author="copilot">
+    <!-- db.json 기반 초기 데이터 insert, email/phone/status 등은 규칙적으로 생성 -->
+        <insert tableName="users">
+            <column name="id" value="Asparagus.cata"/>
+            <column name="name" value="아스파라카타"/>
+            <column name="dept" value="데이터팀"/>
+            <column name="role" value="QA"/>
+            <column name="email" value="Asparagus.cata@example.com"/>
+            <column name="password" value="$2a$10$testpassword"/>
+            <column name="last_login_at" value="2025-01-01T00:00:00"/>
+            <column name="created_by" value="system"/>
+            <column name="created_at" value="2025-01-01T00:00:00"/>
+            <column name="updated_by" value="system"/>
+            <column name="updated_at" value="2025-01-01T00:00:00"/>
+            <column name="refresh_token" value=""/>
+            <column name="token_expired_at" value="2025-12-31T23:59:59"/>
+            <column name="phone" value="010-0000-0001"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="seoyeon.choi"/>
+            <column name="name" value="최서연"/>
+            <column name="dept" value="경영지원"/>
+            <column name="role" value="DevOps"/>
+            <column name="email" value="seoyeon.choi@example.com"/>
+            <column name="password" value="$2a$10$testpassword"/>
+            <column name="last_login_at" value="2025-01-01T00:00:00"/>
+            <column name="created_by" value="system"/>
+            <column name="created_at" value="2025-01-01T00:00:00"/>
+            <column name="updated_by" value="system"/>
+            <column name="updated_at" value="2025-01-01T00:00:00"/>
+            <column name="refresh_token" value=""/>
+            <column name="token_expired_at" value="2025-12-31T23:59:59"/>
+            <column name="phone" value="010-0000-0002"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="hyunwoo.jang"/>
+            <column name="name" value="장현우"/>
+            <column name="dept" value="모바일팀"/>
+            <column name="role" value="Data"/>
+            <column name="email" value="hyunwoo.jang@example.com"/>
+            <column name="password" value="$2a$10$testpassword"/>
+            <column name="last_login_at" value="2025-01-01T00:00:00"/>
+            <column name="created_by" value="system"/>
+            <column name="created_at" value="2025-01-01T00:00:00"/>
+            <column name="updated_by" value="system"/>
+            <column name="updated_at" value="2025-01-01T00:00:00"/>
+            <column name="refresh_token" value=""/>
+            <column name="token_expired_at" value="2025-12-31T23:59:59"/>
+            <column name="phone" value="010-0000-0003"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <!-- ... (db.json의 나머지 데이터도 동일 규칙으로 추가) ... -->
+    </changeSet>
+
+</databaseChangeLog>

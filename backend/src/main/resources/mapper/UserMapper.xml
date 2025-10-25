@@ -5,27 +5,56 @@
 <mapper namespace="com.nexhubstudio.backend.mapper.UserMapper">
 
     <resultMap id="UserResultMap" type="User">
-        <id property="id" column="id"/>
+        <id property="userId" column="id"/>
         <result property="name" column="name"/>
+        <result property="dept" column="dept"/>
+        <result property="role" column="role"/>
         <result property="email" column="email"/>
+        <result property="password" column="password"/>
+        <result property="lastLoginAt" column="last_login_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedBy" column="updated_by"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="refreshToken" column="refresh_token"/>
+        <result property="tokenExpiredAt" column="token_expired_at"/>
+        <result property="phone" column="phone"/>
+        <result property="status" column="status"/>
     </resultMap>
 
     <select id="findAll" resultMap="UserResultMap">
-        SELECT id, name, email FROM users
+    SELECT id, name, dept, role, email, password, last_login_at, created_by, created_at, updated_by, updated_at, refresh_token, token_expired_at, phone, status FROM users
     </select>
 
     <select id="findById" parameterType="string" resultMap="UserResultMap">
-        SELECT id, name, email FROM users WHERE id = #{userId}
+    SELECT id, name, dept, role, email, password, last_login_at, created_by, created_at, updated_by, updated_at, refresh_token, token_expired_at, phone, status FROM users WHERE id = #{userId}
     </select>
 
     <insert id="insertUser" parameterType="User">
-        INSERT INTO users (id, name, email)
-        VALUES (#{id}, #{name}, #{email})
+        INSERT INTO users (
+            id, name, dept, role, email, password, last_login_at, created_by, created_at, updated_by, updated_at, refresh_token, token_expired_at, phone, status
+        ) VALUES (
+            #{userId}, #{name}, #{dept}, #{role}, #{email}, #{password}, #{lastLoginAt}, #{createdBy}, #{createdAt}, #{updatedBy}, #{updatedAt}, #{refreshToken}, #{tokenExpiredAt}, #{phone}, #{status}
+        )
     </insert>
 
     <update id="updateUser" parameterType="User">
-        UPDATE users SET name = #{name}, email = #{email}
-        WHERE id = #{id}
+        UPDATE users SET
+            name = #{name},
+            dept = #{dept},
+            role = #{role},
+            email = #{email},
+            password = #{password},
+            last_login_at = #{lastLoginAt},
+            created_by = #{createdBy},
+            created_at = #{createdAt},
+            updated_by = #{updatedBy},
+            updated_at = #{updatedAt},
+            refresh_token = #{refreshToken},
+            token_expired_at = #{tokenExpiredAt},
+            phone = #{phone},
+            status = #{status}
+        WHERE id = #{userId}
     </update>
 
     <delete id="deleteUser" parameterType="string">

@@ -21,7 +21,6 @@ public class UserController {
         user.setDept(userDto.getDept());
         user.setRole(userDto.getRole());
         user.setEmail(userDto.getEmail());
-        user.setEnabled(userDto.getEnabled());
         user.setLastLoginAt(userDto.getLastLoginAt());
         user.setCreatedAt(userDto.getCreatedAt());
         user.setUpdatedAt(userDto.getUpdatedAt());
@@ -36,7 +35,6 @@ public class UserController {
         user.setDept(userDto.getDept());
         user.setRole(userDto.getRole());
         user.setEmail(userDto.getEmail());
-        user.setEnabled(userDto.getEnabled());
         user.setLastLoginAt(userDto.getLastLoginAt());
         user.setCreatedAt(userDto.getCreatedAt());
         user.setUpdatedAt(userDto.getUpdatedAt());

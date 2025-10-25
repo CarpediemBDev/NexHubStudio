@@ -46,9 +46,15 @@ public class UserService {
         dto.setDept(user.getDept());
         dto.setRole(user.getRole());
         dto.setEmail(user.getEmail());
-        dto.setEnabled(user.getEnabled());
+        dto.setPassword(user.getPassword());
+        dto.setPhone(user.getPhone());
+        dto.setStatus(user.getStatus());
+        dto.setRefreshToken(user.getRefreshToken());
+        dto.setTokenExpiredAt(user.getTokenExpiredAt());
         dto.setLastLoginAt(user.getLastLoginAt());
+        dto.setCreatedBy(user.getCreatedBy());
         dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedBy(user.getUpdatedBy());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
     }
