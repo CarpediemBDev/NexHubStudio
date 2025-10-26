@@ -119,7 +119,7 @@
 <script>
 import SelectedUsers from './SelectedUsers.vue'
 import PagedList from './PagedList.vue'
-import { generateMockUsers } from '../utils/generateMockUsers.js'
+import axios from '@/utils/http'
 
 export default {
   name: 'UserPopup',
@@ -145,7 +145,6 @@ export default {
       leftPageSize: 10,
       rightPage: 1,
       rightPageSize: 10,
-      loading: true,
     }
   },
   computed: {
@@ -235,18 +234,8 @@ export default {
   },
   methods: {
     async loadUsers() {
-      this.loading = true
-      try {
-        const res = await fetch(`${import.meta.env.BASE_URL}db.json`, { cache: 'no-store' })
-        if (!res.ok) throw new Error('db.json not found')
-        const json = await res.json()
-        this.users = Array.isArray(json) ? json : json.users || []
-      } catch (e) {
-        console.warn('[Popup] db.json 로드 실패 → 목업으로 대체', e)
-        this.users = generateMockUsers(100, { seed: 43 })
-      } finally {
-        this.loading = false
-      }
+      const { data } = await axios.get('/users')
+      this.users = Array.isArray(data) ? data : data.users || []
     },
 
     onClose() {
@@ -344,3 +333,7 @@ export default {
   }
 }
 </style>
+
+
+
+

@@ -43,7 +43,6 @@ NexHubStudio/
 ```bash
 cd frontend
 npm install
-npm run make:db        # 목업 데이터 생성
 npm run dev           # http://localhost:5173
 ```
 
@@ -140,9 +139,6 @@ wget -qO- https://get.volta.sh | bash
 npm i
 
 # 샘플 데이터 생성 (100명, 시드 42)
-npm run make:db
-
-# 개발서버 실행
 npm run dev
 ```
 
@@ -179,7 +175,6 @@ src/
 │
 ├── utils/                       # 🛠️ 유틸리티
 │   ├── showPop.js              # 모달 관리 시스템
-│   ├── generateMockUsers.js    # 목업 데이터 생성
 │   └── toastUtil.js            # 토스트 알림
 │
 ├── assets/                      # 🎨 정적 자원
@@ -278,8 +273,4 @@ const users = await this.$modal.show(UserPopup, params)
 
 ```bash
 # 목업 데이터 생성
-npm run make:db
-
-# 생성된 파일
-public/db.json  # 100명의 가상 사용자 데이터
 ```

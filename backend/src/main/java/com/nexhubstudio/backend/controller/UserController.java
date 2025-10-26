@@ -1,7 +1,7 @@
 package com.nexhubstudio.backend.controller;
 
-import com.nexhubstudio.backend.dto.UserDto;
-import com.nexhubstudio.backend.domain.User;
+import com.nexhubstudio.backend.dto.UserRequest;
+import com.nexhubstudio.backend.dto.UserResponse;
 import com.nexhubstudio.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,33 +12,17 @@ import java.util.Optional;
 @RequestMapping("/users")
 public class UserController {
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping
-    public int createUser(@RequestBody UserDto userDto) {
-        // UserDto → User 변환 필요(간단 예시)
-        User user = new User();
-        user.setUserId(userDto.getUserId());
-        user.setName(userDto.getName());
-        user.setDept(userDto.getDept());
-        user.setRole(userDto.getRole());
-        user.setEmail(userDto.getEmail());
-        user.setLastLoginAt(userDto.getLastLoginAt());
-        user.setCreatedAt(userDto.getCreatedAt());
-        user.setUpdatedAt(userDto.getUpdatedAt());
-        return userService.createUser(user);
+    public int createUser(@RequestBody UserRequest userRequest) {
+        return userService.createUser(userRequest);
     }
 
     @PutMapping
-    public int updateUser(@RequestBody UserDto userDto) {
-        User user = new User();
-        user.setUserId(userDto.getUserId());
-        user.setName(userDto.getName());
-        user.setDept(userDto.getDept());
-        user.setRole(userDto.getRole());
-        user.setEmail(userDto.getEmail());
-        user.setLastLoginAt(userDto.getLastLoginAt());
-        user.setCreatedAt(userDto.getCreatedAt());
-        user.setUpdatedAt(userDto.getUpdatedAt());
-        return userService.updateUser(user);
+    public int updateUser(@RequestBody UserRequest userRequest) {
+        return userService.updateUser(userRequest);
     }
 
     @DeleteMapping("/{userId}")
@@ -46,16 +30,13 @@ public class UserController {
         return userService.deleteUser(userId);
     }
 
-    @Autowired
-    private UserService userService;
-
     @GetMapping
-    public List<UserDto> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/{userId}")
-    public Optional<UserDto> getUserById(@PathVariable String userId) {
+    public Optional<UserResponse> getUserById(@PathVariable String userId) {
         return userService.getUserById(userId);
     }
 }

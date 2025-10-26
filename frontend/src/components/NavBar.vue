@@ -13,11 +13,11 @@
           >
             <i class="bi bi-arrow-left"></i>
           </button>
-          <span class="navbar-brand fw-semibold mb-0">userPopExample</span>
+          <span class="navbar-brand fw-semibold mb-0">NexHubStudio</span>
         </div>
 
         <!-- 데스크톱: 일반 브랜드 -->
-        <a class="navbar-brand fw-semibold d-none d-lg-block" href="#">userPopExample</a>
+        <a class="navbar-brand fw-semibold d-none d-lg-block" href="#">NexHubStudio</a>
 
         <!-- 모바일: 햄버거 메뉴만 -->
         <button

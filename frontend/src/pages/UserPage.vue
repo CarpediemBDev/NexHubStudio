@@ -109,11 +109,10 @@
 </template>
 
 <script>
-import SelectedUsers from '../components/SelectedUsers.vue'
-import { generateMockUsers } from '../utils/generateMockUsers.js'
-import { openUserPopup } from '../utils/showPop.js'
-import axios from '../utils/axiosInstance'
-//import { toastMsg } from '../utils/toastUtil.js'
+import SelectedUsers from '@/components/SelectedUsers.vue'
+import { openUserPopup } from '@/utils/showPop.js'
+import { showToast } from '@/utils/toastUtil.js'
+import axios from '@/utils/http'
 
 export default {
   name: 'UserPage',
@@ -171,50 +170,23 @@ export default {
   },
   methods: {
     async loadUsers() {
-      try {
-        const res = await axios.get('/users', { headers: { 'Cache-Control': 'no-store' } })
-        // axios는 기본적으로 res.data에 응답이 들어감
-        const json = res.data
-        this.users = Array.isArray(json) ? json : json.users || []
-      } catch (e) {
-        // API /api/users 로드 실패 → 목업 생성으로 대체
-        this.users = generateMockUsers(100, { seed: 42 })
-      }
+      const { data } = await axios.get('/users')
+      this.users = Array.isArray(data) ? data : data.users || []
     },
     async openPopup() {
-      try {
-        // 헬퍼 함수를 사용해서 팝업 열기
-        const selectedList = await openUserPopup({
-          // preselectedIds: this.checkedIds, // 미리 선택된 ID 목록 (필요시)
-        })
+      const selectedList = await openUserPopup({
+        // preselectedIds: this.checkedIds,
+      })
 
-        // 사용자가 확인을 누른 경우
-        if (selectedList && selectedList.length > 0) {
-          const addIds = selectedList.map((u) => u.userId)
-          const set = new Set(this.checkedIds)
-          for (const id of addIds) {
-            if (!set.has(id)) {
-              this.checkedIds.push(id)
-            }
-          }
-
-          this.$toast(`${selectedList.length}명 추가됨`, {
-            type: 'success',
-            duration: 2000,
-          })
-        } else {
-          // 취소하거나 아무것도 선택하지 않은 경우
-          this.$toast('추가된 항목이 없습니다', {
-            type: 'info',
-            duration: 2000,
-          })
+      if (Array.isArray(selectedList) && selectedList.length > 0) {
+        const addIds = selectedList.map((u) => u.userId)
+        const set = new Set(this.checkedIds)
+        for (const id of addIds) {
+          if (!set.has(id)) this.checkedIds.push(id)
         }
-      } catch (error) {
-        // 팝업 에러
-        this.$toast('팝업을 여는 중 오류가 발생했습니다', {
-          type: 'error',
-          duration: 3000,
-        })
+        showToast(Added , { type: 'success', duration: 3000 })
+      } else {
+        showToast('No items added', { type: 'info', duration: 2000 })
       }
     },
     removeSelected(userId) {
@@ -266,3 +238,5 @@ export default {
   },
 }
 </script>
+
+

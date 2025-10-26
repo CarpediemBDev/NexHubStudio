@@ -119,9 +119,8 @@
 
 <script>
 import SearchGrid from '../components/SearchGrid.vue'
-import { generateMockUsers } from '../utils/generateMockUsers.js'
-import { openUserPopup } from '../utils/showPop.js'
-//import { toastMsg } from '../utils/toastUtil.js'
+import { openUserPopup } from '@/utils/showPop.js'
+import axios from '@/utils/http'
 
 export default {
   name: 'UserSearGridPage',
@@ -179,55 +178,22 @@ export default {
   },
   methods: {
     async loadUsers() {
-      try {
-        // axios로 /api/users 호출
-        const res = await this.$axios.get('/users', { headers: { 'Cache-Control': 'no-store' } })
-        const json = res.data
-        this.users = Array.isArray(json) ? json : json.users || []
-      } catch (e) {
-        // /api/users 로드 실패 → 목업 생성으로 대체
-        this.users = generateMockUsers(100, { seed: 42 })
-      }
+      const { data } = await axios.get('/users')
+      this.users = Array.isArray(data) ? data : data.users || []
     },
     async openPopup() {
-      try {
-        // 헬퍼 함수를 사용해서 팝업 열기
-        const selectedList = await openUserPopup({
-          // 필요한 경우에만 커스텀 옵션 추가
-        })
+      const selectedList = await openUserPopup({})
+      if (!Array.isArray(selectedList) || selectedList.length === 0) return
 
-        if (selectedList && selectedList.length > 0) {
-          // forward selected users to SearchGrid so it can display names
-          try {
-            const sg = this.$refs.searchGrid
-            if (sg && typeof sg.setUsersFromPopup === 'function') {
-              sg.setUsersFromPopup(selectedList)
-            }
-          } catch (e) {
-            // ignore if ref not available
-          }
-
-          // Add to checkedIds
-          const addIds = selectedList.map((u) => u.userId)
-          const set = new Set(this.checkedIds)
-          for (const id of addIds) {
-            if (!set.has(id)) {
-              this.checkedIds.push(id)
-            }
-          }
-
-          this.$toast(`${selectedList.length}명 추가됨`, {
-            type: 'success',
-            duration: 2000,
-          })
-        }
-      } catch (error) {
-        console.error('팝업 에러:', error)
-        this.$toast('팝업을 여는 중 오류가 발생했습니다', {
-          type: 'error',
-          duration: 3000,
-        })
+      const sg = this.$refs.searchGrid
+      if (sg && typeof sg.setUsersFromPopup === 'function') {
+        sg.setUsersFromPopup(selectedList)
       }
+
+      const addIds = selectedList.map((u) => u?.userId).filter(Boolean)
+      this.checkedIds = Array.from(new Set([...this.checkedIds, ...addIds]))
+
+      this.$toast(`Added ${selectedList.length}`, { type: 'success', duration: 2000 })
     },
     onConfirm(selectedList) {
       // 이 메서드는 SearchGrid에서 @update:selected 이벤트로 호출됨
@@ -288,3 +254,8 @@ export default {
   },
 }
 </script>
+
+
+
+
+

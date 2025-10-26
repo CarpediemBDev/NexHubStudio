@@ -20,16 +20,15 @@
 </template>
 
 <script>
-import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue' // alias 없으면 '../components/JqxCustomeGrid.vue'
+import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import axios from '@/utils/http'
 
 export default {
   name: 'JqxGridPage',
   components: { JqxCustomeGrid },
   data() {
     return {
-      // [FIXED] api 제거
-      rows: [], // db.json에서 로드
-      rows: [], // /api/users에서 로드
+      rows: [],
       datafields: [
         { name: 'userId', type: 'string' },
         { name: 'name', type: 'string' },
@@ -50,10 +49,8 @@ export default {
   },
   methods: {
     async loadUsers() {
-      // axios로 /api/users 호출
-      const res = await this.$axios.get('/users', { headers: { 'Cache-Control': 'no-store' } })
-      const json = res.data
-      this.rows = Array.isArray(json) ? json : json.users || []
+      const { data } = await axios.get('/users')
+      this.rows = Array.isArray(data) ? data : data.users || []
     },
     add() {
       this.$refs.grd?.add({ name: '', dept: '', role: '' })
@@ -102,3 +99,11 @@ export default {
   },
 }
 </script>
+
+
+
+
+
+
+
+

@@ -16,8 +16,14 @@
             <column name="email" type="varchar(100)"/>
             <column name="phone" type="varchar(30)"/>
             <column name="status" type="varchar(20)"/>
+            <column name="password" type="varchar(255)"/>
+            <column name="last_login_at" type="timestamp"/>
+            <column name="created_by" type="varchar(50)"/>
             <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_by" type="varchar(50)"/>
             <column name="updated_at" type="timestamp"/>
+            <column name="refresh_token" type="varchar(255)"/>
+            <column name="token_expired_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
