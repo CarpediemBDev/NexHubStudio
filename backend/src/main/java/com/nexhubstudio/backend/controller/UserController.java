@@ -1,6 +1,7 @@
 package com.nexhubstudio.backend.controller;
 
 import com.nexhubstudio.backend.dto.UserRequest;
+import com.nexhubstudio.backend.dto.UserBulkRequest;
 import com.nexhubstudio.backend.dto.UserResponse;
 import com.nexhubstudio.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,5 +39,15 @@ public class UserController {
     @GetMapping("/{userId}")
     public Optional<UserResponse> getUserById(@PathVariable String userId) {
         return userService.getUserById(userId);
+    }
+
+    @PostMapping("/bulk")
+    public java.util.Map<String, Integer> bulkSave(@RequestBody UserBulkRequest bulk) {
+        int[] counts = userService.bulkSave(bulk);
+        return java.util.Map.of(
+                "created", counts[0],
+                "updated", counts[1],
+                "deleted", counts[2]
+        );
     }
 }

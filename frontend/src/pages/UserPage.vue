@@ -184,7 +184,7 @@ export default {
         for (const id of addIds) {
           if (!set.has(id)) this.checkedIds.push(id)
         }
-        showToast(Added , { type: 'success', duration: 3000 })
+        showToast(`Added ${selectedList.length}`, { type: 'success', duration: 3000 })
       } else {
         showToast('No items added', { type: 'info', duration: 2000 })
       }

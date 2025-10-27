@@ -3,7 +3,7 @@ import { showToast } from './toastUtil.js'
 
 // Centralized axios instance for API calls
 const http = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 10000,
 })
 

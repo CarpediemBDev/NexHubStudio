@@ -1,5 +1,16 @@
 <template>
   <div class="container py-3" style="height: 600px">
+    <!-- SearchGrid: 사용자 선택용 툴바 (목록 위에 위치) -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <SearchGrid
+          ref="searchGrid"
+          @open-user-popup="openPopup"
+          @update:selected="onConfirm"
+          @search="loadUsers"
+        />
+      </div>
+    </div>
     <div class="mb-2 d-flex gap-2">
       <button class="btn btn-primary btn-sm" @click="add">추가</button>
       <button class="btn btn-outline-danger btn-sm" @click="deleteSelected">삭제</button>
@@ -21,11 +32,14 @@
 
 <script>
 import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import SearchGrid from '@/components/SearchGrid.vue'
+import { openUserPopup } from '@/utils/showPop.js'
+import { showToast } from '@/utils/toastUtil.js'
 import axios from '@/utils/http'
 
 export default {
   name: 'JqxGridPage',
-  components: { JqxCustomeGrid },
+  components: { JqxCustomeGrid, SearchGrid },
   data() {
     return {
       rows: [],
@@ -64,46 +78,14 @@ export default {
     async saveData() {
       const grid = this.$refs.grd
       if (!grid?.hasChanges()) {
-        alert('변경사항이 없습니다.')
+        alert('변경된 내용이 없습니다.')
         return
       }
-
       const payload = grid.getSavePayload()
-      console.log('서버로 보낼 데이터:', payload)
-
-      try {
-        // 실제 서버 저장 로직 (예시)
-        // const response = await fetch('/api/users/bulk', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(payload)
-        // })
-        //
-        // if (response.ok) {
-        //   alert('저장되었습니다.')
-        //   grid.clearStatuses() // 상태 초기화
-        // }
-
-        // 개발용 임시 처리
-        alert(
-          `저장 완료!\n생성: ${payload.created.length}건\n수정: ${payload.updated.length}건\n삭제: ${payload.deleted.length}건`
-        )
-
-        // 서버 저장 완료 후 최신 데이터 재조회 (실제로는 서버에서)
-        await this.loadUsers() // 서버에서 최신 데이터 가져오기
-      } catch (error) {
-        console.error('저장 실패:', error)
-        alert('저장에 실패했습니다.')
-      }
+      const { data } = await axios.post('/users/bulk', payload)
+      alert(`저장 완료!\n생성: ${data.created}\n수정: ${data.updated}\n삭제: ${data.deleted}`)
+      await this.loadUsers()
     },
   },
 }
 </script>
-
-
-
-
-
-
-
-

@@ -2,11 +2,13 @@ package com.nexhubstudio.backend.service;
 
 import com.nexhubstudio.backend.domain.User;
 import com.nexhubstudio.backend.dto.UserRequest;
+import com.nexhubstudio.backend.dto.UserBulkRequest;
 import com.nexhubstudio.backend.dto.UserResponse;
 import com.nexhubstudio.backend.mapper.UserDtoMapper;
 import com.nexhubstudio.backend.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,5 +45,33 @@ public class UserService {
     public Optional<UserResponse> getUserById(String userId) {
         User user = userMapper.findById(userId);
         return Optional.ofNullable(user).map(userDtoMapper::toResponse);
+    }
+
+    @Transactional
+    public int[] bulkSave(UserBulkRequest bulk) {
+        int createdCount = 0;
+        int updatedCount = 0;
+        int deletedCount = 0;
+
+        if (bulk.getCreated() != null) {
+            for (UserRequest req : bulk.getCreated()) {
+                User user = userDtoMapper.toEntity(req);
+                createdCount += userMapper.insertUser(user);
+            }
+        }
+        if (bulk.getUpdated() != null) {
+            for (UserRequest req : bulk.getUpdated()) {
+                User user = userDtoMapper.toEntity(req);
+                updatedCount += userMapper.updateUser(user);
+            }
+        }
+        if (bulk.getDeleted() != null) {
+            for (UserRequest req : bulk.getDeleted()) {
+                if (req.getUserId() != null) {
+                    deletedCount += userMapper.deleteUser(req.getUserId());
+                }
+            }
+        }
+        return new int[] { createdCount, updatedCount, deletedCount };
     }
 }
