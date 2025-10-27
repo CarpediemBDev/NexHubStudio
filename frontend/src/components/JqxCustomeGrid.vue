@@ -1,5 +1,5 @@
 <template>
-  <div class="jqx-custome-grid w-100 h-100">
+  <div>
     <JqxGrid
       ref="grid"
       :width="width"

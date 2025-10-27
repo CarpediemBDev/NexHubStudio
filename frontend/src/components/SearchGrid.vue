@@ -14,7 +14,18 @@
         </div>
       </div>
 
-      <!-- 필요 시 다른 검색 조건 칸 추가 가능 -->
+      <!-- 날짜 검색 조건 추가 -->
+      <div class="col-12 col-md-4">
+        <label class="form-label">가입일</label>
+        <date-picker
+          v-model="form.joinDate"
+          :lang="lang"
+          format="YYYY-MM-DD"
+          input-class="form-control"
+          placeholder="날짜 선택"
+          clearable
+        />
+      </div>
 
       <div
         class="col-12 col-md-auto ms-md-auto d-flex justify-content-end align-items-center pe-md-3"
@@ -27,28 +38,28 @@
 </template>
 
 <script>
+import 'vue-datepicker-next/index.css'
+import DatePicker from 'vue-datepicker-next'
+import ko from 'vue-datepicker-next/locale/ko'
+
 export default {
   name: 'SearchGrid',
+  components: { DatePicker },
   emits: ['open-user-popup', 'search'],
   data() {
     return {
       form: {
-        // 화면 표시용: 팝업에서 선택 후 "홍길동, 김길동" 형태로 보여줄 값
         userNames: '',
-        // 선택 결과의 실제 ID 보관(옵션, 서버 조회에 유용)
         userIds: [],
+        joinDate: null,
       },
+      lang: ko,
     }
   },
   methods: {
-    // 부모에게 "팝업 열어줘" 요청
     emitOpen() {
-      // 필요하면 현재 입력값(this.form.userNames)을 함께 넘겨 필터에 쓰도록 확장 가능
       this.$emit('open-user-popup', this.form.userNames)
     },
-
-    // 부모(UserPage)가 팝업 확인 시 호출해 주는 메서드
-    // selectedList: [{ userId, name, ... }, ...]
     setUsersFromPopup(selectedList) {
       const users = Array.isArray(selectedList) ? selectedList : []
       this.form.userNames = users
@@ -57,12 +68,9 @@ export default {
         .join(', ')
       this.form.userIds = users.map((u) => u?.userId).filter(Boolean)
     },
-    // 초기화
     onReset() {
-      this.form = { userNames: '', userIds: [] }
+      this.form = { userNames: '', userIds: [], joinDate: null }
     },
-
-    // 조회
     onSearch() {
       this.$emit('search', { ...this.form })
     },
@@ -75,5 +83,9 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* datepicker input에 Bootstrap 스타일 적용 */
+.dp__input_wrap input.form-control {
+  min-width: 140px;
 }
 </style>
