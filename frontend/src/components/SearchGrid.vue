@@ -14,11 +14,17 @@
         </div>
       </div>
 
-      <!-- 날짜 검색 조건 추가 -->
+      <!-- 날짜 검색 조건: 네이티브 date input -->
       <div class="col-12 col-md-4">
-        <label class="form-label">가입일</label>
+        <label class="form-label">가입일 (네이티브)</label>
+        <input type="date" v-model="form.joinDate" class="form-control" placeholder="날짜 선택" />
+      </div>
+
+      <!-- 날짜 검색 조건: vue-datepicker-next -->
+      <div class="col-12 col-md-4">
+        <label class="form-label">가입일 (달력)</label>
         <date-picker
-          v-model="form.joinDate"
+          v-model="form.joinDateCalendar"
           :lang="lang"
           format="YYYY-MM-DD"
           input-class="form-control"
@@ -52,6 +58,7 @@ export default {
         userNames: '',
         userIds: [],
         joinDate: null,
+        joinDateCalendar: null,
       },
       lang: ko,
     }
@@ -69,7 +76,7 @@ export default {
       this.form.userIds = users.map((u) => u?.userId).filter(Boolean)
     },
     onReset() {
-      this.form = { userNames: '', userIds: [], joinDate: null }
+      this.form = { userNames: '', userIds: [], joinDate: null, joinDateCalendar: null }
     },
     onSearch() {
       this.$emit('search', { ...this.form })
@@ -85,6 +92,9 @@ export default {
   text-overflow: ellipsis;
 }
 /* datepicker input에 Bootstrap 스타일 적용 */
+input[type='date'].form-control {
+  min-width: 140px;
+}
 .dp__input_wrap input.form-control {
   min-width: 140px;
 }
