@@ -74,4 +74,14 @@ public class UserService {
         }
         return new int[] { createdCount, updatedCount, deletedCount };
     }
+
+    /**
+     * 평문 비밀번호 비교 (실제 환경에서는 반드시 암호화/해시 비교 필요!)
+     */
+    public boolean checkPassword(String userId, String password) {
+        User user = userMapper.findById(userId);
+        if (user == null)
+            return false;
+        return password != null && password.equals(user.getPassword());
+    }
 }

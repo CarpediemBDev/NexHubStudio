@@ -120,7 +120,8 @@
 <script>
 import SearchGrid from '../components/SearchGrid.vue'
 import { openUserPopup } from '@/utils/showPop.js'
-import axios from '@/utils/http'
+import axios, { parseApiResponse } from '@/utils/http'
+import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'UserSearGridPage',
@@ -177,9 +178,17 @@ export default {
     },
   },
   methods: {
-    async loadUsers() {
-      const { data } = await axios.get('/users')
-      this.users = Array.isArray(data) ? data : data.users || []
+    loadUsers() {
+      axios
+        .get('/users')
+        .then((res) => {
+          const { data } = parseApiResponse(res)
+          this.users = data
+        })
+        .catch((error) => {
+          const msg = error?.response?.data?.message || error.message || '사용자 목록 조회 실패'
+          showToast(msg, { type: 'error' })
+        })
     },
     async openPopup() {
       const selectedList = await openUserPopup({})
@@ -254,8 +263,3 @@ export default {
   },
 }
 </script>
-
-
-
-
-

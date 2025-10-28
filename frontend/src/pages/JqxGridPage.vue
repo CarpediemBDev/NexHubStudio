@@ -34,8 +34,8 @@
 import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
 import SearchGrid from '@/components/SearchGrid.vue'
 import { openUserPopup } from '@/utils/showPop.js'
+import axios, { parseApiResponse } from '@/utils/http'
 import { showToast } from '@/utils/toastUtil.js'
-import axios from '@/utils/http'
 
 export default {
   name: 'JqxGridPage',
@@ -86,9 +86,17 @@ export default {
     this.loadUsers()
   },
   methods: {
-    async loadUsers() {
-      const { data } = await axios.get('/users')
-      this.rows = Array.isArray(data) ? data : data.users || []
+    loadUsers() {
+      axios
+        .get('/users')
+        .then((res) => {
+          const { data } = parseApiResponse(res)
+          this.rows = data
+        })
+        .catch((error) => {
+          const msg = error?.response?.data?.message || error.message || '사용자 목록 조회 실패'
+          showToast(msg, { type: 'error' })
+        })
     },
     add() {
       this.$refs.grd?.add({ name: '', dept: '', role: '' })

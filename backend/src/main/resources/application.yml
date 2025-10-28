@@ -30,4 +30,3 @@ logging:
   level:
     com.nexhubstudio: INFO
     org.springframework.security: INFO
-
