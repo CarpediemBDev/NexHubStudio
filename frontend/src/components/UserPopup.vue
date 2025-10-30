@@ -119,7 +119,7 @@
 <script>
 import SelectedUsers from './SelectedUsers.vue'
 import PagedList from './PagedList.vue'
-import axios from '@/utils/http'
+import axios, { parseApiResponse } from '@/utils/http'
 
 export default {
   name: 'UserPopup',
@@ -127,6 +127,7 @@ export default {
   emits: ['close', 'confirm'],
   props: {
     preselectedIds: { type: Array, default: () => [] },
+    modalId: { type: String, default: '' },
 
     /* 사이즈/레이아웃 옵션 */
     maxWidth: { type: [Number, String], default: 960 },
@@ -234,8 +235,9 @@ export default {
   },
   methods: {
     async loadUsers() {
-      const { data } = await axios.get('/users')
-      this.users = Array.isArray(data) ? data : data.users || []
+      const res = await axios.get('/users')
+      const { data } = parseApiResponse(res)
+      this.users = data ?? []
     },
 
     onClose() {
@@ -333,7 +335,3 @@ export default {
   }
 }
 </style>
-
-
-
-

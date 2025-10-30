@@ -202,7 +202,7 @@ export default {
       const addIds = selectedList.map((u) => u?.userId).filter(Boolean)
       this.checkedIds = Array.from(new Set([...this.checkedIds, ...addIds]))
 
-      this.$toast(`Added ${selectedList.length}`, { type: 'success', duration: 2000 })
+      showToast(`Added ${selectedList.length}`, { type: 'success', duration: 2000 })
     },
     onConfirm(selectedList) {
       // 이 메서드는 SearchGrid에서 @update:selected 이벤트로 호출됨

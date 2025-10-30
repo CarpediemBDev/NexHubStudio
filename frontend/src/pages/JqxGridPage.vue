@@ -3,12 +3,7 @@
     <!-- SearchGrid: 사용자 선택용 툴바 (목록 위에 위치) -->
     <div class="row mb-3">
       <div class="col-12">
-        <SearchGrid
-          ref="searchGrid"
-          @open-user-popup="openPopup"
-          @update:selected="onConfirm"
-          @search="loadUsers"
-        />
+        <SearchGrid ref="searchGrid" @open-user-popup="openPopup" @search="loadUsers" />
       </div>
     </div>
     <div class="mb-2 d-flex gap-2">
@@ -106,6 +101,14 @@ export default {
     },
     logCUD() {
       console.log(this.$refs.grd?.getChanges())
+    },
+    async openPopup() {
+      const selectedList = await openUserPopup()
+      if (!Array.isArray(selectedList) || selectedList.length === 0) return
+      const sg = this.$refs.searchGrid
+      if (sg && typeof sg.setUsersFromPopup === 'function') {
+        sg.setUsersFromPopup(selectedList)
+      }
     },
     async saveData() {
       const grid = this.$refs.grd
