@@ -1,6 +1,8 @@
 <template>
   <div>
-    <JqxGrid
+    <component
+      :is="JqxGrid"
+      v-if="JqxGrid"
       ref="grid"
       :width="width"
       :height="height"
@@ -22,13 +24,12 @@
 </template>
 
 <script>
-import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue3/vue_jqxgrid.vue'
+import { markRaw } from 'vue'
 import 'jqwidgets-scripts/jqwidgets/styles/jqx.base.css'
 import 'jqwidgets-scripts/jqwidgets/styles/jqx.bootstrap.css'
 
 export default {
   name: 'JqxCustomeGrid',
-  components: { JqxGrid },
   props: {
     localdata: { type: Array, default: () => [] },
     datafields: { type: Array, required: true },
@@ -52,6 +53,7 @@ export default {
   data() {
     return {
       adapter: null,
+      JqxGrid: null,
     }
   },
   computed: {
@@ -92,12 +94,17 @@ export default {
   },
   watch: {
     localdata() {
-      this.source.localdata = this.localdata
-      this.$refs.grid?.updatebounddata('cells')
+      if (this.source) {
+        this.source.localdata = this.localdata
+        this.$refs.grid?.updatebounddata('cells')
+      }
     },
   },
-  created() {
-    this.bind()
+  mounted() {
+    import('jqwidgets-scripts/jqwidgets-vue3/vue_jqxgrid.vue').then(({ default: JqxGridComp }) => {
+      this.JqxGrid = markRaw(JqxGridComp)
+      this.bind()
+    })
   },
   methods: {
     // 부모에서 this.$refs.gridComp.add(...) 식으로 호출
