@@ -18,15 +18,18 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
         </Root>
+        
+        <Logger name="org.springframework.security" level="warn" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Logger>
+        <!-- MyBatis SQL 로그 출력 -->
         <Logger name="org.apache.ibatis" level="debug" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
         </Logger>
-        <Logger name="com.nexhubstudio" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="File"/>
-        </Logger>
-    <Logger name="org.springframework.security" level="warn" additivity="false">
+        <!-- 애플리케이션 로그 -->
+        <Logger name="com.nexhubstudio" level="debug" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
         </Logger>
