@@ -109,6 +109,75 @@
         </div>
       </div>
     </div>
+
+    <!-- 구분선 -->
+    <hr class="my-5" />
+
+    <!-- 개발자를 위한 가이드 -->
+    <div class="card border-success">
+      <div class="card-header bg-success text-white border-success">
+        <h4 class="mb-0">🛠️ 개발자 가이드: 이 페이지에 새 컴포넌트 가이드 추가하는 방법</h4>
+      </div>
+      <div class="card-body">
+        <p class="lead">공통 컴포넌트를 추가할 때 이 페이지를 업데이트하는 3단계 방법입니다.</p>
+
+        <div class="row mt-4">
+          <div class="col-md-4">
+            <div class="card h-100 border-success">
+              <div class="card-body">
+                <h5 class="card-title text-success">
+                  <span class="badge bg-success me-2">1</span>Import 추가
+                </h5>
+                <p class="card-text">컴포넌트를 import합니다.</p>
+                <pre
+                  class="bg-light p-2 rounded border"
+                ><code class="text-dark">{{ devGuideStep1 }}</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card h-100 border-success">
+              <div class="card-body">
+                <h5 class="card-title text-success">
+                  <span class="badge bg-success me-2">2</span>Template 추가
+                </h5>
+                <p class="card-text">기존 카드를 복사해서 수정합니다.</p>
+                <pre
+                  class="bg-light p-2 rounded border"
+                  style="max-height: 300px; overflow-y: auto"
+                ><code class="text-dark">{{ devGuideStep2 }}</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card h-100 border-success">
+              <div class="card-body">
+                <h5 class="card-title text-success">
+                  <span class="badge bg-success me-2">3</span>Script 추가
+                </h5>
+                <p class="card-text">컴포넌트 등록과 코드 예제를 추가합니다.</p>
+                <pre
+                  class="bg-light p-2 rounded border"
+                  style="max-height: 300px; overflow-y: auto"
+                ><code class="text-dark">{{ devGuideStep3 }}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-success mt-4 mb-0">
+          <h6 class="alert-heading">✅ 체크리스트</h6>
+          <ul class="mb-0">
+            <li>컴포넌트가 실제로 동작하는 예시를 보여주나요?</li>
+            <li>코드 예제가 복사-붙여넣기 가능한가요?</li>
+            <li>주요 Props와 Events가 설명되어 있나요?</li>
+            <li>일관된 스타일(border-primary, bg-primary)을 사용했나요?</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -262,6 +331,62 @@ showToast('주의하세요!', { type: 'warning' })
 
 // Info
 showToast('정보를 확인하세요.', { type: 'info' })`,
+
+      // 개발자 가이드 코드
+      devGuideStep1: `import YourComponent from '@/components/YourComponent.vue'`,
+
+      devGuideStep2: `<!-- YourComponent 가이드 -->
+<div class="card mb-4 border-primary">
+  <div class="card-header bg-primary text-white border-primary">
+    <h4 class="mb-0">YourComponent - 설명</h4>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <h5 class="text-primary">예시</h5>
+        <YourComponent 
+          :prop1="value1"
+          @event="handleEvent"
+        />
+      </div>
+      <div class="col-md-6">
+        <h5 class="text-primary">코드</h5>
+        <pre class="bg-light p-3 rounded border">
+          <code>{{ yourComponentCode }}</code>
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>`,
+
+      devGuideStep3: `export default {
+  components: {
+    YourComponent  // 컴포넌트 등록
+  },
+  data() {
+    return {
+      yourComponentCode: \`<template>
+  <YourComponent
+    :prop1="value1"
+    @event="handleEvent"
+  />
+</template>
+
+<script>
+import YourComponent from '@/components/YourComponent.vue'
+
+export default {
+  components: { YourComponent },
+  methods: {
+    handleEvent() {
+      // 이벤트 처리 로직
+    }
+  }
+}
+<\\/script>\`
+    }
+  }
+}`,
     }
   },
   methods: {
