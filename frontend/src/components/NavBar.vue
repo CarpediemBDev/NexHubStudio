@@ -162,6 +162,10 @@ export default {
           children: [{ label: '강좌 목록' }, { label: '수강 현황' }, { label: '시험/평가' }],
         },
         {
+          label: '개발 가이드',
+          children: [{ label: '공통 컴포넌트 가이드', to: '/component-guide' }],
+        },
+        {
           label: '시스템',
           children: [{ label: '환경설정' }, { label: '공지사항' }],
         },
