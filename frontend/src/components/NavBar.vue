@@ -158,6 +158,13 @@ export default {
           ],
         },
         {
+          label: '사용자 배정',
+          children: [
+            { label: '사용자 배정 (세로)', to: '/user-assignment-vertical' },
+            { label: '사용자 배정 (공통목록)', to: '/user-assignment-shared' },
+          ],
+        },
+        {
           label: '교육 관리',
           children: [{ label: '강좌 목록' }, { label: '수강 현황' }, { label: '시험/평가' }],
         },
