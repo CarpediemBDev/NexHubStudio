@@ -5,29 +5,76 @@
     <div class="row">
       <!-- 왼쪽: 전체 사용자 목록 -->
       <div class="col-md-4">
-        <div class="card border-primary">
-          <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">전체 사용자</h5>
+        <div class="card border-secondary">
+          <div class="card-header bg-light border-secondary">
+            <div class="d-flex align-items-center gap-2">
+              <div class="form-check mb-0">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="selectAll"
+                  :checked="isAllSelected"
+                  @change="toggleSelectAll"
+                />
+                <label class="form-check-label" for="selectAll">
+                  전체 선택 <span class="text-muted">({{ filteredUsers.length }})</span>
+                </label>
+              </div>
+            </div>
           </div>
           <div class="card-body">
             <input
               v-model="searchQuery"
               type="text"
               class="form-control mb-3"
-              placeholder="이름 또는 부서 검색..."
+              placeholder="🔍 이름 또는 부서 검색..."
             />
-            <div class="border rounded p-2" style="height: 600px; overflow-y: auto">
+            <div class="shared-user-box border rounded" style="height: 600px; overflow-y: auto">
               <div
                 v-for="user in filteredUsers"
                 :key="user.id"
-                class="p-2 mb-1 rounded cursor-pointer user-item"
+                class="shared-user-item"
                 :class="{
-                  'user-selected': selectedUser === user.id,
-                  'bg-light': selectedUser !== user.id,
+                  selected: selectedUsers.includes(user.id),
+                  assigned: getUserAssignedGroup(user.id),
                 }"
-                @click="selectedUser = user.id"
+                @click="toggleUserSelect(user.id)"
               >
-                {{ user.name }} ({{ user.department }})
+                <div class="d-flex align-items-center">
+                  <input
+                    type="checkbox"
+                    class="form-check-input me-2"
+                    :checked="selectedUsers.includes(user.id)"
+                    @click.stop
+                  />
+                  <span>{{ user.name }}</span>
+                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                  <!-- 배정된 그룹 표시 -->
+                  <span v-if="getUserAssignedGroup(user.id)" class="ms-2">
+                    <span
+                      v-if="getUserAssignedGroup(user.id) === 'researcher'"
+                      class="badge bg-primary"
+                      style="font-size: 0.65rem"
+                      >연구원</span
+                    >
+                    <span
+                      v-if="getUserAssignedGroup(user.id) === 'operation'"
+                      class="badge bg-success"
+                      style="font-size: 0.65rem"
+                      >오퍼</span
+                    >
+                    <span
+                      v-if="getUserAssignedGroup(user.id) === 'worker'"
+                      class="badge bg-warning text-dark"
+                      style="font-size: 0.65rem"
+                      >실무자</span
+                    >
+                  </span>
+                </div>
+              </div>
+              <div v-if="filteredUsers.length === 0" class="text-center text-muted py-5">
+                <i class="bi bi-search fs-3 d-block mb-2"></i>
+                <small>검색 결과가 없습니다</small>
               </div>
             </div>
           </div>
@@ -37,31 +84,31 @@
       <!-- 중앙: 화살표 버튼 -->
       <div class="col-md-1 d-flex flex-column justify-content-center align-items-center gap-3">
         <button
-          class="btn btn-primary btn-arrow-group"
+          class="btn btn-outline-primary shared-arrow-btn"
           @click="moveToResearcher"
-          :disabled="!selectedUser"
+          :disabled="selectedUsers.length === 0"
           title="연구원으로 배정"
         >
-          <i class="bi bi-arrow-right-circle-fill fs-3"></i>
-          <small class="d-block mt-1" style="font-size: 0.7rem">연구원</small>
+          <i class="bi bi-arrow-right fs-5"></i>
+          <small class="d-block">연구원</small>
         </button>
         <button
-          class="btn btn-success btn-arrow-group"
+          class="btn btn-outline-success shared-arrow-btn"
           @click="moveToOperation"
-          :disabled="!selectedUser"
+          :disabled="selectedUsers.length === 0"
           title="오퍼레이션으로 배정"
         >
-          <i class="bi bi-arrow-right-circle-fill fs-3"></i>
-          <small class="d-block mt-1" style="font-size: 0.7rem">오퍼</small>
+          <i class="bi bi-arrow-right fs-5"></i>
+          <small class="d-block">오퍼</small>
         </button>
         <button
-          class="btn btn-warning btn-arrow-group"
+          class="btn btn-outline-warning shared-arrow-btn"
           @click="moveToWorker"
-          :disabled="!selectedUser"
+          :disabled="selectedUsers.length === 0"
           title="실무자로 배정"
         >
-          <i class="bi bi-arrow-right-circle-fill fs-3"></i>
-          <small class="d-block mt-1" style="font-size: 0.7rem">실무자</small>
+          <i class="bi bi-arrow-right fs-5"></i>
+          <small class="d-block">실무자</small>
         </button>
       </div>
 
@@ -69,79 +116,84 @@
       <div class="col-md-7">
         <!-- 연구원 그룹 -->
         <div class="card mb-3 border-primary">
-          <div
-            class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
-          >
-            <h6 class="mb-0">연구원</h6>
-            <span class="badge bg-light text-primary">{{ researchers.length }}</span>
+          <div class="card-header bg-primary bg-opacity-10 border-primary">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 text-primary"><i class="bi bi-people-fill me-2"></i>연구원</h6>
+              <span class="badge bg-primary">{{ researchers.length }}</span>
+            </div>
           </div>
-          <div class="card-body p-2">
-            <div class="d-flex flex-wrap gap-2" style="min-height: 60px">
+          <div class="card-body p-3">
+            <div class="assigned-box" style="min-height: 80px">
               <span
                 v-for="user in researchers"
                 :key="user.id"
-                class="badge bg-primary p-2 cursor-pointer"
-                style="font-size: 0.9rem"
+                class="assigned-badge badge-primary"
                 @click="removeFromResearcher(user.id)"
                 title="클릭하여 제거"
               >
-                {{ user.name }} ✕
+                {{ user.name }}
+                <i class="bi bi-x-circle ms-1"></i>
               </span>
-              <span v-if="researchers.length === 0" class="text-muted"
-                >배정된 연구원이 없습니다.</span
-              >
+              <div v-if="researchers.length === 0" class="empty-state">
+                <i class="bi bi-inbox fs-4 d-block mb-2 text-muted"></i>
+                <small class="text-muted">배정된 연구원이 없습니다</small>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 오퍼레이션 그룹 -->
         <div class="card mb-3 border-success">
-          <div
-            class="card-header bg-success text-white d-flex justify-content-between align-items-center"
-          >
-            <h6 class="mb-0">오퍼레이션</h6>
-            <span class="badge bg-light text-success">{{ operations.length }}</span>
+          <div class="card-header bg-success bg-opacity-10 border-success">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 text-success"><i class="bi bi-gear-fill me-2"></i>오퍼레이션</h6>
+              <span class="badge bg-success">{{ operations.length }}</span>
+            </div>
           </div>
-          <div class="card-body p-2">
-            <div class="d-flex flex-wrap gap-2" style="min-height: 60px">
+          <div class="card-body p-3">
+            <div class="assigned-box" style="min-height: 80px">
               <span
                 v-for="user in operations"
                 :key="user.id"
-                class="badge bg-success p-2 cursor-pointer"
-                style="font-size: 0.9rem"
+                class="assigned-badge badge-success"
                 @click="removeFromOperation(user.id)"
                 title="클릭하여 제거"
               >
-                {{ user.name }} ✕
+                {{ user.name }}
+                <i class="bi bi-x-circle ms-1"></i>
               </span>
-              <span v-if="operations.length === 0" class="text-muted"
-                >배정된 오퍼레이션이 없습니다.</span
-              >
+              <div v-if="operations.length === 0" class="empty-state">
+                <i class="bi bi-inbox fs-4 d-block mb-2 text-muted"></i>
+                <small class="text-muted">배정된 오퍼레이션이 없습니다</small>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 실무자 그룹 -->
         <div class="card mb-3 border-warning">
-          <div
-            class="card-header bg-warning text-dark d-flex justify-content-between align-items-center"
-          >
-            <h6 class="mb-0">실무자</h6>
-            <span class="badge bg-dark">{{ workers.length }}</span>
+          <div class="card-header bg-warning bg-opacity-10 border-warning">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 text-warning"><i class="bi bi-person-badge-fill me-2"></i>실무자</h6>
+              <span class="badge bg-warning text-dark">{{ workers.length }}</span>
+            </div>
           </div>
-          <div class="card-body p-2">
-            <div class="d-flex flex-wrap gap-2" style="min-height: 60px">
+          <div class="card-body p-3">
+            <div class="assigned-box" style="min-height: 80px">
               <span
                 v-for="user in workers"
                 :key="user.id"
-                class="badge bg-warning text-dark p-2 cursor-pointer"
-                style="font-size: 0.9rem"
+                class="assigned-badge badge-warning"
                 @click="removeFromWorker(user.id)"
                 title="클릭하여 제거"
               >
-                {{ user.name }} ✕
+                {{ user.name }}
+                <i class="bi bi-x-circle ms-1"></i>
               </span>
-              <span v-if="workers.length === 0" class="text-muted">배정된 실무자가 없습니다.</span>
+              <div v-if="workers.length === 0" class="empty-state">
+                <i class="bi bi-inbox fs-4 d-block mb-2 text-muted"></i>
+                <small class="text-muted">배정된 실무자가 없습니다</small>
+              </div>
             </div>
           </div>
         </div>
@@ -165,7 +217,7 @@ export default {
   data() {
     return {
       searchQuery: '',
-      selectedUser: null,
+      selectedUsers: [], // 다중 선택
       // 전체 사용자 목록
       allUsers: [
         { id: 1, name: '홍길동', department: '개발팀' },
@@ -197,59 +249,111 @@ export default {
   },
   computed: {
     filteredUsers() {
-      if (!this.searchQuery) return this.allUsers
+      // 검색어 필터링만 적용
+      let users = this.allUsers
 
-      const query = this.searchQuery.toLowerCase()
-      return this.allUsers.filter(
-        (user) =>
-          user.name.toLowerCase().includes(query) || user.department.toLowerCase().includes(query)
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase()
+        users = users.filter(
+          (user) =>
+            user.name.toLowerCase().includes(query) || user.department.toLowerCase().includes(query)
+        )
+      }
+
+      return users
+    },
+    isAllSelected() {
+      return (
+        this.filteredUsers.length > 0 &&
+        this.filteredUsers.every((user) => this.selectedUsers.includes(user.id))
       )
     },
   },
   methods: {
-    // 연구원으로 이동
+    // 사용자가 어느 그룹에 배정되었는지 확인
+    getUserAssignedGroup(userId) {
+      if (this.researchers.find((u) => u.id === userId)) return 'researcher'
+      if (this.operations.find((u) => u.id === userId)) return 'operation'
+      if (this.workers.find((u) => u.id === userId)) return 'worker'
+      return null
+    },
+
+    // 전체 선택/해제
+    toggleSelectAll() {
+      if (this.isAllSelected) {
+        // 현재 필터된 사용자들을 선택 해제
+        this.filteredUsers.forEach((user) => {
+          const index = this.selectedUsers.indexOf(user.id)
+          if (index > -1) {
+            this.selectedUsers.splice(index, 1)
+          }
+        })
+      } else {
+        // 현재 필터된 사용자들을 선택
+        this.filteredUsers.forEach((user) => {
+          if (!this.selectedUsers.includes(user.id)) {
+            this.selectedUsers.push(user.id)
+          }
+        })
+      }
+    },
+
+    // 다중 선택 토글
+    toggleUserSelect(userId) {
+      const index = this.selectedUsers.indexOf(userId)
+      if (index > -1) {
+        this.selectedUsers.splice(index, 1)
+      } else {
+        this.selectedUsers.push(userId)
+      }
+    },
+
+    // 연구원으로 이동 (다중)
     moveToResearcher() {
-      const user = this.allUsers.find((u) => u.id === this.selectedUser)
-      if (!user) return
-
-      if (this.researchers.find((r) => r.id === user.id)) {
-        showToast(`${user.name}은(는) 이미 연구원으로 배정되어 있습니다.`, { type: 'warning' })
-        return
+      let count = 0
+      this.selectedUsers.forEach((userId) => {
+        const user = this.allUsers.find((u) => u.id === userId)
+        if (user && !this.researchers.find((r) => r.id === user.id)) {
+          this.researchers.push(user)
+          count++
+        }
+      })
+      this.selectedUsers = []
+      if (count > 0) {
+        showToast(`${count}명을 연구원으로 배정했습니다.`, { type: 'success' })
       }
-
-      this.researchers.push(user)
-      this.selectedUser = null
-      showToast(`${user.name}을(를) 연구원으로 배정했습니다.`, { type: 'success' })
     },
 
-    // 오퍼레이션으로 이동
+    // 오퍼레이션으로 이동 (다중)
     moveToOperation() {
-      const user = this.allUsers.find((u) => u.id === this.selectedUser)
-      if (!user) return
-
-      if (this.operations.find((o) => o.id === user.id)) {
-        showToast(`${user.name}은(는) 이미 오퍼레이션으로 배정되어 있습니다.`, { type: 'warning' })
-        return
+      let count = 0
+      this.selectedUsers.forEach((userId) => {
+        const user = this.allUsers.find((u) => u.id === userId)
+        if (user && !this.operations.find((o) => o.id === user.id)) {
+          this.operations.push(user)
+          count++
+        }
+      })
+      this.selectedUsers = []
+      if (count > 0) {
+        showToast(`${count}명을 오퍼레이션으로 배정했습니다.`, { type: 'success' })
       }
-
-      this.operations.push(user)
-      this.selectedUser = null
-      showToast(`${user.name}을(를) 오퍼레이션으로 배정했습니다.`, { type: 'success' })
     },
 
-    // 실무자로 이동
+    // 실무자로 이동 (다중)
     moveToWorker() {
-      const user = this.allUsers.find((u) => u.id === this.selectedUser)
-      if (!user) return
-
-      if (this.workers.find((w) => w.id === user.id)) {
-        showToast(`${user.name}은(는) 이미 실무자로 배정되어 있습니다.`, { type: 'warning' })
-        return
+      let count = 0
+      this.selectedUsers.forEach((userId) => {
+        const user = this.allUsers.find((u) => u.id === userId)
+        if (user && !this.workers.find((w) => w.id === user.id)) {
+          this.workers.push(user)
+          count++
+        }
+      })
+      this.selectedUsers = []
+      if (count > 0) {
+        showToast(`${count}명을 실무자로 배정했습니다.`, { type: 'success' })
       }
-
-      this.workers.push(user)
-      this.selectedUser = null
-      showToast(`${user.name}을(를) 실무자로 배정했습니다.`, { type: 'success' })
     },
 
     // 제거 메서드
@@ -295,72 +399,151 @@ export default {
 </script>
 
 <style scoped>
-.cursor-pointer {
+/* 좌측 사용자 목록 */
+.shared-user-box {
+  background-color: #f8f9fa;
+  padding: 12px;
+}
+
+.shared-user-item {
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
   cursor: pointer;
-  user-select: none;
-  transition: all 0.2s;
-}
-
-.user-item {
   transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.user-item:not(.user-selected):hover {
-  background-color: #e9ecef !important;
-  transform: translateX(5px);
+.shared-user-item:hover {
+  border-color: #0d6efd;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
-.user-selected {
-  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
-  color: white !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.4);
-  border: 2px solid #0d6efd;
-  transform: translateX(5px);
+.shared-user-item.selected {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
+  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.2);
 }
 
-.user-selected:hover {
-  background: linear-gradient(135deg, #0a58ca 0%, #084298 100%) !important;
-  box-shadow: 0 3px 12px rgba(13, 110, 253, 0.5);
+.shared-user-item.assigned {
+  background-color: #f8f9fa;
+  opacity: 0.7;
 }
 
-.badge.cursor-pointer:hover {
-  opacity: 0.8;
-  transform: scale(1.05);
+.shared-user-item.assigned:hover {
+  opacity: 0.85;
 }
 
-.btn-arrow-group {
-  width: 80px;
-  height: 80px;
+/* 중앙 화살표 버튼 */
+.shared-arrow-btn {
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border: none;
+  transition: all 0.2s ease;
+  border-width: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.btn-arrow-group:hover:not(:disabled) {
-  transform: scale(1.1) translateX(5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+.shared-arrow-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.btn-arrow-group:active:not(:disabled) {
-  transform: scale(0.95);
+.shared-arrow-btn small {
+  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
-.btn-arrow-group:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+/* 우측 배정된 그룹 */
+.assigned-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 4px;
 }
 
-.btn-arrow-group i {
-  transition: transform 0.3s ease;
+.assigned-badge {
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.btn-arrow-group:hover:not(:disabled) i {
-  transform: translateX(3px);
+.assigned-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.assigned-badge i {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.assigned-badge:hover i {
+  opacity: 1;
+}
+
+.badge-primary {
+  background-color: #e7f1ff;
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.badge-primary:hover {
+  background-color: #cfe2ff;
+}
+
+.badge-success {
+  background-color: #d1f4e0;
+  color: #198754;
+  border-color: #198754;
+}
+
+.badge-success:hover {
+  background-color: #b8eed3;
+}
+
+.badge-warning {
+  background-color: #fff3cd;
+  color: #cc9a06;
+  border-color: #ffc107;
+}
+
+.badge-warning:hover {
+  background-color: #ffe69c;
+}
+
+/* 체크박스 스타일 */
+.form-check-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 빈 상태 */
+.empty-state {
+  text-align: center;
+  padding: 20px 0;
+  width: 100%;
 }
 </style>

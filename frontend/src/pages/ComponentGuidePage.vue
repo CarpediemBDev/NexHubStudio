@@ -110,6 +110,444 @@
       </div>
     </div>
 
+    <!-- 사용자 배정 가이드 -->
+    <div class="card mb-4 border-primary">
+      <div class="card-header bg-primary text-white border-primary">
+        <h4 class="mb-0">사용자 배정 - 그룹별 사용자 할당</h4>
+      </div>
+      <div class="card-body">
+        <p class="mb-3">
+          사용자를 다양한 그룹(연구원, 오퍼레이션, 실무자)에 배정하는 인터랙티브 UI를 제공합니다. 두
+          가지 레이아웃 옵션이 있습니다.
+        </p>
+
+        <!-- 탭 네비게이션 -->
+        <ul class="nav nav-tabs mb-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="vertical-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#vertical-demo"
+              type="button"
+              role="tab"
+            >
+              세로 레이아웃 예시
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="shared-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#shared-demo"
+              type="button"
+              role="tab"
+            >
+              공통 목록 예시
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="code-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#code-demo"
+              type="button"
+              role="tab"
+            >
+              코드
+            </button>
+          </li>
+        </ul>
+
+        <!-- 탭 내용 -->
+        <div class="tab-content">
+          <!-- 세로 레이아웃 예시 -->
+          <div class="tab-pane fade show active" id="vertical-demo" role="tabpanel">
+            <div class="card border-primary">
+              <div class="card-header bg-primary bg-opacity-10 border-primary">
+                <h5 class="mb-0 text-primary">세로 레이아웃 - 연구원 배정 예시</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <!-- 전체 사용자 목록 -->
+                  <div class="col-md-5">
+                    <div class="mb-2">
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="demoSelectAll"
+                          :checked="isDemoAllSelected"
+                          @change="demoToggleSelectAll"
+                        />
+                        <label class="form-check-label" for="demoSelectAll">
+                          전체 선택
+                          <span class="text-muted">({{ demoAvailableUsers.length }})</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div
+                      class="transfer-box border rounded"
+                      style="height: 200px; overflow-y: auto"
+                    >
+                      <div
+                        v-for="user in demoAvailableUsers"
+                        :key="user.id"
+                        class="transfer-item"
+                        :class="{
+                          selected: demoSelectedAvailable.includes(user.id),
+                          assigned: getDemoUserAssignedGroup(user.id),
+                        }"
+                        @click="demoToggleAvailable(user.id)"
+                      >
+                        <div class="d-flex align-items-center">
+                          <input
+                            type="checkbox"
+                            class="form-check-input me-2"
+                            :checked="demoSelectedAvailable.includes(user.id)"
+                            @click.stop
+                          />
+                          <span>{{ user.name }}</span>
+                          <small class="ms-auto text-muted">{{ user.department }}</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 화살표 버튼 -->
+                  <div
+                    class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-2"
+                  >
+                    <button
+                      class="btn btn-sm btn-outline-primary transfer-btn"
+                      @click="demoMoveToResearcher"
+                      :disabled="demoSelectedAvailable.length === 0"
+                      title="연구원으로 추가"
+                    >
+                      <i class="bi bi-chevron-right"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-secondary transfer-btn"
+                      @click="demoRemoveFromResearcher"
+                      :disabled="demoSelectedAssigned.length === 0"
+                      title="연구원에서 제거"
+                    >
+                      <i class="bi bi-chevron-left"></i>
+                    </button>
+                  </div>
+
+                  <!-- 선택된 연구원 -->
+                  <div class="col-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <h6 class="mb-0">선택된 연구원</h6>
+                      <span class="badge bg-primary">{{ demoResearchers.length }}</span>
+                    </div>
+                    <div
+                      class="transfer-box transfer-box-assigned border rounded"
+                      style="height: 200px; overflow-y: auto"
+                    >
+                      <div
+                        v-for="user in demoResearchers"
+                        :key="user.id"
+                        class="transfer-item assigned"
+                        :class="{ selected: demoSelectedAssigned.includes(user.id) }"
+                        @click="demoToggleAssigned(user.id)"
+                      >
+                        <div class="d-flex align-items-center">
+                          <input
+                            type="checkbox"
+                            class="form-check-input me-2"
+                            :checked="demoSelectedAssigned.includes(user.id)"
+                            @click.stop
+                          />
+                          <span>{{ user.name }}</span>
+                          <small class="ms-auto text-muted">{{ user.department }}</small>
+                        </div>
+                      </div>
+                      <div v-if="demoResearchers.length === 0" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                        <small>배정된 사용자가 없습니다</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="alert alert-light border mt-3 mb-0">
+                  <small
+                    ><i class="bi bi-info-circle me-1"></i><strong>사용법:</strong> 좌측에서
+                    사용자를 선택하고 오른쪽 화살표를 클릭하면 우측으로 이동합니다.</small
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 공통 목록 예시 -->
+          <div class="tab-pane fade" id="shared-demo" role="tabpanel">
+            <div class="card border-success">
+              <div class="card-header bg-success text-white">
+                <h5 class="mb-0">공통 목록 레이아웃 예시</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <!-- 좌측: 전체 사용자 목록 -->
+                  <div class="col-md-4">
+                    <div class="card border-secondary">
+                      <div class="card-header bg-light border-secondary">
+                        <div class="form-check mb-0">
+                          <input
+                            class="form-check-input"
+                            type="checkbox"
+                            id="demoSharedSelectAll"
+                            :checked="isDemoSharedAllSelected"
+                            @change="demoToggleSharedSelectAll"
+                          />
+                          <label class="form-check-label" for="demoSharedSelectAll">
+                            전체 선택
+                            <span class="text-muted">({{ demoFilteredUsers.length }})</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div class="card-body">
+                        <input
+                          v-model="demoSearchQuery"
+                          type="text"
+                          class="form-control mb-3"
+                          placeholder="🔍 이름 또는 부서 검색..."
+                        />
+                        <div
+                          class="shared-user-box border rounded"
+                          style="height: 400px; overflow-y: auto"
+                        >
+                          <div
+                            v-for="user in demoFilteredUsers"
+                            :key="user.id"
+                            class="shared-user-item"
+                            :class="{
+                              selected: demoSharedSelected.includes(user.id),
+                              assigned: getDemoUserAssignedGroup(user.id),
+                            }"
+                            @click="demoToggleSharedSelect(user.id)"
+                          >
+                            <div class="d-flex align-items-center">
+                              <input
+                                type="checkbox"
+                                class="form-check-input me-2"
+                                :checked="demoSharedSelected.includes(user.id)"
+                                @click.stop
+                              />
+                              <span>{{ user.name }}</span>
+                              <small class="ms-auto text-muted">{{ user.department }}</small>
+                              <!-- 배정된 그룹 표시 -->
+                              <span v-if="getDemoUserAssignedGroup(user.id)" class="ms-2">
+                                <span
+                                  v-if="getDemoUserAssignedGroup(user.id) === 'researcher'"
+                                  class="badge bg-primary"
+                                  style="font-size: 0.65rem"
+                                  >연구원</span
+                                >
+                                <span
+                                  v-if="getDemoUserAssignedGroup(user.id) === 'operation'"
+                                  class="badge bg-success"
+                                  style="font-size: 0.65rem"
+                                  >오퍼</span
+                                >
+                                <span
+                                  v-if="getDemoUserAssignedGroup(user.id) === 'worker'"
+                                  class="badge bg-warning text-dark"
+                                  style="font-size: 0.65rem"
+                                  >실무자</span
+                                >
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            v-if="demoFilteredUsers.length === 0"
+                            class="text-center text-muted py-5"
+                          >
+                            <i class="bi bi-search fs-3 d-block mb-2"></i>
+                            <small>검색 결과가 없습니다</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 중앙: 화살표 버튼 -->
+                  <div
+                    class="col-md-1 d-flex flex-column justify-content-center align-items-center gap-3"
+                  >
+                    <button
+                      class="btn btn-outline-primary shared-arrow-btn"
+                      @click="demoMoveToGroup('researcher')"
+                      :disabled="demoSharedSelected.length === 0"
+                      title="연구원으로 배정"
+                    >
+                      <i class="bi bi-arrow-right fs-5"></i>
+                      <small class="d-block">연구원</small>
+                    </button>
+                    <button
+                      class="btn btn-outline-success shared-arrow-btn"
+                      @click="demoMoveToGroup('operation')"
+                      :disabled="demoSharedSelected.length === 0"
+                      title="오퍼레이션으로 배정"
+                    >
+                      <i class="bi bi-arrow-right fs-5"></i>
+                      <small class="d-block">오퍼</small>
+                    </button>
+                    <button
+                      class="btn btn-outline-warning shared-arrow-btn"
+                      @click="demoMoveToGroup('worker')"
+                      :disabled="demoSharedSelected.length === 0"
+                      title="실무자로 배정"
+                    >
+                      <i class="bi bi-arrow-right fs-5"></i>
+                      <small class="d-block">실무자</small>
+                    </button>
+                  </div>
+
+                  <!-- 우측: 배정된 그룹 -->
+                  <div class="col-md-7">
+                    <div class="card mb-3 border-0">
+                      <div class="card-header bg-primary bg-opacity-10 text-primary border-0">
+                        <h6 class="mb-0">
+                          <i class="bi bi-people-fill me-2"></i>연구원
+                          <span class="badge bg-primary ms-2">{{
+                            demoSharedResearchers.length
+                          }}</span>
+                        </h6>
+                      </div>
+                      <div class="card-body p-2" style="min-height: 80px">
+                        <span
+                          v-for="user in demoSharedResearchers"
+                          :key="user.id"
+                          class="assigned-badge badge-primary me-2 mb-2 cursor-pointer"
+                          @click="demoRemoveFromGroup('researcher', user.id)"
+                          title="클릭하여 제거"
+                        >
+                          {{ user.name }}
+                          <i class="bi bi-x-circle ms-1"></i>
+                        </span>
+                        <div
+                          v-if="demoSharedResearchers.length === 0"
+                          class="text-center text-muted py-3"
+                        >
+                          <small>배정된 연구원이 없습니다</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card mb-3 border-0">
+                      <div class="card-header bg-success bg-opacity-10 text-success border-0">
+                        <h6 class="mb-0">
+                          <i class="bi bi-gear-fill me-2"></i>오퍼레이션
+                          <span class="badge bg-success ms-2">{{
+                            demoSharedOperations.length
+                          }}</span>
+                        </h6>
+                      </div>
+                      <div class="card-body p-2" style="min-height: 80px">
+                        <span
+                          v-for="user in demoSharedOperations"
+                          :key="user.id"
+                          class="assigned-badge badge-success me-2 mb-2 cursor-pointer"
+                          @click="demoRemoveFromGroup('operation', user.id)"
+                          title="클릭하여 제거"
+                        >
+                          {{ user.name }}
+                          <i class="bi bi-x-circle ms-1"></i>
+                        </span>
+                        <div
+                          v-if="demoSharedOperations.length === 0"
+                          class="text-center text-muted py-3"
+                        >
+                          <small>배정된 오퍼레이션이 없습니다</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card mb-3 border-0">
+                      <div class="card-header bg-warning bg-opacity-10 text-warning border-0">
+                        <h6 class="mb-0">
+                          <i class="bi bi-person-badge-fill me-2"></i>실무자
+                          <span class="badge bg-warning ms-2">{{ demoSharedWorkers.length }}</span>
+                        </h6>
+                      </div>
+                      <div class="card-body p-2" style="min-height: 80px">
+                        <span
+                          v-for="user in demoSharedWorkers"
+                          :key="user.id"
+                          class="assigned-badge badge-warning me-2 mb-2 cursor-pointer"
+                          @click="demoRemoveFromGroup('worker', user.id)"
+                          title="클릭하여 제거"
+                        >
+                          {{ user.name }}
+                          <i class="bi bi-x-circle ms-1"></i>
+                        </span>
+                        <div
+                          v-if="demoSharedWorkers.length === 0"
+                          class="text-center text-muted py-3"
+                        >
+                          <small>배정된 실무자가 없습니다</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="alert alert-success mt-3 mb-0">
+                  <small
+                    ><strong>사용법:</strong> 좌측에서 사용자를 선택하고 중앙의 그룹 버튼을 클릭하여
+                    배정합니다. 배지를 클릭하면 제거됩니다.</small
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 코드 탭 -->
+          <div class="tab-pane fade" id="code-demo" role="tabpanel">
+            <div class="row">
+              <div class="col-md-6">
+                <h5 class="text-primary">세로 레이아웃 코드</h5>
+                <pre
+                  class="bg-light p-3 rounded border"
+                ><code>{{ userAssignmentVerticalCode }}</code></pre>
+              </div>
+              <div class="col-md-6">
+                <h5 class="text-primary">공통 목록 코드</h5>
+                <pre
+                  class="bg-light p-3 rounded border"
+                ><code>{{ userAssignmentSharedCode }}</code></pre>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-12">
+                <h5 class="text-primary">주요 기능</h5>
+                <ul>
+                  <li><strong>중복 방지:</strong> 이미 배정된 사용자는 다시 선택할 수 없습니다</li>
+                  <li><strong>다중 선택:</strong> Ctrl 키로 여러 사용자를 동시에 선택 가능</li>
+                  <li>
+                    <strong>시각적 피드백:</strong> 선택된 항목은 그라데이션 배경으로 강조 표시
+                  </li>
+                  <li><strong>Toast 알림:</strong> 모든 작업에 대한 실시간 피드백 제공</li>
+                  <li><strong>반응형 디자인:</strong> Bootstrap 5 기반의 반응형 레이아웃</li>
+                </ul>
+                <div class="alert alert-info">
+                  <strong>전체 페이지 보기:</strong>
+                  <router-link to="/user-assignment-vertical" class="alert-link"
+                    >세로 레이아웃</router-link
+                  >
+                  |
+                  <router-link to="/user-assignment-shared" class="alert-link"
+                    >공통 목록 레이아웃</router-link
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 구분선 -->
     <hr class="my-5" />
 
@@ -225,6 +663,42 @@ export default {
       ],
       currentPage: 1,
 
+      // 사용자 배정 데모 데이터 - 세로 레이아웃
+      demoAvailableUsers: [
+        { id: 1, name: '홍길동', department: '개발팀' },
+        { id: 2, name: '김철수', department: '기획팀' },
+        { id: 3, name: '이영희', department: '디자인팀' },
+        { id: 4, name: '박민수', department: '개발팀' },
+        { id: 5, name: '정수진', department: '마케팅팀' },
+      ],
+      demoResearchers: [],
+      demoSelectedAvailable: [], // 다중 선택
+      demoSelectedAssigned: [], // 다중 선택
+
+      // 사용자 배정 데모 데이터 - 공통 목록
+      demoAllUsers: [
+        { id: 11, name: '강민호', department: '개발팀' },
+        { id: 12, name: '윤서연', department: '기획팀' },
+        { id: 13, name: '임지훈', department: '디자인팀' },
+        { id: 14, name: '한소희', department: '개발팀' },
+        { id: 15, name: '조현우', department: '마케팅팀' },
+        { id: 16, name: '배수지', department: '영업팀' },
+        { id: 17, name: '최유진', department: '개발팀' },
+        { id: 18, name: '신동혁', department: '기획팀' },
+      ],
+      demoSharedResearchers: [],
+      demoSharedOperations: [],
+      demoSharedWorkers: [],
+      demoSharedSelected: [],
+      demoSearchQuery: '',
+
+      // 그룹 정보 맵
+      groupMap: {
+        researcher: { name: '연구원', key: 'demoSharedResearchers' },
+        operation: { name: '오퍼레이션', key: 'demoSharedOperations' },
+        worker: { name: '실무자', key: 'demoSharedWorkers' },
+      },
+
       // 코드 예시
       gridCode: `<template>
   <JqxCustomeGrid
@@ -332,6 +806,453 @@ showToast('주의하세요!', { type: 'warning' })
 // Info
 showToast('정보를 확인하세요.', { type: 'info' })`,
 
+      // 사용자 배정 코드 예시
+      userAssignmentVerticalCode: `<template>
+  <div class="container-fluid py-4">
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5>연구원 배정</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- 전체 목록 -->
+          <div class="col-md-5">
+            <div class="mb-2">
+              <div class="form-check">
+                <input type="checkbox"
+                       class="form-check-input"
+                       id="selectAllResearcher"
+                       :checked="isAllResearcherSelected"
+                       @change="toggleSelectAllResearcher" />
+                <label class="form-check-label" 
+                       for="selectAllResearcher">
+                  전체 선택 
+                  <span class="text-muted">
+                    ({{ availableUsers.length }})
+                  </span>
+                </label>
+              </div>
+            </div>
+            <div class="transfer-box border rounded" 
+                 style="height: 300px; overflow-y: auto">
+              <div v-for="user in availableUsers"
+                   :key="user.id"
+                   @click="toggleAvailableSelect('researcher', user.id)"
+                   class="transfer-item"
+                   :class="{ 
+                     selected: selectedAvailable.researcher.includes(user.id),
+                     assigned: getUserAssignedGroup(user.id)
+                   }">
+                <input type="checkbox"
+                       class="form-check-input me-2"
+                       :checked="selectedAvailable.researcher.includes(user.id)"
+                       @click.stop />
+                {{ user.name }}
+              </div>
+            </div>
+          </div>
+          
+          <!-- 화살표 버튼 -->
+          <div class="col-md-2 text-center d-flex flex-column 
+                      justify-content-center align-items-center gap-2">
+            <button @click="moveToResearcher" 
+                    :disabled="selectedAvailable.researcher.length === 0"
+                    class="btn btn-sm btn-outline-primary transfer-btn">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <button @click="removeFromResearcher"
+                    :disabled="selectedAssigned.researcher.length === 0" 
+                    class="btn btn-sm btn-outline-secondary transfer-btn">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </div>
+          
+          <!-- 선택된 목록 -->
+          <div class="col-md-5">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">선택된 연구원</h6>
+              <span class="badge bg-primary">{{ researchers.length }}</span>
+            </div>
+            <div class="transfer-box transfer-box-assigned border rounded" 
+                 style="height: 300px; overflow-y: auto">
+              <div v-for="user in researchers"
+                   :key="user.id"
+                   @click="toggleAssignedSelect('researcher', user.id)"
+                   class="transfer-item assigned"
+                   :class="{ selected: 
+                             selectedAssigned.researcher.includes(user.id) }">
+                <input type="checkbox"
+                       class="form-check-input me-2"
+                       :checked="selectedAssigned.researcher.includes(user.id)"
+                       @click.stop />
+                {{ user.name }}
+              </div>
+              <div v-if="researchers.length === 0" 
+                   class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                <small>배정된 사용자가 없습니다</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { showToast } from '@/utils/toastUtil.js'
+
+export default {
+  data() {
+    return {
+      availableUsers: [
+        { id: 1, name: '홍길동', department: '개발팀' },
+        { id: 2, name: '김철수', department: '기획팀' }
+      ],
+      researchers: [],
+      // 다중 선택 (배열)
+      selectedAvailable: { researcher: [] },
+      selectedAssigned: { researcher: [] }
+    }
+  },
+  computed: {
+    isAllResearcherSelected() {
+      return this.availableUsers.length > 0 &&
+             this.availableUsers.every(user => 
+               this.selectedAvailable.researcher.includes(user.id))
+    }
+  },
+  methods: {
+    // 사용자가 어느 그룹에 배정되었는지 확인
+    getUserAssignedGroup(userId) {
+      if (this.researchers.find(u => u.id === userId)) return 'researcher'
+      if (this.operations.find(u => u.id === userId)) return 'operation'
+      if (this.workers.find(u => u.id === userId)) return 'worker'
+      return null
+    },
+    
+    toggleSelectAllResearcher() {
+      if (this.isAllResearcherSelected) {
+        this.selectedAvailable.researcher = []
+      } else {
+        this.selectedAvailable.researcher = 
+          this.availableUsers.map(u => u.id)
+      }
+    },
+    toggleAvailableSelect(group, userId) {
+      const idx = this.selectedAvailable[group].indexOf(userId)
+      if (idx > -1) {
+        this.selectedAvailable[group].splice(idx, 1)
+      } else {
+        this.selectedAvailable[group].push(userId)
+      }
+    },
+    toggleAssignedSelect(group, userId) {
+      const idx = this.selectedAssigned[group].indexOf(userId)
+      if (idx > -1) {
+        this.selectedAssigned[group].splice(idx, 1)
+      } else {
+        this.selectedAssigned[group].push(userId)
+      }
+    },
+    moveToResearcher() {
+      this.selectedAvailable.researcher.forEach(userId => {
+        const user = this.availableUsers.find(u => u.id === userId)
+        if (user && !this.researchers.find(r => r.id === user.id)) {
+          this.researchers.push(user)
+        }
+      })
+      const count = this.selectedAvailable.researcher.length
+      this.selectedAvailable.researcher = []
+      showToast(\`\${count}명을 연구원으로 추가했습니다.\`, 
+                { type: 'success' })
+    },
+    removeFromResearcher() {
+      this.selectedAssigned.researcher.forEach(userId => {
+        const idx = this.researchers.findIndex(u => u.id === userId)
+        if (idx !== -1) this.researchers.splice(idx, 1)
+      })
+      const count = this.selectedAssigned.researcher.length
+      this.selectedAssigned.researcher = []
+      showToast(\`\${count}명을 연구원에서 제거했습니다.\`, 
+                { type: 'info' })
+    }
+  }
+}
+<\\/script>
+
+<style scoped>
+.transfer-box {
+  background-color: #fafafa;
+  padding: 8px;
+}
+
+.transfer-box-assigned {
+  background-color: #f0f7ff;
+}
+
+.transfer-item {
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.transfer-item:hover {
+  border-color: #0d6efd;
+  background-color: #f8f9fa;
+}
+
+.transfer-item.selected {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
+}
+
+.transfer-item.assigned {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+  border-left: 3px solid #198754;
+}
+
+.transfer-item.assigned:hover {
+  opacity: 0.85;
+}
+
+.transfer-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 4px;
+}
+</style>`,
+
+      userAssignmentSharedCode: `<template>
+  <div class="container-fluid py-4">
+    <div class="row">
+      <!-- 좌측: 전체 사용자 목록 -->
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <div class="form-check mb-0">
+              <input type="checkbox"
+                     class="form-check-input"
+                     id="selectAll"
+                     :checked="isAllSelected"
+                     @change="toggleSelectAll" />
+              <label class="form-check-label" 
+                     for="selectAll">
+                전체 선택 
+                <span class="text-muted">
+                  ({{ filteredUsers.length }})
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="card-body">
+            <input v-model="searchQuery" 
+                   placeholder="🔍 검색..." 
+                   class="form-control mb-3" />
+            <div class="list-group">
+              <div v-for="user in filteredUsers"
+                   :key="user.id"
+                   @click="toggleUserSelect(user.id)"
+                   class="list-group-item"
+                   :class="{ 
+                     selected: selectedUsers.includes(user.id),
+                     assigned: getUserAssignedGroup(user.id)
+                   }">
+                <input type="checkbox"
+                       class="form-check-input me-2"
+                       :checked="selectedUsers.includes(user.id)"
+                       @click.stop />
+                {{ user.name }}
+                <!-- 배정된 그룹 표시 -->
+                <span v-if="getUserAssignedGroup(user.id)" 
+                      class="ms-auto">
+                  <span v-if="getUserAssignedGroup(user.id) === 'researcher'" 
+                        class="badge bg-primary" 
+                        style="font-size: 0.65rem">연구원</span>
+                  <span v-if="getUserAssignedGroup(user.id) === 'operation'" 
+                        class="badge bg-success" 
+                        style="font-size: 0.65rem">오퍼</span>
+                  <span v-if="getUserAssignedGroup(user.id) === 'worker'" 
+                        class="badge bg-warning text-dark" 
+                        style="font-size: 0.65rem">실무자</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 중앙: 화살표 버튼 -->
+      <div class="col-md-2 text-center">
+        <button @click="moveToResearcher" 
+                :disabled="selectedUsers.length === 0"
+                class="btn btn-arrow-group mb-3">
+          <i class="bi bi-arrow-right"></i>
+          <div>연구원</div>
+        </button>
+        <button @click="moveToOperation" 
+                :disabled="selectedUsers.length === 0"
+                class="btn btn-arrow-group mb-3">
+          <i class="bi bi-arrow-right"></i>
+          <div>오퍼레이션</div>
+        </button>
+        <button @click="moveToWorker" 
+                :disabled="selectedUsers.length === 0"
+                class="btn btn-arrow-group">
+          <i class="bi bi-arrow-right"></i>
+          <div>실무자</div>
+        </button>
+      </div>
+      
+      <!-- 우측: 배정된 그룹 -->
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">
+              연구원 
+              <span class="badge bg-light text-dark">
+                {{ researchers.length }}
+              </span>
+            </h6>
+          </div>
+          <div class="card-body">
+            <span v-for="user in researchers" 
+                  :key="user.id"
+                  class="badge bg-primary me-1 mb-1"
+                  @click="removeFromResearcher(user.id)">
+              {{ user.name }} 
+              <i class="bi bi-x-circle ms-1"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { showToast } from '@/utils/toastUtil.js'
+
+export default {
+  data() {
+    return {
+      allUsers: [
+        { id: 1, name: '홍길동', department: '개발팀' },
+        { id: 2, name: '김철수', department: '기획팀' }
+      ],
+      researchers: [],
+      operations: [],
+      workers: [],
+      selectedUsers: [],  // 다중 선택
+      searchQuery: ''
+    }
+  },
+  computed: {
+    filteredUsers() {
+      // 검색어 필터링만 적용 (배정된 사용자도 표시)
+      let users = this.allUsers
+      
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase()
+        users = users.filter(user =>
+          user.name.toLowerCase().includes(query) ||
+          user.department.toLowerCase().includes(query)
+        )
+      }
+      
+      return users
+    },
+    isAllSelected() {
+      return this.filteredUsers.length > 0 &&
+             this.filteredUsers.every(user => 
+               this.selectedUsers.includes(user.id))
+    }
+  },
+  methods: {
+    // 사용자가 어느 그룹에 배정되었는지 확인
+    getUserAssignedGroup(userId) {
+      if (this.researchers.find(u => u.id === userId)) return 'researcher'
+      if (this.operations.find(u => u.id === userId)) return 'operation'
+      if (this.workers.find(u => u.id === userId)) return 'worker'
+      return null
+    },
+    
+    toggleSelectAll() {
+      if (this.isAllSelected) {
+        // 선택 해제
+        this.filteredUsers.forEach(user => {
+          const idx = this.selectedUsers.indexOf(user.id)
+          if (idx > -1) this.selectedUsers.splice(idx, 1)
+        })
+      } else {
+        // 전체 선택
+        this.filteredUsers.forEach(user => {
+          if (!this.selectedUsers.includes(user.id)) {
+            this.selectedUsers.push(user.id)
+          }
+        })
+      }
+    },
+    toggleUserSelect(userId) {
+      const idx = this.selectedUsers.indexOf(userId)
+      if (idx > -1) {
+        this.selectedUsers.splice(idx, 1)
+      } else {
+        this.selectedUsers.push(userId)
+      }
+    },
+    moveToResearcher() {
+      let count = 0
+      this.selectedUsers.forEach(userId => {
+        const user = this.allUsers.find(u => u.id === userId)
+        if (user && !this.researchers.find(r => r.id === user.id)) {
+          this.researchers.push(user)
+          count++
+        }
+      })
+      this.selectedUsers = []
+      if (count > 0) {
+        showToast(\`\${count}명을 연구원으로 배정했습니다.\`, 
+                  { type: 'success' })
+      }
+    }
+  }
+}
+<\\/script>
+
+<style scoped>
+.list-group-item.selected {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
+}
+
+.list-group-item.assigned {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+}
+
+.list-group-item.assigned:hover {
+  opacity: 0.85;
+}
+
+.btn-arrow-group {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+<\\/style>`,
+
       // 개발자 가이드 코드
       devGuideStep1: `import YourComponent from '@/components/YourComponent.vue'`,
 
@@ -389,7 +1310,44 @@ export default {
 }`,
     }
   },
+  computed: {
+    // 공통 목록에서 검색 필터링 (배정된 사용자도 표시)
+    demoFilteredUsers() {
+      let users = this.demoAllUsers
+
+      // 검색어가 있으면 필터링
+      if (this.demoSearchQuery) {
+        users = users.filter(
+          (user) =>
+            user.name.includes(this.demoSearchQuery) ||
+            user.department.includes(this.demoSearchQuery)
+        )
+      }
+
+      return users
+    },
+    isDemoAllSelected() {
+      return (
+        this.demoAvailableUsers.length > 0 &&
+        this.demoAvailableUsers.every((user) => this.demoSelectedAvailable.includes(user.id))
+      )
+    },
+    isDemoSharedAllSelected() {
+      return (
+        this.demoFilteredUsers.length > 0 &&
+        this.demoFilteredUsers.every((user) => this.demoSharedSelected.includes(user.id))
+      )
+    },
+  },
   methods: {
+    // 사용자가 어느 그룹에 배정되었는지 확인
+    getDemoUserAssignedGroup(userId) {
+      if (this.demoSharedResearchers.find((u) => u.id === userId)) return 'researcher'
+      if (this.demoSharedOperations.find((u) => u.id === userId)) return 'operation'
+      if (this.demoSharedWorkers.find((u) => u.id === userId)) return 'worker'
+      return null
+    },
+
     addRow() {
       this.$refs.exampleGrid?.add({ name: '새 사용자', email: 'new@example.com', role: 'User' })
     },
@@ -415,6 +1373,120 @@ export default {
     showInfoToast() {
       showToast('정보를 확인하세요.', { type: 'info' })
     },
+
+    // 세로 레이아웃 데모 메서드
+    getDemoUserAssignedGroup(userId) {
+      if (this.demoResearchers.find((u) => u.id === userId)) return 'researcher'
+      // 오퍼레이션과 실무자 그룹이 있다면 추가
+      return null
+    },
+
+    demoToggleSelectAll() {
+      if (this.isDemoAllSelected) {
+        this.demoSelectedAvailable = []
+      } else {
+        this.demoSelectedAvailable = this.demoAvailableUsers.map((u) => u.id)
+      }
+    },
+    demoToggleAvailable(userId) {
+      const index = this.demoSelectedAvailable.indexOf(userId)
+      if (index > -1) {
+        this.demoSelectedAvailable.splice(index, 1)
+      } else {
+        this.demoSelectedAvailable.push(userId)
+      }
+    },
+    demoToggleAssigned(userId) {
+      const index = this.demoSelectedAssigned.indexOf(userId)
+      if (index > -1) {
+        this.demoSelectedAssigned.splice(index, 1)
+      } else {
+        this.demoSelectedAssigned.push(userId)
+      }
+    },
+    demoMoveToResearcher() {
+      let count = 0
+      this.demoSelectedAvailable.forEach((userId) => {
+        const user = this.demoAvailableUsers.find((u) => u.id === userId)
+        if (user && !this.demoResearchers.find((r) => r.id === user.id)) {
+          this.demoResearchers.push(user)
+          count++
+        }
+      })
+      this.demoSelectedAvailable = []
+      if (count > 0) {
+        showToast(`${count}명을 연구원으로 배정했습니다.`, { type: 'success' })
+      }
+    },
+    demoRemoveFromResearcher() {
+      this.demoSelectedAssigned.forEach((userId) => {
+        const index = this.demoResearchers.findIndex((u) => u.id === userId)
+        if (index !== -1) {
+          this.demoResearchers.splice(index, 1)
+        }
+      })
+      const count = this.demoSelectedAssigned.length
+      this.demoSelectedAssigned = []
+      if (count > 0) {
+        showToast(`${count}명을 연구원에서 제거했습니다.`, { type: 'info' })
+      }
+    },
+
+    // 공통 목록 데모 메서드
+    demoToggleSharedSelectAll() {
+      if (this.isDemoSharedAllSelected) {
+        // 현재 필터된 사용자들을 선택 해제
+        this.demoFilteredUsers.forEach((user) => {
+          const index = this.demoSharedSelected.indexOf(user.id)
+          if (index > -1) {
+            this.demoSharedSelected.splice(index, 1)
+          }
+        })
+      } else {
+        // 현재 필터된 사용자들을 선택
+        this.demoFilteredUsers.forEach((user) => {
+          if (!this.demoSharedSelected.includes(user.id)) {
+            this.demoSharedSelected.push(user.id)
+          }
+        })
+      }
+    },
+    demoToggleSharedSelect(userId) {
+      const index = this.demoSharedSelected.indexOf(userId)
+      index === -1 ? this.demoSharedSelected.push(userId) : this.demoSharedSelected.splice(index, 1)
+    },
+
+    demoMoveToGroup(groupType) {
+      if (this.demoSharedSelected.length === 0) return
+
+      const selectedUsers = this.demoAllUsers.filter((u) => this.demoSharedSelected.includes(u.id))
+      const groupArray = this[this.groupMap[groupType].key]
+
+      // 중복되지 않은 사용자만 추가
+      selectedUsers.forEach((user) => {
+        if (!groupArray.find((u) => u.id === user.id)) {
+          groupArray.push(user)
+        }
+      })
+
+      showToast(`${selectedUsers.length}명을 ${this.groupMap[groupType].name}으로 배정했습니다.`, {
+        type: 'success',
+      })
+      this.demoSharedSelected = []
+    },
+
+    demoRemoveFromGroup(groupType, userId) {
+      const groupArray = this[this.groupMap[groupType].key]
+      const index = groupArray.findIndex((u) => u.id === userId)
+
+      if (index !== -1) {
+        const user = groupArray[index]
+        groupArray.splice(index, 1)
+        showToast(`${user.name}님을 ${this.groupMap[groupType].name}에서 제거했습니다.`, {
+          type: 'info',
+        })
+      }
+    },
   },
 }
 </script>
@@ -429,5 +1501,190 @@ pre {
 code {
   white-space: pre;
   word-wrap: normal;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* 세로 레이아웃 - Transfer 스타일 */
+.transfer-box {
+  background-color: #fafafa;
+  padding: 8px;
+}
+
+.transfer-box-assigned {
+  background-color: #f0f7ff;
+}
+
+.transfer-item {
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.transfer-item:hover {
+  border-color: #0d6efd;
+  background-color: #f8f9fa;
+}
+
+.transfer-item.selected {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
+}
+
+.transfer-item.assigned {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+  border-left: 3px solid #198754;
+}
+
+.transfer-item.assigned:hover {
+  opacity: 0.85;
+}
+
+.transfer-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 4px;
+}
+
+/* 체크박스 스타일 */
+.form-check-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 공통 목록 스타일 */
+.shared-user-box {
+  background-color: #f8f9fa;
+  padding: 12px;
+}
+
+.shared-user-item {
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  background-color: white;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.shared-user-item:hover {
+  border-color: #dee2e6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.shared-user-item.selected {
+  background-color: #e7f1ff;
+  border-color: #0d6efd;
+  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.2);
+}
+
+.shared-user-item.assigned {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+}
+
+.shared-user-item.assigned:hover {
+  opacity: 0.85;
+}
+
+/* 중앙 화살표 버튼 */
+.shared-arrow-btn {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-width: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.shared-arrow-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.shared-arrow-btn small {
+  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* 배정된 배지 */
+.assigned-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.assigned-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.assigned-badge i {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.assigned-badge:hover i {
+  opacity: 1;
+}
+
+.badge-primary {
+  background-color: #e7f1ff;
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.badge-primary:hover {
+  background-color: #cfe2ff;
+}
+
+.badge-success {
+  background-color: #d1f4e0;
+  color: #198754;
+  border-color: #198754;
+}
+
+.badge-success:hover {
+  background-color: #b8eed3;
+}
+
+.badge-warning {
+  background-color: #fff3cd;
+  color: #cc9a06;
+  border-color: #ffc107;
+}
+
+.badge-warning:hover {
+  background-color: #ffe69c;
 }
 </style>

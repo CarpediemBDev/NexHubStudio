@@ -4,26 +4,48 @@
 
     <!-- 연구원 그룹 -->
     <div class="card mb-4 border-primary">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">연구원 배정</h5>
+      <div class="card-header bg-primary bg-opacity-10 border-primary">
+        <h5 class="mb-0 text-primary">연구원 배정</h5>
       </div>
       <div class="card-body">
         <div class="row">
           <!-- 전체 사용자 목록 -->
           <div class="col-md-5">
-            <h6>전체 사용자</h6>
-            <div class="border rounded p-2" style="height: 300px; overflow-y: auto">
+            <div class="mb-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="selectAllResearcher"
+                  :checked="isAllResearcherSelected"
+                  @change="toggleSelectAllResearcher"
+                />
+                <label class="form-check-label" for="selectAllResearcher">
+                  전체 선택 <span class="text-muted">({{ availableUsers.length }})</span>
+                </label>
+              </div>
+            </div>
+            <div class="transfer-box border rounded" style="height: 300px; overflow-y: auto">
               <div
                 v-for="user in availableUsers"
                 :key="user.id"
-                class="p-2 mb-1 rounded cursor-pointer user-item"
+                class="transfer-item"
                 :class="{
-                  'user-selected-primary': selectedAvailable.researcher === user.id,
-                  'bg-light': selectedAvailable.researcher !== user.id,
+                  selected: selectedAvailable.researcher.includes(user.id),
+                  assigned: getUserAssignedGroup(user.id),
                 }"
-                @click="selectedAvailable.researcher = user.id"
+                @click="toggleAvailableSelect('researcher', user.id)"
               >
-                {{ user.name }} ({{ user.department }})
+                <div class="d-flex align-items-center">
+                  <input
+                    type="checkbox"
+                    class="form-check-input me-2"
+                    :checked="selectedAvailable.researcher.includes(user.id)"
+                    @click.stop
+                  />
+                  <span>{{ user.name }}</span>
+                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                </div>
               </div>
             </div>
           </div>
@@ -31,40 +53,54 @@
           <!-- 화살표 버튼 -->
           <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-2">
             <button
-              class="btn btn-primary btn-arrow"
+              class="btn btn-sm btn-outline-primary transfer-btn"
               @click="moveToResearcher"
-              :disabled="!selectedAvailable.researcher"
+              :disabled="selectedAvailable.researcher.length === 0"
               title="연구원으로 추가"
             >
-              <i class="bi bi-arrow-right-circle fs-4"></i>
+              <i class="bi bi-chevron-right"></i>
             </button>
             <button
-              class="btn btn-outline-secondary btn-arrow"
+              class="btn btn-sm btn-outline-secondary transfer-btn"
               @click="removeFromResearcher"
-              :disabled="!selectedAssigned.researcher"
+              :disabled="selectedAssigned.researcher.length === 0"
               title="연구원에서 제거"
             >
-              <i class="bi bi-arrow-left-circle fs-4"></i>
+              <i class="bi bi-chevron-left"></i>
             </button>
           </div>
 
           <!-- 선택된 연구원 -->
           <div class="col-md-5">
-            <h6>
-              선택된 연구원 <span class="badge bg-primary">{{ researchers.length }}</span>
-            </h6>
-            <div class="border rounded p-2" style="height: 300px; overflow-y: auto">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">선택된 연구원</h6>
+              <span class="badge bg-primary">{{ researchers.length }}</span>
+            </div>
+            <div
+              class="transfer-box transfer-box-assigned border rounded"
+              style="height: 300px; overflow-y: auto"
+            >
               <div
                 v-for="user in researchers"
                 :key="user.id"
-                class="p-2 mb-1 rounded cursor-pointer user-item"
-                :class="{
-                  'user-selected-success': selectedAssigned.researcher === user.id,
-                  'bg-success text-white': selectedAssigned.researcher !== user.id,
-                }"
-                @click="selectedAssigned.researcher = user.id"
+                class="transfer-item assigned"
+                :class="{ selected: selectedAssigned.researcher.includes(user.id) }"
+                @click="toggleAssignedSelect('researcher', user.id)"
               >
-                {{ user.name }} ({{ user.department }})
+                <div class="d-flex align-items-center">
+                  <input
+                    type="checkbox"
+                    class="form-check-input me-2"
+                    :checked="selectedAssigned.researcher.includes(user.id)"
+                    @click.stop
+                  />
+                  <span>{{ user.name }}</span>
+                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                </div>
+              </div>
+              <div v-if="researchers.length === 0" class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                <small>배정된 연구원이 없습니다</small>
               </div>
             </div>
           </div>
@@ -74,26 +110,48 @@
 
     <!-- 오퍼레이션 그룹 -->
     <div class="card mb-4 border-success">
-      <div class="card-header bg-success text-white">
-        <h5 class="mb-0">오퍼레이션 배정</h5>
+      <div class="card-header bg-success bg-opacity-10 border-success">
+        <h5 class="mb-0 text-success">오퍼레이션 배정</h5>
       </div>
       <div class="card-body">
         <div class="row">
           <!-- 전체 사용자 목록 -->
           <div class="col-md-5">
-            <h6>전체 사용자</h6>
-            <div class="border rounded p-2" style="height: 300px; overflow-y: auto">
+            <div class="mb-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="selectAllOperation"
+                  :checked="isAllOperationSelected"
+                  @change="toggleSelectAllOperation"
+                />
+                <label class="form-check-label" for="selectAllOperation">
+                  전체 선택 <span class="text-muted">({{ availableUsers.length }})</span>
+                </label>
+              </div>
+            </div>
+            <div class="transfer-box border rounded" style="height: 300px; overflow-y: auto">
               <div
                 v-for="user in availableUsers"
                 :key="user.id"
-                class="p-2 mb-1 rounded cursor-pointer user-item"
+                class="transfer-item"
                 :class="{
-                  'user-selected-success': selectedAvailable.operation === user.id,
-                  'bg-light': selectedAvailable.operation !== user.id,
+                  selected: selectedAvailable.operation.includes(user.id),
+                  assigned: getUserAssignedGroup(user.id),
                 }"
-                @click="selectedAvailable.operation = user.id"
+                @click="toggleAvailableSelect('operation', user.id)"
               >
-                {{ user.name }} ({{ user.department }})
+                <div class="d-flex align-items-center">
+                  <input
+                    type="checkbox"
+                    class="form-check-input me-2"
+                    :checked="selectedAvailable.operation.includes(user.id)"
+                    @click.stop
+                  />
+                  <span>{{ user.name }}</span>
+                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                </div>
               </div>
             </div>
           </div>
@@ -101,40 +159,54 @@
           <!-- 화살표 버튼 -->
           <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-2">
             <button
-              class="btn btn-success btn-arrow"
+              class="btn btn-sm btn-outline-success transfer-btn"
               @click="moveToOperation"
-              :disabled="!selectedAvailable.operation"
+              :disabled="selectedAvailable.operation.length === 0"
               title="오퍼레이션으로 추가"
             >
-              <i class="bi bi-arrow-right-circle fs-4"></i>
+              <i class="bi bi-chevron-right"></i>
             </button>
             <button
-              class="btn btn-outline-secondary btn-arrow"
+              class="btn btn-sm btn-outline-secondary transfer-btn"
               @click="removeFromOperation"
-              :disabled="!selectedAssigned.operation"
+              :disabled="selectedAssigned.operation.length === 0"
               title="오퍼레이션에서 제거"
             >
-              <i class="bi bi-arrow-left-circle fs-4"></i>
+              <i class="bi bi-chevron-left"></i>
             </button>
           </div>
 
           <!-- 선택된 오퍼레이션 -->
           <div class="col-md-5">
-            <h6>
-              선택된 오퍼레이션 <span class="badge bg-success">{{ operations.length }}</span>
-            </h6>
-            <div class="border rounded p-2" style="height: 300px; overflow-y: auto">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">선택된 오퍼레이션</h6>
+              <span class="badge bg-success">{{ operations.length }}</span>
+            </div>
+            <div
+              class="transfer-box transfer-box-assigned border rounded"
+              style="height: 300px; overflow-y: auto"
+            >
               <div
                 v-for="user in operations"
                 :key="user.id"
-                class="p-2 mb-1 rounded cursor-pointer user-item"
-                :class="{
-                  'user-selected-info': selectedAssigned.operation === user.id,
-                  'bg-info text-white': selectedAssigned.operation !== user.id,
-                }"
-                @click="selectedAssigned.operation = user.id"
+                class="transfer-item assigned"
+                :class="{ selected: selectedAssigned.operation.includes(user.id) }"
+                @click="toggleAssignedSelect('operation', user.id)"
               >
-                {{ user.name }} ({{ user.department }})
+                <div class="d-flex align-items-center">
+                  <input
+                    type="checkbox"
+                    class="form-check-input me-2"
+                    :checked="selectedAssigned.operation.includes(user.id)"
+                    @click.stop
+                  />
+                  <span>{{ user.name }}</span>
+                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                </div>
+              </div>
+              <div v-if="operations.length === 0" class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                <small>배정된 오퍼레이션이 없습니다</small>
               </div>
             </div>
           </div>
@@ -144,26 +216,48 @@
 
     <!-- 실무자 그룹 -->
     <div class="card mb-4 border-warning">
-      <div class="card-header bg-warning text-dark">
-        <h5 class="mb-0">실무자 배정</h5>
+      <div class="card-header bg-warning bg-opacity-10 border-warning">
+        <h5 class="mb-0 text-warning">실무자 배정</h5>
       </div>
       <div class="card-body">
         <div class="row">
           <!-- 전체 사용자 목록 -->
           <div class="col-md-5">
-            <h6>전체 사용자</h6>
-            <div class="border rounded p-2" style="height: 300px; overflow-y: auto">
+            <div class="mb-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="selectAllWorker"
+                  :checked="isAllWorkerSelected"
+                  @change="toggleSelectAllWorker"
+                />
+                <label class="form-check-label" for="selectAllWorker">
+                  전체 선택 <span class="text-muted">({{ availableUsers.length }})</span>
+                </label>
+              </div>
+            </div>
+            <div class="transfer-box border rounded" style="height: 300px; overflow-y: auto">
               <div
                 v-for="user in availableUsers"
                 :key="user.id"
-                class="p-2 mb-1 rounded cursor-pointer user-item"
+                class="transfer-item"
                 :class="{
-                  'user-selected-warning': selectedAvailable.worker === user.id,
-                  'bg-light': selectedAvailable.worker !== user.id,
+                  selected: selectedAvailable.worker.includes(user.id),
+                  assigned: getUserAssignedGroup(user.id),
                 }"
-                @click="selectedAvailable.worker = user.id"
+                @click="toggleAvailableSelect('worker', user.id)"
               >
-                {{ user.name }} ({{ user.department }})
+                <div class="d-flex align-items-center">
+                  <input
+                    type="checkbox"
+                    class="form-check-input me-2"
+                    :checked="selectedAvailable.worker.includes(user.id)"
+                    @click.stop
+                  />
+                  <span>{{ user.name }}</span>
+                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                </div>
               </div>
             </div>
           </div>
@@ -171,40 +265,54 @@
           <!-- 화살표 버튼 -->
           <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-2">
             <button
-              class="btn btn-warning btn-arrow"
+              class="btn btn-sm btn-outline-warning transfer-btn"
               @click="moveToWorker"
-              :disabled="!selectedAvailable.worker"
+              :disabled="selectedAvailable.worker.length === 0"
               title="실무자로 추가"
             >
-              <i class="bi bi-arrow-right-circle fs-4"></i>
+              <i class="bi bi-chevron-right"></i>
             </button>
             <button
-              class="btn btn-outline-secondary btn-arrow"
+              class="btn btn-sm btn-outline-secondary transfer-btn"
               @click="removeFromWorker"
-              :disabled="!selectedAssigned.worker"
+              :disabled="selectedAssigned.worker.length === 0"
               title="실무자에서 제거"
             >
-              <i class="bi bi-arrow-left-circle fs-4"></i>
+              <i class="bi bi-chevron-left"></i>
             </button>
           </div>
 
           <!-- 선택된 실무자 -->
           <div class="col-md-5">
-            <h6>
-              선택된 실무자 <span class="badge bg-warning text-dark">{{ workers.length }}</span>
-            </h6>
-            <div class="border rounded p-2" style="height: 300px; overflow-y: auto">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">선택된 실무자</h6>
+              <span class="badge bg-warning text-dark">{{ workers.length }}</span>
+            </div>
+            <div
+              class="transfer-box transfer-box-assigned border rounded"
+              style="height: 300px; overflow-y: auto"
+            >
               <div
                 v-for="user in workers"
                 :key="user.id"
-                class="p-2 mb-1 rounded cursor-pointer user-item"
-                :class="{
-                  'user-selected-dark': selectedAssigned.worker === user.id,
-                  'bg-warning': selectedAssigned.worker !== user.id,
-                }"
-                @click="selectedAssigned.worker = user.id"
+                class="transfer-item assigned"
+                :class="{ selected: selectedAssigned.worker.includes(user.id) }"
+                @click="toggleAssignedSelect('worker', user.id)"
               >
-                {{ user.name }} ({{ user.department }})
+                <div class="d-flex align-items-center">
+                  <input
+                    type="checkbox"
+                    class="form-check-input me-2"
+                    :checked="selectedAssigned.worker.includes(user.id)"
+                    @click.stop
+                  />
+                  <span>{{ user.name }}</span>
+                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                </div>
+              </div>
+              <div v-if="workers.length === 0" class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                <small>배정된 실무자가 없습니다</small>
               </div>
             </div>
           </div>
@@ -243,76 +351,160 @@ export default {
       researchers: [],
       operations: [],
       workers: [],
-      // 선택된 사용자 (왼쪽)
+      // 선택된 사용자 (다중 선택 - 배열)
       selectedAvailable: {
-        researcher: null,
-        operation: null,
-        worker: null,
+        researcher: [],
+        operation: [],
+        worker: [],
       },
-      // 선택된 사용자 (오른쪽)
+      // 선택된 사용자 (오른쪽 - 배열)
       selectedAssigned: {
-        researcher: null,
-        operation: null,
-        worker: null,
+        researcher: [],
+        operation: [],
+        worker: [],
       },
     }
   },
+  computed: {
+    isAllResearcherSelected() {
+      return (
+        this.availableUsers.length > 0 &&
+        this.availableUsers.every((user) => this.selectedAvailable.researcher.includes(user.id))
+      )
+    },
+    isAllOperationSelected() {
+      return (
+        this.availableUsers.length > 0 &&
+        this.availableUsers.every((user) => this.selectedAvailable.operation.includes(user.id))
+      )
+    },
+    isAllWorkerSelected() {
+      return (
+        this.availableUsers.length > 0 &&
+        this.availableUsers.every((user) => this.selectedAvailable.worker.includes(user.id))
+      )
+    },
+  },
   methods: {
-    // 연구원으로 이동
-    moveToResearcher() {
-      const user = this.availableUsers.find((u) => u.id === this.selectedAvailable.researcher)
-      if (user && !this.researchers.find((r) => r.id === user.id)) {
-        this.researchers.push(user)
-        this.selectedAvailable.researcher = null
-        showToast(`${user.name}을(를) 연구원으로 추가했습니다.`, { type: 'success' })
+    // 사용자가 어느 그룹에 배정되었는지 확인
+    getUserAssignedGroup(userId) {
+      if (this.researchers.find((u) => u.id === userId)) return 'researcher'
+      if (this.operations.find((u) => u.id === userId)) return 'operation'
+      if (this.workers.find((u) => u.id === userId)) return 'worker'
+      return null
+    },
+
+    // 전체 선택/해제
+    toggleSelectAllResearcher() {
+      if (this.isAllResearcherSelected) {
+        this.selectedAvailable.researcher = []
+      } else {
+        this.selectedAvailable.researcher = this.availableUsers.map((u) => u.id)
       }
+    },
+    toggleSelectAllOperation() {
+      if (this.isAllOperationSelected) {
+        this.selectedAvailable.operation = []
+      } else {
+        this.selectedAvailable.operation = this.availableUsers.map((u) => u.id)
+      }
+    },
+    toggleSelectAllWorker() {
+      if (this.isAllWorkerSelected) {
+        this.selectedAvailable.worker = []
+      } else {
+        this.selectedAvailable.worker = this.availableUsers.map((u) => u.id)
+      }
+    },
+
+    // 다중 선택 토글
+    toggleAvailableSelect(group, userId) {
+      const index = this.selectedAvailable[group].indexOf(userId)
+      if (index > -1) {
+        this.selectedAvailable[group].splice(index, 1)
+      } else {
+        this.selectedAvailable[group].push(userId)
+      }
+    },
+    toggleAssignedSelect(group, userId) {
+      const index = this.selectedAssigned[group].indexOf(userId)
+      if (index > -1) {
+        this.selectedAssigned[group].splice(index, 1)
+      } else {
+        this.selectedAssigned[group].push(userId)
+      }
+    },
+
+    // 연구원으로 이동 (다중)
+    moveToResearcher() {
+      this.selectedAvailable.researcher.forEach((userId) => {
+        const user = this.availableUsers.find((u) => u.id === userId)
+        if (user && !this.researchers.find((r) => r.id === user.id)) {
+          this.researchers.push(user)
+        }
+      })
+      const count = this.selectedAvailable.researcher.length
+      this.selectedAvailable.researcher = []
+      showToast(`${count}명을 연구원으로 추가했습니다.`, { type: 'success' })
     },
     removeFromResearcher() {
-      const index = this.researchers.findIndex((u) => u.id === this.selectedAssigned.researcher)
-      if (index !== -1) {
-        const user = this.researchers[index]
-        this.researchers.splice(index, 1)
-        this.selectedAssigned.researcher = null
-        showToast(`${user.name}을(를) 연구원에서 제거했습니다.`, { type: 'info' })
-      }
+      this.selectedAssigned.researcher.forEach((userId) => {
+        const index = this.researchers.findIndex((u) => u.id === userId)
+        if (index !== -1) {
+          this.researchers.splice(index, 1)
+        }
+      })
+      const count = this.selectedAssigned.researcher.length
+      this.selectedAssigned.researcher = []
+      showToast(`${count}명을 연구원에서 제거했습니다.`, { type: 'info' })
     },
 
-    // 오퍼레이션으로 이동
+    // 오퍼레이션으로 이동 (다중)
     moveToOperation() {
-      const user = this.availableUsers.find((u) => u.id === this.selectedAvailable.operation)
-      if (user && !this.operations.find((o) => o.id === user.id)) {
-        this.operations.push(user)
-        this.selectedAvailable.operation = null
-        showToast(`${user.name}을(를) 오퍼레이션으로 추가했습니다.`, { type: 'success' })
-      }
+      this.selectedAvailable.operation.forEach((userId) => {
+        const user = this.availableUsers.find((u) => u.id === userId)
+        if (user && !this.operations.find((o) => o.id === user.id)) {
+          this.operations.push(user)
+        }
+      })
+      const count = this.selectedAvailable.operation.length
+      this.selectedAvailable.operation = []
+      showToast(`${count}명을 오퍼레이션으로 추가했습니다.`, { type: 'success' })
     },
     removeFromOperation() {
-      const index = this.operations.findIndex((u) => u.id === this.selectedAssigned.operation)
-      if (index !== -1) {
-        const user = this.operations[index]
-        this.operations.splice(index, 1)
-        this.selectedAssigned.operation = null
-        showToast(`${user.name}을(를) 오퍼레이션에서 제거했습니다.`, { type: 'info' })
-      }
+      this.selectedAssigned.operation.forEach((userId) => {
+        const index = this.operations.findIndex((u) => u.id === userId)
+        if (index !== -1) {
+          this.operations.splice(index, 1)
+        }
+      })
+      const count = this.selectedAssigned.operation.length
+      this.selectedAssigned.operation = []
+      showToast(`${count}명을 오퍼레이션에서 제거했습니다.`, { type: 'info' })
     },
 
-    // 실무자로 이동
+    // 실무자로 이동 (다중)
     moveToWorker() {
-      const user = this.availableUsers.find((u) => u.id === this.selectedAvailable.worker)
-      if (user && !this.workers.find((w) => w.id === user.id)) {
-        this.workers.push(user)
-        this.selectedAvailable.worker = null
-        showToast(`${user.name}을(를) 실무자로 추가했습니다.`, { type: 'success' })
-      }
+      this.selectedAvailable.worker.forEach((userId) => {
+        const user = this.availableUsers.find((u) => u.id === userId)
+        if (user && !this.workers.find((w) => w.id === user.id)) {
+          this.workers.push(user)
+        }
+      })
+      const count = this.selectedAvailable.worker.length
+      this.selectedAvailable.worker = []
+      showToast(`${count}명을 실무자로 추가했습니다.`, { type: 'success' })
     },
     removeFromWorker() {
-      const index = this.workers.findIndex((u) => u.id === this.selectedAssigned.worker)
-      if (index !== -1) {
-        const user = this.workers[index]
-        this.workers.splice(index, 1)
-        this.selectedAssigned.worker = null
-        showToast(`${user.name}을(를) 실무자에서 제거했습니다.`, { type: 'info' })
-      }
+      this.selectedAssigned.worker.forEach((userId) => {
+        const index = this.workers.findIndex((u) => u.id === userId)
+        if (index !== -1) {
+          this.workers.splice(index, 1)
+        }
+      })
+      const count = this.selectedAssigned.worker.length
+      this.selectedAssigned.worker = []
+      showToast(`${count}명을 실무자에서 제거했습니다.`, { type: 'info' })
     },
 
     // 저장
@@ -330,118 +522,65 @@ export default {
 </script>
 
 <style scoped>
-.cursor-pointer {
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s;
+/* Transfer 박스 스타일 */
+.transfer-box {
+  background-color: #fafafa;
+  padding: 8px;
 }
 
-.user-item {
+.transfer-box-assigned {
+  background-color: #f0f7ff;
+}
+
+/* Transfer 아이템 */
+.transfer-item {
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.user-item:not([class*='user-selected']):hover {
-  background-color: #e9ecef !important;
-  transform: translateX(5px);
+.transfer-item:hover {
+  border-color: #0d6efd;
+  background-color: #f8f9fa;
 }
 
-/* Primary 선택 스타일 (연구원 왼쪽) */
-.user-selected-primary {
-  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
-  color: white !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.4);
-  border: 2px solid #0d6efd;
-  transform: translateX(5px);
+.transfer-item.selected {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
 }
 
-.user-selected-primary:hover {
-  background: linear-gradient(135deg, #0a58ca 0%, #084298 100%) !important;
-  box-shadow: 0 3px 12px rgba(13, 110, 253, 0.5);
+.transfer-item.assigned {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+  border-left: 3px solid #198754;
 }
 
-/* Success 선택 스타일 (연구원 오른쪽, 오퍼레이션 왼쪽) */
-.user-selected-success {
-  background: linear-gradient(135deg, #198754 0%, #157347 100%) !important;
-  color: white !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(25, 135, 84, 0.4);
-  border: 2px solid #198754;
-  transform: translateX(5px);
+.transfer-item.assigned:hover {
+  opacity: 0.85;
 }
 
-.user-selected-success:hover {
-  background: linear-gradient(135deg, #157347 0%, #0d5132 100%) !important;
-  box-shadow: 0 3px 12px rgba(25, 135, 84, 0.5);
+/* Transfer 버튼 */
+.transfer-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 4px;
 }
 
-/* Info 선택 스타일 (오퍼레이션 오른쪽) */
-.user-selected-info {
-  background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%) !important;
-  color: white !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(13, 202, 240, 0.4);
-  border: 2px solid #0dcaf0;
-  transform: translateX(5px);
+/* 체크박스 스타일 */
+.form-check-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.user-selected-info:hover {
-  background: linear-gradient(135deg, #0aa2c0 0%, #087990 100%) !important;
-  box-shadow: 0 3px 12px rgba(13, 202, 240, 0.5);
-}
-
-/* Warning 선택 스타일 (실무자 왼쪽) */
-.user-selected-warning {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
-  color: #000 !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
-  border: 2px solid #ffc107;
-  transform: translateX(5px);
-}
-
-.user-selected-warning:hover {
-  background: linear-gradient(135deg, #e0a800 0%, #cc9a06 100%) !important;
-  box-shadow: 0 3px 12px rgba(255, 193, 7, 0.5);
-}
-
-/* Dark 선택 스타일 (실무자 오른쪽) */
-.user-selected-dark {
-  background: linear-gradient(135deg, #212529 0%, #000000 100%) !important;
-  color: white !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  border: 2px solid #212529;
-  transform: translateX(5px);
-}
-
-.user-selected-dark:hover {
-  background: linear-gradient(135deg, #000000 0%, #000000 100%) !important;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
-}
-
-.btn-arrow {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-arrow:hover:not(:disabled) {
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-arrow:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-.btn-arrow:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
 }
 </style>
