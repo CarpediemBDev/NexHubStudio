@@ -326,7 +326,7 @@
                             class="shared-user-item"
                             :class="{
                               selected: demoSharedSelected.includes(user.id),
-                              assigned: getDemoUserAssignedGroup(user.id),
+                              assigned: getDemoUserAssignedGroups(user.id).length > 0,
                             }"
                             @click="demoToggleSharedSelect(user.id)"
                           >
@@ -339,22 +339,25 @@
                               />
                               <span>{{ user.name }}</span>
                               <small class="ms-auto text-muted">{{ user.department }}</small>
-                              <!-- 배정된 그룹 표시 -->
-                              <span v-if="getDemoUserAssignedGroup(user.id)" class="ms-2">
+                              <!-- 배정된 그룹 표시 (모든 그룹) -->
+                              <span
+                                v-if="getDemoUserAssignedGroups(user.id).length > 0"
+                                class="ms-2 d-flex gap-1"
+                              >
                                 <span
-                                  v-if="getDemoUserAssignedGroup(user.id) === 'researcher'"
+                                  v-if="getDemoUserAssignedGroups(user.id).includes('researcher')"
                                   class="badge bg-primary"
                                   style="font-size: 0.65rem"
                                   >연구원</span
                                 >
                                 <span
-                                  v-if="getDemoUserAssignedGroup(user.id) === 'operation'"
+                                  v-if="getDemoUserAssignedGroups(user.id).includes('operation')"
                                   class="badge bg-success"
                                   style="font-size: 0.65rem"
                                   >오퍼</span
                                 >
                                 <span
-                                  v-if="getDemoUserAssignedGroup(user.id) === 'worker'"
+                                  v-if="getDemoUserAssignedGroups(user.id).includes('worker')"
                                   class="badge bg-warning text-dark"
                                   style="font-size: 0.65rem"
                                   >실무자</span
@@ -930,7 +933,7 @@ export default {
     }
   },
   methods: {
-    // 사용자가 어느 그룹에 배정되었는지 확인
+    // 사용자가 배정된 모든 그룹 확인 (배열 반환) - 세로 레이아웃용
     getUserAssignedGroup(userId) {
       if (this.researchers.find(u => u.id === userId)) return 'researcher'
       if (this.operations.find(u => u.id === userId)) return 'operation'
@@ -1069,23 +1072,23 @@ export default {
                    class="list-group-item"
                    :class="{ 
                      selected: selectedUsers.includes(user.id),
-                     assigned: getUserAssignedGroup(user.id)
+                     assigned: getUserAssignedGroups(user.id).length > 0
                    }">
                 <input type="checkbox"
                        class="form-check-input me-2"
                        :checked="selectedUsers.includes(user.id)"
                        @click.stop />
                 {{ user.name }}
-                <!-- 배정된 그룹 표시 -->
-                <span v-if="getUserAssignedGroup(user.id)" 
-                      class="ms-auto">
-                  <span v-if="getUserAssignedGroup(user.id) === 'researcher'" 
+                <!-- 배정된 그룹 표시 (모든 그룹) -->
+                <span v-if="getUserAssignedGroups(user.id).length > 0" 
+                      class="ms-auto d-flex gap-1">
+                  <span v-if="getUserAssignedGroups(user.id).includes('researcher')" 
                         class="badge bg-primary" 
                         style="font-size: 0.65rem">연구원</span>
-                  <span v-if="getUserAssignedGroup(user.id) === 'operation'" 
+                  <span v-if="getUserAssignedGroups(user.id).includes('operation')" 
                         class="badge bg-success" 
                         style="font-size: 0.65rem">오퍼</span>
-                  <span v-if="getUserAssignedGroup(user.id) === 'worker'" 
+                  <span v-if="getUserAssignedGroups(user.id).includes('worker')" 
                         class="badge bg-warning text-dark" 
                         style="font-size: 0.65rem">실무자</span>
                 </span>
@@ -1184,12 +1187,13 @@ export default {
     }
   },
   methods: {
-    // 사용자가 어느 그룹에 배정되었는지 확인
-    getUserAssignedGroup(userId) {
-      if (this.researchers.find(u => u.id === userId)) return 'researcher'
-      if (this.operations.find(u => u.id === userId)) return 'operation'
-      if (this.workers.find(u => u.id === userId)) return 'worker'
-      return null
+    // 사용자가 배정된 모든 그룹 확인 (배열 반환)
+    getUserAssignedGroups(userId) {
+      const groups = []
+      if (this.researchers.find(u => u.id === userId)) groups.push('researcher')
+      if (this.operations.find(u => u.id === userId)) groups.push('operation')
+      if (this.workers.find(u => u.id === userId)) groups.push('worker')
+      return groups
     },
     
     toggleSelectAll() {
@@ -1415,12 +1419,13 @@ export default {
     },
   },
   methods: {
-    // 사용자가 어느 그룹에 배정되었는지 확인
-    getDemoUserAssignedGroup(userId) {
-      if (this.demoSharedResearchers.find((u) => u.id === userId)) return 'researcher'
-      if (this.demoSharedOperations.find((u) => u.id === userId)) return 'operation'
-      if (this.demoSharedWorkers.find((u) => u.id === userId)) return 'worker'
-      return null
+    // 사용자가 배정된 모든 그룹 확인 (배열 반환)
+    getDemoUserAssignedGroups(userId) {
+      const groups = []
+      if (this.demoSharedResearchers.find((u) => u.id === userId)) groups.push('researcher')
+      if (this.demoSharedOperations.find((u) => u.id === userId)) groups.push('operation')
+      if (this.demoSharedWorkers.find((u) => u.id === userId)) groups.push('worker')
+      return groups
     },
 
     addRow() {

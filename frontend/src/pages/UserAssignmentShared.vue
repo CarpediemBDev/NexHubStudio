@@ -36,7 +36,7 @@
                 class="shared-user-item"
                 :class="{
                   selected: selectedUsers.includes(user.id),
-                  assigned: getUserAssignedGroup(user.id),
+                  assigned: getUserAssignedGroups(user.id).length > 0,
                 }"
                 @click="toggleUserSelect(user.id)"
               >
@@ -49,22 +49,22 @@
                   />
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>
-                  <!-- 배정된 그룹 표시 -->
-                  <span v-if="getUserAssignedGroup(user.id)" class="ms-2">
+                  <!-- 배정된 그룹 표시 (모든 그룹) -->
+                  <span v-if="getUserAssignedGroups(user.id).length > 0" class="ms-2 d-flex gap-1">
                     <span
-                      v-if="getUserAssignedGroup(user.id) === 'researcher'"
+                      v-if="getUserAssignedGroups(user.id).includes('researcher')"
                       class="badge bg-primary"
                       style="font-size: 0.65rem"
                       >연구원</span
                     >
                     <span
-                      v-if="getUserAssignedGroup(user.id) === 'operation'"
+                      v-if="getUserAssignedGroups(user.id).includes('operation')"
                       class="badge bg-success"
                       style="font-size: 0.65rem"
                       >오퍼</span
                     >
                     <span
-                      v-if="getUserAssignedGroup(user.id) === 'worker'"
+                      v-if="getUserAssignedGroups(user.id).includes('worker')"
                       class="badge bg-warning text-dark"
                       style="font-size: 0.65rem"
                       >실무자</span
@@ -270,12 +270,13 @@ export default {
     },
   },
   methods: {
-    // 사용자가 어느 그룹에 배정되었는지 확인
-    getUserAssignedGroup(userId) {
-      if (this.researchers.find((u) => u.id === userId)) return 'researcher'
-      if (this.operations.find((u) => u.id === userId)) return 'operation'
-      if (this.workers.find((u) => u.id === userId)) return 'worker'
-      return null
+    // 사용자가 배정된 모든 그룹 확인 (배열 반환)
+    getUserAssignedGroups(userId) {
+      const groups = []
+      if (this.researchers.find((u) => u.id === userId)) groups.push('researcher')
+      if (this.operations.find((u) => u.id === userId)) groups.push('operation')
+      if (this.workers.find((u) => u.id === userId)) groups.push('worker')
+      return groups
     },
 
     // 전체 선택/해제
