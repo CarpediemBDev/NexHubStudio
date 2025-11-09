@@ -419,16 +419,18 @@
                         </h6>
                       </div>
                       <div class="card-body p-2" style="min-height: 80px">
-                        <span
-                          v-for="user in demoSharedResearchers"
-                          :key="user.id"
-                          class="assigned-badge badge-primary me-2 mb-2 cursor-pointer"
-                          @click="demoRemoveFromGroup('researcher', user.id)"
-                          title="클릭하여 제거"
-                        >
-                          {{ user.name }}
-                          <i class="bi bi-x-circle ms-1"></i>
-                        </span>
+                        <div class="assigned-box">
+                          <span
+                            v-for="user in demoSharedResearchers"
+                            :key="user.id"
+                            class="assigned-badge badge-primary cursor-pointer"
+                            @click="demoRemoveFromGroup('researcher', user.id)"
+                            title="클릭하여 제거"
+                          >
+                            {{ user.name }}
+                            <i class="bi bi-x-circle"></i>
+                          </span>
+                        </div>
                         <div
                           v-if="demoSharedResearchers.length === 0"
                           class="text-center text-muted py-3"
@@ -447,16 +449,18 @@
                         </h6>
                       </div>
                       <div class="card-body p-2" style="min-height: 80px">
-                        <span
-                          v-for="user in demoSharedOperations"
-                          :key="user.id"
-                          class="assigned-badge badge-success me-2 mb-2 cursor-pointer"
-                          @click="demoRemoveFromGroup('operation', user.id)"
-                          title="클릭하여 제거"
-                        >
-                          {{ user.name }}
-                          <i class="bi bi-x-circle ms-1"></i>
-                        </span>
+                        <div class="assigned-box">
+                          <span
+                            v-for="user in demoSharedOperations"
+                            :key="user.id"
+                            class="assigned-badge badge-success cursor-pointer"
+                            @click="demoRemoveFromGroup('operation', user.id)"
+                            title="클릭하여 제거"
+                          >
+                            {{ user.name }}
+                            <i class="bi bi-x-circle"></i>
+                          </span>
+                        </div>
                         <div
                           v-if="demoSharedOperations.length === 0"
                           class="text-center text-muted py-3"
@@ -473,16 +477,18 @@
                         </h6>
                       </div>
                       <div class="card-body p-2" style="min-height: 80px">
-                        <span
-                          v-for="user in demoSharedWorkers"
-                          :key="user.id"
-                          class="assigned-badge badge-warning me-2 mb-2 cursor-pointer"
-                          @click="demoRemoveFromGroup('worker', user.id)"
-                          title="클릭하여 제거"
-                        >
-                          {{ user.name }}
-                          <i class="bi bi-x-circle ms-1"></i>
-                        </span>
+                        <div class="assigned-box">
+                          <span
+                            v-for="user in demoSharedWorkers"
+                            :key="user.id"
+                            class="assigned-badge badge-warning cursor-pointer"
+                            @click="demoRemoveFromGroup('worker', user.id)"
+                            title="클릭하여 제거"
+                          >
+                            {{ user.name }}
+                            <i class="bi bi-x-circle"></i>
+                          </span>
+                        </div>
                         <div
                           v-if="demoSharedWorkers.length === 0"
                           class="text-center text-muted py-3"
@@ -1122,14 +1128,16 @@ export default {
               </span>
             </h6>
           </div>
-          <div class="card-body">
-            <span v-for="user in researchers" 
-                  :key="user.id"
-                  class="badge bg-primary me-1 mb-1"
-                  @click="removeFromResearcher(user.id)">
-              {{ user.name }} 
-              <i class="bi bi-x-circle ms-1"></i>
-            </span>
+          <div class="card-body p-2">
+            <div class="assigned-box">
+              <span v-for="user in researchers" 
+                    :key="user.id"
+                    class="assigned-badge badge-primary"
+                    @click="removeFromResearcher(user.id)">
+                {{ user.name }}
+                <i class="bi bi-x-circle"></i>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -1250,6 +1258,73 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.assigned-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 8px;
+}
+
+.assigned-badge {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.assigned-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.assigned-badge i {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.assigned-badge:hover i {
+  opacity: 1;
+}
+
+.badge-primary {
+  background-color: #e7f1ff;
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.badge-primary:hover {
+  background-color: #cfe2ff;
+}
+
+.badge-success {
+  background-color: #d1f4e0;
+  color: #198754;
+  border-color: #198754;
+}
+
+.badge-success:hover {
+  background-color: #b8eed3;
+}
+
+.badge-warning {
+  background-color: #fff3cd;
+  color: #cc9a06;
+  border-color: #ffc107;
+}
+
+.badge-warning:hover {
+  background-color: #ffe69c;
 }
 <\\/style>`,
 
@@ -1631,25 +1706,35 @@ code {
 }
 
 /* 배정된 배지 */
+.assigned-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 8px;
+}
+
 .assigned-badge {
   display: inline-flex;
   align-items: center;
-  padding: 10px 14px;
-  border-radius: 8px;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .assigned-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
 .assigned-badge i {
+  font-size: 0.75rem;
   opacity: 0.7;
   transition: opacity 0.2s;
 }

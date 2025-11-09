@@ -467,28 +467,32 @@ export default {
 .assigned-box {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
   align-items: flex-start;
-  padding: 4px;
+  padding: 8px;
 }
 
 .assigned-badge {
-  padding: 10px 14px;
-  font-size: 0.9rem;
+  padding: 6px 10px;
+  font-size: 0.8rem;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .assigned-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
 .assigned-badge i {
+  font-size: 0.75rem;
   opacity: 0.7;
   transition: opacity 0.2s;
 }
