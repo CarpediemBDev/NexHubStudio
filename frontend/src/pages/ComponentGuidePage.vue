@@ -110,6 +110,55 @@
       </div>
     </div>
 
+    <!-- MultiSelect 가이드 -->
+    <div class="card mb-4 border-primary">
+      <div class="card-header bg-primary text-white border-primary">
+        <h4 class="mb-0">MultiSelect - 멀티 셀렉터</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h5 class="text-primary">예시</h5>
+            <div class="mb-3">
+              <label class="form-label">기본 사용</label>
+              <MultiSelect
+                v-model="selectedFruits"
+                :options="fruits"
+                placeholder="과일을 선택하세요"
+              />
+              <small class="text-muted d-block mt-1"
+                >선택된 항목: {{ selectedFruits.join(', ') || '없음' }}</small
+              >
+            </div>
+            <div class="mb-3">
+              <label class="form-label">객체 배열 사용</label>
+              <MultiSelect
+                v-model="selectedUsers"
+                :options="userOptions"
+                label-key="name"
+                value-key="id"
+                placeholder="사용자를 선택하세요"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">최대 선택 제한 (최대 3개)</label>
+              <MultiSelect
+                v-model="selectedColors"
+                :options="colors"
+                :max-selections="3"
+                placeholder="색상을 선택하세요 (최대 3개)"
+                @max-reached="handleMaxReached"
+              />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h5 class="text-primary">코드</h5>
+            <pre class="bg-light p-3 rounded border"><code>{{ multiSelectCode }}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 사용자 배정 가이드 -->
     <div class="card mb-4 border-primary">
       <div class="card-header bg-primary text-white border-primary">
@@ -632,6 +681,7 @@
 import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
 import SearchGrid from '@/components/SearchGrid.vue'
 import PagedList from '@/components/PagedList.vue'
+import MultiSelect from '@/components/MultiSelect.vue'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
@@ -640,9 +690,24 @@ export default {
     JqxCustomeGrid,
     SearchGrid,
     PagedList,
+    MultiSelect,
   },
   data() {
     return {
+      // MultiSelect 예시 데이터
+      selectedFruits: [],
+      fruits: ['사과', '바나나', '오렌지', '포도', '딸기', '수박', '메론'],
+      selectedUsers: [],
+      userOptions: [
+        { id: 1, name: '홍길동' },
+        { id: 2, name: '김철수' },
+        { id: 3, name: '이영희' },
+        { id: 4, name: '박민수' },
+        { id: 5, name: '정수진' },
+      ],
+      selectedColors: [],
+      colors: ['빨강', '파랑', '노랑', '초록', '보라', '주황', '분홍'],
+
       // JqxCustomeGrid 예시 데이터
       exampleData: [
         { id: 1, name: '홍길동', email: 'hong@example.com', role: 'Admin' },
@@ -709,6 +774,82 @@ export default {
       },
 
       // 코드 예시
+      multiSelectCode: `<template>
+  <!-- 기본 사용 (문자열 배열) -->
+  <MultiSelect
+    v-model="selectedItems"
+    :options="['항목1', '항목2', '항목3']"
+    placeholder="항목을 선택하세요"
+  />
+
+  <!-- 객체 배열 사용 -->
+  <MultiSelect
+    v-model="selectedUsers"
+    :options="users"
+    label-key="name"
+    value-key="id"
+    placeholder="사용자를 선택하세요"
+    @change="handleChange"
+  />
+
+  <!-- 최대 선택 제한 -->
+  <MultiSelect
+    v-model="selected"
+    :options="options"
+    :max-selections="3"
+    @max-reached="handleMaxReached"
+  />
+
+  <!-- 검색 비활성화 -->
+  <MultiSelect
+    v-model="selected"
+    :options="options"
+    :searchable="false"
+  />
+</template>
+
+<script>
+import MultiSelect from '@/components/MultiSelect.vue'
+
+export default {
+  components: { MultiSelect },
+  data() {
+    return {
+      selectedItems: [],
+      selectedUsers: [],
+      users: [
+        { id: 1, name: '홍길동' },
+        { id: 2, name: '김철수' }
+      ]
+    }
+  },
+  methods: {
+    handleChange(newValue) {
+      console.log('선택된 항목:', newValue)
+    },
+    handleMaxReached(max) {
+      alert(\`최대 \${max}개까지 선택 가능합니다\`)
+    }
+  }
+}
+<\\/script>
+
+<!-- Props -->
+- modelValue: 선택된 값들 (Array)
+- options: 옵션 목록 (Array, required)
+- labelKey: 객체의 라벨 속성명 (String, default: 'label')
+- valueKey: 객체의 값 속성명 (String, default: 'value')
+- placeholder: placeholder 텍스트 (String)
+- searchable: 검색 기능 활성화 (Boolean, default: true)
+- showSelectAll: 전체 선택 버튼 표시 (Boolean, default: true)
+- disabled: 비활성화 (Boolean, default: false)
+- maxSelections: 최대 선택 개수 (Number)
+
+<!-- Events -->
+- update:modelValue: 선택 변경 시
+- change: 선택 변경 시 (선택된 값들 전달)
+- max-reached: 최대 선택 개수 도달 시`,
+
       gridCode: `<template>
   <JqxCustomeGrid
     ref="grid"
@@ -1187,6 +1328,11 @@ export default {
     }
   },
   methods: {
+    // MultiSelect 이벤트 핸들러
+    handleMaxReached(max) {
+      showToast(\`최대 \${max}개까지 선택 가능합니다\`, { type: 'warning' })
+    },
+
     // 사용자가 배정된 모든 그룹 확인 (배열 반환)
     getUserAssignedGroups(userId) {
       const groups = []
