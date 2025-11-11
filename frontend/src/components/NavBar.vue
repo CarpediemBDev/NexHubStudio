@@ -169,6 +169,14 @@ export default {
           children: [{ label: '강좌 목록' }, { label: '수강 현황' }, { label: '시험/평가' }],
         },
         {
+          label: '게시판',
+          children: [
+            { label: '게시글 목록', to: '/posts' },
+            { label: '게시글 작성', to: '/posts/write' },
+            { label: '파일 관리', to: '/files' },
+          ],
+        },
+        {
           label: '개발 가이드',
           children: [{ label: '공통 컴포넌트 가이드', to: '/component-guide' }],
         },

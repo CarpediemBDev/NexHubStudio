@@ -32,18 +32,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-            .cors(Customizer.withDefaults())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    new AntPathRequestMatcher("/h2-console/**"),
-                    new AntPathRequestMatcher("/actuator/health"),
-                    new AntPathRequestMatcher("/actuator/**"),
-                    new AntPathRequestMatcher("/api/**")
-                ).permitAll()
-                .anyRequest().authenticated()
-            );
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                .cors(Customizer.withDefaults())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/h2-console/**"),
+                                new AntPathRequestMatcher("/actuator/health"),
+                                new AntPathRequestMatcher("/actuator/**"),
+                                new AntPathRequestMatcher("/api/**"),
+                                new AntPathRequestMatcher("/users/**"),
+                                new AntPathRequestMatcher("/posts/**"),
+                                new AntPathRequestMatcher("/comments/**"),
+                                new AntPathRequestMatcher("/files/**"))
+                        .permitAll()
+                        .anyRequest().authenticated());
 
         return http.build();
     }

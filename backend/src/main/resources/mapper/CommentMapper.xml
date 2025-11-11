@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nexhubstudio.backend.mapper.CommentMapper">
+
+    <resultMap id="CommentResultMap" type="Comment">
+        <id property="id" column="id"/>
+        <result property="postId" column="post_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="content" column="content"/>
+        <result property="authorId" column="author_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <insert id="insertComment" parameterType="Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comments (post_id, parent_id, content, author_id, created_at)
+        VALUES (#{postId}, #{parentId}, #{content}, #{authorId}, #{createdAt})
+    </insert>
+
+    <update id="updateComment" parameterType="Comment">
+        UPDATE comments
+        SET content = #{content},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteComment" parameterType="long">
+        DELETE FROM comments WHERE id = #{id}
+    </delete>
+
+    <select id="findById" parameterType="long" resultMap="CommentResultMap">
+        SELECT * FROM comments WHERE id = #{id}
+    </select>
+
+    <select id="findByPostId" parameterType="long" resultMap="CommentResultMap">
+        SELECT * FROM comments WHERE post_id = #{postId} ORDER BY created_at ASC
+    </select>
+
+    <select id="findByParentId" parameterType="long" resultMap="CommentResultMap">
+        SELECT * FROM comments WHERE parent_id = #{parentId} ORDER BY created_at ASC
+    </select>
+
+    <select id="findByAuthorId" parameterType="string" resultMap="CommentResultMap">
+        SELECT * FROM comments WHERE author_id = #{authorId} ORDER BY created_at DESC
+    </select>
+
+</mapper>

@@ -5,14 +5,16 @@ import com.nexhubstudio.backend.dto.UserBulkRequest;
 import com.nexhubstudio.backend.dto.UserResponse;
 import com.nexhubstudio.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.nexhubstudio.backend.dto.ApiResponse;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
+/**
+ * 사용자 관리 컨트롤러
+ * GlobalExceptionHandler가 예외를 처리하므로 try-catch 불필요
+ */
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -20,68 +22,58 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    /**
+     * 사용자 생성
+     * 성공: 201 Created, 사용자 정보 반환
+     * 실패: 400 Bad Request (필수값 누락, 중복 사용자)
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<Integer>> createUser(@RequestBody UserRequest userRequest) {
         int result = userService.createUser(userRequest);
-        ApiResponse<Integer> body = ApiResponse.<Integer>builder()
-                .code(200)
-                .message("사용자 등록 성공")
-                .data(result)
-                .build();
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(ApiResponse.success("사용자 등록 성공", result));
     }
 
+    /**
+     * 사용자 수정
+     * 성공: 200 OK
+     * 실패: 404 Not Found (사용자 없음)
+     */
     @PutMapping
     public ResponseEntity<ApiResponse<Integer>> updateUser(@RequestBody UserRequest userRequest) {
         int result = userService.updateUser(userRequest);
-        ApiResponse<Integer> body = ApiResponse.<Integer>builder()
-                .code(200)
-                .message("사용자 수정 성공")
-                .data(result)
-                .build();
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(ApiResponse.success("사용자 수정 성공", result));
     }
 
+    /**
+     * 사용자 삭제
+     * 성공: 200 OK
+     * 실패: 404 Not Found (사용자 없음)
+     */
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Integer>> deleteUser(@PathVariable String userId) {
         int result = userService.deleteUser(userId);
-        ApiResponse<Integer> body = ApiResponse.<Integer>builder()
-                .code(200)
-                .message("사용자 삭제 성공")
-                .data(result)
-                .build();
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(ApiResponse.success("사용자 삭제 성공", result));
     }
 
+    /**
+     * 전체 사용자 조회
+     * 성공: 200 OK, 사용자 목록 반환
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
-        ApiResponse<List<UserResponse>> body = ApiResponse.<List<UserResponse>>builder()
-                .code(200)
-                .message("사용자 목록 조회 성공")
-                .data(users)
-                .build();
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(ApiResponse.success(users));
     }
 
+    /**
+     * 사용자 조회 (ID로)
+     * 성공: 200 OK, 사용자 정보 반환
+     * 실패: 404 Not Found (사용자 없음)
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String userId) {
-        Optional<UserResponse> userOpt = userService.getUserById(userId);
-        if (userOpt.isPresent()) {
-            ApiResponse<UserResponse> body = ApiResponse.<UserResponse>builder()
-                    .code(200)
-                    .message("사용자 조회 성공")
-                    .data(userOpt.get())
-                    .build();
-            return ResponseEntity.ok(body);
-        } else {
-            ApiResponse<UserResponse> body = ApiResponse.<UserResponse>builder()
-                    .code(404)
-                    .message("사용자를 찾을 수 없습니다.")
-                    .data(null)
-                    .build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-        }
+        UserResponse user = userService.getUserById(userId);
+        return ResponseEntity.ok(ApiResponse.success(user));
     }
 
     @PostMapping("/bulk")
@@ -91,11 +83,6 @@ public class UserController {
                 "created", counts[0],
                 "updated", counts[1],
                 "deleted", counts[2]);
-        ApiResponse<Map<String, Integer>> body = ApiResponse.<Map<String, Integer>>builder()
-                .code(200)
-                .message("일괄 처리 성공")
-                .data(result)
-                .build();
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(ApiResponse.success("일괄 처리 성공", result));
     }
 }

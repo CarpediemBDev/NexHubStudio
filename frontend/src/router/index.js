@@ -6,6 +6,10 @@ import JqxGridPage from '../pages/JqxGridPage.vue'
 import ComponentGuidePage from '../pages/ComponentGuidePage.vue'
 import UserAssignmentVertical from '../pages/UserAssignmentVertical.vue'
 import UserAssignmentShared from '../pages/UserAssignmentShared.vue'
+import PostListPage from '../pages/PostListPage.vue'
+import PostDetailPage from '../pages/PostDetailPage.vue'
+import PostWritePage from '../pages/PostWritePage.vue'
+import FileListPage from '../pages/FileListPage.vue'
 
 const routes = [
   {
@@ -26,6 +30,13 @@ const routes = [
         name: '사용자 배정 (공통목록)',
         component: UserAssignmentShared,
       },
+      // 게시판
+      { path: 'posts', name: '게시판', component: PostListPage },
+      { path: 'posts/write', name: '게시글 작성', component: PostWritePage },
+      { path: 'posts/:id', name: '게시글 상세', component: PostDetailPage },
+      { path: 'posts/:id/edit', name: '게시글 수정', component: PostWritePage },
+      // 파일
+      { path: 'files', name: '파일 관리', component: FileListPage },
     ],
   },
 ]

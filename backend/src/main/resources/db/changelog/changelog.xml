@@ -83,4 +83,178 @@
         <!-- ... (db.json의 나머지 데이터도 동일 규칙으로 추가) ... -->
     </changeSet>
 
+    <!-- 게시판 테이블 -->
+    <changeSet id="3-create-posts-table" author="copilot">
+        <createTable tableName="posts">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="PUBLISHED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="view_count" type="int" defaultValue="0"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="posts"
+            baseColumnNames="author_id"
+            constraintName="fk_posts_author"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <createIndex tableName="posts" indexName="idx_posts_author">
+            <column name="author_id"/>
+        </createIndex>
+        <createIndex tableName="posts" indexName="idx_posts_created">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 댓글 테이블 -->
+    <changeSet id="4-create-comments-table" author="copilot">
+        <createTable tableName="comments">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="post_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="content" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="comments"
+            baseColumnNames="post_id"
+            constraintName="fk_comments_post"
+            referencedTableName="posts"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <addForeignKeyConstraint
+            baseTableName="comments"
+            baseColumnNames="parent_id"
+            constraintName="fk_comments_parent"
+            referencedTableName="comments"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <addForeignKeyConstraint
+            baseTableName="comments"
+            baseColumnNames="author_id"
+            constraintName="fk_comments_author"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <createIndex tableName="comments" indexName="idx_comments_post">
+            <column name="post_id"/>
+        </createIndex>
+        <createIndex tableName="comments" indexName="idx_comments_parent">
+            <column name="parent_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 파일 테이블 -->
+    <changeSet id="5-create-files-table" author="copilot">
+        <createTable tableName="files">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="original_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stored_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_path" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_size" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_type" type="varchar(100)"/>
+            <column name="uploader_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="files"
+            baseColumnNames="uploader_id"
+            constraintName="fk_files_uploader"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <createIndex tableName="files" indexName="idx_files_uploader">
+            <column name="uploader_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 초기 게시글 데이터 -->
+    <changeSet id="6-insert-posts-initial-data" author="copilot">
+        <insert tableName="posts">
+            <column name="title" value="첫 번째 게시글"/>
+            <column name="content" value="안녕하세요, 첫 번째 게시글입니다."/>
+            <column name="author_id" value="Asparagus.cata"/>
+            <column name="status" value="PUBLISHED"/>
+            <column name="view_count" value="10"/>
+            <column name="created_at" value="2025-11-01T10:00:00"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="title" value="Spring Boot 학습 팁"/>
+            <column name="content" value="Spring Boot를 효과적으로 학습하는 방법을 공유합니다."/>
+            <column name="author_id" value="seoyeon.choi"/>
+            <column name="status" value="PUBLISHED"/>
+            <column name="view_count" value="25"/>
+            <column name="created_at" value="2025-11-05T14:30:00"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="title" value="임시 저장 글"/>
+            <column name="content" value="작성 중인 글입니다."/>
+            <column name="author_id" value="hyunwoo.jang"/>
+            <column name="status" value="DRAFT"/>
+            <column name="view_count" value="0"/>
+            <column name="created_at" value="2025-11-10T09:15:00"/>
+        </insert>
+    </changeSet>
+
+    <!-- 초기 댓글 데이터 -->
+    <changeSet id="7-insert-comments-initial-data" author="copilot">
+        <insert tableName="comments">
+            <column name="post_id" value="1"/>
+            <column name="content" value="좋은 글이네요!"/>
+            <column name="author_id" value="seoyeon.choi"/>
+            <column name="created_at" value="2025-11-01T11:00:00"/>
+        </insert>
+        <insert tableName="comments">
+            <column name="post_id" value="1"/>
+            <column name="parent_id" value="1"/>
+            <column name="content" value="감사합니다!"/>
+            <column name="author_id" value="Asparagus.cata"/>
+            <column name="created_at" value="2025-11-01T12:00:00"/>
+        </insert>
+        <insert tableName="comments">
+            <column name="post_id" value="2"/>
+            <column name="content" value="도움이 많이 되었습니다."/>
+            <column name="author_id" value="hyunwoo.jang"/>
+            <column name="created_at" value="2025-11-05T15:00:00"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
