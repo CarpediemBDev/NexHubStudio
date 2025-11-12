@@ -177,6 +177,10 @@ export default {
           ],
         },
         {
+          label: '모니터링',
+          children: [{ label: '설비 모니터링', to: '/equipment-monitor' }],
+        },
+        {
           label: '개발 가이드',
           children: [{ label: '공통 컴포넌트 가이드', to: '/component-guide' }],
         },

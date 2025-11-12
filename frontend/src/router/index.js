@@ -10,6 +10,7 @@ import PostListPage from '../pages/PostListPage.vue'
 import PostDetailPage from '../pages/PostDetailPage.vue'
 import PostWritePage from '../pages/PostWritePage.vue'
 import FileListPage from '../pages/FileListPage.vue'
+import EquipmentMonitorPage from '../pages/EquipmentMonitorPage.vue'
 
 const routes = [
   {
@@ -37,6 +38,8 @@ const routes = [
       { path: 'posts/:id/edit', name: '게시글 수정', component: PostWritePage },
       // 파일
       { path: 'files', name: '파일 관리', component: FileListPage },
+      // 설비 모니터링
+      { path: 'equipment-monitor', name: '설비 모니터링', component: EquipmentMonitorPage },
     ],
   },
 ]

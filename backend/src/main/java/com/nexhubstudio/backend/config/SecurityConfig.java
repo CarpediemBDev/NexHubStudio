@@ -44,7 +44,8 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/users/**"),
                                 new AntPathRequestMatcher("/posts/**"),
                                 new AntPathRequestMatcher("/comments/**"),
-                                new AntPathRequestMatcher("/files/**"))
+                                new AntPathRequestMatcher("/files/**"),
+                                new AntPathRequestMatcher("/equipments/**"))
                         .permitAll()
                         .anyRequest().authenticated());
 

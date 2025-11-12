@@ -7,9 +7,6 @@ export default {
 
     if (!input) return
 
-    // 검증 대상 표시
-    el.setAttribute('data-validation', 'true')
-
     // 유효성 검사 함수
     const validate = () => {
       const value = input.value.trim()
@@ -74,9 +71,6 @@ export default {
         validate()
       }
     })
-
-    // 외부에서 호출 가능하도록 함수 저장
-    el._validate = validate
   },
 
   unmounted(el) {

@@ -257,4 +257,203 @@
         </insert>
     </changeSet>
 
+    <!-- 설비 테이블 -->
+    <changeSet id="8-create-equipment-table" author="copilot">
+        <createTable tableName="equipment">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="equipment_code" type="varchar(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="equipment_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="equipment_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="NORMAL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position_x" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position_y" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="floor" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="temperature" type="decimal(5,2)"/>
+            <column name="pressure" type="decimal(5,2)"/>
+            <column name="cycle_count" type="int" defaultValue="0"/>
+            <column name="last_check_time" type="timestamp"/>
+            <column name="description" type="varchar(500)"/>
+        </createTable>
+        <createIndex tableName="equipment" indexName="idx_equipment_code">
+            <column name="equipment_code"/>
+        </createIndex>
+        <createIndex tableName="equipment" indexName="idx_equipment_floor">
+            <column name="floor"/>
+        </createIndex>
+        <createIndex tableName="equipment" indexName="idx_equipment_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 초기 설비 데이터 -->
+    <changeSet id="9-insert-equipment-initial-data" author="copilot">
+        <!-- 1층 - CVD 장비 -->
+        <insert tableName="equipment">
+            <column name="equipment_code" value="CVD-101"/>
+            <column name="equipment_name" value="CVD 증착기 #1"/>
+            <column name="equipment_type" value="CVD"/>
+            <column name="status" value="NORMAL"/>
+            <column name="position_x" value="100"/>
+            <column name="position_y" value="100"/>
+            <column name="floor" value="1F"/>
+            <column name="temperature" value="850.5"/>
+            <column name="pressure" value="0.8"/>
+            <column name="cycle_count" value="1234"/>
+            <column name="last_check_time" value="2025-01-20T10:00:00"/>
+            <column name="description" value="메인 CVD 증착 장비"/>
+        </insert>
+        <insert tableName="equipment">
+            <column name="equipment_code" value="CVD-102"/>
+            <column name="equipment_name" value="CVD 증착기 #2"/>
+            <column name="equipment_type" value="CVD"/>
+            <column name="status" value="WARNING"/>
+            <column name="position_x" value="300"/>
+            <column name="position_y" value="100"/>
+            <column name="floor" value="1F"/>
+            <column name="temperature" value="920.8"/>
+            <column name="pressure" value="1.2"/>
+            <column name="cycle_count" value="2345"/>
+            <column name="last_check_time" value="2025-01-20T10:05:00"/>
+            <column name="description" value="고온 CVD 증착 장비"/>
+        </insert>
+
+        <!-- 1층 - Etching 장비 -->
+        <insert tableName="equipment">
+            <column name="equipment_code" value="ETCH-101"/>
+            <column name="equipment_name" value="식각기 #1"/>
+            <column name="equipment_type" value="ETCHING"/>
+            <column name="status" value="NORMAL"/>
+            <column name="position_x" value="500"/>
+            <column name="position_y" value="100"/>
+            <column name="floor" value="1F"/>
+            <column name="temperature" value="25.3"/>
+            <column name="pressure" value="0.001"/>
+            <column name="cycle_count" value="3456"/>
+            <column name="last_check_time" value="2025-01-20T10:02:00"/>
+            <column name="description" value="플라즈마 식각 장비"/>
+        </insert>
+        <insert tableName="equipment">
+            <column name="equipment_code" value="ETCH-102"/>
+            <column name="equipment_name" value="식각기 #2"/>
+            <column name="equipment_type" value="ETCHING"/>
+            <column name="status" value="ERROR"/>
+            <column name="position_x" value="700"/>
+            <column name="position_y" value="100"/>
+            <column name="floor" value="1F"/>
+            <column name="temperature" value="35.7"/>
+            <column name="pressure" value="0.002"/>
+            <column name="cycle_count" value="4567"/>
+            <column name="last_check_time" value="2025-01-20T09:55:00"/>
+            <column name="description" value="드라이 식각 장비 (챔버 압력 이상)"/>
+        </insert>
+
+        <!-- 1층 - Lithography 장비 -->
+        <insert tableName="equipment">
+            <column name="equipment_code" value="LITHO-101"/>
+            <column name="equipment_name" value="노광기 #1"/>
+            <column name="equipment_type" value="LITHOGRAPHY"/>
+            <column name="status" value="NORMAL"/>
+            <column name="position_x" value="100"/>
+            <column name="position_y" value="300"/>
+            <column name="floor" value="1F"/>
+            <column name="temperature" value="23.5"/>
+            <column name="pressure" value="1.0"/>
+            <column name="cycle_count" value="5678"/>
+            <column name="last_check_time" value="2025-01-20T10:03:00"/>
+            <column name="description" value="EUV 노광 장비"/>
+        </insert>
+
+        <!-- 2층 - Ion Implanter -->
+        <insert tableName="equipment">
+            <column name="equipment_code" value="ION-201"/>
+            <column name="equipment_name" value="이온주입기 #1"/>
+            <column name="equipment_type" value="ION_IMPLANT"/>
+            <column name="status" value="MAINTENANCE"/>
+            <column name="position_x" value="150"/>
+            <column name="position_y" value="150"/>
+            <column name="floor" value="2F"/>
+            <column name="temperature" value="28.2"/>
+            <column name="pressure" value="0.5"/>
+            <column name="cycle_count" value="6789"/>
+            <column name="last_check_time" value="2025-01-20T08:30:00"/>
+            <column name="description" value="정기 유지보수 중"/>
+        </insert>
+        <insert tableName="equipment">
+            <column name="equipment_code" value="ION-202"/>
+            <column name="equipment_name" value="이온주입기 #2"/>
+            <column name="equipment_type" value="ION_IMPLANT"/>
+            <column name="status" value="NORMAL"/>
+            <column name="position_x" value="400"/>
+            <column name="position_y" value="150"/>
+            <column name="floor" value="2F"/>
+            <column name="temperature" value="26.8"/>
+            <column name="pressure" value="0.4"/>
+            <column name="cycle_count" value="7890"/>
+            <column name="last_check_time" value="2025-01-20T10:01:00"/>
+            <column name="description" value="고에너지 이온주입 장비"/>
+        </insert>
+
+        <!-- 2층 - CMP 장비 -->
+        <insert tableName="equipment">
+            <column name="equipment_code" value="CMP-201"/>
+            <column name="equipment_name" value="CMP 연마기 #1"/>
+            <column name="equipment_type" value="CMP"/>
+            <column name="status" value="NORMAL"/>
+            <column name="position_x" value="650"/>
+            <column name="position_y" value="150"/>
+            <column name="floor" value="2F"/>
+            <column name="temperature" value="22.1"/>
+            <column name="pressure" value="3.5"/>
+            <column name="cycle_count" value="8901"/>
+            <column name="last_check_time" value="2025-01-20T10:04:00"/>
+            <column name="description" value="화학기계적 연마 장비"/>
+        </insert>
+
+        <!-- 3층 - 검사 장비 -->
+        <insert tableName="equipment">
+            <column name="equipment_code" value="INSP-301"/>
+            <column name="equipment_name" value="웨이퍼 검사기 #1"/>
+            <column name="equipment_type" value="INSPECTION"/>
+            <column name="status" value="NORMAL"/>
+            <column name="position_x" value="200"/>
+            <column name="position_y" value="200"/>
+            <column name="floor" value="3F"/>
+            <column name="temperature" value="21.5"/>
+            <column name="pressure" value="1.0"/>
+            <column name="cycle_count" value="9012"/>
+            <column name="last_check_time" value="2025-01-20T10:06:00"/>
+            <column name="description" value="결함 검사 장비"/>
+        </insert>
+        <insert tableName="equipment">
+            <column name="equipment_code" value="INSP-302"/>
+            <column name="equipment_name" value="웨이퍼 검사기 #2"/>
+            <column name="equipment_type" value="INSPECTION"/>
+            <column name="status" value="OFFLINE"/>
+            <column name="position_x" value="500"/>
+            <column name="position_y" value="200"/>
+            <column name="floor" value="3F"/>
+            <column name="temperature" value="0"/>
+            <column name="pressure" value="0"/>
+            <column name="cycle_count" value="1023"/>
+            <column name="last_check_time" value="2025-01-19T18:00:00"/>
+            <column name="description" value="전원 꺼짐 상태"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

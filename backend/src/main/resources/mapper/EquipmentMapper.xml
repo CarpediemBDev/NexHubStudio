@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nexhubstudio.backend.mapper.EquipmentMapper">
+
+    <resultMap id="equipmentResultMap" type="com.nexhubstudio.backend.domain.Equipment">
+        <id property="id" column="id"/>
+        <result property="equipmentCode" column="equipment_code"/>
+        <result property="equipmentName" column="equipment_name"/>
+        <result property="equipmentType" column="equipment_type"/>
+        <result property="status" column="status"/>
+        <result property="positionX" column="position_x"/>
+        <result property="positionY" column="position_y"/>
+        <result property="floor" column="floor"/>
+        <result property="temperature" column="temperature"/>
+        <result property="pressure" column="pressure"/>
+        <result property="cycleCount" column="cycle_count"/>
+        <result property="lastCheckTime" column="last_check_time"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="equipmentResultMap">
+        SELECT *
+        FROM equipment
+        ORDER BY floor, position_x, position_y
+    </select>
+
+    <select id="findById" resultMap="equipmentResultMap">
+        SELECT *
+        FROM equipment
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByCode" resultMap="equipmentResultMap">
+        SELECT *
+        FROM equipment
+        WHERE equipment_code = #{equipmentCode}
+    </select>
+
+    <select id="findByFloor" resultMap="equipmentResultMap">
+        SELECT *
+        FROM equipment
+        WHERE floor = #{floor}
+        ORDER BY position_x, position_y
+    </select>
+
+    <select id="findByStatus" resultMap="equipmentResultMap">
+        SELECT *
+        FROM equipment
+        WHERE status = #{status}
+        ORDER BY floor, position_x, position_y
+    </select>
+
+    <update id="updateStatus">
+        UPDATE equipment
+        SET status = #{status},
+            temperature = #{temperature},
+            pressure = #{pressure},
+            cycle_count = #{cycleCount},
+            last_check_time = #{lastCheckTime}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
