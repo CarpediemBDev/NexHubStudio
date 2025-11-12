@@ -41,7 +41,7 @@
                     type="checkbox"
                     class="form-check-input me-2"
                     :checked="selectedAvailable.researcher.includes(user.id)"
-                    @click.stop
+                    @click.stop="toggleAvailableSelect('researcher', user.id)"
                   />
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>
@@ -92,7 +92,7 @@
                     type="checkbox"
                     class="form-check-input me-2"
                     :checked="selectedAssigned.researcher.includes(user.id)"
-                    @click.stop
+                    @click.stop="toggleAssignedSelect('researcher', user.id)"
                   />
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>
@@ -147,7 +147,7 @@
                     type="checkbox"
                     class="form-check-input me-2"
                     :checked="selectedAvailable.operation.includes(user.id)"
-                    @click.stop
+                    @click.stop="toggleAvailableSelect('operation', user.id)"
                   />
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>
@@ -198,7 +198,7 @@
                     type="checkbox"
                     class="form-check-input me-2"
                     :checked="selectedAssigned.operation.includes(user.id)"
-                    @click.stop
+                    @click.stop="toggleAssignedSelect('operation', user.id)"
                   />
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>
@@ -253,7 +253,7 @@
                     type="checkbox"
                     class="form-check-input me-2"
                     :checked="selectedAvailable.worker.includes(user.id)"
-                    @click.stop
+                    @click.stop="toggleAvailableSelect('worker', user.id)"
                   />
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>
@@ -304,7 +304,7 @@
                     type="checkbox"
                     class="form-check-input me-2"
                     :checked="selectedAssigned.worker.includes(user.id)"
-                    @click.stop
+                    @click.stop="toggleAssignedSelect('worker', user.id)"
                   />
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>

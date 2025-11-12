@@ -256,7 +256,7 @@
                             type="checkbox"
                             class="form-check-input me-2"
                             :checked="demoSelectedAvailable.includes(user.id)"
-                            @click.stop
+                            @click.stop="demoToggleAvailable(user.id)"
                           />
                           <span>{{ user.name }}</span>
                           <small class="ms-auto text-muted">{{ user.department }}</small>
@@ -309,7 +309,7 @@
                             type="checkbox"
                             class="form-check-input me-2"
                             :checked="demoSelectedAssigned.includes(user.id)"
-                            @click.stop
+                            @click.stop="demoToggleAssigned(user.id)"
                           />
                           <span>{{ user.name }}</span>
                           <small class="ms-auto text-muted">{{ user.department }}</small>
@@ -384,7 +384,7 @@
                                 type="checkbox"
                                 class="form-check-input me-2"
                                 :checked="demoSharedSelected.includes(user.id)"
-                                @click.stop
+                                @click.stop="demoToggleSharedSelect(user.id)"
                               />
                               <span>{{ user.name }}</span>
                               <small class="ms-auto text-muted">{{ user.department }}</small>
@@ -996,7 +996,7 @@ showToast('정보를 확인하세요.', { type: 'info' })`,
                 <input type="checkbox"
                        class="form-check-input me-2"
                        :checked="selectedAvailable.researcher.includes(user.id)"
-                       @click.stop />
+                       @click.stop="toggleAvailableSelect('researcher', user.id)" />
                 {{ user.name }}
               </div>
             </div>
@@ -1034,7 +1034,7 @@ showToast('정보를 확인하세요.', { type: 'info' })`,
                 <input type="checkbox"
                        class="form-check-input me-2"
                        :checked="selectedAssigned.researcher.includes(user.id)"
-                       @click.stop />
+                       @click.stop="toggleAssignedSelect('researcher', user.id)" />
                 {{ user.name }}
               </div>
               <div v-if="researchers.length === 0" 
@@ -1218,7 +1218,7 @@ export default {
                 <input type="checkbox"
                        class="form-check-input me-2"
                        :checked="selectedUsers.includes(user.id)"
-                       @click.stop />
+                       @click.stop="toggleUserSelect(user.id)" />
                 {{ user.name }}
                 <!-- 배정된 그룹 표시 (모든 그룹) -->
                 <span v-if="getUserAssignedGroups(user.id).length > 0" 

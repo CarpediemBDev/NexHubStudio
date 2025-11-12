@@ -45,7 +45,7 @@
                     type="checkbox"
                     class="form-check-input me-2"
                     :checked="selectedUsers.includes(user.id)"
-                    @click.stop
+                    @click.stop="toggleUserSelect(user.id)"
                   />
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>
