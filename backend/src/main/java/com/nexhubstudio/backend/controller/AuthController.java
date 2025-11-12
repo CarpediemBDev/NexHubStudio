@@ -15,7 +15,7 @@ import java.util.Map;
  * 로그인, 토큰 발급 등
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
     private UserService userService;

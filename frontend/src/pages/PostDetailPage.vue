@@ -145,7 +145,7 @@ export default {
     async fetchPost() {
       this.loading = true
       try {
-        const response = await axios.get(`http://localhost:8080/posts/${this.$route.params.id}`)
+        const response = await axios.get(`http://localhost:8080/api/posts/${this.$route.params.id}`)
         this.post = response.data.data
       } catch (error) {
         showToast('error', '게시글 조회 실패')
@@ -157,7 +157,7 @@ export default {
     async fetchComments() {
       try {
         const response = await axios.get(
-          `http://localhost:8080/comments/post/${this.$route.params.id}`
+          `http://localhost:8080/api/comments/post/${this.$route.params.id}`
         )
         const allComments = response.data.data
 
@@ -180,7 +180,7 @@ export default {
 
       try {
         await axios.post(
-          'http://localhost:8080/comments',
+          'http://localhost:8080/api/comments',
           {
             postId: this.$route.params.id,
             content: this.newComment,
@@ -205,7 +205,7 @@ export default {
 
       try {
         await axios.post(
-          'http://localhost:8080/comments',
+          'http://localhost:8080/api/comments',
           {
             postId: this.$route.params.id,
             parentId: parentId,
@@ -228,7 +228,7 @@ export default {
       if (!confirm('댓글을 삭제하시겠습니까?')) return
 
       try {
-        await axios.delete(`http://localhost:8080/comments/${commentId}`, {
+        await axios.delete(`http://localhost:8080/api/comments/${commentId}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
         showToast('success', '댓글 삭제 완료')
@@ -242,7 +242,7 @@ export default {
       if (!confirm('게시글을 삭제하시겠습니까?')) return
 
       try {
-        await axios.delete(`http://localhost:8080/posts/${this.$route.params.id}`, {
+        await axios.delete(`http://localhost:8080/api/posts/${this.$route.params.id}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
         showToast('success', '게시글 삭제 완료')

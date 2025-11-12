@@ -67,7 +67,7 @@ export default {
     async fetchPosts() {
       this.loading = true
       try {
-        const response = await axios.get('http://localhost:8080/posts')
+        const response = await axios.get('http://localhost:8080/api/posts')
         this.posts = response.data.data
       } catch (error) {
         showToast('error', '게시글 목록 조회 실패')

@@ -16,7 +16,7 @@ import java.util.Map;
  * GlobalExceptionHandler가 예외를 처리하므로 try-catch 불필요
  */
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired

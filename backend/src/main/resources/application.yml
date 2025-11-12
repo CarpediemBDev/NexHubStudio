@@ -9,9 +9,6 @@ spring:
       - classpath:config-liquibase.yml
   application:
     name: NexHubStudio-backend
-  mvc:
-    servlet:
-      path: /api
 
   # JPA Configuration
   # Security Configuration (기본 비활성화)

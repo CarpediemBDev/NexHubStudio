@@ -129,7 +129,7 @@ export default {
   methods: {
     fetchPost() {
       axios
-        .get(`http://localhost:8080/posts/${this.postId}`)
+        .get(`http://localhost:8080/api/posts/${this.postId}`)
         .then((response) => {
           const post = response.data.data
           this.form.title = post.title
@@ -146,8 +146,8 @@ export default {
       this.form.status = status
 
       const url = this.isEdit
-        ? `http://localhost:8080/posts/${this.postId}`
-        : 'http://localhost:8080/posts'
+        ? `http://localhost:8080/api/posts/${this.postId}`
+        : 'http://localhost:8080/api/posts'
       const method = this.isEdit ? 'put' : 'post'
 
       axios[method](url, this.form, { headers: { 'X-User-Id': this.currentUserId } })

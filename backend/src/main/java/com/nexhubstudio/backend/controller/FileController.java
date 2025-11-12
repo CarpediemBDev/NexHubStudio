@@ -21,7 +21,7 @@ import java.util.List;
  * 파일 컨트롤러
  */
 @RestController
-@RequestMapping("/files")
+@RequestMapping("/api/files")
 @RequiredArgsConstructor
 public class FileController {
 

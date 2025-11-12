@@ -40,12 +40,7 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/h2-console/**"),
                                 new AntPathRequestMatcher("/actuator/health"),
                                 new AntPathRequestMatcher("/actuator/**"),
-                                new AntPathRequestMatcher("/api/**"),
-                                new AntPathRequestMatcher("/users/**"),
-                                new AntPathRequestMatcher("/posts/**"),
-                                new AntPathRequestMatcher("/comments/**"),
-                                new AntPathRequestMatcher("/files/**"),
-                                new AntPathRequestMatcher("/equipments/**"))
+                                new AntPathRequestMatcher("/api/**"))
                         .permitAll()
                         .anyRequest().authenticated());
 

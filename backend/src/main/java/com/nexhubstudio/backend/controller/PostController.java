@@ -14,7 +14,7 @@ import java.util.List;
  * 게시판 컨트롤러
  */
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
 

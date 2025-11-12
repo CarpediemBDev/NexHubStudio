@@ -126,7 +126,7 @@ export default {
     async fetchFiles() {
       this.loading = true
       try {
-        const response = await axios.get('http://localhost:8080/files')
+        const response = await axios.get('http://localhost:8080/api/files')
         this.files = response.data.data
       } catch (error) {
         showToast('error', '파일 목록 조회 실패')
@@ -153,7 +153,7 @@ export default {
       formData.append('file', this.selectedFile)
 
       try {
-        await axios.post('http://localhost:8080/files', formData, {
+        await axios.post('http://localhost:8080/api/files', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'X-User-Id': this.currentUserId,
@@ -174,7 +174,7 @@ export default {
       if (!confirm('파일을 삭제하시겠습니까?')) return
 
       try {
-        await axios.delete(`http://localhost:8080/files/${id}`, {
+        await axios.delete(`http://localhost:8080/api/files/${id}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
         showToast('success', '파일 삭제 완료')
@@ -185,7 +185,7 @@ export default {
       }
     },
     downloadFile(id) {
-      window.open(`http://localhost:8080/files/${id}/download`, '_blank')
+      window.open(`http://localhost:8080/api/files/${id}/download`, '_blank')
     },
     getFileIcon(contentType) {
       if (!contentType) return 'bi bi-file'
