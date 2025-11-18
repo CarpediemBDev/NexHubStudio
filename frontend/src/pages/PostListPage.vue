@@ -49,8 +49,10 @@
 </template>
 
 <script>
-import axios from 'axios'
+import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
+import { formatDate } from '@/utils/dateUtil'
+import { truncate } from '@/utils/stringUtil'
 
 export default {
   name: 'PostListPage',
@@ -64,13 +66,15 @@ export default {
     this.fetchPosts()
   },
   methods: {
+    formatDate,
+    truncate,
     async fetchPosts() {
       this.loading = true
       try {
-        const response = await axios.get('http://localhost:8080/api/posts')
+        const response = await http.get('/posts')
         this.posts = response.data.data
       } catch (error) {
-        showToast('error', '게시글 목록 조회 실패')
+        // 에러는 http 인터셉터에서 자동 처리
         console.error(error)
       } finally {
         this.loading = false
@@ -81,15 +85,6 @@ export default {
     },
     goToDetail(id) {
       this.$router.push(`/posts/${id}`)
-    },
-    truncate(text, length) {
-      if (!text) return ''
-      return text.length > length ? text.substring(0, length) + '...' : text
-    },
-    formatDate(dateString) {
-      if (!dateString) return ''
-      const date = new Date(dateString)
-      return date.toLocaleDateString('ko-KR')
     },
   },
 }

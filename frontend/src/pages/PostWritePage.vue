@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
 
 export default {
@@ -128,8 +128,8 @@ export default {
   },
   methods: {
     fetchPost() {
-      axios
-        .get(`http://localhost:8080/api/posts/${this.postId}`)
+      http
+        .get(`/posts/${this.postId}`)
         .then((response) => {
           const post = response.data.data
           this.form.title = post.title
@@ -137,7 +137,6 @@ export default {
           this.form.status = post.status
         })
         .catch((error) => {
-          showToast('error', '게시글 조회 실패')
           console.error(error)
           this.$router.push('/posts')
         })
@@ -145,18 +144,15 @@ export default {
     savePost(status, successMessage, redirectPath) {
       this.form.status = status
 
-      const url = this.isEdit
-        ? `http://localhost:8080/api/posts/${this.postId}`
-        : 'http://localhost:8080/api/posts'
+      const url = this.isEdit ? `/posts/${this.postId}` : '/posts'
       const method = this.isEdit ? 'put' : 'post'
 
-      axios[method](url, this.form, { headers: { 'X-User-Id': this.currentUserId } })
+      http[method](url, this.form, { headers: { 'X-User-Id': this.currentUserId } })
         .then((response) => {
-          showToast('success', successMessage)
+          showToast(successMessage, { type: 'success' })
           this.$router.push(redirectPath || `/posts/${response.data.data.id}`)
         })
         .catch((error) => {
-          showToast('error', `${successMessage} 실패`)
           console.error(error)
         })
     },

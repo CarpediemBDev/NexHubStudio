@@ -116,8 +116,9 @@
 </template>
 
 <script>
-import axios from 'axios'
+import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
+import { formatDate } from '@/utils/dateUtil'
 
 export default {
   name: 'PostDetailPage',
@@ -142,10 +143,11 @@ export default {
     this.fetchComments()
   },
   methods: {
+    formatDate,
     async fetchPost() {
       this.loading = true
       try {
-        const response = await axios.get(`http://localhost:8080/api/posts/${this.$route.params.id}`)
+        const response = await http.get(`/posts/${this.$route.params.id}`)
         this.post = response.data.data
       } catch (error) {
         showToast('error', '게시글 조회 실패')
@@ -156,9 +158,7 @@ export default {
     },
     async fetchComments() {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/api/comments/post/${this.$route.params.id}`
-        )
+        const response = await http.get(`/comments/post/${this.$route.params.id}`)
         const allComments = response.data.data
 
         // 댓글과 대댓글 구조화
@@ -174,13 +174,13 @@ export default {
     },
     async createComment() {
       if (!this.newComment.trim()) {
-        showToast('warning', '댓글 내용을 입력하세요')
+        showToast('댓글 내용을 입력하세요', { type: 'warning' })
         return
       }
 
       try {
-        await axios.post(
-          'http://localhost:8080/api/comments',
+        await http.post(
+          '/comments',
           {
             postId: this.$route.params.id,
             content: this.newComment,
@@ -190,22 +190,21 @@ export default {
           }
         )
         this.newComment = ''
-        showToast('success', '댓글 작성 완료')
+        showToast('댓글 작성 완료', { type: 'success' })
         this.fetchComments()
       } catch (error) {
-        showToast('error', '댓글 작성 실패')
         console.error(error)
       }
     },
     async createReply(parentId) {
       if (!this.replyContent.trim()) {
-        showToast('warning', '답글 내용을 입력하세요')
+        showToast('답글 내용을 입력하세요', { type: 'warning' })
         return
       }
 
       try {
-        await axios.post(
-          'http://localhost:8080/api/comments',
+        await http.post(
+          '/comments',
           {
             postId: this.$route.params.id,
             parentId: parentId,
@@ -217,10 +216,9 @@ export default {
         )
         this.replyContent = ''
         this.replyFormId = null
-        showToast('success', '답글 작성 완료')
+        showToast('답글 작성 완료', { type: 'success' })
         this.fetchComments()
       } catch (error) {
-        showToast('error', '답글 작성 실패')
         console.error(error)
       }
     },
@@ -228,13 +226,12 @@ export default {
       if (!confirm('댓글을 삭제하시겠습니까?')) return
 
       try {
-        await axios.delete(`http://localhost:8080/api/comments/${commentId}`, {
+        await http.delete(`/comments/${commentId}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
-        showToast('success', '댓글 삭제 완료')
+        showToast('댓글 삭제 완료', { type: 'success' })
         this.fetchComments()
       } catch (error) {
-        showToast('error', '댓글 삭제 실패')
         console.error(error)
       }
     },
@@ -242,13 +239,12 @@ export default {
       if (!confirm('게시글을 삭제하시겠습니까?')) return
 
       try {
-        await axios.delete(`http://localhost:8080/api/posts/${this.$route.params.id}`, {
+        await http.delete(`/posts/${this.$route.params.id}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
-        showToast('success', '게시글 삭제 완료')
+        showToast('게시글 삭제 완료', { type: 'success' })
         this.$router.push('/posts')
       } catch (error) {
-        showToast('error', '게시글 삭제 실패')
         console.error(error)
       }
     },
@@ -268,11 +264,6 @@ export default {
     },
     formatContent(content) {
       return content.replace(/\n/g, '<br>')
-    },
-    formatDate(dateString) {
-      if (!dateString) return ''
-      const date = new Date(dateString)
-      return date.toLocaleString('ko-KR')
     },
   },
 }

@@ -102,8 +102,10 @@
 </template>
 
 <script>
-import axios from 'axios'
+import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
+import { formatDate } from '@/utils/dateUtil'
+import { formatFileSize, getFileIcon } from '@/utils/fileUtil'
 import { Modal } from 'bootstrap'
 
 export default {
@@ -123,13 +125,15 @@ export default {
     this.uploadModal = new Modal(document.getElementById('uploadModal'))
   },
   methods: {
+    formatDate,
+    formatFileSize,
+    getFileIcon,
     async fetchFiles() {
       this.loading = true
       try {
-        const response = await axios.get('http://localhost:8080/api/files')
+        const response = await http.get('/files')
         this.files = response.data.data
       } catch (error) {
-        showToast('error', '파일 목록 조회 실패')
         console.error(error)
       } finally {
         this.loading = false
@@ -144,7 +148,7 @@ export default {
     },
     async uploadFile() {
       if (!this.selectedFile) {
-        showToast('warning', '파일을 선택하세요')
+        showToast('파일을 선택하세요', { type: 'warning' })
         return
       }
 
@@ -153,18 +157,16 @@ export default {
       formData.append('file', this.selectedFile)
 
       try {
-        await axios.post('http://localhost:8080/api/files', formData, {
+        await http.post('/files', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'X-User-Id': this.currentUserId,
           },
         })
-        showToast('success', '파일 업로드 완료')
+        showToast('파일 업로드 완료', { type: 'success' })
         this.uploadModal.hide()
         this.fetchFiles()
       } catch (error) {
-        const message = error.response?.data?.message || '파일 업로드 실패'
-        showToast('error', message)
         console.error(error)
       } finally {
         this.uploading = false
@@ -174,36 +176,17 @@ export default {
       if (!confirm('파일을 삭제하시겠습니까?')) return
 
       try {
-        await axios.delete(`http://localhost:8080/api/files/${id}`, {
+        await http.delete(`/files/${id}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
-        showToast('success', '파일 삭제 완료')
+        showToast('파일 삭제 완료', { type: 'success' })
         this.fetchFiles()
       } catch (error) {
-        showToast('error', '파일 삭제 실패')
         console.error(error)
       }
     },
     downloadFile(id) {
-      window.open(`http://localhost:8080/api/files/${id}/download`, '_blank')
-    },
-    getFileIcon(contentType) {
-      if (!contentType) return 'bi bi-file'
-      if (contentType.startsWith('image/')) return 'bi bi-file-image'
-      if (contentType === 'application/pdf') return 'bi bi-file-pdf'
-      return 'bi bi-file-earmark'
-    },
-    formatFileSize(bytes) {
-      if (bytes === 0) return '0 B'
-      const k = 1024
-      const sizes = ['B', 'KB', 'MB', 'GB']
-      const i = Math.floor(Math.log(bytes) / Math.log(k))
-      return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
-    },
-    formatDate(dateString) {
-      if (!dateString) return ''
-      const date = new Date(dateString)
-      return date.toLocaleString('ko-KR')
+      window.open(`/api/files/${id}/download`, '_blank')
     },
   },
 }

@@ -53,7 +53,14 @@ public enum ErrorCode {
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "F002", "파일 업로드에 실패했습니다."),
     FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "F003", "파일 크기가 너무 큽니다."),
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "F004", "허용되지 않은 파일 형식입니다."),
-    FILE_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "F005", "파일 삭제 권한이 없습니다.");
+    FILE_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "F005", "파일 삭제 권한이 없습니다."),
+
+    // 설비 관련 에러 (E001~E099) - Equipment
+    EQUIPMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "E001", "설비를 찾을 수 없습니다."),
+    EQUIPMENT_CODE_REQUIRED(HttpStatus.BAD_REQUEST, "E002", "설비 코드는 필수입니다."),
+    EQUIPMENT_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "E003", "설비 이름은 필수입니다."),
+    EQUIPMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "E004", "이미 존재하는 설비입니다."),
+    EQUIPMENT_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E005", "설비 정보 업데이트에 실패했습니다.");
 
     private final HttpStatus status;
     private final String code;

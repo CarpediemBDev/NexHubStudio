@@ -2,6 +2,8 @@ package com.nexhubstudio.backend.service;
 
 import com.nexhubstudio.backend.domain.Equipment;
 import com.nexhubstudio.backend.dto.EquipmentResponse;
+import com.nexhubstudio.backend.exception.BusinessException;
+import com.nexhubstudio.backend.exception.ErrorCode;
 import com.nexhubstudio.backend.mapper.EquipmentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +34,7 @@ public class EquipmentService {
     public EquipmentResponse getEquipmentById(Long id) {
         Equipment equipment = equipmentMapper.findById(id);
         if (equipment == null) {
-            throw new IllegalArgumentException("설비를 찾을 수 없습니다. ID: " + id);
+            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND, "설비를 찾을 수 없습니다. ID: " + id);
         }
         return EquipmentResponse.from(equipment);
     }
@@ -43,7 +45,7 @@ public class EquipmentService {
     public EquipmentResponse getEquipmentByCode(String code) {
         Equipment equipment = equipmentMapper.findByCode(code);
         if (equipment == null) {
-            throw new IllegalArgumentException("설비를 찾을 수 없습니다. Code: " + code);
+            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND, "설비를 찾을 수 없습니다. Code: " + code);
         }
         return EquipmentResponse.from(equipment);
     }
@@ -73,7 +75,7 @@ public class EquipmentService {
     public EquipmentResponse updateEquipmentStatus(Long id, Equipment updateData) {
         Equipment equipment = equipmentMapper.findById(id);
         if (equipment == null) {
-            throw new IllegalArgumentException("설비를 찾을 수 없습니다. ID: " + id);
+            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND, "설비를 찾을 수 없습니다. ID: " + id);
         }
 
         equipment.setStatus(updateData.getStatus());

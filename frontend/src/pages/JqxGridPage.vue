@@ -29,7 +29,7 @@
 import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
 import SearchGrid from '@/components/SearchGrid.vue'
 import { openUserPopup } from '@/utils/showPop.js'
-import axios, { parseApiResponse } from '@/utils/http'
+import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
@@ -82,11 +82,11 @@ export default {
   },
   methods: {
     loadUsers() {
-      axios
+      http
         .get('/users')
         .then((res) => {
-          const { data } = parseApiResponse(res)
-          this.rows = data
+          const { data } = res.data
+          this.rows = data ?? []
         })
         .catch((error) => {
           const msg = error?.response?.data?.message || error.message || '사용자 목록 조회 실패'

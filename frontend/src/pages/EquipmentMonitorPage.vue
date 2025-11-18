@@ -153,7 +153,8 @@
 </template>
 
 <script>
-import axios from 'axios'
+import http from '@/utils/http'
+import { formatDateTime } from '@/utils/dateUtil'
 
 export default {
   name: 'EquipmentMonitorPage',
@@ -185,15 +186,14 @@ export default {
     this.stopPolling()
   },
   methods: {
+    formatDateTime,
     loadEquipments() {
       this.isLoading = true
       this.loadingError = null
 
-      const url = this.selectedFloor
-        ? `http://localhost:8080/api/equipments/floor/${this.selectedFloor}`
-        : 'http://localhost:8080/api/equipments'
+      const url = this.selectedFloor ? `/equipments/floor/${this.selectedFloor}` : '/equipments'
 
-      axios
+      http
         .get(url)
         .then((response) => {
           console.log('설비 데이터:', response.data)
@@ -203,7 +203,7 @@ export default {
         })
         .catch((error) => {
           console.error('설비 데이터 로드 실패:', error)
-          this.loadingError = `API 호출 실패: ${error.message}. 백엔드가 실행 중인지 확인하세요. (URL: ${url})`
+          this.loadingError = `API 호출 실패: ${error.message}. 백엔드가 실행 중인지 확인하세요.`
           this.isLoading = false
         })
     },
@@ -252,11 +252,6 @@ export default {
     },
     closeDetail() {
       this.selectedEquipment = null
-    },
-    formatDateTime(dateTimeStr) {
-      if (!dateTimeStr) return '-'
-      const date = new Date(dateTimeStr)
-      return date.toLocaleString('ko-KR')
     },
   },
 }

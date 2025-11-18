@@ -119,7 +119,7 @@
 <script>
 import SelectedUsers from './SelectedUsers.vue'
 import PagedList from './PagedList.vue'
-import axios, { parseApiResponse } from '@/utils/http'
+import http from '@/utils/http'
 
 export default {
   name: 'UserPopup',
@@ -235,9 +235,8 @@ export default {
   },
   methods: {
     async loadUsers() {
-      const res = await axios.get('/users')
-      const { data } = parseApiResponse(res)
-      this.users = data ?? []
+      const res = await http.get('/users')
+      this.users = res.data.data ?? []
     },
 
     onClose() {
