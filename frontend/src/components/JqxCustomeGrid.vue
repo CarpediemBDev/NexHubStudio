@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="jqx-custome-grid">
     <JqxGrid
       ref="grid"
       :width="width"
@@ -16,7 +16,7 @@
       :filterable="filterable"
       :columnsresize="columnsresize"
       :columnsreorder="columnsreorder"
-      :autoheight="true"
+      :autoheight="autoheight"
     />
   </div>
 </template>
@@ -73,7 +73,7 @@ export default {
       const statusCol = {
         text: '',
         datafield: 'rowStatus',
-        width: 10,
+        width: 40,
         editable: false,
         align: 'center',
         cellsalign: 'center',
@@ -101,16 +101,27 @@ export default {
   },
   methods: {
     // 부모에서 this.$refs.gridComp.add(...) 식으로 호출
-    add(initial = {}) {
-      this.$refs.grid.addrow(null, initial)
+    add(initial = {}, position = 'first') {
+      this.$refs.grid.addrow(null, initial, position)
     },
     deleteSelected() {
       const selectedIndexes = this.$refs.grid.getselectedrowindexes() || []
       if (selectedIndexes.length === 0) return
 
-      selectedIndexes.forEach((index) => {
+      // 인덱스를 역순으로 정렬 (뒤에서부터 삭제해야 인덱스 꼬임 방지)
+      const sortedIndexes = [...selectedIndexes].sort((a, b) => b - a)
+
+      sortedIndexes.forEach((index) => {
         if (index >= 0 && index < this.localdata.length) {
-          this.localdata[index] = { ...this.localdata[index], rowStatus: 'D' }
+          const row = this.localdata[index]
+
+          // 새로 추가한 행(A)이면 배열에서 완전히 제거
+          if (row.rowStatus === 'A') {
+            this.localdata.splice(index, 1)
+          } else {
+            // 기존 행이면 삭제 표시(D)
+            this.localdata[index] = { ...row, rowStatus: 'D' }
+          }
         }
       })
 
@@ -120,34 +131,19 @@ export default {
         this.$refs.grid?.clearselection()
       })
     },
-    getChanges() {
+    // 서버로 보낼 payload 생성
+    getSavePayload() {
       return {
-        added: this.localdata.filter((r) => r.rowStatus === 'A'),
+        created: this.localdata.filter((r) => r.rowStatus === 'A'),
         updated: this.localdata.filter((r) => r.rowStatus === 'U'),
         deleted: this.localdata.filter((r) => r.rowStatus === 'D'),
       }
     },
 
-    // 서버로 보낼 payload 생성
-    getSavePayload() {
-      const changes = this.getChanges()
-
-      // rowStatus 필드만 제거하고 전송
-      changes.added.forEach((item) => delete item.rowStatus)
-      changes.updated.forEach((item) => delete item.rowStatus)
-      changes.deleted.forEach((item) => delete item.rowStatus)
-
-      return {
-        created: changes.added,
-        updated: changes.updated,
-        deleted: changes.deleted,
-      }
-    },
-
     // 변경사항 개수 확인
     hasChanges() {
-      const changes = this.getChanges()
-      return changes.added.length > 0 || changes.updated.length > 0 || changes.deleted.length > 0
+      const payload = this.getSavePayload()
+      return payload.created.length > 0 || payload.updated.length > 0 || payload.deleted.length > 0
     },
 
     // jqx source / adapter
@@ -160,12 +156,19 @@ export default {
         // 짧고 담백한 CUD 콜백 (화살표 함수로 this 컨텍스트 유지)
         addrow: (rowid, rowdata, position, commit) => {
           rowdata.rowStatus = 'A'
-          // 배열의 맨 위에 추가
-          this.localdata.unshift(rowdata)
-          // source.localdata도 동기화
+
+          // position에 따라 추가 위치 결정
+          if (position === 'last') {
+            this.localdata.push(rowdata)
+          } else if (typeof position === 'number') {
+            this.localdata.splice(position, 0, rowdata)
+          } else {
+            // 'first' 또는 undefined
+            this.localdata.unshift(rowdata)
+          }
+
           this.source.localdata = this.localdata
           commit(true)
-          // 그리드 새로고침
           this.$nextTick(() => {
             this.$refs.grid?.updatebounddata('cells')
           })
@@ -183,22 +186,6 @@ export default {
           // 배열의 해당 인덱스 데이터 교체
           this.localdata.splice(i, 1, updatedRow)
 
-          // source.localdata도 동기화
-          this.source.localdata = this.localdata
-          commit(true)
-          this.$nextTick(() => {
-            this.$refs.grid?.updatebounddata('cells')
-          })
-        },
-        deleterow: (rowid, rowdata, commit) => {
-          const i = rowid // rowid가 인덱스
-          if (i < 0 || i >= this.localdata.length) return commit(false)
-          // rowdata가 있다면 직접 사용, 없다면 기존 방식
-          if (rowdata) {
-            this.localdata.splice(i, 1, { ...rowdata, rowStatus: 'D' })
-          } else {
-            this.localdata[i] = { ...this.localdata[i], rowStatus: 'D' }
-          }
           // source.localdata도 동기화
           this.source.localdata = this.localdata
           commit(true)

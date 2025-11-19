@@ -117,7 +117,7 @@ export default {
         return
       }
       const payload = grid.getSavePayload()
-      const { data } = await axios.post('/users/bulk', payload)
+      const { data } = await http.post('/users/bulk', payload)
       alert(`저장 완료!\n생성: ${data.created}\n수정: ${data.updated}\n삭제: ${data.deleted}`)
       await this.loadUsers()
     },
