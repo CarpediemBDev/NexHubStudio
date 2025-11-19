@@ -456,4 +456,98 @@
         </insert>
     </changeSet>
 
+    <!-- 게시물-첨부 매핑 테이블: posts <-> files 연결 (다대다/다대일 지원) -->
+    <changeSet id="10-create-post-files" author="copilot">
+        <createTable tableName="post_files">
+            <column name="post_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(50)" defaultValue="attachment"/>
+            <column name="sort_order" type="int" defaultValueNumeric="0"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="post_files" baseColumnNames="post_id"
+            referencedTableName="posts" referencedColumnNames="id" constraintName="fk_postfiles_post" onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="post_files" baseColumnNames="file_id"
+            referencedTableName="files" referencedColumnNames="id" constraintName="fk_postfiles_file" onDelete="CASCADE"/>
+
+        <createIndex tableName="post_files" indexName="idx_postfiles_post">
+            <column name="post_id"/>
+        </createIndex>
+
+        <createIndex tableName="post_files" indexName="idx_postfiles_file">
+            <column name="file_id"/>
+        </createIndex>
+
+        <addPrimaryKey tableName="post_files" columnNames="post_id,file_id" constraintName="pk_post_files"/>
+    </changeSet>
+
+    <!-- 파일 그룹 컬럼 추가: posts.file_group_id, files.file_group_id (개발/운영 공통) -->
+    <changeSet id="11-add-file-group-columns" author="copilot">
+        <addColumn tableName="posts">
+            <column name="file_group_id" type="bigint"/>
+        </addColumn>
+
+        <addColumn tableName="files">
+            <column name="file_group_id" type="bigint"/>
+        </addColumn>
+
+        <createIndex tableName="files" indexName="idx_files_file_group">
+            <column name="file_group_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- file_group_id를 VARCHAR로 변경 (ULID 지원) -->
+    <changeSet id="12-modify-file-group-id-to-varchar" author="dev">
+        <!-- 1. 임시 컬럼 추가 -->
+        <addColumn tableName="posts">
+            <column name="file_group_id_new" type="varchar(50)"/>
+        </addColumn>
+        
+        <addColumn tableName="files">
+            <column name="file_group_id_new" type="varchar(50)"/>
+        </addColumn>
+        
+        <!-- 2. 기존 인덱스 삭제 -->
+        <dropIndex tableName="files" indexName="idx_files_file_group"/>
+        
+        <!-- 3. 기존 컬럼 삭제 -->
+        <dropColumn tableName="posts" columnName="file_group_id"/>
+        <dropColumn tableName="files" columnName="file_group_id"/>
+        
+        <!-- 4. 새 컬럼 리네임 -->
+        <renameColumn tableName="posts" 
+                      oldColumnName="file_group_id_new" 
+                      newColumnName="file_group_id" 
+                      columnDataType="varchar(50)"/>
+        <renameColumn tableName="files" 
+                      oldColumnName="file_group_id_new" 
+                      newColumnName="file_group_id" 
+                      columnDataType="varchar(50)"/>
+        
+        <!-- 5. 인덱스 재생성 -->
+        <createIndex tableName="files" indexName="idx_files_file_group">
+            <column name="file_group_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- files 테이블에 soft delete 플래그 추가 -->
+    <changeSet id="13-add-del-yn-to-files" author="dev">
+        <addColumn tableName="files">
+            <column name="del_yn" type="char(1)" defaultValue="N">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        
+        <!-- 복합 인덱스: file_group_id + del_yn -->
+        <createIndex tableName="files" indexName="idx_files_group_active">
+            <column name="file_group_id"/>
+            <column name="del_yn"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

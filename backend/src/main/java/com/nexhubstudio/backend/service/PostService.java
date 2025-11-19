@@ -6,6 +6,7 @@ import com.nexhubstudio.backend.dto.PostResponse;
 import com.nexhubstudio.backend.exception.BusinessException;
 import com.nexhubstudio.backend.exception.ErrorCode;
 import com.nexhubstudio.backend.mapper.PostMapper;
+import com.nexhubstudio.backend.mapper.FileMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,12 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostMapper postMapper;
+    private final FileMapper fileMapper;
+    private final FileGroupService fileGroupService;
 
     /**
      * 게시글 생성
@@ -33,17 +37,27 @@ public class PostService {
             throw new BusinessException(ErrorCode.POST_CONTENT_REQUIRED);
         }
 
+        // ULID 기반 file_group_id 생성
+        String fileGroupId = fileGroupService.generateGroupId("POST");
+
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .authorId(authorId)
                 .status(request.getStatus() != null ? request.getStatus() : "PUBLISHED")
                 .viewCount(0)
+                .fileGroupId(fileGroupId)
                 .createdAt(LocalDateTime.now())
                 .build();
 
         postMapper.insertPost(post);
-        return toResponse(post);
+
+        // 첨부가 있으면 files.file_group_id 를 설정
+        if (request.getAttachmentIds() != null && !request.getAttachmentIds().isEmpty()) {
+            fileMapper.updateFilesSetGroup(fileGroupId, request.getAttachmentIds());
+        }
+
+        return toResponseWithAttachments(post);
     }
 
     /**
@@ -69,7 +83,14 @@ public class PostService {
         post.setUpdatedAt(LocalDateTime.now());
 
         postMapper.updatePost(post);
-        return toResponse(post);
+
+        // 첨부 갱신: 기존 파일 모두 삭제 표시 후, 유지/신규 파일만 활성화
+        fileMapper.markFilesAsDeleted(post.getFileGroupId());
+        if (request.getAttachmentIds() != null && !request.getAttachmentIds().isEmpty()) {
+            fileMapper.updateFilesSetGroup(post.getFileGroupId(), request.getAttachmentIds());
+        }
+
+        return toResponseWithAttachments(post);
     }
 
     /**
@@ -104,7 +125,7 @@ public class PostService {
         postMapper.incrementViewCount(id);
         post.setViewCount(post.getViewCount() + 1);
 
-        return toResponse(post);
+        return toResponseWithAttachments(post);
     }
 
     /**
@@ -112,7 +133,7 @@ public class PostService {
      */
     public List<PostResponse> getAllPosts() {
         return postMapper.findAll().stream()
-                .map(this::toResponse)
+                .map(p -> toResponseWithAttachments(p))
                 .collect(Collectors.toList());
     }
 
@@ -121,7 +142,7 @@ public class PostService {
      */
     public List<PostResponse> getPostsByAuthor(String authorId) {
         return postMapper.findByAuthorId(authorId).stream()
-                .map(this::toResponse)
+                .map(p -> toResponseWithAttachments(p))
                 .collect(Collectors.toList());
     }
 
@@ -136,5 +157,18 @@ public class PostService {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();
+    }
+
+    private PostResponse toResponseWithAttachments(Post post) {
+        PostResponse resp = toResponse(post);
+        // 첨부파일 조회 via file_group_id
+        try {
+            java.util.List<com.nexhubstudio.backend.domain.File> files = fileMapper
+                    .findByFileGroupId(post.getFileGroupId());
+            resp.setAttachments(files != null ? files : new ArrayList<>());
+        } catch (Exception e) {
+            resp.setAttachments(new ArrayList<>());
+        }
+        return resp;
     }
 }

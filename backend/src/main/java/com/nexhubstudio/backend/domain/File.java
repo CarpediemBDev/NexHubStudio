@@ -23,4 +23,6 @@ public class File {
     private String contentType; // MIME 타입 (image/jpeg 등)
     private String uploaderId; // 업로더 ID (users.id FK)
     private LocalDateTime uploadedAt;
+    private String fileGroupId; // 파일 그룹 ID (ULID 기반, FG_POST_xxx 형식)
+    private String delYn; // 삭제 여부 (Y/N)
 }

@@ -73,6 +73,40 @@
               </div>
 
               <!-- 버튼 그룹 -->
+              <!-- 첨부파일 업로드 -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">첨부파일</label>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <input type="file" multiple @change="handleFileChange" />
+                  <div v-if="uploadInProgress" class="text-muted">업로드 중...</div>
+                </div>
+
+                <ul class="list-group">
+                  <li
+                    v-for="file in uploadedFiles"
+                    :key="file.id"
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <div>
+                      <a :href="`/api/files/${file.id}/download`" target="_blank">{{
+                        file.originalName || file.fileName
+                      }}</a>
+                      <small class="text-muted ms-2">{{
+                        file.size ? file.size + ' bytes' : ''
+                      }}</small>
+                    </div>
+                    <div>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        @click="removeUploadedFile(file)"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </li>
+                </ul>
+              </div>
               <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                 <button type="button" class="btn btn-lg btn-outline-secondary" @click="goToList">
                   <i class="bi bi-list me-2"></i>목록으로
@@ -103,9 +137,13 @@
 <script>
 import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
+import FileUpload from '@/components/FileUpload.vue'
 
 export default {
   name: 'PostWritePage',
+  components: {
+    FileUpload,
+  },
   data() {
     return {
       form: {
@@ -113,6 +151,7 @@ export default {
         content: '',
         status: 'PUBLISHED',
       },
+      uploadedFiles: [],
       isEdit: false,
       postId: null,
       currentUserId: 'Asparagus.cata', // 임시 사용자
@@ -135,6 +174,8 @@ export default {
           this.form.title = post.title
           this.form.content = post.content
           this.form.status = post.status
+          // load existing attachments when editing
+          this.uploadedFiles = post.attachments || []
         })
         .catch((error) => {
           console.error(error)
@@ -147,7 +188,12 @@ export default {
       const url = this.isEdit ? `/posts/${this.postId}` : '/posts'
       const method = this.isEdit ? 'put' : 'post'
 
-      http[method](url, this.form, { headers: { 'X-User-Id': this.currentUserId } })
+      // include attachment ids from uploaded files
+      const payload = Object.assign({}, this.form, {
+        attachmentIds: this.uploadedFiles.map((f) => f.id),
+      })
+
+      http[method](url, payload, { headers: { 'X-User-Id': this.currentUserId } })
         .then((response) => {
           showToast(successMessage, { type: 'success' })
           this.$router.push(redirectPath || `/posts/${response.data.data.id}`)

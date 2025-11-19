@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * 댓글 컨트롤러
  */
@@ -52,14 +50,5 @@ public class CommentController {
             @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String userId) {
         commentService.deleteComment(id, userId);
         return ResponseEntity.ok(ApiResponse.success("댓글 삭제 성공", null));
-    }
-
-    /**
-     * 게시글별 댓글 목록
-     */
-    @GetMapping("/post/{postId}")
-    public ResponseEntity<ApiResponse<List<CommentResponse>>> getCommentsByPost(@PathVariable Long postId) {
-        List<CommentResponse> comments = commentService.getCommentsByPost(postId);
-        return ResponseEntity.ok(ApiResponse.success(comments));
     }
 }

@@ -28,8 +28,17 @@ public class FileService {
     private final FileMapper fileMapper;
     private static final String UPLOAD_DIR = "uploads/";
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/gif",
-            "application/pdf");
+    // 파일 타입 제한 완화 (개발 중)
+    private static final List<String> ALLOWED_TYPES = List.of(
+            "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp",
+            "application/pdf",
+            "application/msword", // .doc
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+            "application/vnd.ms-excel", // .xls
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+            "text/plain", // .txt
+            "application/zip",
+            "application/x-zip-compressed");
 
     /**
      * 파일 업로드
@@ -47,11 +56,12 @@ public class FileService {
                     String.format("최대 %dMB까지 업로드 가능합니다.", MAX_FILE_SIZE / 1024 / 1024));
         }
 
-        // 파일 타입 검증
+        // 파일 타입 검증 (contentType이 null인 경우 허용)
         String contentType = multipartFile.getContentType();
-        if (!ALLOWED_TYPES.contains(contentType)) {
+        if (contentType != null && !ALLOWED_TYPES.contains(contentType)) {
+            log.warn("허용되지 않은 파일 타입: {}", contentType);
             throw new BusinessException(ErrorCode.INVALID_FILE_TYPE,
-                    "허용된 파일 형식: JPG, PNG, GIF, PDF");
+                    "허용된 파일 형식이 아닙니다. 업로드한 파일 타입: " + contentType);
         }
 
         try {

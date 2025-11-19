@@ -128,16 +128,19 @@ export default {
     formatDate,
     formatFileSize,
     getFileIcon,
-    async fetchFiles() {
+    fetchFiles() {
       this.loading = true
-      try {
-        const response = await http.get('/files')
-        this.files = response.data.data
-      } catch (error) {
-        console.error(error)
-      } finally {
-        this.loading = false
-      }
+      http
+        .get('/files')
+        .then((response) => {
+          this.files = response.data.data
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     showUploadModal() {
       this.selectedFile = null
@@ -146,7 +149,7 @@ export default {
     handleFileChange(event) {
       this.selectedFile = event.target.files[0]
     },
-    async uploadFile() {
+    uploadFile() {
       if (!this.selectedFile) {
         showToast('파일을 선택하세요', { type: 'warning' })
         return
@@ -156,34 +159,39 @@ export default {
       const formData = new FormData()
       formData.append('file', this.selectedFile)
 
-      try {
-        await http.post('/files', formData, {
+      http
+        .post('/files', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'X-User-Id': this.currentUserId,
           },
         })
-        showToast('파일 업로드 완료', { type: 'success' })
-        this.uploadModal.hide()
-        this.fetchFiles()
-      } catch (error) {
-        console.error(error)
-      } finally {
-        this.uploading = false
-      }
+        .then(() => {
+          showToast('파일 업로드 완료', { type: 'success' })
+          this.uploadModal.hide()
+          this.fetchFiles()
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          this.uploading = false
+        })
     },
-    async deleteFile(id) {
+    deleteFile(id) {
       if (!confirm('파일을 삭제하시겠습니까?')) return
 
-      try {
-        await http.delete(`/files/${id}`, {
+      http
+        .delete(`/files/${id}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
-        showToast('파일 삭제 완료', { type: 'success' })
-        this.fetchFiles()
-      } catch (error) {
-        console.error(error)
-      }
+        .then(() => {
+          showToast('파일 삭제 완료', { type: 'success' })
+          this.fetchFiles()
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     },
     downloadFile(id) {
       window.open(`/api/files/${id}/download`, '_blank')

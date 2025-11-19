@@ -27,6 +27,28 @@
 
       <!-- 게시글 내용 -->
       <div class="card-body">
+        <div v-if="post.attachments && post.attachments.length" class="mb-3">
+          <h6 class="mb-2"><i class="bi bi-paperclip me-1"></i>첨부파일</h6>
+          <ul class="list-unstyled">
+            <li
+              v-for="file in post.attachments"
+              :key="file.id"
+              class="mb-1 d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <a :href="`/api/files/${file.id}/download`" target="_blank">{{
+                  file.originalName || file.fileName
+                }}</a>
+                <small class="text-muted ms-2">{{ file.size ? file.size + ' bytes' : '' }}</small>
+              </div>
+              <div v-if="isAuthor">
+                <button class="btn btn-sm btn-outline-danger" @click="deleteAttachment(file.id)">
+                  삭제
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
         <div class="post-content" v-html="formatContent(post.content)"></div>
       </div>
 
@@ -144,43 +166,47 @@ export default {
   },
   methods: {
     formatDate,
-    async fetchPost() {
+    fetchPost() {
       this.loading = true
-      try {
-        const response = await http.get(`/posts/${this.$route.params.id}`)
-        this.post = response.data.data
-      } catch (error) {
-        showToast('error', '게시글 조회 실패')
-        console.error(error)
-      } finally {
-        this.loading = false
-      }
+      http
+        .get(`/posts/${this.$route.params.id}`)
+        .then((response) => {
+          this.post = response.data.data
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
-    async fetchComments() {
-      try {
-        const response = await http.get(`/comments/post/${this.$route.params.id}`)
-        const allComments = response.data.data
+    fetchComments() {
+      http
+        .get(`/posts/${this.$route.params.id}/comments`)
+        .then((response) => {
+          const allComments = response.data.data
 
-        // 댓글과 대댓글 구조화
-        this.comments = allComments
-          .filter((c) => !c.parentId)
-          .map((parent) => ({
-            ...parent,
-            replies: allComments.filter((c) => c.parentId === parent.id),
-          }))
-      } catch (error) {
-        console.error('댓글 조회 실패:', error)
-      }
+          // 댓글과 대댓글 구조화
+          this.comments = allComments
+            .filter((c) => !c.parentId)
+            .map((parent) => ({
+              ...parent,
+              replies: allComments.filter((c) => c.parentId === parent.id),
+            }))
+        })
+        .catch((error) => {
+          console.error('댓글 조회 실패:', error)
+        })
     },
-    async createComment() {
+    createComment() {
       if (!this.newComment.trim()) {
         showToast('댓글 내용을 입력하세요', { type: 'warning' })
         return
       }
 
-      try {
-        await http.post(
-          '/comments',
+      http
+        .post(
+          `/posts/${this.$route.params.id}/comments`,
           {
             postId: this.$route.params.id,
             content: this.newComment,
@@ -189,21 +215,23 @@ export default {
             headers: { 'X-User-Id': this.currentUserId },
           }
         )
-        this.newComment = ''
-        showToast('댓글 작성 완료', { type: 'success' })
-        this.fetchComments()
-      } catch (error) {
-        console.error(error)
-      }
+        .then(() => {
+          this.newComment = ''
+          showToast('댓글 작성 완료', { type: 'success' })
+          this.fetchComments()
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     },
-    async createReply(parentId) {
+    createReply(parentId) {
       if (!this.replyContent.trim()) {
         showToast('답글 내용을 입력하세요', { type: 'warning' })
         return
       }
 
-      try {
-        await http.post(
+      http
+        .post(
           '/comments',
           {
             postId: this.$route.params.id,
@@ -214,39 +242,59 @@ export default {
             headers: { 'X-User-Id': this.currentUserId },
           }
         )
-        this.replyContent = ''
-        this.replyFormId = null
-        showToast('답글 작성 완료', { type: 'success' })
-        this.fetchComments()
-      } catch (error) {
-        console.error(error)
-      }
+        .then(() => {
+          this.replyContent = ''
+          this.replyFormId = null
+          showToast('답글 작성 완료', { type: 'success' })
+          this.fetchComments()
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     },
-    async deleteComment(commentId) {
+    deleteComment(commentId) {
       if (!confirm('댓글을 삭제하시겠습니까?')) return
 
-      try {
-        await http.delete(`/comments/${commentId}`, {
+      http
+        .delete(`/comments/${commentId}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
-        showToast('댓글 삭제 완료', { type: 'success' })
-        this.fetchComments()
-      } catch (error) {
-        console.error(error)
-      }
+        .then(() => {
+          showToast('댓글 삭제 완료', { type: 'success' })
+          this.fetchComments()
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     },
-    async deletePost() {
+    deletePost() {
       if (!confirm('게시글을 삭제하시겠습니까?')) return
 
-      try {
-        await http.delete(`/posts/${this.$route.params.id}`, {
+      http
+        .delete(`/posts/${this.$route.params.id}`, {
           headers: { 'X-User-Id': this.currentUserId },
         })
-        showToast('게시글 삭제 완료', { type: 'success' })
-        this.$router.push('/posts')
-      } catch (error) {
-        console.error(error)
-      }
+        .then(() => {
+          showToast('게시글 삭제 완료', { type: 'success' })
+          this.$router.push('/posts')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    },
+    deleteAttachment(fileId) {
+      if (!confirm('첨부파일을 삭제하시겠습니까?')) return
+      http
+        .delete(`/files/${fileId}`, {
+          headers: { 'X-User-Id': this.currentUserId },
+        })
+        .then(() => {
+          showToast('첨부파일 삭제 완료', { type: 'success' })
+          this.fetchPost()
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     },
     showReplyForm(commentId) {
       this.replyFormId = commentId

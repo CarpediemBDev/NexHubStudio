@@ -25,12 +25,20 @@
     <select id="findAll" resultMap="UserResultMap">
     SELECT id, name, dept, role, email, password, last_login_at, created_by, created_at, updated_by, updated_at, refresh_token, token_expired_at, phone, status FROM users
     </select>
+    
+    <select id="findAllAsResponse" resultType="com.nexhubstudio.backend.dto.UserResponse">
+    SELECT id as userId, name, dept, role, email, phone, status, last_login_at, token_expired_at, created_by, created_at, updated_by, updated_at FROM users
+    </select>
 
     <select id="findById" parameterType="string" resultMap="UserResultMap">
     SELECT id, name, dept, role, email, password, last_login_at, created_by, created_at, updated_by, updated_at, refresh_token, token_expired_at, phone, status FROM users WHERE id = #{userId}
     </select>
+    
+    <select id="findByIdAsResponse" parameterType="string" resultType="com.nexhubstudio.backend.dto.UserResponse">
+    SELECT id as userId, name, dept, role, email, phone, status, last_login_at, token_expired_at, created_by, created_at, updated_by, updated_at FROM users WHERE id = #{userId}
+    </select>
 
-    <insert id="insertUser" parameterType="User">
+    <insert id="insertUser" parameterType="com.nexhubstudio.backend.dto.UserRequest">
         INSERT INTO users (
             id, name, dept, role, email, password, last_login_at, created_by, created_at, updated_by, updated_at, refresh_token, token_expired_at, phone, status
         ) VALUES (

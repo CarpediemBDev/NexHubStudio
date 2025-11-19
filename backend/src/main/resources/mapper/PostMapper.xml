@@ -11,13 +11,14 @@
         <result property="authorId" column="author_id"/>
         <result property="status" column="status"/>
         <result property="viewCount" column="view_count"/>
+        <result property="fileGroupId" column="file_group_id"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <insert id="insertPost" parameterType="Post" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO posts (title, content, author_id, status, view_count, created_at)
-        VALUES (#{title}, #{content}, #{authorId}, #{status}, #{viewCount}, #{createdAt})
+        INSERT INTO posts (title, content, author_id, status, view_count, file_group_id, created_at)
+        VALUES (#{title}, #{content}, #{authorId}, #{status}, #{viewCount}, #{fileGroupId}, #{createdAt})
     </insert>
 
     <update id="updatePost" parameterType="Post">
@@ -25,6 +26,7 @@
         SET title = #{title},
             content = #{content},
             status = #{status},
+            file_group_id = #{fileGroupId},
             updated_at = CURRENT_TIMESTAMP
         WHERE id = #{id}
     </update>
@@ -61,5 +63,6 @@
         SET view_count = view_count + 1
         WHERE id = #{id}
     </update>
+
 
 </mapper>

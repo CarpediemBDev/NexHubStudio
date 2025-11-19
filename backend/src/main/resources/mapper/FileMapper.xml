@@ -13,6 +13,8 @@
         <result property="contentType" column="content_type"/>
         <result property="uploaderId" column="uploader_id"/>
         <result property="uploadedAt" column="uploaded_at"/>
+        <result property="fileGroupId" column="file_group_id"/>
+        <result property="delYn" column="del_yn"/>
     </resultMap>
 
     <insert id="insertFile" parameterType="File" useGeneratedKeys="true" keyProperty="id">
@@ -35,5 +37,27 @@
     <select id="findByUploaderId" parameterType="string" resultMap="FileResultMap">
         SELECT * FROM files WHERE uploader_id = #{uploaderId} ORDER BY uploaded_at DESC
     </select>
+
+    <select id="findByFileGroupId" parameterType="string" resultMap="FileResultMap">
+        SELECT * FROM files 
+        WHERE file_group_id = #{fileGroupId} AND del_yn = 'N'
+        ORDER BY uploaded_at, id
+    </select>
+
+    <!-- 그룹 내 모든 파일을 삭제 표시 -->
+    <update id="markFilesAsDeleted" parameterType="string">
+        UPDATE files SET del_yn = 'Y' 
+        WHERE file_group_id = #{fileGroupId} AND del_yn = 'N'
+    </update>
+
+    <!-- 파일들을 그룹에 할당하고 활성화 -->
+    <update id="updateFilesSetGroup">
+        UPDATE files 
+        SET file_group_id = #{fileGroupId}, del_yn = 'N'
+        WHERE id IN
+        <foreach collection="fileIds" item="fid" open="(" separator="," close=")">
+            #{fid}
+        </foreach>
+    </update>
 
 </mapper>

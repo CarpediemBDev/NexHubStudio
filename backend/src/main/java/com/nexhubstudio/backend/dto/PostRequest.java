@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 /**
  * 게시글 생성/수정 요청 DTO
@@ -17,4 +18,5 @@ public class PostRequest {
     private String title;
     private String content;
     private String status; // PUBLISHED, DRAFT
+    private List<Long> attachmentIds; // 업로드된 파일 id 목록 (선택)
 }

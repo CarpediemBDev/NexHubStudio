@@ -6,22 +6,18 @@ import com.nexhubstudio.backend.dto.UserBulkRequest;
 import com.nexhubstudio.backend.dto.UserResponse;
 import com.nexhubstudio.backend.exception.BusinessException;
 import com.nexhubstudio.backend.exception.ErrorCode;
-import com.nexhubstudio.backend.mapper.UserDtoMapper;
 import com.nexhubstudio.backend.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private UserDtoMapper userDtoMapper;
 
     /**
      * 사용자 생성
@@ -43,8 +39,7 @@ public class UserService {
                     "이미 존재하는 사용자입니다: " + userRequest.getUserId());
         }
 
-        User user = userDtoMapper.toEntity(userRequest);
-        return userMapper.insertUser(user);
+        return userMapper.insertUser(userRequest);
     }
 
     /**
@@ -63,8 +58,7 @@ public class UserService {
                     "수정할 사용자를 찾을 수 없습니다: " + userRequest.getUserId());
         }
 
-        User user = userDtoMapper.toEntity(userRequest);
-        int result = userMapper.updateUser(user);
+        int result = userMapper.updateUser(userRequest);
 
         if (result == 0) {
             throw new BusinessException(ErrorCode.USER_UPDATE_FAILED);
@@ -99,9 +93,7 @@ public class UserService {
     }
 
     public List<UserResponse> getAllUsers() {
-        return userMapper.findAll().stream()
-                .map(userDtoMapper::toResponse)
-                .collect(Collectors.toList());
+        return userMapper.findAllAsResponse();
     }
 
     /**
@@ -113,13 +105,12 @@ public class UserService {
             throw new BusinessException(ErrorCode.USER_ID_REQUIRED);
         }
 
-        User user = userMapper.findById(userId);
-        if (user == null) {
+        UserResponse response = userMapper.findByIdAsResponse(userId);
+        if (response == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND,
                     "사용자를 찾을 수 없습니다: " + userId);
         }
-
-        return userDtoMapper.toResponse(user);
+        return response;
     }
 
     @Transactional
@@ -130,14 +121,12 @@ public class UserService {
 
         if (bulk.getCreated() != null) {
             for (UserRequest req : bulk.getCreated()) {
-                User user = userDtoMapper.toEntity(req);
-                createdCount += userMapper.insertUser(user);
+                createdCount += userMapper.insertUser(req);
             }
         }
         if (bulk.getUpdated() != null) {
             for (UserRequest req : bulk.getUpdated()) {
-                User user = userDtoMapper.toEntity(req);
-                updatedCount += userMapper.updateUser(user);
+                updatedCount += userMapper.updateUser(req);
             }
         }
         if (bulk.getDeleted() != null) {

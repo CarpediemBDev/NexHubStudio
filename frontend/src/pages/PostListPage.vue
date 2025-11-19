@@ -68,17 +68,19 @@ export default {
   methods: {
     formatDate,
     truncate,
-    async fetchPosts() {
+    fetchPosts() {
       this.loading = true
-      try {
-        const response = await http.get('/posts')
-        this.posts = response.data.data
-      } catch (error) {
-        // 에러는 http 인터셉터에서 자동 처리
-        console.error(error)
-      } finally {
-        this.loading = false
-      }
+      http
+        .get('/posts')
+        .then((response) => {
+          this.posts = response.data.data
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     goToWrite() {
       this.$router.push('/posts/write')

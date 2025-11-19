@@ -108,6 +108,22 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 특정 게시글에 댓글 작성 (RESTful)
+     */
+    @Transactional
+    public CommentResponse createCommentInPost(Long postId, CommentRequest request, String authorId) {
+        // postId 검증
+        Post post = postMapper.findById(postId);
+        if (post == null) {
+            throw new BusinessException(ErrorCode.POST_NOT_FOUND);
+        }
+
+        // request의 postId를 URL postId로 덮어쓰기 (일관성)
+        request.setPostId(postId);
+        return createComment(request, authorId);
+    }
+
     private CommentResponse toResponse(Comment comment) {
         return CommentResponse.builder()
                 .id(comment.getId())

@@ -22,4 +22,14 @@ public interface FileMapper {
 
     // 업로더별 파일 조회
     List<File> findByUploaderId(String uploaderId);
+
+    // 파일 그룹 조회 (활성 파일만)
+    List<File> findByFileGroupId(String fileGroupId);
+
+    // 그룹 내 모든 파일을 삭제 표시 (soft delete)
+    int markFilesAsDeleted(String fileGroupId);
+
+    // 파일들에 대해 file_group_id 설정 (단일 파일씩 업데이트)
+    int updateFilesSetGroup(@org.apache.ibatis.annotations.Param("fileGroupId") String fileGroupId,
+            @org.apache.ibatis.annotations.Param("fileIds") java.util.List<Long> fileIds);
 }

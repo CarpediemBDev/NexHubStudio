@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import com.nexhubstudio.backend.domain.File;
 
 /**
  * 게시글 응답 DTO
@@ -24,4 +26,5 @@ public class PostResponse {
     private Integer viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<File> attachments; // 첨부파일 목록
 }
