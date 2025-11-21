@@ -85,8 +85,7 @@ export default {
       http
         .get('/users')
         .then((res) => {
-          const { data } = res.data
-          this.rows = data ?? []
+          this.rows = res.data ?? []
         })
         .catch((error) => {
           const msg = error?.response?.data?.message || error.message || '사용자 목록 조회 실패'
@@ -117,8 +116,8 @@ export default {
         return
       }
       const payload = grid.getSavePayload()
-      const { data } = await http.post('/users/bulk', payload)
-      alert(`저장 완료!\n생성: ${data.created}\n수정: ${data.updated}\n삭제: ${data.deleted}`)
+      const { data: result } = await http.post('/users/bulk', payload)
+      alert(`저장 완료!\n생성: ${result.created}\n수정: ${result.updated}\n삭제: ${result.deleted}`)
       await this.loadUsers()
     },
   },

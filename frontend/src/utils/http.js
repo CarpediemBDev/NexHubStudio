@@ -9,16 +9,17 @@ const http = axios.create({
 
 // Response: global error toast
 http.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 응답 구조가 { data: { data: ..., message: ... } } 형태면 자동 파싱
+    if (response.data && response.data.data !== undefined) {
+      return response.data
+    }
+    return response
+  },
   (error) => {
     const msg =
-      error?.response?.data?.message ||
-      error?.response?.statusText ||
-      error?.message ||
-      '요청 처리 중 오류가 발생했습니다.'
-    try {
-      showToast(`요청 실패: ${msg}`, { type: 'error', duration: 3000 })
-    } catch (_) {}
+      error?.response?.data?.message || error.message || '요청 처리 중 오류가 발생했습니다.'
+    showToast(`요청 실패: ${msg}`, { type: 'error', duration: 3000 })
     return Promise.reject(error)
   }
 )
