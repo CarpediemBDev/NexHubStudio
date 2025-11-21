@@ -38,6 +38,12 @@ export default {
   data() {
     return {
       rows: [],
+      roleOptions: [
+        { code: 'ADMIN', value: '관리자' },
+        { code: 'USER', value: '사용자' },
+        { code: 'MANAGER', value: '매니저' },
+        { code: 'GUEST', value: '게스트' },
+      ],
       datafields: [
         { name: 'userId', type: 'string' },
         { name: 'name', type: 'string' },
@@ -61,7 +67,25 @@ export default {
         { text: 'ID', datafield: 'userId', width: 100 },
         { text: '이름', datafield: 'name', width: 120, editable: true },
         { text: '부서', datafield: 'dept', width: 120, editable: true },
-        { text: '역할', datafield: 'role', width: 100, editable: true },
+        {
+          text: '역할',
+          datafield: 'role',
+          width: 120,
+          editable: true,
+          columntype: 'dropdownlist',
+          createeditor: (row, value, editor) => {
+            editor.jqxDropDownList({
+              source: this.roleOptions,
+              displayMember: 'value',
+              valueMember: 'code',
+              autoDropDownHeight: true,
+              placeHolder: `<div style="padding: 4px 8px;">${value || '선택'}</div>`,
+            })
+          },
+          cellsrenderer: (row, columnfield, value) => {
+            return `<div style="padding: 4px 8px;">${value || '선택'}</div>`
+          },
+        },
         { text: '이메일', datafield: 'email', width: 180, editable: true },
         { text: '비밀번호', datafield: 'password', width: 140, editable: true },
         { text: '전화번호', datafield: 'phone', width: 120, editable: true },
