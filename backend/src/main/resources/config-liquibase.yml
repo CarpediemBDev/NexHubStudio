@@ -2,3 +2,7 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/changelog.xml
+    # drop-first 설정:
+    # - false: 기존 데이터 유지, 새로운 changeSet만 실행 (운영/개발 권장, 현재 설정)
+    # - true: 재시작 시 모든 테이블 삭제 후 재생성 (테스트 환경)
+    drop-first: false
