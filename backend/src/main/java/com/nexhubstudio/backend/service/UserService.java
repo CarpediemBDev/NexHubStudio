@@ -35,8 +35,7 @@ public class UserService {
         // 중복 체크
         User existingUser = userMapper.findById(userRequest.getUserId());
         if (existingUser != null) {
-            throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS,
-                    "이미 존재하는 사용자입니다: " + userRequest.getUserId());
+            throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
         return userMapper.insertUser(userRequest);
@@ -54,8 +53,7 @@ public class UserService {
         // 존재 여부 확인
         User existingUser = userMapper.findById(userRequest.getUserId());
         if (existingUser == null) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND,
-                    "수정할 사용자를 찾을 수 없습니다: " + userRequest.getUserId());
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
         int result = userMapper.updateUser(userRequest);
@@ -79,8 +77,7 @@ public class UserService {
         // 존재 여부 확인
         User existingUser = userMapper.findById(userId);
         if (existingUser == null) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND,
-                    "삭제할 사용자를 찾을 수 없습니다: " + userId);
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
         int result = userMapper.deleteUser(userId);
@@ -107,8 +104,7 @@ public class UserService {
 
         UserResponse response = userMapper.findByIdAsResponse(userId);
         if (response == null) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND,
-                    "사용자를 찾을 수 없습니다: " + userId);
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
         return response;
     }
@@ -148,7 +144,7 @@ public class UserService {
             throw new BusinessException(ErrorCode.USER_ID_REQUIRED);
         }
         if (password == null || password.trim().isEmpty()) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT, "비밀번호는 필수입니다.");
+            throw new BusinessException(ErrorCode.INVALID_INPUT);
         }
 
         User user = userMapper.findById(userId);

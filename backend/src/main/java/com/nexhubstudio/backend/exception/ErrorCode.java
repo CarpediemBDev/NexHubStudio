@@ -60,7 +60,13 @@ public enum ErrorCode {
     EQUIPMENT_CODE_REQUIRED(HttpStatus.BAD_REQUEST, "E002", "설비 코드는 필수입니다."),
     EQUIPMENT_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "E003", "설비 이름은 필수입니다."),
     EQUIPMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "E004", "이미 존재하는 설비입니다."),
-    EQUIPMENT_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E005", "설비 정보 업데이트에 실패했습니다.");
+    EQUIPMENT_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E005", "설비 정보 업데이트에 실패했습니다."),
+
+    // 공통코드 그룹 관련 에러 (G001~G099) - Code Group
+    CODE_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "G001", "코드 그룹을 찾을 수 없습니다."),
+    CODE_GROUP_ALREADY_EXISTS(HttpStatus.CONFLICT, "G002", "이미 존재하는 그룹 코드입니다."),
+    CODE_GROUP_CODE_REQUIRED(HttpStatus.BAD_REQUEST, "G003", "그룹 코드는 필수입니다."),
+    CODE_GROUP_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "G004", "그룹명은 필수입니다.");
 
     private final HttpStatus status;
     private final String code;

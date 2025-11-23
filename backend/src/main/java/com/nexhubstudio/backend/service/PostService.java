@@ -67,7 +67,7 @@ public class PostService {
     public PostResponse updatePost(Long id, PostRequest request, String currentUserId) {
         Post post = postMapper.findById(id);
         if (post == null) {
-            throw new BusinessException(ErrorCode.POST_NOT_FOUND, "게시글 ID: " + id);
+            throw new BusinessException(ErrorCode.POST_NOT_FOUND);
         }
 
         // 권한 체크 (작성자만 수정 가능)

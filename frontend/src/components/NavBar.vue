@@ -186,7 +186,11 @@ export default {
         },
         {
           label: '시스템',
-          children: [{ label: '환경설정' }, { label: '공지사항' }],
+          children: [
+            { label: '공통코드 그룹', to: '/common-code-groups' },
+            { label: '환경설정' },
+            { label: '공지사항' },
+          ],
         },
       ],
     }

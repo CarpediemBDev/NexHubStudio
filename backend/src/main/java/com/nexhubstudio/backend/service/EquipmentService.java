@@ -34,7 +34,7 @@ public class EquipmentService {
     public EquipmentResponse getEquipmentById(Long id) {
         Equipment equipment = equipmentMapper.findById(id);
         if (equipment == null) {
-            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND, "설비를 찾을 수 없습니다. ID: " + id);
+            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND);
         }
         return EquipmentResponse.from(equipment);
     }
@@ -45,7 +45,7 @@ public class EquipmentService {
     public EquipmentResponse getEquipmentByCode(String code) {
         Equipment equipment = equipmentMapper.findByCode(code);
         if (equipment == null) {
-            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND, "설비를 찾을 수 없습니다. Code: " + code);
+            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND);
         }
         return EquipmentResponse.from(equipment);
     }
@@ -75,7 +75,7 @@ public class EquipmentService {
     public EquipmentResponse updateEquipmentStatus(Long id, Equipment updateData) {
         Equipment equipment = equipmentMapper.findById(id);
         if (equipment == null) {
-            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND, "설비를 찾을 수 없습니다. ID: " + id);
+            throw new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND);
         }
 
         equipment.setStatus(updateData.getStatus());

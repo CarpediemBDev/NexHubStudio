@@ -6,20 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 성공 응답 DTO
+ * API 공통 응답 DTO
+ * - 모든 API 응답을 통일된 형식으로 제공
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ApiResponse<T> {
-    private int code;
+    private String code;
     private String message;
     private T data;
 
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
-                .code(200)
+                .code("SUCCESS")
                 .message("성공")
                 .data(data)
                 .build();
@@ -27,7 +28,7 @@ public class ApiResponse<T> {
 
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
-                .code(200)
+                .code("SUCCESS")
                 .message(message)
                 .data(data)
                 .build();

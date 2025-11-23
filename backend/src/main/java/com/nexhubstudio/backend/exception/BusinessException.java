@@ -18,16 +18,4 @@ public class BusinessException extends RuntimeException {
         this.status = errorCode.getStatus();
         this.code = errorCode.getCode();
     }
-
-    public BusinessException(ErrorCode errorCode, String customMessage) {
-        super(customMessage);
-        this.status = errorCode.getStatus();
-        this.code = errorCode.getCode();
-    }
-
-    public BusinessException(HttpStatus status, String code, String message) {
-        super(message);
-        this.status = status;
-        this.code = code;
-    }
 }

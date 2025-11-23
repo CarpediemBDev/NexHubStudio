@@ -47,7 +47,7 @@ public class FileService {
     public FileResponse uploadFile(MultipartFile multipartFile, String uploaderId) {
         // 파일 검증
         if (multipartFile.isEmpty()) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT, "파일이 비어있습니다.");
+            throw new BusinessException(ErrorCode.INVALID_INPUT);
         }
 
         // 파일 크기 검증
@@ -74,7 +74,7 @@ public class FileService {
             // 파일명 생성 (UUID + 확장자)
             String originalName = multipartFile.getOriginalFilename();
             if (originalName == null || originalName.isEmpty()) {
-                throw new BusinessException(ErrorCode.INVALID_INPUT, "파일명이 없습니다.");
+                throw new BusinessException(ErrorCode.INVALID_INPUT);
             }
             String extension = originalName.contains(".") ? originalName.substring(originalName.lastIndexOf(".")) : "";
             String storedName = UUID.randomUUID().toString() + extension;
