@@ -115,10 +115,6 @@ npm run dev          # http://localhost:3001
 3. 브랜치 푸시: `git push origin feature/new-feature`
 4. Pull Request 생성
 
-## 📄 라이센스
-
-MIT License
-
 ## 🚀 빠른 시작
 
 이 프로젝트는 **Volta**로 Node와 npm 버전을 고정합니다. 로컬/CI/배포 환경 어디서든 동일한 런타임을 보장합니다.
@@ -274,3 +270,14 @@ const users = await this.$modal.show(UserPopup, params)
 ```bash
 # 목업 데이터 생성
 ```
+
+## 📄 라이센스
+
+이 프로젝트는 학습 및 포트폴리오 목적으로 제작되었습니다.
+
+### 주의사항
+
+- **JqWidgets**: 이 프로젝트에서 사용된 JqWidgets는 상용 라이선스가 필요합니다
+  - 비상업적 용도(학습/테스트)로만 무료 사용 가능
+  - 상업적 사용 시 라이선스 구매 필요: https://www.jqwidgets.com/license/
+- 기타 오픈소스 라이브러리는 각각의 라이선스를 따릅니다
