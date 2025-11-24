@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nexhubstudio.backend.mapper.CommonCodeMapper">
+
+    <resultMap id="CommonCodeResultMap" type="com.nexhubstudio.backend.domain.CommonCode">
+        <id property="id" column="id"/>
+        <result property="codeGroupId" column="code_group_id"/>
+        <result property="codeId" column="code_id"/>
+        <result property="codeName" column="code_name"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="useYn" column="use_yn"/>
+        <result property="description" column="description"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedBy" column="updated_by"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="CommonCodeResultMap">
+        SELECT id, code_group_id, code_id, code_name, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
+        FROM common_code
+        ORDER BY code_group_id, sort_order, code_id
+    </select>
+
+    <select id="findByCodeGroupId" parameterType="long" resultMap="CommonCodeResultMap">
+        SELECT id, code_group_id, code_id, code_name, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
+        FROM common_code
+        WHERE code_group_id = #{codeGroupId}
+        ORDER BY sort_order, code_id
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="CommonCodeResultMap">
+        SELECT id, code_group_id, code_id, code_name, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
+        FROM common_code
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertCommonCode" parameterType="com.nexhubstudio.backend.dto.CommonCodeRequest">
+        INSERT INTO common_code (
+            code_group_id, code_id, code_name, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at
+        ) VALUES (
+            #{codeGroupId}, #{codeId}, #{codeName}, #{sortOrder}, #{useYn}, #{description}, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateCommonCode" parameterType="com.nexhubstudio.backend.dto.CommonCodeRequest">
+        UPDATE common_code SET
+            code_group_id = #{codeGroupId},
+            code_id = #{codeId},
+            code_name = #{codeName},
+            sort_order = #{sortOrder},
+            use_yn = #{useYn},
+            description = #{description},
+            updated_by = 'SYSTEM',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteCommonCode" parameterType="long">
+        DELETE FROM common_code WHERE id = #{id}
+    </delete>
+
+</mapper>

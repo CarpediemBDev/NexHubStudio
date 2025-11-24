@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- 사용자 테이블 -->
+    <changeSet id="1-create-user-table" author="copilot">
+        <createTable tableName="users">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)"/>
+            <column name="dept" type="varchar(50)"/>
+            <column name="role" type="varchar(50)"/>
+            <column name="email" type="varchar(100)"/>
+            <column name="phone" type="varchar(30)"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="password" type="varchar(255)"/>
+            <column name="last_login_at" type="timestamp"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_by" type="varchar(50)"/>
+            <column name="updated_at" type="timestamp"/>
+            <column name="refresh_token" type="varchar(255)"/>
+            <column name="token_expired_at" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 게시판 테이블 -->
+    <changeSet id="3-create-posts-table" author="copilot">
+        <createTable tableName="posts">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="PUBLISHED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="view_count" type="int" defaultValue="0"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="posts"
+            baseColumnNames="author_id"
+            constraintName="fk_posts_author"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <createIndex tableName="posts" indexName="idx_posts_author">
+            <column name="author_id"/>
+        </createIndex>
+        <createIndex tableName="posts" indexName="idx_posts_created">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 댓글 테이블 -->
+    <changeSet id="4-create-comments-table" author="copilot">
+        <createTable tableName="comments">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="post_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="content" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="comments"
+            baseColumnNames="post_id"
+            constraintName="fk_comments_post"
+            referencedTableName="posts"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <addForeignKeyConstraint
+            baseTableName="comments"
+            baseColumnNames="parent_id"
+            constraintName="fk_comments_parent"
+            referencedTableName="comments"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <addForeignKeyConstraint
+            baseTableName="comments"
+            baseColumnNames="author_id"
+            constraintName="fk_comments_author"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <createIndex tableName="comments" indexName="idx_comments_post">
+            <column name="post_id"/>
+        </createIndex>
+        <createIndex tableName="comments" indexName="idx_comments_parent">
+            <column name="parent_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 파일 테이블 -->
+    <changeSet id="5-create-files-table" author="copilot">
+        <createTable tableName="files">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="original_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stored_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_path" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_size" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_type" type="varchar(100)"/>
+            <column name="uploader_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="files"
+            baseColumnNames="uploader_id"
+            constraintName="fk_files_uploader"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        <createIndex tableName="files" indexName="idx_files_uploader">
+            <column name="uploader_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 설비 테이블 -->
+    <changeSet id="8-create-equipment-table" author="copilot">
+        <createTable tableName="equipment">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="equipment_code" type="varchar(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="equipment_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="equipment_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="NORMAL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position_x" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position_y" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="floor" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="temperature" type="decimal(5,2)"/>
+            <column name="pressure" type="decimal(5,2)"/>
+            <column name="cycle_count" type="int" defaultValue="0"/>
+            <column name="last_check_time" type="timestamp"/>
+            <column name="description" type="varchar(500)"/>
+        </createTable>
+        <createIndex tableName="equipment" indexName="idx_equipment_code">
+            <column name="equipment_code"/>
+        </createIndex>
+        <createIndex tableName="equipment" indexName="idx_equipment_floor">
+            <column name="floor"/>
+        </createIndex>
+        <createIndex tableName="equipment" indexName="idx_equipment_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 게시물-첨부 매핑 테이블 -->
+    <changeSet id="10-create-post-files" author="copilot">
+        <createTable tableName="post_files">
+            <column name="post_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(50)" defaultValue="attachment"/>
+            <column name="sort_order" type="int" defaultValueNumeric="0"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="post_files" baseColumnNames="post_id"
+            referencedTableName="posts" referencedColumnNames="id" constraintName="fk_postfiles_post" onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="post_files" baseColumnNames="file_id"
+            referencedTableName="files" referencedColumnNames="id" constraintName="fk_postfiles_file" onDelete="CASCADE"/>
+
+        <createIndex tableName="post_files" indexName="idx_postfiles_post">
+            <column name="post_id"/>
+        </createIndex>
+
+        <createIndex tableName="post_files" indexName="idx_postfiles_file">
+            <column name="file_id"/>
+        </createIndex>
+
+        <addPrimaryKey tableName="post_files" columnNames="post_id,file_id" constraintName="pk_post_files"/>
+    </changeSet>
+
+    <!-- 파일 그룹 컬럼 추가 -->
+    <changeSet id="11-add-file-group-columns" author="copilot">
+        <addColumn tableName="posts">
+            <column name="file_group_id" type="bigint"/>
+        </addColumn>
+
+        <addColumn tableName="files">
+            <column name="file_group_id" type="bigint"/>
+        </addColumn>
+
+        <createIndex tableName="files" indexName="idx_files_file_group">
+            <column name="file_group_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- file_group_id를 VARCHAR로 변경 (ULID 지원) -->
+    <changeSet id="12-modify-file-group-id-to-varchar" author="dev">
+        <addColumn tableName="posts">
+            <column name="file_group_id_new" type="varchar(50)"/>
+        </addColumn>
+        
+        <addColumn tableName="files">
+            <column name="file_group_id_new" type="varchar(50)"/>
+        </addColumn>
+        
+        <dropIndex tableName="files" indexName="idx_files_file_group"/>
+        
+        <dropColumn tableName="posts" columnName="file_group_id"/>
+        <dropColumn tableName="files" columnName="file_group_id"/>
+        
+        <renameColumn tableName="posts" 
+                      oldColumnName="file_group_id_new" 
+                      newColumnName="file_group_id" 
+                      columnDataType="varchar(50)"/>
+        <renameColumn tableName="files" 
+                      oldColumnName="file_group_id_new" 
+                      newColumnName="file_group_id" 
+                      columnDataType="varchar(50)"/>
+        
+        <createIndex tableName="files" indexName="idx_files_file_group">
+            <column name="file_group_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- files 테이블에 soft delete 플래그 추가 -->
+    <changeSet id="13-add-del-yn-to-files" author="dev">
+        <addColumn tableName="files">
+            <column name="del_yn" type="char(1)" defaultValue="N">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        
+        <createIndex tableName="files" indexName="idx_files_group_active">
+            <column name="file_group_id"/>
+            <column name="del_yn"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 공통코드 그룹 테이블 -->
+    <changeSet id="14-create-common-code-group-table" author="dev">
+        <createTable tableName="common_code_group">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="group_code" type="varchar(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="group_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(500)"/>
+            <column name="sort_order" type="int" defaultValue="0"/>
+            <column name="use_yn" type="char(1)" defaultValue="Y">
+                <constraints nullable="false"/>
+            </column>
+            <column name="icon" type="varchar(100)"/>
+            <column name="color_code" type="varchar(20)"/>
+            <column name="category" type="varchar(50)"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_by" type="varchar(50)"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        
+        <createIndex tableName="common_code_group" indexName="idx_group_code">
+            <column name="group_code"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 공통코드 테이블 -->
+    <changeSet id="15-create-common-code-table" author="dev">
+        <createTable tableName="common_code">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code_group_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code_name" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sort_order" type="int" defaultValue="0"/>
+            <column name="use_yn" type="char(1)" defaultValue="Y">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(500)"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_by" type="varchar(50)"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        
+        <addUniqueConstraint tableName="common_code" 
+                             columnNames="code_group_id, code_id" 
+                             constraintName="uk_code_group_code"/>
+        
+        <createIndex tableName="common_code" indexName="idx_code_group_id">
+            <column name="code_group_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

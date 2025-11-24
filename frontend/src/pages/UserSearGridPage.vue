@@ -141,6 +141,8 @@ export default {
   },
   computed: {
     visibleUsers() {
+      if (!Array.isArray(this.users)) return []
+
       const kw = this.keyword.trim().toLowerCase()
       const filtered = !kw
         ? this.users.slice()

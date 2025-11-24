@@ -52,16 +52,14 @@ public class FileService {
 
         // 파일 크기 검증
         if (multipartFile.getSize() > MAX_FILE_SIZE) {
-            throw new BusinessException(ErrorCode.FILE_TOO_LARGE,
-                    String.format("최대 %dMB까지 업로드 가능합니다.", MAX_FILE_SIZE / 1024 / 1024));
+            throw new BusinessException(ErrorCode.FILE_TOO_LARGE);
         }
 
         // 파일 타입 검증 (contentType이 null인 경우 허용)
         String contentType = multipartFile.getContentType();
         if (contentType != null && !ALLOWED_TYPES.contains(contentType)) {
             log.warn("허용되지 않은 파일 타입: {}", contentType);
-            throw new BusinessException(ErrorCode.INVALID_FILE_TYPE,
-                    "허용된 파일 형식이 아닙니다. 업로드한 파일 타입: " + contentType);
+            throw new BusinessException(ErrorCode.INVALID_FILE_TYPE);
         }
 
         try {

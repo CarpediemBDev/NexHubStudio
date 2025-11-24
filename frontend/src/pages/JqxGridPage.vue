@@ -1,27 +1,40 @@
 <template>
-  <div class="container py-3" style="height: 600px">
-    <!-- SearchGrid: 사용자 선택용 툴바 (목록 위에 위치) -->
-    <div class="row mb-3">
-      <div class="col-12">
-        <SearchGrid ref="searchGrid" @open-user-popup="openPopup" @search="loadUsers" />
-      </div>
-    </div>
-    <div class="mb-2 d-flex gap-2">
-      <button class="btn btn-primary btn-sm" @click="add">추가</button>
-      <button class="btn btn-outline-danger btn-sm" @click="deleteSelected">삭제</button>
-      <button class="btn btn-outline-secondary btn-sm" @click="logCUD">변경확인</button>
-      <button class="btn btn-success btn-sm" @click="saveData">저장</button>
+  <div class="github-page">
+    <div class="page-header">
+      <h2 class="page-title">JQWidgets 그리드 예제</h2>
+      <p class="page-subtitle">사용자 목록을 관리하는 그리드 페이지입니다</p>
     </div>
 
-    <JqxCustomeGrid
-      ref="grd"
-      :localdata="rows"
-      :datafields="datafields"
-      :columns="columns"
-      selectionmode="checkbox"
-      :height="560"
-      theme="bootstrap"
-    />
+    <!-- SearchGrid -->
+    <div class="filter-bar">
+      <SearchGrid ref="searchGrid" @open-user-popup="openPopup" @search="loadUsers" />
+    </div>
+
+    <!-- 액션 버튼 -->
+    <div class="action-bar">
+      <button class="github-btn github-btn-primary" @click="add">
+        <i class="bi bi-plus-circle"></i> 추가
+      </button>
+      <button class="github-btn github-btn-danger" @click="deleteSelected">
+        <i class="bi bi-trash"></i> 삭제
+      </button>
+      <button class="github-btn github-btn-success" @click="saveData">
+        <i class="bi bi-save"></i> 저장
+      </button>
+    </div>
+
+    <!-- 그리드 -->
+    <div class="content-card">
+      <JqxCustomeGrid
+        ref="grd"
+        :localdata="rows"
+        :datafields="datafields"
+        :columns="columns"
+        selectionmode="checkbox"
+        :height="560"
+        theme="bootstrap"
+      />
+    </div>
   </div>
 </template>
 
@@ -122,9 +135,6 @@ export default {
     deleteSelected() {
       this.$refs.grd?.deleteSelected()
     },
-    logCUD() {
-      console.log(this.$refs.grd?.getChanges())
-    },
     async openPopup() {
       const selectedList = await openUserPopup()
       if (!Array.isArray(selectedList) || selectedList.length === 0) return
@@ -147,3 +157,14 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+@import '@/assets/styles/github-theme.css';
+
+.action-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: flex-end;
+}
+</style>

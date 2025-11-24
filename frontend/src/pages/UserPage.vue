@@ -1,101 +1,123 @@
 <template>
-  <div class="container py-4">
+  <div class="github-page">
+    <!-- 페이지 헤더 -->
+    <div class="page-header">
+      <div class="header-content">
+        <h2 class="page-title">사용자 관리</h2>
+        <p class="page-subtitle">시스템 사용자 목록을 조회하고 관리합니다</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary github-btn github-btn-primary" @click="openPopup()">
+          <i class="bi bi-plus-lg"></i> 사용자 추가
+        </button>
+      </div>
+    </div>
+
     <div class="row g-3">
       <!-- LEFT: 사용자 목록 -->
       <div class="col-12 col-lg-6">
-        <div class="card shadow-sm">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <h2 class="h5 mb-0">사용자 목록</h2>
+        <!-- 검색바 -->
+        <div class="filter-bar">
+          <div class="search-wrapper">
+            <i class="bi bi-search search-icon"></i>
             <input
               v-model="keyword"
-              class="form-control form-control-sm w-auto"
-              placeholder="검색: ID/이름/부서/직무"
+              class="form-control search-input"
+              placeholder="ID, 이름, 부서, 직무로 검색..."
             />
           </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover table-sm mb-0 align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th style="width: 44px">
-                      <div class="form-check m-0 d-flex justify-content-center">
-                        <input
-                          class="form-check-input"
-                          ref="masterPage"
-                          type="checkbox"
-                          :checked="allCheckedPage"
-                          :disabled="!visibleUsers.length"
-                          @change="toggleAllVisiblePage"
-                          aria-label="현재 보이는 사용자 전체 선택/해제"
-                        />
-                      </div>
-                    </th>
-                    <th
-                      class="user-select-none text-nowrap"
-                      scope="col"
-                      @click="sortBy('userId')"
-                      :aria-sort="ariaSort('userId')"
+          <div class="result-info">
+            <span>총 {{ visibleUsers.length }}명</span>
+          </div>
+        </div>
+
+        <!-- 사용자 목록 테이블 -->
+        <div class="content-card">
+          <div class="table-responsive">
+            <table class="table github-table table-hover mb-0 align-middle">
+              <thead>
+                <tr>
+                  <th class="text-center" style="width: 50px">
+                    <input
+                      class="form-check-input"
+                      ref="masterPage"
+                      type="checkbox"
+                      :checked="allCheckedPage"
+                      :disabled="!visibleUsers.length"
+                      @change="toggleAllVisiblePage"
+                    />
+                  </th>
+                  <th
+                    class="user-select-none"
+                    @click="sortBy('userId')"
+                    :aria-sort="ariaSort('userId')"
+                    style="cursor: pointer"
+                  >
+                    UserId <small class="text-muted">{{ sortIndicator('userId') }}</small>
+                  </th>
+                  <th
+                    class="user-select-none"
+                    @click="sortBy('name')"
+                    :aria-sort="ariaSort('name')"
+                    style="cursor: pointer"
+                  >
+                    사용자명 <small class="text-muted">{{ sortIndicator('name') }}</small>
+                  </th>
+                  <th
+                    class="user-select-none"
+                    @click="sortBy('dept')"
+                    :aria-sort="ariaSort('dept')"
+                    style="cursor: pointer"
+                  >
+                    부서명 <small class="text-muted">{{ sortIndicator('dept') }}</small>
+                  </th>
+                  <th
+                    class="user-select-none"
+                    @click="sortBy('role')"
+                    :aria-sort="ariaSort('role')"
+                    style="cursor: pointer"
+                  >
+                    직무 <small class="text-muted">{{ sortIndicator('role') }}</small>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="u in visibleUsers" :key="u.userId">
+                  <td class="text-center">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      v-model="checkedIds"
+                      :value="u.userId"
+                    />
+                  </td>
+                  <td>
+                    <code class="github-code">{{ u.userId }}</code>
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-link btn-sm p-0 text-decoration-none"
+                      @click="openPopup()"
                     >
-                      UserId <small class="text-muted">{{ sortIndicator('userId') }}</small>
-                    </th>
-                    <th
-                      class="user-select-none text-nowrap"
-                      scope="col"
-                      @click="sortBy('name')"
-                      :aria-sort="ariaSort('name')"
-                    >
-                      사용자명 <small class="text-muted">{{ sortIndicator('name') }}</small>
-                    </th>
-                    <th
-                      class="user-select-none text-nowrap"
-                      scope="col"
-                      @click="sortBy('dept')"
-                      :aria-sort="ariaSort('dept')"
-                    >
-                      부서명 <small class="text-muted">{{ sortIndicator('dept') }}</small>
-                    </th>
-                    <th
-                      class="user-select-none text-nowrap"
-                      scope="col"
-                      @click="sortBy('role')"
-                      :aria-sort="ariaSort('role')"
-                    >
-                      직무 <small class="text-muted">{{ sortIndicator('role') }}</small>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="u in visibleUsers" :key="u.userId">
-                    <td>
-                      <div class="form-check m-0 d-flex justify-content-center">
-                        <input
-                          class="form-check-input"
-                          type="checkbox"
-                          v-model="checkedIds"
-                          :value="u.userId"
-                          aria-label="사용자 선택"
-                        />
-                      </div>
-                    </td>
-                    <td>
-                      <span class="font-monospace text-body">{{ u.userId }}</span>
-                    </td>
-                    <td>
-                      <button class="btn btn-outline-primary btn-sm" @click="openPopup()">
-                        {{ u.name }}
-                      </button>
-                    </td>
-                    <td>{{ u.dept }}</td>
-                    <td>{{ u.role }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                      {{ u.name }}
+                    </button>
+                  </td>
+                  <td class="text-github-secondary">{{ u.dept }}</td>
+                  <td class="text-github-secondary">{{ u.role }}</td>
+                </tr>
+                <tr v-if="visibleUsers.length === 0">
+                  <td colspan="5" class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <div>데이터가 없습니다</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: 선택된 사용자 (공통 컴포넌트만 사용) -->
+      <!-- RIGHT: 선택된 사용자 -->
       <div class="col-12 col-lg-6 d-flex flex-column">
         <SelectedUsers
           class="flex-grow-1"
@@ -173,9 +195,11 @@ export default {
       http
         .get('/users')
         .then((res) => {
-          this.users = res.data.data ?? []
+          console.log('UserPage - API response:', res.data)
+          this.users = res.data ?? []
         })
         .catch((error) => {
+          console.error('UserPage - API error:', error)
           const msg = error?.response?.data?.message || error.message || '사용자 목록 조회 실패'
           showToast(msg, { type: 'error' })
         })
@@ -245,3 +269,7 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+@import '@/assets/styles/github-theme.css';
+</style>

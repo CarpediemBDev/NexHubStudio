@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- 공통코드 그룹 초기 데이터 (운영 필수) -->
+    <changeSet id="16-insert-common-code-group-initial-data" author="dev">
+        <insert tableName="common_code_group">
+            <column name="group_code" value="USER_STATUS"/>
+            <column name="group_name" value="사용자 상태"/>
+            <column name="description" value="사용자 계정 상태 구분"/>
+            <column name="sort_order" value="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="icon" value="user"/>
+            <column name="color_code" value="#4CAF50"/>
+            <column name="category" value="USER"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="USER_ROLE"/>
+            <column name="group_name" value="사용자 역할"/>
+            <column name="description" value="시스템 사용자 역할 구분"/>
+            <column name="sort_order" value="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="icon" value="shield"/>
+            <column name="color_code" value="#2196F3"/>
+            <column name="category" value="USER"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="DEPT"/>
+            <column name="group_name" value="부서"/>
+            <column name="description" value="조직 부서 구분"/>
+            <column name="sort_order" value="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="icon" value="building"/>
+            <column name="color_code" value="#FF9800"/>
+            <column name="category" value="ORG"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="POST_STATUS"/>
+            <column name="group_name" value="게시글 상태"/>
+            <column name="description" value="게시글 발행 상태"/>
+            <column name="sort_order" value="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="icon" value="file-text"/>
+            <column name="color_code" value="#9C27B0"/>
+            <column name="category" value="BOARD"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="EQUIPMENT_TYPE"/>
+            <column name="group_name" value="설비 유형"/>
+            <column name="description" value="제조 설비 타입 분류"/>
+            <column name="sort_order" value="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="icon" value="cpu"/>
+            <column name="color_code" value="#607D8B"/>
+            <column name="category" value="EQUIPMENT"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="EQUIPMENT_STATUS"/>
+            <column name="group_name" value="설비 상태"/>
+            <column name="description" value="설비 가동 상태"/>
+            <column name="sort_order" value="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="icon" value="activity"/>
+            <column name="color_code" value="#F44336"/>
+            <column name="category" value="EQUIPMENT"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <!-- 공통코드 초기 데이터 (운영 필수) -->
+    <changeSet id="17-insert-common-code-initial-data" author="dev">
+        <!-- USER_STATUS -->
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'USER_STATUS')"/>
+            <column name="code_id" value="ACTIVE"/>
+            <column name="code_name" value="활성"/>
+            <column name="sort_order" value="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="정상 활성 상태"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'USER_STATUS')"/>
+            <column name="code_id" value="INACTIVE"/>
+            <column name="code_name" value="비활성"/>
+            <column name="sort_order" value="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="일시 정지 상태"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'USER_STATUS')"/>
+            <column name="code_id" value="LOCKED"/>
+            <column name="code_name" value="잠김"/>
+            <column name="sort_order" value="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="계정 잠금 상태"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- USER_ROLE -->
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'USER_ROLE')"/>
+            <column name="code_id" value="ADMIN"/>
+            <column name="code_name" value="관리자"/>
+            <column name="sort_order" value="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="시스템 관리자"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'USER_ROLE')"/>
+            <column name="code_id" value="USER"/>
+            <column name="code_name" value="사용자"/>
+            <column name="sort_order" value="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="일반 사용자"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'USER_ROLE')"/>
+            <column name="code_id" value="DEVELOPER"/>
+            <column name="code_name" value="개발자"/>
+            <column name="sort_order" value="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="개발 담당자"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'USER_ROLE')"/>
+            <column name="code_id" value="QA"/>
+            <column name="code_name" value="QA"/>
+            <column name="sort_order" value="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="품질 관리"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- DEPT -->
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DEPT')"/>
+            <column name="code_id" value="FRONTEND"/>
+            <column name="code_name" value="프론트엔드팀"/>
+            <column name="sort_order" value="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DEPT')"/>
+            <column name="code_id" value="BACKEND"/>
+            <column name="code_name" value="백엔드팀"/>
+            <column name="sort_order" value="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DEPT')"/>
+            <column name="code_id" value="DATA"/>
+            <column name="code_name" value="데이터팀"/>
+            <column name="sort_order" value="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DEPT')"/>
+            <column name="code_id" value="MOBILE"/>
+            <column name="code_name" value="모바일팀"/>
+            <column name="sort_order" value="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- POST_STATUS -->
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'POST_STATUS')"/>
+            <column name="code_id" value="DRAFT"/>
+            <column name="code_name" value="임시저장"/>
+            <column name="sort_order" value="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'POST_STATUS')"/>
+            <column name="code_id" value="PUBLISHED"/>
+            <column name="code_name" value="발행"/>
+            <column name="sort_order" value="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'POST_STATUS')"/>
+            <column name="code_id" value="ARCHIVED"/>
+            <column name="code_name" value="보관"/>
+            <column name="sort_order" value="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- EQUIPMENT_TYPE -->
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_TYPE')"/>
+            <column name="code_id" value="CVD"/>
+            <column name="code_name" value="CVD 증착"/>
+            <column name="sort_order" value="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_TYPE')"/>
+            <column name="code_id" value="ETCHING"/>
+            <column name="code_name" value="식각"/>
+            <column name="sort_order" value="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_TYPE')"/>
+            <column name="code_id" value="LITHOGRAPHY"/>
+            <column name="code_name" value="노광"/>
+            <column name="sort_order" value="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_TYPE')"/>
+            <column name="code_id" value="ION_IMPLANT"/>
+            <column name="code_name" value="이온주입"/>
+            <column name="sort_order" value="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_TYPE')"/>
+            <column name="code_id" value="CMP"/>
+            <column name="code_name" value="CMP 연마"/>
+            <column name="sort_order" value="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_TYPE')"/>
+            <column name="code_id" value="INSPECTION"/>
+            <column name="code_name" value="검사"/>
+            <column name="sort_order" value="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- EQUIPMENT_STATUS -->
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_STATUS')"/>
+            <column name="code_id" value="NORMAL"/>
+            <column name="code_name" value="정상"/>
+            <column name="sort_order" value="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_STATUS')"/>
+            <column name="code_id" value="WARNING"/>
+            <column name="code_name" value="경고"/>
+            <column name="sort_order" value="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_STATUS')"/>
+            <column name="code_id" value="ERROR"/>
+            <column name="code_name" value="오류"/>
+            <column name="sort_order" value="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_STATUS')"/>
+            <column name="code_id" value="MAINTENANCE"/>
+            <column name="code_name" value="점검중"/>
+            <column name="sort_order" value="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'EQUIPMENT_STATUS')"/>
+            <column name="code_id" value="OFFLINE"/>
+            <column name="code_name" value="오프라인"/>
+            <column name="sort_order" value="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
