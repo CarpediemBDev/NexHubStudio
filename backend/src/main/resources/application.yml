@@ -16,6 +16,8 @@ spring:
     user:
       name: admin
       password: admin
+  liquibase:
+    clear-checksums: true
 
 # JWT Configuration
 jwt:
