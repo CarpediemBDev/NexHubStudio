@@ -236,7 +236,7 @@ export default {
   methods: {
     async loadUsers() {
       const res = await http.get('/users')
-      this.users = res.data.data ?? []
+      this.users = res.data ?? []
     },
 
     onClose() {
