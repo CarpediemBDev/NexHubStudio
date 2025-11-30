@@ -8,3 +8,4 @@ spring:
     parameters:
       liquibase.schema: public
       app.name: NexHubStudio-backend
+    clear-checksums: true
