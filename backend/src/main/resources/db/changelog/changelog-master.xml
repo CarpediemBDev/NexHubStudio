@@ -7,6 +7,7 @@
 
     <!-- DDL: 테이블 생성 -->
     <include file="db/changelog/ddl/v1.0-schema.xml"/>
+    <include file="db/changelog/ddl/v1.2-add-parent-id-to-common-code.xml"/>
 
     <!-- DML: 공통코드 초기 데이터 (운영 필수) -->
     <include file="db/changelog/dml/seed-common-codes.xml"/>

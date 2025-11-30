@@ -153,6 +153,25 @@
             <column name="use_yn" value="Y"/>
             <column name="created_by" value="system"/>
         </insert>
+            <!-- 2depth: FE1, FE2팀 (FRONTEND 하위) -->
+            <insert tableName="common_code">
+                <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DEPT')"/>
+                <column name="code_id" value="FE1"/>
+                <column name="code_name" value="FE-1팀"/>
+                <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'FRONTEND')"/>
+                <column name="sort_order" value="101"/>
+                <column name="use_yn" value="Y"/>
+                <column name="created_by" value="system"/>
+            </insert>
+            <insert tableName="common_code">
+                <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DEPT')"/>
+                <column name="code_id" value="FE2"/>
+                <column name="code_name" value="FE-2팀"/>
+                <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'FRONTEND')"/>
+                <column name="sort_order" value="102"/>
+                <column name="use_yn" value="Y"/>
+                <column name="created_by" value="system"/>
+            </insert>
         <insert tableName="common_code">
             <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DEPT')"/>
             <column name="code_id" value="BACKEND"/>

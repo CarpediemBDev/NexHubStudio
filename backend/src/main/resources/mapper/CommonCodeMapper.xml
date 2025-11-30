@@ -16,32 +16,33 @@
         <result property="createdAt" column="created_at"/>
         <result property="updatedBy" column="updated_by"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="parentId" column="parent_id"/>
     </resultMap>
 
     <select id="findAll" resultMap="CommonCodeResultMap">
-        SELECT id, code_group_id, code_id, code_name, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
+        SELECT id, code_group_id, code_id, code_name, parent_id, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
         FROM common_code
         ORDER BY code_group_id, sort_order, code_id
     </select>
 
     <select id="findByCodeGroupId" parameterType="long" resultMap="CommonCodeResultMap">
-        SELECT id, code_group_id, code_id, code_name, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
+        SELECT id, code_group_id, code_id, code_name, parent_id, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
         FROM common_code
         WHERE code_group_id = #{codeGroupId}
         ORDER BY sort_order, code_id
     </select>
 
     <select id="findById" parameterType="long" resultMap="CommonCodeResultMap">
-        SELECT id, code_group_id, code_id, code_name, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
+        SELECT id, code_group_id, code_id, code_name, parent_id, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at 
         FROM common_code
         WHERE id = #{id}
     </select>
 
     <insert id="insertCommonCode" parameterType="com.nexhubstudio.backend.dto.CommonCodeRequest">
         INSERT INTO common_code (
-            code_group_id, code_id, code_name, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at
+            code_group_id, code_id, code_name, parent_id, sort_order, use_yn, description, created_by, created_at, updated_by, updated_at
         ) VALUES (
-            #{codeGroupId}, #{codeId}, #{codeName}, #{sortOrder}, #{useYn}, #{description}, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP
+            #{codeGroupId}, #{codeId}, #{codeName}, #{parentId}, #{sortOrder}, #{useYn}, #{description}, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP
         )
     </insert>
 
@@ -50,6 +51,7 @@
             code_group_id = #{codeGroupId},
             code_id = #{codeId},
             code_name = #{codeName},
+            parent_id = #{parentId},
             sort_order = #{sortOrder},
             use_yn = #{useYn},
             description = #{description},

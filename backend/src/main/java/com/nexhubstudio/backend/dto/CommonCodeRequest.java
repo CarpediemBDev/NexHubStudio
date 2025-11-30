@@ -15,4 +15,5 @@ public class CommonCodeRequest {
     private Integer sortOrder;
     private String useYn;
     private String description;
+    private Long parentId; // 부모 코드 ID (트리 구조용)
 }

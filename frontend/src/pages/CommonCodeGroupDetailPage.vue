@@ -24,30 +24,10 @@
           <span class="panel-title">코드 트리</span>
           <span class="badge">{{ codes.length }}</span>
         </div>
-        <div class="tree-list">
-          <div
-            v-for="code in sortedCodes"
-            :key="code.id || code.codeId"
-            class="tree-item"
-            :class="{ active: selectedCode?.codeId === code.codeId }"
-            @click="selectCode(code)"
-            draggable="true"
-            @dragstart="handleDragStart(code, $event)"
-            @dragover.prevent="handleDragOver(code, $event)"
-            @drop="handleDrop(code, $event)"
-          >
-            <div class="tree-item-content">
-              <i class="bi bi-grip-vertical drag-handle"></i>
-              <i class="bi bi-tag"></i>
-              <span class="code-text">{{ code.codeId }}</span>
-              <span class="value-text">{{ code.codeName }}</span>
-              <span v-if="code.useYn === 'N'" class="badge bg-secondary ms-auto">미사용</span>
-            </div>
-          </div>
-          <div v-if="codes.length === 0" class="text-center text-muted py-5">
-            <i class="bi bi-inbox" style="font-size: 2rem"></i>
-            <div class="mt-2">등록된 코드가 없습니다</div>
-          </div>
+        <CodeTree :codes="codes" @select="selectCode" />
+        <div v-if="codes.length === 0" class="text-center text-muted py-5">
+          <i class="bi bi-inbox" style="font-size: 2rem"></i>
+          <div class="mt-2">등록된 코드가 없습니다</div>
         </div>
       </div>
 
@@ -82,17 +62,25 @@
 
 <script>
 import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import CodeTree from '@/components/CodeTree.vue'
 import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'CommonCodeGroupDetailPage',
-  components: { JqxCustomeGrid },
+  components: { JqxCustomeGrid, CodeTree },
   data() {
     return {
       groupId: null,
       groupInfo: {},
-      codes: [],
+      codes: [
+        { codeId: 'A', codeName: '루트코드A', parentId: null },
+        { codeId: 'B', codeName: '루트코드B', parentId: null },
+        { codeId: 'A1', codeName: 'A의 자식1', parentId: 'A' },
+        { codeId: 'A2', codeName: 'A의 자식2', parentId: 'A' },
+        { codeId: 'A1-1', codeName: 'A1의 자식', parentId: 'A1' },
+        { codeId: 'B1', codeName: 'B의 자식1', parentId: 'B' },
+      ],
       selectedCode: null,
       draggedCode: null,
       datafields: [
@@ -161,8 +149,8 @@ export default {
     },
     async loadCodes() {
       try {
-        const { data } = await http.get('/common-codes')
-        this.codes = data.filter((c) => c.codeGroupId === Number(this.groupId))
+        const { data } = await http.get(`common-codes/group/${this.groupId}`)
+        this.codes = data
       } catch (error) {
         showToast('코드 목록 조회 실패', { type: 'error' })
       }
@@ -388,5 +376,45 @@ export default {
 .value-text {
   flex: 1;
   color: #57606a;
+}
+
+/* 버튼 스타일 개선: 메인페이지와 통일, 작고 심플하게 */
+.github-btn {
+  font-size: 0.82rem;
+  padding: 0.32rem 0.7rem;
+  font-weight: 500;
+  border-radius: 5px;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.github-btn-primary {
+  background: #2da44e;
+  border: 1px solid #2da44e;
+  color: #fff;
+}
+.github-btn-primary:hover {
+  background: #2c974b;
+  border-color: #2c974b;
+}
+.github-btn-danger {
+  color: #cf222e;
+  border: 1px solid rgba(207, 34, 46, 0.2);
+  background: #fff;
+}
+.github-btn-danger:hover {
+  background: #cf222e;
+  border-color: #cf222e;
+  color: #fff;
+}
+.github-btn-success {
+  background: #218838;
+  border: 1px solid #218838;
+  color: #fff;
+}
+.github-btn-success:hover {
+  background: #1e7e34;
+  border-color: #1e7e34;
 }
 </style>

@@ -22,4 +22,5 @@ public class CommonCode {
     private LocalDateTime createdAt;
     private String updatedBy;
     private LocalDateTime updatedAt;
+    private Long parentId; // 부모 코드 ID (트리 구조용)
 }
