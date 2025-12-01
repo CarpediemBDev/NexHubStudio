@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "axios": "^1.13.2",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.13.1",
+    "jqwidgets-scripts": "^19.2.0",
     "vue": "^3.5.12",
-    "vue-router": "^4.4.5",
-    "jqwidgets-scripts": "^19.2.0"
+    "vue-datepicker-next": "^1.0.3",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.2",
