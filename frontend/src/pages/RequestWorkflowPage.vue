@@ -77,12 +77,35 @@
 
               <div class="mb-3">
                 <label class="form-label fw-bold">첨부파일</label>
-                <div class="file-upload-area border rounded p-3 text-center bg-light">
+
+                <!-- 파일 업로드 영역 (조건부 렌더링) -->
+                <div
+                  v-if="uploadProgress === 0"
+                  class="file-upload-area border rounded p-3 text-center bg-light"
+                >
                   <i class="bi bi-cloud-upload fs-1 text-muted"></i>
                   <p class="mb-2 text-muted">클릭하거나 파일을 드래그하세요</p>
-                  <input type="file" class="form-control" multiple />
+                  <input type="file" class="form-control" @change="handleFileUpload" multiple />
                   <small class="text-muted">최대 10MB, 여러 파일 선택 가능</small>
                 </div>
+
+                <!-- 업로드 진행률 (같은 영역에서 표시) -->
+                <div
+                  v-else-if="uploadProgress > 0 && uploadProgress < 100"
+                  class="border rounded p-4 text-center bg-light"
+                >
+                  <i class="bi bi-cloud-upload fs-1 text-success mb-2"></i>
+                  <div class="progress" style="height: 30px">
+                    <div
+                      class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                      :style="{ width: uploadProgress + '%' }"
+                    >
+                      업로드 중... {{ uploadProgress }}%
+                    </div>
+                  </div>
+                  <small class="text-muted mt-2 d-block">파일을 업로드하고 있습니다...</small>
+                </div>
+
                 <!-- 첨부파일 목록 예시 -->
                 <ul class="list-group mt-2" v-if="requestData.files.length > 0">
                   <li
@@ -388,6 +411,9 @@ export default {
         files: ['제안서.pdf', '요구사항_정의서.docx'], // 예시
       },
 
+      // 파일 업로드 진행률
+      uploadProgress: 0,
+
       // 접수 데이터
       receiveData: {
         assignee: '',
@@ -414,6 +440,51 @@ export default {
     }
   },
   methods: {
+    handleFileUpload(event) {
+      const files = event.target.files
+      if (!files.length) return
+
+      // 실제 업로드 시뮬레이션 (데모용)
+      this.uploadProgress = 0
+      const interval = setInterval(() => {
+        this.uploadProgress += 5
+        if (this.uploadProgress >= 100) {
+          clearInterval(interval)
+          setTimeout(() => {
+            this.uploadProgress = 0
+            // 파일명 추가 (실제로는 서버 응답에서 받음)
+            Array.from(files).forEach((file) => {
+              if (!this.requestData.files.includes(file.name)) {
+                this.requestData.files.push(file.name)
+              }
+            })
+          }, 500)
+        }
+      }, 400)
+
+      /* 실제 업로드 코드 (백엔드 연동 시)
+      const formData = new FormData()
+      Array.from(files).forEach(file => {
+        formData.append('files', file)
+      })
+
+      http.post('/files/upload', formData, {
+        onUploadProgress: (progressEvent) => {
+          this.uploadProgress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          )
+        }
+      })
+      .then(response => {
+        this.requestData.files = response.data
+        this.uploadProgress = 0
+      })
+      .catch(error => {
+        console.error('업로드 실패:', error)
+        this.uploadProgress = 0
+      })
+      */
+    },
     toggleSection(section) {
       // 현재 상태에 따라 접근 가능한 섹션 제한
       if (!this.canAccessSection(section)) {
