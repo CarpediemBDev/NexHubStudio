@@ -65,6 +65,18 @@ export default {
   mounted() {
     this.fetchPosts()
   },
+  activated() {
+    // keep-alive 사용 시 페이지 재진입할 때마다 목록 새로고침
+    this.fetchPosts()
+  },
+  watch: {
+    // 라우트 변경 감지하여 목록 새로고침
+    $route(to, from) {
+      if (to.path === '/posts' && from.path.startsWith('/posts/')) {
+        this.fetchPosts()
+      }
+    },
+  },
   methods: {
     formatDate,
     truncate,
@@ -73,10 +85,12 @@ export default {
       http
         .get('/posts')
         .then((response) => {
-          this.posts = response.data.data
+          this.posts = response.data || []
         })
         .catch((error) => {
-          console.error(error)
+          console.error('[PostListPage] 에러:', error)
+          this.posts = []
+          showToast('게시글 목록 조회 실패', { type: 'error' })
         })
         .finally(() => {
           this.loading = false

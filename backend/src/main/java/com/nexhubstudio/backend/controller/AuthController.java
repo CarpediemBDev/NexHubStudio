@@ -1,10 +1,12 @@
 package com.nexhubstudio.backend.controller;
 
+import com.nexhubstudio.backend.dto.ApiResponse;
 import com.nexhubstudio.backend.dto.UserRequest;
 import com.nexhubstudio.backend.dto.UserResponse;
 import com.nexhubstudio.backend.security.JwtProvider;
 import com.nexhubstudio.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -28,7 +30,7 @@ public class AuthController {
      * 실패: 401 Unauthorized (사용자 없음 또는 비밀번호 불일치)
      */
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> login(@RequestBody UserRequest userRequest) {
         // 사용자 조회 (없으면 BusinessException 발생)
         UserResponse user = userService.getUserById(userRequest.getUserId());
 
@@ -46,6 +48,7 @@ public class AuthController {
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
         result.put("user", user);
-        return result;
+
+        return ResponseEntity.ok(ApiResponse.success("로그인 성공", result));
     }
 }

@@ -196,8 +196,7 @@ export default {
       http
         .get(url)
         .then((response) => {
-          console.log('설비 데이터:', response.data)
-          this.equipments = response.data.data || []
+          this.equipments = response.data || []
           this.lastUpdateTime = new Date().toLocaleTimeString()
           this.isLoading = false
         })

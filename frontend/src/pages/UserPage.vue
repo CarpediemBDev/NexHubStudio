@@ -195,7 +195,6 @@ export default {
       http
         .get('/users')
         .then((res) => {
-          console.log('UserPage - API response:', res.data)
           this.users = res.data ?? []
         })
         .catch((error) => {

@@ -514,7 +514,6 @@ export default {
         operations: this.operations.map((u) => u.id),
         workers: this.workers.map((u) => u.id),
       }
-      console.log('저장할 데이터:', data)
       showToast('사용자 배정이 저장되었습니다.', { type: 'success' })
     },
   },

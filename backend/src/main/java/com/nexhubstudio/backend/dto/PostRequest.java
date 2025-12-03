@@ -18,5 +18,6 @@ public class PostRequest {
     private String title;
     private String content;
     private String status; // PUBLISHED, DRAFT
+    private Boolean isPublic; // 공개여부
     private List<Long> attachmentIds; // 업로드된 파일 id 목록 (선택)
 }

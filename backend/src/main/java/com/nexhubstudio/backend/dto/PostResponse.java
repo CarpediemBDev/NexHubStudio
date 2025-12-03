@@ -24,6 +24,7 @@ public class PostResponse {
     private String authorName; // 작성자 이름 (JOIN으로 가져옴)
     private String status;
     private Integer viewCount;
+    private Boolean isPublic; // 공개여부
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<File> attachments; // 첨부파일 목록

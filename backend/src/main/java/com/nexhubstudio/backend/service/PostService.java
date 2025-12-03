@@ -46,6 +46,7 @@ public class PostService {
                 .authorId(authorId)
                 .status(request.getStatus() != null ? request.getStatus() : "PUBLISHED")
                 .viewCount(0)
+                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : true)
                 .fileGroupId(fileGroupId)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -79,6 +80,9 @@ public class PostService {
         post.setContent(request.getContent());
         if (request.getStatus() != null) {
             post.setStatus(request.getStatus());
+        }
+        if (request.getIsPublic() != null) {
+            post.setIsPublic(request.getIsPublic());
         }
         post.setUpdatedAt(LocalDateTime.now());
 
@@ -154,6 +158,7 @@ public class PostService {
                 .authorId(post.getAuthorId())
                 .status(post.getStatus())
                 .viewCount(post.getViewCount())
+                .isPublic(post.getIsPublic())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();

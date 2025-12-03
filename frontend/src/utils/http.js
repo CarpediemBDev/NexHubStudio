@@ -10,17 +10,10 @@ const http = axios.create({
 // Response: global error toast
 http.interceptors.response.use(
   (response) => {
-    // 응답 구조가 { data: { data: ..., message: ... } } 형태면 자동 파싱
-    if (response.data && response.data.data !== undefined) {
-      // success가 false인 경우 에러로 처리
-      if (response.data.success === false) {
-        const errorMsg = response.data.message || '요청 처리 중 오류가 발생했습니다.'
-        showToast(errorMsg, { type: 'error', duration: 3000 })
-        return Promise.reject(new Error(errorMsg))
-      }
-      return response.data
-    }
-    return response
+    // 백엔드는 항상 { code, message, data } 형태의 ApiResponse로 응답
+    // Axios response.data에는 { code, message, data }가 들어있음
+    // 이를 그대로 반환하여 컴포넌트에서 response.code, response.message, response.data로 접근
+    return response.data
   },
   (error) => {
     const msg =

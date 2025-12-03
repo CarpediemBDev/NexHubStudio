@@ -72,7 +72,35 @@
                 </div>
               </div>
 
-              <!-- 버튼 그룹 -->
+              <!-- 공개여부 -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">
+                  공개여부 <span class="text-danger">*</span>
+                </label>
+                <div>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      id="isPublic-true"
+                      :value="true"
+                      v-model="form.isPublic"
+                    />
+                    <label class="form-check-label" for="isPublic-true">공개</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      id="isPublic-false"
+                      :value="false"
+                      v-model="form.isPublic"
+                    />
+                    <label class="form-check-label" for="isPublic-false">비공개</label>
+                  </div>
+                </div>
+              </div>
+
               <!-- 첨부파일 업로드 -->
               <div class="mb-4">
                 <label class="form-label fw-bold">첨부파일</label>
@@ -150,8 +178,10 @@ export default {
         title: '',
         content: '',
         status: 'PUBLISHED',
+        isPublic: true,
       },
       uploadedFiles: [],
+      uploadInProgress: false,
       isEdit: false,
       postId: null,
       currentUserId: 'Asparagus.cata', // 임시 사용자
@@ -170,10 +200,11 @@ export default {
       http
         .get(`/posts/${this.postId}`)
         .then((response) => {
-          const post = response.data.data
+          const post = response.data
           this.form.title = post.title
           this.form.content = post.content
           this.form.status = post.status
+          this.form.isPublic = post.isPublic !== undefined ? post.isPublic : true
           // load existing attachments when editing
           this.uploadedFiles = post.attachments || []
         })
@@ -196,10 +227,25 @@ export default {
       http[method](url, payload, { headers: { 'X-User-Id': this.currentUserId } })
         .then((response) => {
           showToast(successMessage, { type: 'success' })
-          this.$router.push(redirectPath || `/posts/${response.data.data.id}`)
+
+          // http 인터셉터가 이미 response.data를 반환함
+          const savedPost = response.data
+
+          // redirectPath가 지정되어 있으면 그곳으로, 아니면 상세 페이지로
+          if (redirectPath) {
+            this.$router.push(redirectPath)
+          } else {
+            const postId = savedPost?.id || this.postId
+            if (postId) {
+              this.$router.push(`/posts/${postId}`)
+            } else {
+              this.$router.push('/posts')
+            }
+          }
         })
         .catch((error) => {
-          console.error(error)
+          console.error('게시글 저장 오류:', error)
+          showToast('저장 실패', { type: 'error' })
         })
     },
     submitPost() {
@@ -215,6 +261,43 @@ export default {
         }
       }
       this.$router.push('/posts')
+    },
+    async handleFileChange(event) {
+      const files = event.target.files
+      if (!files || files.length === 0) return
+
+      this.uploadInProgress = true
+      const formData = new FormData()
+
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i])
+      }
+
+      try {
+        const response = await http.post('/files/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-User-Id': this.currentUserId,
+          },
+        })
+
+        const uploadedFileList = response.data || []
+        this.uploadedFiles.push(...uploadedFileList)
+        showToast(`${uploadedFileList.length}개 파일 업로드 완료`, { type: 'success' })
+      } catch (error) {
+        console.error(error)
+        showToast('파일 업로드 실패', { type: 'error' })
+      } finally {
+        this.uploadInProgress = false
+        event.target.value = ''
+      }
+    },
+    removeUploadedFile(file) {
+      const index = this.uploadedFiles.findIndex((f) => f.id === file.id)
+      if (index > -1) {
+        this.uploadedFiles.splice(index, 1)
+        showToast('파일 제거 완료', { type: 'info' })
+      }
     },
   },
 }

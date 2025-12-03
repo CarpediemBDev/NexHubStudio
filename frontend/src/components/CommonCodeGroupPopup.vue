@@ -226,7 +226,6 @@ export default {
           response = await http.post('/common-code-groups', this.form)
           showToast('그룹 등록 완료', { type: 'success' })
         }
-        console.log('Save response:', response)
         this.$emit('save')
         this.close()
       } catch (error) {

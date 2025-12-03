@@ -27,6 +27,33 @@
 
       <!-- 게시글 내용 -->
       <div class="card-body">
+        <!-- 공개여부 -->
+        <div class="mb-3 pb-3 border-bottom">
+          <label class="form-label fw-bold text-muted small">공개여부</label>
+          <div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                id="isPublic-true-detail"
+                :checked="post.isPublic === true"
+                disabled
+              />
+              <label class="form-check-label" for="isPublic-true-detail">공개</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                id="isPublic-false-detail"
+                :checked="post.isPublic === false"
+                disabled
+              />
+              <label class="form-check-label" for="isPublic-false-detail">비공개</label>
+            </div>
+          </div>
+        </div>
+
         <div v-if="post.attachments && post.attachments.length" class="mb-3">
           <h6 class="mb-2"><i class="bi bi-paperclip me-1"></i>첨부파일</h6>
           <ul class="list-unstyled">
@@ -171,7 +198,7 @@ export default {
       http
         .get(`/posts/${this.$route.params.id}`)
         .then((response) => {
-          this.post = response.data.data
+          this.post = response.data
         })
         .catch((error) => {
           console.error(error)
@@ -184,7 +211,7 @@ export default {
       http
         .get(`/posts/${this.$route.params.id}/comments`)
         .then((response) => {
-          const allComments = response.data.data
+          const allComments = response.data || []
 
           // 댓글과 대댓글 구조화
           this.comments = allComments

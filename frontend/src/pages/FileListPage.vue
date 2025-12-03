@@ -133,7 +133,7 @@ export default {
       http
         .get('/files')
         .then((response) => {
-          this.files = response.data.data
+          this.files = response.data
         })
         .catch((error) => {
           console.error(error)
