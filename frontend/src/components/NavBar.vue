@@ -181,6 +181,10 @@ export default {
           children: [{ label: '설비 모니터링', to: '/equipment-monitor' }],
         },
         {
+          label: '업무 관리',
+          children: [{ label: '업무 의뢰', to: '/request-workflow' }],
+        },
+        {
           label: '개발 가이드',
           children: [{ label: '공통 컴포넌트 가이드', to: '/component-guide' }],
         },
