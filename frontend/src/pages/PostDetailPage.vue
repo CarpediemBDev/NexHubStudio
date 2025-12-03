@@ -31,28 +31,15 @@
         <div class="mb-3 pb-3 border-bottom">
           <label class="form-label fw-bold text-muted small">공개여부</label>
           <div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                id="isPublic-public-detail"
-                value="public"
-                v-model="displayIsPublic"
-                disabled
-              />
-              <label class="form-check-label" for="isPublic-public-detail">공개</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                id="isPublic-private-detail"
-                value="private"
-                v-model="displayIsPublic"
-                disabled
-              />
-              <label class="form-check-label" for="isPublic-private-detail">비공개</label>
-            </div>
+            <Radio
+              v-for="code in publicCodes"
+              :key="code.codeId"
+              v-model="displayIsPublic"
+              :value="code.codeId"
+              :label="code.codeName"
+              name="isPublic-detail"
+              disabled
+            />
           </div>
         </div>
 
@@ -170,9 +157,13 @@
 import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
 import { formatDate } from '@/utils/dateUtil'
+import Radio from '@/components/Radio.vue'
 
 export default {
   name: 'PostDetailPage',
+  components: {
+    Radio,
+  },
   data() {
     return {
       post: null,
@@ -182,7 +173,8 @@ export default {
       replyFormId: null,
       loading: false,
       currentUserId: 'Asparagus.cata', // 임시 사용자 (나중에 로그인 기능 추가 시 변경)
-      displayIsPublic: 'public', // 공개여부 표시용
+      displayIsPublic: '', // 공개여부 표시용
+      publicCodes: [], // API에서 로드
     }
   },
   computed: {
@@ -191,11 +183,22 @@ export default {
     },
   },
   mounted() {
+    this.fetchPublicCodes()
     this.fetchPost()
     this.fetchComments()
   },
   methods: {
     formatDate,
+    fetchPublicCodes() {
+      http
+        .get('/common-codes/group-code/POST_PUBLIC')
+        .then((response) => {
+          this.publicCodes = response.data || []
+        })
+        .catch((error) => {
+          console.error('공개여부 코드 조회 실패:', error)
+        })
+    },
     fetchPost() {
       this.loading = true
       http

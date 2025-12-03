@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="insert-post-public-codes" author="system">
+        <comment>게시글 공개여부 공통코드 그룹 및 코드 생성</comment>
+        
+        <!-- 1. POST_PUBLIC 그룹 생성 -->
+        <insert tableName="common_code_group">
+            <column name="group_code" value="POST_PUBLIC"/>
+            <column name="group_name" value="게시글 공개여부"/>
+            <column name="description" value="게시글의 공개/비공개 상태를 관리하는 코드"/>
+            <column name="sort_order" value="7"/>
+            <column name="use_yn" value="Y"/>
+            <column name="icon" value="bi bi-eye"/>
+            <column name="color_code" value="#00BCD4"/>
+            <column name="category" value="BOARD"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- 2. public 코드 생성 -->
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'POST_PUBLIC')"/>
+            <column name="code_id" value="public"/>
+            <column name="code_name" value="공개"/>
+            <column name="sort_order" value="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="게시글을 모든 사용자에게 공개"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- 3. private 코드 생성 -->
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'POST_PUBLIC')"/>
+            <column name="code_id" value="private"/>
+            <column name="code_name" value="비공개"/>
+            <column name="sort_order" value="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="게시글을 작성자만 볼 수 있도록 비공개"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

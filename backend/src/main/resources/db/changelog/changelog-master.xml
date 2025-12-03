@@ -14,6 +14,7 @@
 
     <!-- DML: 공통코드 초기 데이터 (운영 필수) -->
     <include file="db/changelog/dml/seed-common-codes.xml"/>
+    <include file="db/changelog/dml/v20251204-insert-post-public-codes.xml"/>
 
     <!-- DML: 샘플 데이터 (개발/테스트 환경만) -->
     <include file="db/changelog/dml/seed-sample-data.xml"/>

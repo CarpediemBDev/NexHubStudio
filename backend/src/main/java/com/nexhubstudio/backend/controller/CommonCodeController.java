@@ -49,6 +49,12 @@ public class CommonCodeController {
         return ResponseEntity.ok(ApiResponse.success(codes));
     }
 
+    @GetMapping("/group-code/{groupCode}")
+    public ResponseEntity<ApiResponse<List<CommonCode>>> getCommonCodesByGroupCode(@PathVariable String groupCode) {
+        List<CommonCode> codes = commonCodeService.getCommonCodesByGroupCode(groupCode);
+        return ResponseEntity.ok(ApiResponse.success(codes));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CommonCode>> getCommonCodeById(@PathVariable Long id) {
         CommonCode code = commonCodeService.getCommonCodeById(id);

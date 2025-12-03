@@ -80,6 +80,19 @@ public class CommonCodeService {
         return commonCodeMapper.findByCodeGroupId(codeGroupId);
     }
 
+    public List<CommonCode> getCommonCodesByGroupCode(String groupCode) {
+        if (groupCode == null || groupCode.trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT);
+        }
+
+        CommonCodeGroup group = commonCodeGroupMapper.findByGroupCode(groupCode);
+        if (group == null) {
+            throw new BusinessException(ErrorCode.CODE_GROUP_NOT_FOUND);
+        }
+
+        return commonCodeMapper.findByCodeGroupId(group.getId());
+    }
+
     public CommonCode getCommonCodeById(Long id) {
         if (id == null) {
             throw new BusinessException(ErrorCode.INVALID_INPUT);

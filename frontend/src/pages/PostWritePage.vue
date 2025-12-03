@@ -75,29 +75,18 @@
               <!-- 공개여부 -->
               <div class="mb-4">
                 <label class="form-label fw-bold">
-                  공개여부 <span class="text-danger">*</span>
+                  공개여부
+                  <span class="text-danger">*</span>
                 </label>
                 <div>
-                  <div class="form-check form-check-inline">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="isPublic-public"
-                      value="public"
-                      v-model="form.isPublic"
-                    />
-                    <label class="form-check-label" for="isPublic-public">공개</label>
-                  </div>
-                  <div class="form-check form-check-inline">
-                    <input
-                      class="form-check-input"
-                      type="radio"
-                      id="isPublic-private"
-                      value="private"
-                      v-model="form.isPublic"
-                    />
-                    <label class="form-check-label" for="isPublic-private">비공개</label>
-                  </div>
+                  <Radio
+                    v-for="code in publicCodes"
+                    :key="code.codeId"
+                    v-model="form.isPublic"
+                    :value="code.codeId"
+                    :label="code.codeName"
+                    name="isPublic"
+                  />
                 </div>
               </div>
 
@@ -165,11 +154,13 @@
 <script>
 import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
+import Radio from '@/components/Radio.vue'
 import FileUpload from '@/components/FileUpload.vue'
 
 export default {
   name: 'PostWritePage',
   components: {
+    Radio,
     FileUpload,
   },
   data() {
@@ -185,9 +176,11 @@ export default {
       isEdit: false,
       postId: null,
       currentUserId: 'Asparagus.cata', // 임시 사용자
+      publicCodes: [], // API에서 로드
     }
   },
   mounted() {
+    this.fetchPublicCodes()
     this.postId = this.$route.params.id
     this.isEdit = !!this.postId
 
@@ -196,6 +189,16 @@ export default {
     }
   },
   methods: {
+    fetchPublicCodes() {
+      http
+        .get('/common-codes/group-code/POST_PUBLIC')
+        .then((response) => {
+          this.publicCodes = response.data || []
+        })
+        .catch((error) => {
+          console.error('공개여부 코드 조회 실패:', error)
+        })
+    },
     fetchPost() {
       http
         .get(`/posts/${this.postId}`)

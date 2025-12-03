@@ -18,6 +18,84 @@
     </div>
 
     <div class="content-area">
+      <!-- 그룹 정보 편집 섹션 -->
+      <div class="content-card mb-3">
+        <div class="panel-header">
+          <span class="panel-title">그룹 정보</span>
+          <button class="github-btn github-btn-sm" @click="toggleGroupEdit">
+            <i :class="editingGroup ? 'bi bi-x' : 'bi bi-pencil'"></i>
+            {{ editingGroup ? '취소' : '편집' }}
+          </button>
+        </div>
+        <div class="p-3">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">그룹 코드</label>
+              <input
+                type="text"
+                class="form-control"
+                v-model="groupInfo.groupCode"
+                :disabled="!editingGroup"
+                readonly
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">그룹명</label>
+              <input
+                type="text"
+                class="form-control"
+                v-model="groupInfo.groupName"
+                :disabled="!editingGroup"
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">아이콘</label>
+              <input
+                type="text"
+                class="form-control"
+                v-model="groupInfo.icon"
+                :disabled="!editingGroup"
+                placeholder="예: bi bi-folder"
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">색상 코드</label>
+              <input
+                type="text"
+                class="form-control"
+                v-model="groupInfo.colorCode"
+                :disabled="!editingGroup"
+                placeholder="예: #00BCD4"
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">카테고리</label>
+              <input
+                type="text"
+                class="form-control"
+                v-model="groupInfo.category"
+                :disabled="!editingGroup"
+                placeholder="예: BOARD"
+              />
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">설명</label>
+              <textarea
+                class="form-control"
+                v-model="groupInfo.description"
+                :disabled="!editingGroup"
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+          <div v-if="editingGroup" class="mt-3 text-end">
+            <button class="github-btn github-btn-success" @click="saveGroupInfo">
+              <i class="bi bi-save"></i> 그룹 정보 저장
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- 좌측: 코드 Tree -->
       <div class="tree-panel content-card">
         <div class="panel-header">
@@ -73,6 +151,7 @@ export default {
     return {
       groupId: null,
       groupInfo: {},
+      editingGroup: false,
       codes: [
         { codeId: 'A', codeName: '루트코드A', parentId: null },
         { codeId: 'B', codeName: '루트코드B', parentId: null },
@@ -157,6 +236,19 @@ export default {
     },
     selectCode(code) {
       this.selectedCode = code
+    },
+    toggleGroupEdit() {
+      this.editingGroup = !this.editingGroup
+    },
+    async saveGroupInfo() {
+      try {
+        await http.put(`/common-code-groups/${this.groupId}`, this.groupInfo)
+        showToast('그룹 정보 저장 완료', { type: 'success' })
+        this.editingGroup = false
+        await this.loadGroupInfo()
+      } catch (error) {
+        showToast('그룹 정보 저장 실패', { type: 'error' })
+      }
     },
     addCode() {
       const maxOrder = Math.max(0, ...this.codes.map((c) => c.sortOrder || 0))
