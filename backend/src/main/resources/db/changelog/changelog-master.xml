@@ -10,6 +10,7 @@
 
     <include file="db/changelog/ddl/v1.2-add-parent-id-to-common-code.xml"/>
     <include file="db/changelog/ddl/v20251204-add-is-public-to-posts.xml"/>
+    <include file="db/changelog/v20251204-change-is-public-to-string.xml"/>
 
     <!-- DML: 공통코드 초기 데이터 (운영 필수) -->
     <include file="db/changelog/dml/seed-common-codes.xml"/>

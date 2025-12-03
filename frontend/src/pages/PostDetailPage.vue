@@ -35,21 +35,23 @@
               <input
                 class="form-check-input"
                 type="radio"
-                id="isPublic-true-detail"
-                :checked="post.isPublic === true"
+                id="isPublic-public-detail"
+                value="public"
+                v-model="displayIsPublic"
                 disabled
               />
-              <label class="form-check-label" for="isPublic-true-detail">공개</label>
+              <label class="form-check-label" for="isPublic-public-detail">공개</label>
             </div>
             <div class="form-check form-check-inline">
               <input
                 class="form-check-input"
                 type="radio"
-                id="isPublic-false-detail"
-                :checked="post.isPublic === false"
+                id="isPublic-private-detail"
+                value="private"
+                v-model="displayIsPublic"
                 disabled
               />
-              <label class="form-check-label" for="isPublic-false-detail">비공개</label>
+              <label class="form-check-label" for="isPublic-private-detail">비공개</label>
             </div>
           </div>
         </div>
@@ -180,6 +182,7 @@ export default {
       replyFormId: null,
       loading: false,
       currentUserId: 'Asparagus.cata', // 임시 사용자 (나중에 로그인 기능 추가 시 변경)
+      displayIsPublic: 'public', // 공개여부 표시용
     }
   },
   computed: {
@@ -199,6 +202,7 @@ export default {
         .get(`/posts/${this.$route.params.id}`)
         .then((response) => {
           this.post = response.data
+          this.displayIsPublic = response.data.isPublic
         })
         .catch((error) => {
           console.error(error)

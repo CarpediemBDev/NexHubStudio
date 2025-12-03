@@ -46,7 +46,7 @@ public class PostService {
                 .authorId(authorId)
                 .status(request.getStatus() != null ? request.getStatus() : "PUBLISHED")
                 .viewCount(0)
-                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : true)
+                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : "public")
                 .fileGroupId(fileGroupId)
                 .createdAt(LocalDateTime.now())
                 .build();

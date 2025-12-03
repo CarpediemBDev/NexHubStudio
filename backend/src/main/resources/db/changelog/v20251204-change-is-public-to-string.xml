@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="change-is-public-to-string" author="developer">
+        <comment>게시글 is_public 컬럼 타입을 BOOLEAN에서 VARCHAR(10)로 변경 (public/private)</comment>
+        
+        <!-- 1. 임시 컬럼 추가 -->
+        <addColumn tableName="posts">
+            <column name="is_public_temp" type="VARCHAR(10)"/>
+        </addColumn>
+        
+        <!-- 2. 기존 데이터 변환: true -> 'public', false/null -> 'private' -->
+        <sql>
+            UPDATE posts SET is_public_temp = CASE 
+                WHEN is_public = TRUE THEN 'public' 
+                ELSE 'private' 
+            END;
+        </sql>
+        
+        <!-- 3. 기존 컬럼 삭제 -->
+        <dropColumn tableName="posts" columnName="is_public"/>
+        
+        <!-- 4. 임시 컬럼 이름 변경 -->
+        <renameColumn tableName="posts" oldColumnName="is_public_temp" newColumnName="is_public" columnDataType="VARCHAR(10)"/>
+        
+        <!-- 5. NOT NULL 제약 조건 추가 -->
+        <addNotNullConstraint tableName="posts" columnName="is_public" columnDataType="VARCHAR(10)"/>
+        
+        <!-- 6. 기본값 설정 -->
+        <addDefaultValue tableName="posts" columnName="is_public" defaultValue="public"/>
+    </changeSet>
+
+</databaseChangeLog>

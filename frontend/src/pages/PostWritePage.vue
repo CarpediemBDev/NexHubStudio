@@ -82,21 +82,21 @@
                     <input
                       class="form-check-input"
                       type="radio"
-                      id="isPublic-true"
-                      :value="true"
+                      id="isPublic-public"
+                      value="public"
                       v-model="form.isPublic"
                     />
-                    <label class="form-check-label" for="isPublic-true">공개</label>
+                    <label class="form-check-label" for="isPublic-public">공개</label>
                   </div>
                   <div class="form-check form-check-inline">
                     <input
                       class="form-check-input"
                       type="radio"
-                      id="isPublic-false"
-                      :value="false"
+                      id="isPublic-private"
+                      value="private"
                       v-model="form.isPublic"
                     />
-                    <label class="form-check-label" for="isPublic-false">비공개</label>
+                    <label class="form-check-label" for="isPublic-private">비공개</label>
                   </div>
                 </div>
               </div>
@@ -178,7 +178,7 @@ export default {
         title: '',
         content: '',
         status: 'PUBLISHED',
-        isPublic: true,
+        isPublic: 'public',
       },
       uploadedFiles: [],
       uploadInProgress: false,
@@ -204,7 +204,7 @@ export default {
           this.form.title = post.title
           this.form.content = post.content
           this.form.status = post.status
-          this.form.isPublic = post.isPublic !== undefined ? post.isPublic : true
+          this.form.isPublic = post.isPublic || 'public'
           // load existing attachments when editing
           this.uploadedFiles = post.attachments || []
         })

@@ -21,7 +21,7 @@ public class Post {
     private String authorId; // 작성자 ID (users.id FK)
     private String status; // PUBLISHED, DRAFT, DELETED
     private Integer viewCount;
-    private Boolean isPublic; // 공개여부
+    private String isPublic; // 공개여부 (public, private)
     private String fileGroupId; // 파일 그룹 ID (ULID 기반)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

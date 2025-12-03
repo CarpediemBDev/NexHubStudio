@@ -2,10 +2,10 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/changelog-master.xml
-    drop-first: false
+    drop-first: false # 개발 시 true로 변경하면 매번 DB 재생성 (주의!)
     default-schema: public
     contexts: development, production
     parameters:
       liquibase.schema: public
       app.name: NexHubStudio-backend
-    clear-checksums: false
+    clear-checksums: true # 개발 환경: true로 changeset 자유롭게 수정 가능
