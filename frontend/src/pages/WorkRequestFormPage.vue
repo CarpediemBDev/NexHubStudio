@@ -47,148 +47,90 @@
                 <col style="width: 35%" />
               </colgroup>
               <tbody>
+                <!-- 1행: 제목 -->
                 <tr>
-                  <th class="table-light align-middle">의뢰번호</th>
+                  <th class="table-light align-middle">제목 <span class="text-danger">*</span></th>
+                  <td colspan="3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="formData.title"
+                      placeholder="제목을 입력하세요"
+                    />
+                  </td>
+                </tr>
+                <!-- 2행: 요청번호, 과제 -->
+                <tr>
+                  <th class="table-light align-middle">요청번호</th>
                   <td>
                     <input type="text" class="form-control" v-model="formData.requestNo" readonly />
                   </td>
-                  <th class="table-light align-middle">
-                    의뢰일자 <span class="text-danger">*</span>
-                  </th>
+                  <th class="table-light align-middle">과제</th>
                   <td>
-                    <input type="date" class="form-control" v-model="formData.requestDate" />
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="formData.project"
+                      placeholder="과제명"
+                    />
                   </td>
                 </tr>
+                <!-- 3행: 요청자, 완료요청일 -->
                 <tr>
                   <th class="table-light align-middle">
-                    의뢰자 <span class="text-danger">*</span>
+                    요청자 <span class="text-danger">*</span>
                   </th>
                   <td>
                     <input
                       type="text"
                       class="form-control"
                       v-model="formData.requester"
-                      placeholder="성명"
+                      placeholder="요청자명"
                     />
                   </td>
-                  <th class="table-light align-middle">부서</th>
+                  <th class="table-light align-middle">완료요청일</th>
+                  <td>
+                    <input type="date" class="form-control" v-model="formData.dueDate" />
+                  </td>
+                </tr>
+                <!-- 4행: 디바이스명, 위치 -->
+                <tr>
+                  <th class="table-light align-middle">디바이스명</th>
                   <td>
                     <input
                       type="text"
                       class="form-control"
-                      v-model="formData.department"
-                      placeholder="부서명"
+                      v-model="formData.deviceName"
+                      placeholder="디바이스명"
                     />
                   </td>
-                </tr>
-                <tr>
-                  <th class="table-light align-middle">
-                    연락처 <span class="text-danger">*</span>
-                  </th>
+                  <th class="table-light align-middle">위치</th>
                   <td>
-                    <input
-                      type="tel"
-                      class="form-control"
-                      v-model="formData.contact"
-                      placeholder="010-0000-0000"
-                    />
-                  </td>
-                  <th class="table-light align-middle">이메일</th>
-                  <td>
-                    <input
-                      type="email"
-                      class="form-control"
-                      v-model="formData.email"
-                      placeholder="email@example.com"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th class="table-light align-middle">
-                    의뢰 제목 <span class="text-danger">*</span>
-                  </th>
-                  <td colspan="3">
                     <input
                       type="text"
                       class="form-control"
-                      v-model="formData.title"
-                      placeholder="의뢰 제목을 입력하세요"
+                      v-model="formData.location"
+                      placeholder="위치"
                     />
                   </td>
                 </tr>
-                <tr>
-                  <th class="table-light align-middle">우선순위</th>
-                  <td colspan="3">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          v-model="formData.priority"
-                          value="low"
-                          id="priority-low"
-                        />
-                        <label class="form-check-label" for="priority-low">낮음</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          v-model="formData.priority"
-                          value="normal"
-                          id="priority-normal"
-                        />
-                        <label class="form-check-label" for="priority-normal">보통</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          v-model="formData.priority"
-                          value="high"
-                          id="priority-high"
-                        />
-                        <label class="form-check-label" for="priority-high">높음</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          v-model="formData.priority"
-                          value="urgent"
-                          id="priority-urgent"
-                        />
-                        <label class="form-check-label" for="priority-urgent">긴급</label>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <th class="table-light align-middle">희망 완료일</th>
-                  <td colspan="3">
-                    <input
-                      type="date"
-                      class="form-control"
-                      v-model="formData.dueDate"
-                      style="width: 200px"
-                    />
-                  </td>
-                </tr>
+                <!-- 5행: 내용 -->
                 <tr>
                   <th class="table-light align-top pt-3">
-                    의뢰 내용 <span class="text-danger">*</span>
+                    내용 <span class="text-danger">*</span>
                   </th>
                   <td colspan="3">
                     <textarea
                       class="form-control"
                       rows="8"
                       v-model="formData.content"
-                      placeholder="의뢰 내용을 상세히 입력하세요"
+                      placeholder="내용을 상세히 입력하세요"
                     ></textarea>
                   </td>
                 </tr>
+                <!-- 6행: 파일첨부 -->
                 <tr>
-                  <th class="table-light align-top pt-3">첨부파일</th>
+                  <th class="table-light align-top pt-3">파일첨부</th>
                   <td colspan="3">
                     <div
                       v-if="uploadProgress === 0"
@@ -257,11 +199,8 @@
           <div class="accordion-body p-0">
             <div class="alert alert-info m-3">
               <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>접수된 의뢰 정보</h6>
-              <p class="mb-1"><strong>제목:</strong> {{ formData.title || '(의뢰 제목)' }}</p>
-              <p class="mb-0">
-                <strong>우선순위:</strong>
-                <span class="badge bg-warning">{{ getPriorityLabel(formData.priority) }}</span>
-              </p>
+              <p class="mb-1"><strong>제목:</strong> {{ formData.title || '(제목)' }}</p>
+              <p class="mb-0"><strong>요청자:</strong> {{ formData.requester || '(요청자)' }}</p>
             </div>
             <table class="table table-bordered form-table mb-0">
               <colgroup>
@@ -678,14 +617,12 @@ export default {
       ],
       formData: {
         requestNo: 'REQ-2024-0001',
-        requestDate: '',
-        requester: '',
-        department: '',
-        contact: '',
-        email: '',
         title: '',
-        priority: 'normal',
+        project: '',
+        requester: '',
         dueDate: '',
+        deviceName: '',
+        location: '',
         content: '',
         files: [],
         supportType: '',
@@ -823,14 +760,12 @@ export default {
       // 1단계 의뢰 제출
       const requestData = {
         requestNo: this.formData.requestNo,
-        requestDate: this.formData.requestDate,
-        requester: this.formData.requester,
-        department: this.formData.department,
-        contact: this.formData.contact,
-        email: this.formData.email,
         title: this.formData.title,
-        priority: this.formData.priority,
+        project: this.formData.project,
+        requester: this.formData.requester,
         dueDate: this.formData.dueDate,
+        deviceName: this.formData.deviceName,
+        location: this.formData.location,
         content: this.formData.content,
         files: this.formData.files,
       }
