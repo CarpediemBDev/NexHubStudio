@@ -182,7 +182,10 @@ export default {
         },
         {
           label: '업무 관리',
-          children: [{ label: '업무 의뢰', to: '/request-workflow' }],
+          children: [
+            { label: '업무 의뢰', to: '/request-workflow' },
+            { label: '업무 의뢰서', to: '/work-request-form' },
+          ],
         },
         {
           label: '개발 가이드',

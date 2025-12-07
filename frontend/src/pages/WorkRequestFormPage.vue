@@ -1,0 +1,1045 @@
+<template>
+  <div class="container mt-4">
+    <h2 class="mb-4">업무 의뢰서</h2>
+
+    <!-- 워크플로우 스텝바 -->
+    <div class="workflow-steps mb-5">
+      <div
+        v-for="(step, index) in steps"
+        :key="step.key"
+        class="step-item"
+        :class="{
+          active: currentStep === step.key,
+          completed: isStepCompleted(step.key),
+        }"
+      >
+        <div class="step-circle">
+          <i :class="step.icon"></i>
+        </div>
+        <div class="step-label">{{ step.label }}</div>
+        <div v-if="index < steps.length - 1" class="step-line"></div>
+      </div>
+    </div>
+
+    <!-- 아코디언 폼 영역 -->
+    <div class="accordion" id="requestFormAccordion">
+      <!-- 1단계: 의뢰 -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button"
+            :class="{ collapsed: !sections.request, disabled: !canAccessSection('request') }"
+            :disabled="!canAccessSection('request')"
+            type="button"
+            @click="canAccessSection('request') && toggleSection('request')"
+          >
+            <i class="bi bi-file-text me-2"></i>지원 의뢰
+            <span class="badge bg-primary ms-2">1단계</span>
+          </button>
+        </h2>
+        <div class="accordion-collapse collapse" :class="{ show: sections.request }">
+          <div class="accordion-body p-0">
+            <table class="table table-bordered form-table mb-0">
+              <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+              </colgroup>
+              <tbody>
+                <tr>
+                  <th class="table-light align-middle">의뢰번호</th>
+                  <td>
+                    <input type="text" class="form-control" v-model="formData.requestNo" readonly />
+                  </td>
+                  <th class="table-light align-middle">
+                    의뢰일자 <span class="text-danger">*</span>
+                  </th>
+                  <td>
+                    <input type="date" class="form-control" v-model="formData.requestDate" />
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">
+                    의뢰자 <span class="text-danger">*</span>
+                  </th>
+                  <td>
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="formData.requester"
+                      placeholder="성명"
+                    />
+                  </td>
+                  <th class="table-light align-middle">부서</th>
+                  <td>
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="formData.department"
+                      placeholder="부서명"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">
+                    연락처 <span class="text-danger">*</span>
+                  </th>
+                  <td>
+                    <input
+                      type="tel"
+                      class="form-control"
+                      v-model="formData.contact"
+                      placeholder="010-0000-0000"
+                    />
+                  </td>
+                  <th class="table-light align-middle">이메일</th>
+                  <td>
+                    <input
+                      type="email"
+                      class="form-control"
+                      v-model="formData.email"
+                      placeholder="email@example.com"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">
+                    의뢰 제목 <span class="text-danger">*</span>
+                  </th>
+                  <td colspan="3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="formData.title"
+                      placeholder="의뢰 제목을 입력하세요"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">우선순위</th>
+                  <td colspan="3">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.priority"
+                          value="low"
+                          id="priority-low"
+                        />
+                        <label class="form-check-label" for="priority-low">낮음</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.priority"
+                          value="normal"
+                          id="priority-normal"
+                        />
+                        <label class="form-check-label" for="priority-normal">보통</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.priority"
+                          value="high"
+                          id="priority-high"
+                        />
+                        <label class="form-check-label" for="priority-high">높음</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.priority"
+                          value="urgent"
+                          id="priority-urgent"
+                        />
+                        <label class="form-check-label" for="priority-urgent">긴급</label>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">희망 완료일</th>
+                  <td colspan="3">
+                    <input
+                      type="date"
+                      class="form-control"
+                      v-model="formData.dueDate"
+                      style="width: 200px"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-top pt-3">
+                    의뢰 내용 <span class="text-danger">*</span>
+                  </th>
+                  <td colspan="3">
+                    <textarea
+                      class="form-control"
+                      rows="8"
+                      v-model="formData.content"
+                      placeholder="의뢰 내용을 상세히 입력하세요"
+                    ></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-top pt-3">첨부파일</th>
+                  <td colspan="3">
+                    <div
+                      v-if="uploadProgress === 0"
+                      class="file-upload-box border rounded p-3 text-center bg-light"
+                    >
+                      <i class="bi bi-cloud-upload fs-3 text-muted"></i>
+                      <p class="mb-2 mt-2 text-muted">클릭하거나 파일을 드래그하세요</p>
+                      <input type="file" class="form-control" @change="handleFileUpload" multiple />
+                      <small class="text-muted">최대 10MB, 여러 파일 선택 가능</small>
+                    </div>
+                    <div
+                      v-else-if="uploadProgress > 0 && uploadProgress < 100"
+                      class="border rounded p-3 text-center bg-light"
+                    >
+                      <i class="bi bi-cloud-upload fs-3 text-success mb-2"></i>
+                      <div class="progress" style="height: 25px">
+                        <div
+                          class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                          :style="{ width: uploadProgress + '%' }"
+                        >
+                          {{ uploadProgress }}%
+                        </div>
+                      </div>
+                      <small class="text-muted mt-2 d-block">파일을 업로드하고 있습니다...</small>
+                    </div>
+                    <ul class="list-group mt-2" v-if="formData.files.length > 0">
+                      <li
+                        v-for="(file, idx) in formData.files"
+                        :key="idx"
+                        class="list-group-item d-flex justify-content-between align-items-center"
+                      >
+                        <span><i class="bi bi-file-earmark me-2"></i>{{ file }}</span>
+                        <button class="btn btn-sm btn-outline-danger" @click="removeFile(idx)">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="p-3 text-end bg-light">
+              <button class="btn btn-primary" @click="submitRequest">
+                <i class="bi bi-send me-1"></i>의뢰 제출
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2단계: 접수 -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button"
+            :class="{ collapsed: !sections.receive, disabled: !canAccessSection('receive') }"
+            :disabled="!canAccessSection('receive')"
+            type="button"
+            @click="canAccessSection('receive') && toggleSection('receive')"
+          >
+            <i class="bi bi-clipboard-check me-2"></i>지원 접수
+            <span class="badge bg-success ms-2">2단계</span>
+          </button>
+        </h2>
+        <div class="accordion-collapse collapse" :class="{ show: sections.receive }">
+          <div class="accordion-body p-0">
+            <div class="alert alert-info m-3">
+              <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>접수된 의뢰 정보</h6>
+              <p class="mb-1"><strong>제목:</strong> {{ formData.title || '(의뢰 제목)' }}</p>
+              <p class="mb-0">
+                <strong>우선순위:</strong>
+                <span class="badge bg-warning">{{ getPriorityLabel(formData.priority) }}</span>
+              </p>
+            </div>
+            <table class="table table-bordered form-table mb-0">
+              <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+              </colgroup>
+              <tbody>
+                <tr>
+                  <th class="table-light align-middle">
+                    지원 유형 <span class="text-danger">*</span>
+                  </th>
+                  <td>
+                    <select class="form-select" v-model="formData.supportType" style="width: 250px">
+                      <option value="">선택하세요</option>
+                      <option value="maintenance">유지보수</option>
+                      <option value="repair">수리</option>
+                      <option value="inspection">점검</option>
+                      <option value="installation">설치</option>
+                      <option value="consultation">상담</option>
+                      <option value="other">기타</option>
+                    </select>
+                  </td>
+                  <th class="table-light align-middle">
+                    승인 여부 <span class="text-danger">*</span>
+                  </th>
+                  <td>
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.approvalStatus"
+                          value="approved"
+                          id="approval-approved"
+                        />
+                        <label class="form-check-label" for="approval-approved">승인</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.approvalStatus"
+                          value="rejected"
+                          id="approval-rejected"
+                        />
+                        <label class="form-check-label" for="approval-rejected">반려</label>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">완료 예정일</th>
+                  <td>
+                    <input
+                      type="datetime-local"
+                      class="form-control"
+                      v-model="formData.expectedCompletionDate"
+                    />
+                  </td>
+                  <th class="table-light align-middle">처리 방식</th>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <select
+                        class="form-select"
+                        v-model="formData.processingMethod"
+                        style="width: 120px"
+                      >
+                        <option value="">선택</option>
+                        <option value="internal">내부</option>
+                        <option value="outsourcing">외주</option>
+                      </select>
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="formData.outsourcingCompany"
+                        placeholder="외주 업체명"
+                      />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">
+                    접수 담당자 <span class="text-danger">*</span>
+                  </th>
+                  <td colspan="3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="formData.assignee"
+                      placeholder="담당자명 (여러 명인 경우 쉼표로 구분)"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">처리 유형</th>
+                  <td colspan="3">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.processingType"
+                          value="immediate"
+                          id="processing-immediate"
+                        />
+                        <label class="form-check-label" for="processing-immediate">즉시 처리</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.processingType"
+                          value="scheduled"
+                          id="processing-scheduled"
+                        />
+                        <label class="form-check-label" for="processing-scheduled">예약 처리</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          v-model="formData.processingType"
+                          value="pending"
+                          id="processing-pending"
+                        />
+                        <label class="form-check-label" for="processing-pending">보류</label>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">레시피</th>
+                  <td colspan="3">
+                    <div class="input-group" style="max-width: 500px">
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="formData.recipe"
+                        placeholder="레시피명"
+                        readonly
+                      />
+                      <button class="btn btn-outline-secondary" @click="openRecipePopup">
+                        <i class="bi bi-search"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-middle">협의자</th>
+                  <td colspan="3">
+                    <div class="input-group" style="max-width: 500px">
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="formData.consultants"
+                        placeholder="협의자명"
+                        readonly
+                      />
+                      <button class="btn btn-outline-secondary" @click="openConsultantPopup">
+                        <i class="bi bi-search"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-top pt-3">접수 의견</th>
+                  <td colspan="3">
+                    <textarea
+                      class="form-control"
+                      rows="4"
+                      v-model="formData.receiveComment"
+                      placeholder="접수 확인 내용 및 예상 처리 기간 등을 입력하세요"
+                    ></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-top pt-3">첨부파일</th>
+                  <td colspan="3">
+                    <input
+                      type="file"
+                      class="form-control"
+                      @change="handleReceiveFileUpload"
+                      multiple
+                    />
+                    <small class="text-muted">최대 10MB, 여러 파일 선택 가능</small>
+                    <ul class="list-group mt-2" v-if="formData.receiveFiles.length > 0">
+                      <li
+                        v-for="(file, idx) in formData.receiveFiles"
+                        :key="idx"
+                        class="list-group-item d-flex justify-content-between align-items-center"
+                      >
+                        <span><i class="bi bi-file-earmark me-2"></i>{{ file }}</span>
+                        <button
+                          class="btn btn-sm btn-outline-danger"
+                          @click="removeReceiveFile(idx)"
+                        >
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="p-3 text-end bg-light">
+              <button class="btn btn-outline-secondary me-2" @click="saveDraftReceive">
+                <i class="bi bi-save me-1"></i>임시저장
+              </button>
+              <button class="btn btn-success" @click="submitReceive">
+                <i class="bi bi-check-circle me-1"></i>저장
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3단계: 진행 -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button"
+            :class="{ collapsed: !sections.progress, disabled: !canAccessSection('progress') }"
+            :disabled="!canAccessSection('progress')"
+            type="button"
+            @click="canAccessSection('progress') && toggleSection('progress')"
+          >
+            <i class="bi bi-pencil-square me-2"></i>결과 등록
+            <span class="badge bg-warning ms-2">3단계</span>
+          </button>
+        </h2>
+        <div class="accordion-collapse collapse" :class="{ show: sections.progress }">
+          <div class="accordion-body p-0">
+            <table class="table table-bordered form-table mb-0">
+              <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 85%" />
+              </colgroup>
+              <tbody>
+                <tr>
+                  <th class="table-light align-top pt-3">내용</th>
+                  <td>
+                    <textarea
+                      class="form-control"
+                      rows="5"
+                      v-model="formData.progressDescription"
+                      placeholder="처리 내용을 입력하세요"
+                    ></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="table-light align-top pt-3">지연 사유</th>
+                  <td>
+                    <textarea
+                      class="form-control"
+                      rows="3"
+                      v-model="formData.issues"
+                      placeholder="지연 사유를 입력하세요"
+                    ></textarea>
+                  </td>
+                </tr>
+                <!-- 진행 내역 테이블 -->
+                <tr>
+                  <th class="table-light align-top pt-3">진행 내역</th>
+                  <td>
+                    <div class="mb-2 text-end">
+                      <button class="btn btn-sm btn-primary me-1" @click="addProgressRow">
+                        <i class="bi bi-plus-circle me-1"></i>추가
+                      </button>
+                      <button class="btn btn-sm btn-danger" @click="deleteProgressRow">
+                        <i class="bi bi-trash me-1"></i>삭제
+                      </button>
+                    </div>
+                    <JqxCustomeGrid
+                      ref="progressGrid"
+                      :localdata="progressRows"
+                      :datafields="progressDatafields"
+                      :columns="progressColumns"
+                      selectionmode="checkbox"
+                      :height="300"
+                      theme="bootstrap"
+                    />
+                  </td>
+                </tr>
+                <!-- 첨부파일 1 -->
+                <tr>
+                  <th class="table-light align-top pt-3">첨부파일 1</th>
+                  <td>
+                    <input
+                      type="file"
+                      class="form-control"
+                      @change="handleResultFileUpload1"
+                      multiple
+                    />
+                    <small class="text-muted">최대 10MB, 여러 파일 선택 가능</small>
+                    <ul class="list-group mt-2" v-if="formData.resultFiles1.length > 0">
+                      <li
+                        v-for="(file, idx) in formData.resultFiles1"
+                        :key="idx"
+                        class="list-group-item d-flex justify-content-between align-items-center"
+                      >
+                        <span><i class="bi bi-file-earmark me-2"></i>{{ file }}</span>
+                        <button
+                          class="btn btn-sm btn-outline-danger"
+                          @click="removeResultFile1(idx)"
+                        >
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+                <!-- 첨부파일 2 -->
+                <tr>
+                  <th class="table-light align-top pt-3">첨부파일 2</th>
+                  <td>
+                    <input
+                      type="file"
+                      class="form-control"
+                      @change="handleResultFileUpload2"
+                      multiple
+                    />
+                    <small class="text-muted">최대 10MB, 여러 파일 선택 가능</small>
+                    <ul class="list-group mt-2" v-if="formData.resultFiles2.length > 0">
+                      <li
+                        v-for="(file, idx) in formData.resultFiles2"
+                        :key="idx"
+                        class="list-group-item d-flex justify-content-between align-items-center"
+                      >
+                        <span><i class="bi bi-file-earmark me-2"></i>{{ file }}</span>
+                        <button
+                          class="btn btn-sm btn-outline-danger"
+                          @click="removeResultFile2(idx)"
+                        >
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="p-3 bg-light d-flex justify-content-between">
+              <div>
+                <button class="btn btn-outline-secondary me-2" @click="modifyProgress">
+                  <i class="bi bi-pencil me-1"></i>수정
+                </button>
+                <button class="btn btn-outline-secondary" @click="rejectProgress">
+                  <i class="bi bi-x-circle me-1"></i>반려
+                </button>
+              </div>
+              <div>
+                <button class="btn btn-outline-secondary me-2" @click="saveDraftProgress">
+                  <i class="bi bi-save me-1"></i>임시저장
+                </button>
+                <button class="btn btn-success" @click="submitComplete">
+                  <i class="bi bi-check-circle me-1"></i>저장
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 버튼 영역 -->
+    <div class="text-center mt-4 mb-4">
+      <button class="btn btn-secondary" @click="goToList">
+        <i class="bi bi-list me-1"></i>목록
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
+import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import { openUserPopup } from '@/utils/showPop.js'
+
+export default {
+  name: 'WorkRequestFormPage',
+  components: {
+    JqxCustomeGrid,
+  },
+  data() {
+    return {
+      currentStep: 'progress', // request, receive, progress, complete
+      steps: [
+        { key: 'request', label: '의뢰', icon: 'bi bi-file-text' },
+        { key: 'receive', label: '접수', icon: 'bi bi-clipboard-check' },
+        { key: 'progress', label: '진행', icon: 'bi bi-arrow-repeat' },
+        { key: 'complete', label: '완료', icon: 'bi bi-check-circle' },
+      ],
+      sections: {
+        request: false,
+        receive: false,
+        progress: false,
+      },
+      uploadProgress: 0,
+      progressRows: [],
+      progressDatafields: [
+        { name: 'progressDate', type: 'string' },
+        { name: 'progressContent', type: 'string' },
+        { name: 'worker', type: 'string' },
+        { name: 'status', type: 'string' },
+        { name: 'remark', type: 'string' },
+      ],
+      progressColumns: [
+        { text: '진행일자', datafield: 'progressDate', width: 120, editable: true },
+        { text: '진행내용', datafield: 'progressContent', width: 250, editable: true },
+        { text: '작업자', datafield: 'worker', width: 100, editable: true },
+        { text: '상태', datafield: 'status', width: 100, editable: true },
+        { text: '비고', datafield: 'remark', width: 200, editable: true },
+      ],
+      formData: {
+        requestNo: 'REQ-2024-0001',
+        requestDate: '',
+        requester: '',
+        department: '',
+        contact: '',
+        email: '',
+        title: '',
+        priority: 'normal',
+        dueDate: '',
+        content: '',
+        files: [],
+        supportType: '',
+        approvalStatus: '',
+        expectedCompletionDate: '',
+        processingMethod: '',
+        assignee: '',
+        outsourcingCompany: '',
+        processingType: '',
+        expectedDate: '',
+        receiveComment: '',
+        receiveFiles: [],
+        progressPercentage: 0,
+        progressDescription: '',
+        issues: '',
+        resultStatus: '',
+        completedAt: '',
+        resultDescription: '',
+        resultFiles: [],
+        resultFiles1: [],
+        resultFiles2: [],
+        rating: 0,
+        consultants: '',
+        recipe: '',
+      },
+    }
+  },
+  watch: {
+    currentStep: {
+      immediate: true,
+      handler(newStep) {
+        // currentStep 변경 시 해당 섯션 자동으로 열기
+        this.sections.request = false
+        this.sections.receive = false
+        this.sections.progress = false
+
+        if (newStep === 'request') {
+          this.sections.request = true
+        } else if (newStep === 'receive') {
+          this.sections.receive = true
+        } else if (newStep === 'progress' || newStep === 'complete') {
+          this.sections.progress = true
+        }
+      },
+    },
+  },
+  methods: {
+    toggleSection(section) {
+      this.sections[section] = !this.sections[section]
+    },
+    canAccessSection(sectionKey) {
+      // 아코디언은 3개만 있음 (request, receive, progress)
+      const sectionOrder = ['request', 'receive', 'progress']
+      const stepOrder = ['request', 'receive', 'progress', 'complete']
+
+      const currentIndex = stepOrder.indexOf(this.currentStep)
+      const sectionIndex = sectionOrder.indexOf(sectionKey)
+
+      // 현재 단계 이하만 접근 가능
+      return sectionIndex !== -1 && sectionIndex <= currentIndex
+    },
+    isStepCompleted(stepKey) {
+      const stepOrder = ['request', 'receive', 'progress', 'complete']
+      const currentIndex = stepOrder.indexOf(this.currentStep)
+      const stepIndex = stepOrder.indexOf(stepKey)
+      return stepIndex < currentIndex
+    },
+    handleFileUpload(event) {
+      const files = event.target.files
+      if (files.length > 0) {
+        this.uploadProgress = 1
+        const interval = setInterval(() => {
+          this.uploadProgress += 5
+          if (this.uploadProgress >= 100) {
+            clearInterval(interval)
+            for (let i = 0; i < files.length; i++) {
+              this.formData.files.push(files[i].name)
+            }
+            setTimeout(() => {
+              this.uploadProgress = 0
+            }, 500)
+          }
+        }, 400)
+      }
+    },
+    removeFile(index) {
+      this.formData.files.splice(index, 1)
+    },
+    handleReceiveFileUpload(event) {
+      const files = event.target.files
+      for (let i = 0; i < files.length; i++) {
+        this.formData.receiveFiles.push(files[i].name)
+      }
+    },
+    removeReceiveFile(index) {
+      this.formData.receiveFiles.splice(index, 1)
+    },
+    handleResultFileUpload(event) {
+      const files = event.target.files
+      for (let i = 0; i < files.length; i++) {
+        this.formData.resultFiles.push(files[i].name)
+      }
+    },
+    removeResultFile(index) {
+      this.formData.resultFiles.splice(index, 1)
+    },
+    handleResultFileUpload1(event) {
+      const files = event.target.files
+      for (let i = 0; i < files.length; i++) {
+        this.formData.resultFiles1.push(files[i].name)
+      }
+    },
+    removeResultFile1(index) {
+      this.formData.resultFiles1.splice(index, 1)
+    },
+    handleResultFileUpload2(event) {
+      const files = event.target.files
+      for (let i = 0; i < files.length; i++) {
+        this.formData.resultFiles2.push(files[i].name)
+      }
+    },
+    removeResultFile2(index) {
+      this.formData.resultFiles2.splice(index, 1)
+    },
+    getPriorityLabel(priority) {
+      const labels = {
+        low: '낮음',
+        normal: '보통',
+        high: '높음',
+        urgent: '긴급',
+      }
+      return labels[priority] || '보통'
+    },
+    submitRequest() {
+      // 1단계 의뢰 제출
+      const requestData = {
+        requestNo: this.formData.requestNo,
+        requestDate: this.formData.requestDate,
+        requester: this.formData.requester,
+        department: this.formData.department,
+        contact: this.formData.contact,
+        email: this.formData.email,
+        title: this.formData.title,
+        priority: this.formData.priority,
+        dueDate: this.formData.dueDate,
+        content: this.formData.content,
+        files: this.formData.files,
+      }
+      console.log('의뢰 제출 데이터:', requestData)
+      alert('의뢰가 제출되었습니다.')
+      this.currentStep = 'receive'
+      this.sections.request = false
+      this.sections.receive = true
+    },
+    submitReceive() {
+      // 2단계 접수 완료
+      const receiveData = {
+        supportType: this.formData.supportType,
+        approvalStatus: this.formData.approvalStatus,
+        expectedCompletionDate: this.formData.expectedCompletionDate,
+        processingMethod: this.formData.processingMethod,
+        outsourcingCompany: this.formData.outsourcingCompany,
+        assignee: this.formData.assignee,
+        processingType: this.formData.processingType,
+        receiveComment: this.formData.receiveComment,
+        receiveFiles: this.formData.receiveFiles,
+      }
+      console.log('접수 완료 데이터:', receiveData)
+      alert('접수가 완료되었습니다.')
+      this.currentStep = 'progress'
+      this.sections.receive = false
+      this.sections.progress = true
+    },
+    updateProgress() {
+      // 3단계 진행 상황 업데이트
+      alert('진행 상황이 업데이트되었습니다.')
+    },
+    submitComplete() {
+      // 3단계 결과 등록 완료 → 4단계(완료)로 이동
+      const progressData = {
+        progressDescription: this.formData.progressDescription,
+        issues: this.formData.issues,
+        resultFiles1: this.formData.resultFiles1,
+        resultFiles2: this.formData.resultFiles2,
+      }
+      console.log('결과 등록 완료 데이터:', progressData)
+      alert('결과 등록이 완료되었습니다.')
+      this.currentStep = 'complete'
+      // 아코디언은 3개만 있으므로 sections 제어 불필요
+      // 스텝바만 complete 단계로 표시됨
+    },
+    goToList() {
+      this.$router.push('/request-workflow')
+    },
+    saveDraftReceive() {
+      const draftData = {
+        supportType: this.formData.supportType,
+        approvalStatus: this.formData.approvalStatus,
+        expectedCompletionDate: this.formData.expectedCompletionDate,
+        processingMethod: this.formData.processingMethod,
+        outsourcingCompany: this.formData.outsourcingCompany,
+        assignee: this.formData.assignee,
+        processingType: this.formData.processingType,
+        receiveComment: this.formData.receiveComment,
+        receiveFiles: this.formData.receiveFiles,
+      }
+      console.log('접수 임시저장 데이터:', draftData)
+      alert('임시저장되었습니다.')
+    },
+    saveDraftProgress() {
+      const draftData = {
+        progressDescription: this.formData.progressDescription,
+        issues: this.formData.issues,
+        resultFiles1: this.formData.resultFiles1,
+        resultFiles2: this.formData.resultFiles2,
+      }
+      console.log('결과등록 임시저장 데이터:', draftData)
+      alert('임시저장되었습니다.')
+    },
+    modifyProgress() {
+      alert('수정 요청되었습니다.')
+    },
+    rejectProgress() {
+      if (confirm('정말로 반려하시겠습니까?')) {
+        alert('반려 처리되었습니다.')
+      }
+    },
+    addProgressRow() {
+      this.$refs.progressGrid?.add({
+        progressDate: '',
+        progressContent: '',
+        worker: '',
+        status: '',
+        remark: '',
+      })
+    },
+    deleteProgressRow() {
+      this.$refs.progressGrid?.deleteSelected()
+    },
+    async openConsultantPopup() {
+      const selectedList = await openUserPopup()
+      if (Array.isArray(selectedList) && selectedList.length > 0) {
+        this.formData.consultants = selectedList.map((u) => u.name).join(', ')
+      }
+    },
+    openRecipePopup() {
+      // 레시피 팝업 로직 추가 예정
+      alert('레시피 검색 팝업 (구현 예정)')
+    },
+  },
+}
+</script>
+
+<style scoped>
+.form-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.form-table td,
+.form-table th {
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.file-upload-box input[type='file'] {
+  margin-top: 10px;
+}
+
+.workflow-steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  z-index: 1;
+}
+
+.step-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  border: 3px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #6c757d;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+  background-color: white;
+}
+
+.step-item.active .step-circle {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+}
+
+.step-item.completed .step-circle {
+  background-color: #198754;
+  border-color: #198754;
+  color: white;
+}
+
+.step-label {
+  margin-top: 10px;
+  font-weight: 600;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.step-item.active .step-label {
+  color: #0d6efd;
+  font-size: 15px;
+}
+
+.step-item.completed .step-label {
+  color: #198754;
+}
+
+.step-line {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  width: 100%;
+  height: 3px;
+  background-color: #dee2e6;
+  z-index: 0;
+}
+
+.step-item.completed .step-line {
+  background-color: #198754;
+}
+
+.step-item:last-child .step-line {
+  display: none;
+}
+
+.accordion-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>

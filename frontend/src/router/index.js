@@ -14,6 +14,7 @@ import PostWritePage from '../pages/PostWritePage.vue'
 import FileListPage from '../pages/FileListPage.vue'
 import EquipmentMonitorPage from '../pages/EquipmentMonitorPage.vue'
 import RequestWorkflowPage from '../pages/RequestWorkflowPage.vue'
+import WorkRequestFormPage from '../pages/WorkRequestFormPage.vue'
 
 const routes = [
   {
@@ -55,6 +56,7 @@ const routes = [
       { path: 'equipment-monitor', name: '설비 모니터링', component: EquipmentMonitorPage },
       // 업무 의뢰
       { path: 'request-workflow', name: '업무 의뢰', component: RequestWorkflowPage },
+      { path: 'work-request-form', name: '업무 의뢰서', component: WorkRequestFormPage },
     ],
   },
 ]
