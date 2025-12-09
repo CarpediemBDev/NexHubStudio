@@ -217,12 +217,10 @@
                   <td>
                     <select class="form-select" v-model="formData.supportType" style="width: 250px">
                       <option value="">선택하세요</option>
-                      <option value="maintenance">유지보수</option>
-                      <option value="repair">수리</option>
-                      <option value="inspection">점검</option>
-                      <option value="installation">설치</option>
-                      <option value="consultation">상담</option>
-                      <option value="other">기타</option>
+                      <option value="equipment-support">설비지원</option>
+                      <option value="failure-repair">고장수리</option>
+                      <option value="setup-release">설비셋업해제</option>
+                      <option value="modification-improvement">설비개조개선</option>
                     </select>
                   </td>
                   <th class="table-light align-middle">
@@ -441,105 +439,38 @@
                 <col style="width: 85%" />
               </colgroup>
               <tbody>
+                <!-- 지원 유형별 결과 등록 컴포넌트 -->
                 <tr>
-                  <th class="table-light align-top pt-3">내용</th>
-                  <td>
-                    <textarea
-                      class="form-control"
-                      rows="5"
-                      v-model="formData.progressDescription"
-                      placeholder="처리 내용을 입력하세요"
-                    ></textarea>
-                  </td>
-                </tr>
-                <tr>
-                  <th class="table-light align-top pt-3">지연 사유</th>
-                  <td>
-                    <textarea
-                      class="form-control"
-                      rows="3"
-                      v-model="formData.issues"
-                      placeholder="지연 사유를 입력하세요"
-                    ></textarea>
-                  </td>
-                </tr>
-                <!-- 진행 내역 테이블 -->
-                <tr>
-                  <th class="table-light align-top pt-3">진행 내역</th>
-                  <td>
-                    <div class="mb-2 text-end">
-                      <button class="btn btn-sm btn-primary me-1" @click="addProgressRow">
-                        <i class="bi bi-plus-circle me-1"></i>추가
-                      </button>
-                      <button class="btn btn-sm btn-danger" @click="deleteProgressRow">
-                        <i class="bi bi-trash me-1"></i>삭제
-                      </button>
+                  <td colspan="2" class="p-0">
+                    <!-- 설비지원 -->
+                    <EquipmentSupportResult
+                      v-if="formData.supportType === 'equipment-support'"
+                      v-model="equipmentSupportData"
+                    />
+
+                    <!-- 고장수리 -->
+                    <FailureRepairResult
+                      v-else-if="formData.supportType === 'failure-repair'"
+                      v-model="failureRepairData"
+                    />
+
+                    <!-- 설비셋업해제 -->
+                    <SetupReleaseResult
+                      v-else-if="formData.supportType === 'setup-release'"
+                      v-model="setupReleaseData"
+                    />
+
+                    <!-- 설비개조개선 -->
+                    <ModificationImprovementResult
+                      v-else-if="formData.supportType === 'modification-improvement'"
+                      v-model="modificationImprovementData"
+                    />
+
+                    <!-- 지원 유형 미선택 -->
+                    <div v-else class="p-4 text-center text-muted">
+                      <i class="bi bi-info-circle me-2"></i>
+                      먼저 1단계에서 지원 유형을 선택해주세요.
                     </div>
-                    <JqxCustomeGrid
-                      ref="progressGrid"
-                      :localdata="progressRows"
-                      :datafields="progressDatafields"
-                      :columns="progressColumns"
-                      selectionmode="checkbox"
-                      :height="300"
-                      theme="bootstrap"
-                    />
-                  </td>
-                </tr>
-                <!-- 첨부파일 1 -->
-                <tr>
-                  <th class="table-light align-top pt-3">첨부파일 1</th>
-                  <td>
-                    <input
-                      type="file"
-                      class="form-control"
-                      @change="handleResultFileUpload1"
-                      multiple
-                    />
-                    <small class="text-muted">최대 10MB, 여러 파일 선택 가능</small>
-                    <ul class="list-group mt-2" v-if="formData.resultFiles1.length > 0">
-                      <li
-                        v-for="(file, idx) in formData.resultFiles1"
-                        :key="idx"
-                        class="list-group-item d-flex justify-content-between align-items-center"
-                      >
-                        <span><i class="bi bi-file-earmark me-2"></i>{{ file }}</span>
-                        <button
-                          class="btn btn-sm btn-outline-danger"
-                          @click="removeResultFile1(idx)"
-                        >
-                          <i class="bi bi-x"></i>
-                        </button>
-                      </li>
-                    </ul>
-                  </td>
-                </tr>
-                <!-- 첨부파일 2 -->
-                <tr>
-                  <th class="table-light align-top pt-3">첨부파일 2</th>
-                  <td>
-                    <input
-                      type="file"
-                      class="form-control"
-                      @change="handleResultFileUpload2"
-                      multiple
-                    />
-                    <small class="text-muted">최대 10MB, 여러 파일 선택 가능</small>
-                    <ul class="list-group mt-2" v-if="formData.resultFiles2.length > 0">
-                      <li
-                        v-for="(file, idx) in formData.resultFiles2"
-                        :key="idx"
-                        class="list-group-item d-flex justify-content-between align-items-center"
-                      >
-                        <span><i class="bi bi-file-earmark me-2"></i>{{ file }}</span>
-                        <button
-                          class="btn btn-sm btn-outline-danger"
-                          @click="removeResultFile2(idx)"
-                        >
-                          <i class="bi bi-x"></i>
-                        </button>
-                      </li>
-                    </ul>
                   </td>
                 </tr>
               </tbody>
@@ -579,15 +510,23 @@
 <script>
 import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
 import { openUserPopup } from '@/utils/showPop.js'
+import EquipmentSupportResult from '@/components/EquipmentSupportResult.vue'
+import FailureRepairResult from '@/components/FailureRepairResult.vue'
+import SetupReleaseResult from '@/components/SetupReleaseResult.vue'
+import ModificationImprovementResult from '@/components/ModificationImprovementResult.vue'
 
 export default {
   name: 'WorkRequestFormPage',
   components: {
     JqxCustomeGrid,
+    EquipmentSupportResult,
+    FailureRepairResult,
+    SetupReleaseResult,
+    ModificationImprovementResult,
   },
   data() {
     return {
-      currentStep: 'request', // request, receive, progress, complete
+      currentStep: 'progress', // request, receive, progress, complete
       steps: [
         { key: 'request', label: '의뢰', icon: 'bi bi-file-text' },
         { key: 'receive', label: '접수', icon: 'bi bi-clipboard-check' },
@@ -648,6 +587,55 @@ export default {
         consultants: '',
         recipe: '',
       },
+      // 지원 유형별 결과 등록 데이터
+      equipmentSupportData: {
+        supportContent: '',
+        supportTime: '',
+        supportPersonnel: 1,
+        supportNotes: '',
+        supportFiles: [],
+      },
+      failureRepairData: {
+        vendorManager: '',
+        purchaseCost: '',
+        project: '',
+        failureStatus: '',
+        selectedCauses: [],
+        causeNote: '',
+        causeRows: [],
+        repairAction: '',
+        selectedMeasures: [],
+        measureDetails: {
+          개조개선: '',
+          횡전개: '',
+          'OPLS/SOP': '',
+          기타: '',
+        },
+        partRows: [],
+        delayReason: '',
+        workerRows: [],
+        repairFiles: [],
+      },
+      setupReleaseData: {
+        setupType: 'setup',
+        setupContent: '',
+        setupTime: '',
+        setupPersonnel: 1,
+        equipmentUsed: '',
+        safetyMeasures: '',
+        setupFiles: [],
+      },
+      modificationImprovementData: {
+        modificationContent: '',
+        improvementPurpose: '',
+        improvementEffect: '',
+        modificationCost: '',
+        workStartDate: '',
+        workEndDate: '',
+        participants: '',
+        technicalDocs: '',
+        modificationFiles: [],
+      },
     }
   },
   watch: {
@@ -669,7 +657,146 @@ export default {
       },
     },
   },
+  mounted() {
+    // 페이지 로드 시 DB에서 데이터 조회
+    this.loadWorkRequestData()
+  },
   methods: {
+    async loadWorkRequestData() {
+      // TODO: 실제로는 API 호출로 DB에서 데이터 조회
+      // const requestId = this.$route.params.id
+      // const response = await fetch(`/api/work-requests/${requestId}`)
+      // const data = await response.json()
+
+      // 임시 데이터 (실제로는 DB에서 조회)
+      const mockData = {
+        requestNo: 'REQ-2024-0001',
+        title: '생산라인 A 설비 고장',
+        supportType: 'failure-repair', // equipment-support, failure-repair, setup-release, modification-improvement
+        currentStep: 'progress',
+        // ... 기본 formData
+
+        // 지원 유형별 결과 데이터 (DB에 JSON으로 저장되어 있음)
+        resultData: {
+          vendorManager: '김철수',
+          purchaseCost: '500,000원',
+          project: 'PJ-2024-001',
+          failureStatus: '생산라인 A 모터 베어링 마모로 인한 이상 소음 및 진동 발생',
+          selectedCauses: ['마모', '노후'],
+          causeRows: [
+            { selected: false, detail: '모터 베어링 장기간 사용으로 인한 마모' },
+            { selected: false, detail: '정기 점검 미실시' },
+          ],
+          repairAction: '베어링 교체 및 윤활유 보충, 정렬 조정',
+          selectedMeasures: ['개조개선', '횡전개'],
+          measureDetails: {
+            개조개선: '진동 센서 설치 및 모니터링 시스템 구축',
+            횡전개: '동일 모델 모터 20대 점검 실시',
+            'OPLS/SOP': '',
+            기타: '',
+          },
+          partRows: [
+            {
+              selected: false,
+              name: '모터 베어링',
+              spec: 'SKF-6205',
+              quantity: 2,
+              note: '교체완료',
+            },
+            {
+              selected: false,
+              name: '윤활유',
+              spec: 'Shell Omala S2 G 220',
+              quantity: 1,
+              note: '보충',
+            },
+          ],
+          delayReason: '',
+          workerRows: [
+            { selected: false, worker: '홍길동', department: '설비팀', workTime: 120 },
+            { selected: false, worker: '이영희', department: '설비팀', workTime: 90 },
+          ],
+          repairFiles: ['repair_before.jpg', 'repair_after.jpg'],
+        },
+      }
+
+      // 기본 formData 설정
+      this.formData.requestNo = mockData.requestNo
+      this.formData.title = mockData.title
+      this.formData.supportType = mockData.supportType
+      this.currentStep = mockData.currentStep
+
+      // 지원 유형에 따라 해당 컴포넌트 데이터 설정
+      this.loadResultDataByType(mockData.supportType, mockData.resultData)
+    },
+
+    loadResultDataByType(supportType, resultData) {
+      // DB에서 조회한 resultData를 지원 유형에 맞는 컴포넌트 데이터로 매핑
+      if (!resultData) return
+
+      switch (supportType) {
+        case 'equipment-support':
+          this.equipmentSupportData = {
+            supportContent: resultData.supportContent || '',
+            supportTime: resultData.supportTime || '',
+            supportPersonnel: resultData.supportPersonnel || 1,
+            supportNotes: resultData.supportNotes || '',
+            supportFiles: resultData.supportFiles || [],
+          }
+          break
+
+        case 'failure-repair':
+          this.failureRepairData = {
+            vendorManager: resultData.vendorManager || '',
+            purchaseCost: resultData.purchaseCost || '',
+            project: resultData.project || '',
+            failureStatus: resultData.failureStatus || '',
+            selectedCauses: resultData.selectedCauses || [],
+            causeNote: resultData.causeNote || '',
+            causeRows: resultData.causeRows || [],
+            repairAction: resultData.repairAction || '',
+            selectedMeasures: resultData.selectedMeasures || [],
+            measureDetails: resultData.measureDetails || {
+              개조개선: '',
+              횡전개: '',
+              'OPLS/SOP': '',
+              기타: '',
+            },
+            partRows: resultData.partRows || [],
+            delayReason: resultData.delayReason || '',
+            workerRows: resultData.workerRows || [],
+            repairFiles: resultData.repairFiles || [],
+          }
+          break
+
+        case 'setup-release':
+          this.setupReleaseData = {
+            setupType: resultData.setupType || 'setup',
+            setupContent: resultData.setupContent || '',
+            setupTime: resultData.setupTime || '',
+            setupPersonnel: resultData.setupPersonnel || 1,
+            equipmentUsed: resultData.equipmentUsed || '',
+            safetyMeasures: resultData.safetyMeasures || '',
+            setupFiles: resultData.setupFiles || [],
+          }
+          break
+
+        case 'modification-improvement':
+          this.modificationImprovementData = {
+            modificationContent: resultData.modificationContent || '',
+            improvementPurpose: resultData.improvementPurpose || '',
+            improvementEffect: resultData.improvementEffect || '',
+            modificationCost: resultData.modificationCost || '',
+            workStartDate: resultData.workStartDate || '',
+            workEndDate: resultData.workEndDate || '',
+            participants: resultData.participants || '',
+            technicalDocs: resultData.technicalDocs || '',
+            modificationFiles: resultData.modificationFiles || [],
+          }
+          break
+      }
+    },
+
     toggleSection(section) {
       this.sections[section] = !this.sections[section]
     },
@@ -800,13 +927,39 @@ export default {
     },
     submitComplete() {
       // 3단계 결과 등록 완료 → 4단계(완료)로 이동
-      const progressData = {
-        progressDescription: this.formData.progressDescription,
-        issues: this.formData.issues,
-        resultFiles1: this.formData.resultFiles1,
-        resultFiles2: this.formData.resultFiles2,
+
+      // 현재 지원 유형에 맞는 결과 데이터 수집
+      let resultData = null
+      switch (this.formData.supportType) {
+        case 'equipment-support':
+          resultData = this.equipmentSupportData
+          break
+        case 'failure-repair':
+          resultData = this.failureRepairData
+          break
+        case 'setup-release':
+          resultData = this.setupReleaseData
+          break
+        case 'modification-improvement':
+          resultData = this.modificationImprovementData
+          break
       }
+
+      const progressData = {
+        requestNo: this.formData.requestNo,
+        supportType: this.formData.supportType,
+        resultData: resultData, // 지원 유형별 결과 데이터 (JSON으로 DB 저장)
+        progressRows: this.progressRows, // 진행 내역 테이블
+      }
+
       console.log('결과 등록 완료 데이터:', progressData)
+
+      // TODO: 실제 API 호출
+      // await fetch(`/api/work-requests/${this.formData.requestNo}/complete`, {
+      //   method: 'POST',
+      //   body: JSON.stringify(progressData)
+      // })
+
       alert('결과 등록이 완료되었습니다.')
       this.currentStep = 'complete'
       // 아코디언은 3개만 있으므로 sections 제어 불필요
@@ -831,13 +984,38 @@ export default {
       alert('임시저장되었습니다.')
     },
     saveDraftProgress() {
-      const draftData = {
-        progressDescription: this.formData.progressDescription,
-        issues: this.formData.issues,
-        resultFiles1: this.formData.resultFiles1,
-        resultFiles2: this.formData.resultFiles2,
+      // 현재 지원 유형에 맞는 결과 데이터 수집
+      let resultData = null
+      switch (this.formData.supportType) {
+        case 'equipment-support':
+          resultData = this.equipmentSupportData
+          break
+        case 'failure-repair':
+          resultData = this.failureRepairData
+          break
+        case 'setup-release':
+          resultData = this.setupReleaseData
+          break
+        case 'modification-improvement':
+          resultData = this.modificationImprovementData
+          break
       }
+
+      const draftData = {
+        requestNo: this.formData.requestNo,
+        supportType: this.formData.supportType,
+        resultData: resultData, // 지원 유형별 결과 데이터
+        progressRows: this.progressRows,
+      }
+
       console.log('결과등록 임시저장 데이터:', draftData)
+
+      // TODO: 실제 API 호출
+      // await fetch(`/api/work-requests/${this.formData.requestNo}/draft`, {
+      //   method: 'POST',
+      //   body: JSON.stringify(draftData)
+      // })
+
       alert('임시저장되었습니다.')
     },
     modifyProgress() {
