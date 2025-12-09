@@ -587,7 +587,7 @@ export default {
   },
   data() {
     return {
-      currentStep: 'progress', // request, receive, progress, complete
+      currentStep: 'request', // request, receive, progress, complete
       steps: [
         { key: 'request', label: '의뢰', icon: 'bi bi-file-text' },
         { key: 'receive', label: '접수', icon: 'bi bi-clipboard-check' },
@@ -926,17 +926,49 @@ export default {
   background-color: white;
 }
 
+/* 활성 스텝: 깜빡이는 그림자 효과 */
 .step-item.active .step-circle {
   background-color: #0d6efd;
   border-color: #0d6efd;
   color: white;
   box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+  animation: pulseShadow 2s ease-in-out infinite;
 }
 
+/* 활성 스텝 아이콘: 둥둥 떠있는 효과 */
+.step-item.active .step-circle i {
+  animation: floatingIcon 2s ease-in-out infinite;
+}
+
+/* 완료된 스텝: 눌러진 느낌 (축소 + 안쪽 그림자 + 아래로 이동) */
 .step-item.completed .step-circle {
   background-color: #198754;
   border-color: #198754;
   color: white;
+  transform: scale(0.92) translateY(2px);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 깜빡이는 그림자 애니메이션 */
+@keyframes pulseShadow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(13, 110, 253, 0.1);
+  }
+}
+
+/* 둥둥 떠있는 아이콘 애니메이션 */
+@keyframes floatingIcon {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 .step-label {
@@ -960,13 +992,30 @@ export default {
   top: 30px;
   left: 50%;
   width: 100%;
-  height: 3px;
+  height: 4px;
   background-color: #dee2e6;
   z-index: 0;
+  overflow: hidden;
 }
 
+/* 완료된 스텝의 연결선 - 흐르는 그라데이션 */
 .step-item.completed .step-line {
-  background-color: #198754;
+  background: linear-gradient(90deg, #198754 0%, #20c997 50%, #198754 100%);
+  background-size: 200% 100%;
+  animation: flowGradient 3s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(25, 135, 84, 0.4);
+}
+
+@keyframes flowGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .step-item:last-child .step-line {
