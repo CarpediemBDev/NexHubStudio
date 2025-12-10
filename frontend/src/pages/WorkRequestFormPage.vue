@@ -443,27 +443,22 @@
                 <tr>
                   <td colspan="2" class="p-0">
                     <!-- 설비지원 -->
-                    <EquipmentSupportResult
-                      v-if="formData.supportType === 'equipment-support'"
-                      v-model="equipmentSupportData"
-                    />
+                    <EquipmentSupportResult v-if="formData.supportType === 'equipment-support'" />
 
                     <!-- 고장수리 -->
-                    <FailureRepairResult
-                      v-else-if="formData.supportType === 'failure-repair'"
-                      v-model="failureRepairData"
-                    />
+                    <FailureRepairResult v-else-if="formData.supportType === 'failure-repair'" />
 
                     <!-- 설비셋업해제 -->
                     <SetupReleaseResult
-                      v-else-if="formData.supportType === 'setup-release'"
-                      v-model="setupReleaseData"
+                      v-else-if="
+                        formData.supportType === 'setup-release' ||
+                        formData.supportType === 'setup-setup'
+                      "
                     />
 
                     <!-- 설비개조개선 -->
                     <ModificationImprovementResult
                       v-else-if="formData.supportType === 'modification-improvement'"
-                      v-model="modificationImprovementData"
                     />
 
                     <!-- 지원 유형 미선택 -->
@@ -475,24 +470,7 @@
                 </tr>
               </tbody>
             </table>
-            <div class="p-3 bg-light d-flex justify-content-between">
-              <div>
-                <button class="btn btn-outline-secondary me-2" @click="modifyProgress">
-                  <i class="bi bi-pencil me-1"></i>수정
-                </button>
-                <button class="btn btn-outline-secondary" @click="rejectProgress">
-                  <i class="bi bi-x-circle me-1"></i>반려
-                </button>
-              </div>
-              <div>
-                <button class="btn btn-outline-secondary me-2" @click="saveDraftProgress">
-                  <i class="bi bi-save me-1"></i>임시저장
-                </button>
-                <button class="btn btn-success" @click="submitComplete">
-                  <i class="bi bi-check-circle me-1"></i>저장
-                </button>
-              </div>
-            </div>
+            <div class="p-3 bg-light d-flex justify-content-between"></div>
           </div>
         </div>
       </div>
@@ -526,7 +504,7 @@ export default {
   },
   data() {
     return {
-      currentStep: 'progress', // request, receive, progress, complete
+      currentStep: 'request', // request, receive, progress, complete
       steps: [
         { key: 'request', label: '의뢰', icon: 'bi bi-file-text' },
         { key: 'receive', label: '접수', icon: 'bi bi-clipboard-check' },
@@ -587,55 +565,6 @@ export default {
         consultants: '',
         recipe: '',
       },
-      // 지원 유형별 결과 등록 데이터
-      equipmentSupportData: {
-        supportContent: '',
-        supportTime: '',
-        supportPersonnel: 1,
-        supportNotes: '',
-        supportFiles: [],
-      },
-      failureRepairData: {
-        vendorManager: '',
-        purchaseCost: '',
-        project: '',
-        failureStatus: '',
-        selectedCauses: [],
-        causeNote: '',
-        causeRows: [],
-        repairAction: '',
-        selectedMeasures: [],
-        measureDetails: {
-          개조개선: '',
-          횡전개: '',
-          'OPLS/SOP': '',
-          기타: '',
-        },
-        partRows: [],
-        delayReason: '',
-        workerRows: [],
-        repairFiles: [],
-      },
-      setupReleaseData: {
-        setupType: 'setup',
-        setupContent: '',
-        setupTime: '',
-        setupPersonnel: 1,
-        equipmentUsed: '',
-        safetyMeasures: '',
-        setupFiles: [],
-      },
-      modificationImprovementData: {
-        modificationContent: '',
-        improvementPurpose: '',
-        improvementEffect: '',
-        modificationCost: '',
-        workStartDate: '',
-        workEndDate: '',
-        participants: '',
-        technicalDocs: '',
-        modificationFiles: [],
-      },
     }
   },
   watch: {
@@ -673,7 +602,6 @@ export default {
         requestNo: 'REQ-2024-0001',
         title: '생산라인 A 설비 고장',
         supportType: 'failure-repair', // equipment-support, failure-repair, setup-release, modification-improvement
-        currentStep: 'progress',
         // ... 기본 formData
 
         // 지원 유형별 결과 데이터 (DB에 JSON으로 저장되어 있음)
@@ -724,77 +652,9 @@ export default {
       this.formData.requestNo = mockData.requestNo
       this.formData.title = mockData.title
       this.formData.supportType = mockData.supportType
-      this.currentStep = mockData.currentStep
+      // this.currentStep = mockData.currentStep // currentStep은 mockData를 따르지 않고 기존 값 사용
 
-      // 지원 유형에 따라 해당 컴포넌트 데이터 설정
-      this.loadResultDataByType(mockData.supportType, mockData.resultData)
-    },
-
-    loadResultDataByType(supportType, resultData) {
-      // DB에서 조회한 resultData를 지원 유형에 맞는 컴포넌트 데이터로 매핑
-      if (!resultData) return
-
-      switch (supportType) {
-        case 'equipment-support':
-          this.equipmentSupportData = {
-            supportContent: resultData.supportContent || '',
-            supportTime: resultData.supportTime || '',
-            supportPersonnel: resultData.supportPersonnel || 1,
-            supportNotes: resultData.supportNotes || '',
-            supportFiles: resultData.supportFiles || [],
-          }
-          break
-
-        case 'failure-repair':
-          this.failureRepairData = {
-            vendorManager: resultData.vendorManager || '',
-            purchaseCost: resultData.purchaseCost || '',
-            project: resultData.project || '',
-            failureStatus: resultData.failureStatus || '',
-            selectedCauses: resultData.selectedCauses || [],
-            causeNote: resultData.causeNote || '',
-            causeRows: resultData.causeRows || [],
-            repairAction: resultData.repairAction || '',
-            selectedMeasures: resultData.selectedMeasures || [],
-            measureDetails: resultData.measureDetails || {
-              개조개선: '',
-              횡전개: '',
-              'OPLS/SOP': '',
-              기타: '',
-            },
-            partRows: resultData.partRows || [],
-            delayReason: resultData.delayReason || '',
-            workerRows: resultData.workerRows || [],
-            repairFiles: resultData.repairFiles || [],
-          }
-          break
-
-        case 'setup-release':
-          this.setupReleaseData = {
-            setupType: resultData.setupType || 'setup',
-            setupContent: resultData.setupContent || '',
-            setupTime: resultData.setupTime || '',
-            setupPersonnel: resultData.setupPersonnel || 1,
-            equipmentUsed: resultData.equipmentUsed || '',
-            safetyMeasures: resultData.safetyMeasures || '',
-            setupFiles: resultData.setupFiles || [],
-          }
-          break
-
-        case 'modification-improvement':
-          this.modificationImprovementData = {
-            modificationContent: resultData.modificationContent || '',
-            improvementPurpose: resultData.improvementPurpose || '',
-            improvementEffect: resultData.improvementEffect || '',
-            modificationCost: resultData.modificationCost || '',
-            workStartDate: resultData.workStartDate || '',
-            workEndDate: resultData.workEndDate || '',
-            participants: resultData.participants || '',
-            technicalDocs: resultData.technicalDocs || '',
-            modificationFiles: resultData.modificationFiles || [],
-          }
-          break
-      }
+      // 결과등록 데이터는 자식에서 관리하므로 별도 세팅하지 않음
     },
 
     toggleSection(section) {
@@ -927,43 +787,7 @@ export default {
     },
     submitComplete() {
       // 3단계 결과 등록 완료 → 4단계(완료)로 이동
-
-      // 현재 지원 유형에 맞는 결과 데이터 수집
-      let resultData = null
-      switch (this.formData.supportType) {
-        case 'equipment-support':
-          resultData = this.equipmentSupportData
-          break
-        case 'failure-repair':
-          resultData = this.failureRepairData
-          break
-        case 'setup-release':
-          resultData = this.setupReleaseData
-          break
-        case 'modification-improvement':
-          resultData = this.modificationImprovementData
-          break
-      }
-
-      const progressData = {
-        requestNo: this.formData.requestNo,
-        supportType: this.formData.supportType,
-        resultData: resultData, // 지원 유형별 결과 데이터 (JSON으로 DB 저장)
-        progressRows: this.progressRows, // 진행 내역 테이블
-      }
-
-      console.log('결과 등록 완료 데이터:', progressData)
-
-      // TODO: 실제 API 호출
-      // await fetch(`/api/work-requests/${this.formData.requestNo}/complete`, {
-      //   method: 'POST',
-      //   body: JSON.stringify(progressData)
-      // })
-
-      alert('결과 등록이 완료되었습니다.')
-      this.currentStep = 'complete'
-      // 아코디언은 3개만 있으므로 sections 제어 불필요
-      // 스텝바만 complete 단계로 표시됨
+      // 결과등록 데이터는 자식에서 관리하므로 별도 수집하지 않음
     },
     goToList() {
       this.$router.push('/request-workflow')
@@ -983,49 +807,7 @@ export default {
       console.log('접수 임시저장 데이터:', draftData)
       alert('임시저장되었습니다.')
     },
-    saveDraftProgress() {
-      // 현재 지원 유형에 맞는 결과 데이터 수집
-      let resultData = null
-      switch (this.formData.supportType) {
-        case 'equipment-support':
-          resultData = this.equipmentSupportData
-          break
-        case 'failure-repair':
-          resultData = this.failureRepairData
-          break
-        case 'setup-release':
-          resultData = this.setupReleaseData
-          break
-        case 'modification-improvement':
-          resultData = this.modificationImprovementData
-          break
-      }
 
-      const draftData = {
-        requestNo: this.formData.requestNo,
-        supportType: this.formData.supportType,
-        resultData: resultData, // 지원 유형별 결과 데이터
-        progressRows: this.progressRows,
-      }
-
-      console.log('결과등록 임시저장 데이터:', draftData)
-
-      // TODO: 실제 API 호출
-      // await fetch(`/api/work-requests/${this.formData.requestNo}/draft`, {
-      //   method: 'POST',
-      //   body: JSON.stringify(draftData)
-      // })
-
-      alert('임시저장되었습니다.')
-    },
-    modifyProgress() {
-      alert('수정 요청되었습니다.')
-    },
-    rejectProgress() {
-      if (confirm('정말로 반려하시겠습니까?')) {
-        alert('반려 처리되었습니다.')
-      }
-    },
     addProgressRow() {
       this.$refs.progressGrid?.add({
         progressDate: '',

@@ -394,16 +394,33 @@
         </tr>
       </tbody>
     </table>
+    <!-- 결과등록 버튼 영역 (폼 하단) -->
+    <div class="p-3 bg-light d-flex justify-content-between">
+      <div>
+        <button class="btn btn-outline-secondary me-2" @click="modify">
+          <i class="bi bi-pencil me-1"></i>수정
+        </button>
+        <button class="btn btn-outline-secondary" @click="reject">
+          <i class="bi bi-x-circle me-1"></i>반려
+        </button>
+      </div>
+      <div>
+        <button class="btn btn-outline-secondary me-2" @click="saveDraft">
+          <i class="bi bi-save me-1"></i>임시저장
+        </button>
+        <button class="btn btn-success" @click="submitComplete">
+          <i class="bi bi-check-circle me-1"></i>저장
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'FailureRepairResult',
-  props: {
-    modelValue: {
-      type: Object,
-      default: () => ({
+  data() {
+    return {
+      failureRepairData: {
         vendorManager: '',
         purchaseCost: '',
         project: '',
@@ -423,12 +440,33 @@ export default {
         delayReason: '',
         workerRows: [],
         repairFiles: [],
-      }),
-    },
+      },
+    }
   },
-  emits: ['update:modelValue'],
+  name: 'FailureRepairResult',
   data() {
     return {
+      formData: {
+        vendorManager: '',
+        purchaseCost: '',
+        project: '',
+        failureStatus: '',
+        selectedCauses: [],
+        causeNote: '',
+        causeRows: [],
+        repairAction: '',
+        selectedMeasures: [],
+        measureDetails: {
+          개조개선: '',
+          횡전개: '',
+          'OPLS/SOP': '',
+          기타: '',
+        },
+        partRows: [],
+        delayReason: '',
+        workerRows: [],
+        repairFiles: [],
+      },
       mainCauses: [
         '공정',
         '구조',
@@ -460,14 +498,6 @@ export default {
     }
   },
   computed: {
-    formData: {
-      get() {
-        return this.modelValue
-      },
-      set(value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
     isEtcSelected() {
       return this.formData.selectedCauses.includes('ETC')
     },
@@ -540,6 +570,23 @@ export default {
     },
     removeFile(idx) {
       this.formData.repairFiles.splice(idx, 1)
+    },
+
+    // 결과등록 관련 버튼 메서드
+    saveDraft() {
+      alert('임시저장되었습니다. (고장수리)')
+    },
+    submitComplete() {
+      alert('저장되었습니다. (고장수리)')
+      // 필요시 emit 등으로 부모에 완료 알림
+    },
+    modify() {
+      alert('수정 요청되었습니다. (고장수리)')
+    },
+    reject() {
+      if (confirm('정말로 반려하시겠습니까?')) {
+        alert('반려 처리되었습니다. (고장수리)')
+      }
     },
   },
 }

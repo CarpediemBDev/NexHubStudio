@@ -185,6 +185,7 @@ export default {
           children: [
             { label: '업무 의뢰', to: '/request-workflow' },
             { label: '업무 의뢰서', to: '/work-request-form' },
+            { label: '설비지원요청', to: '/equipment-support-request' },
           ],
         },
         {

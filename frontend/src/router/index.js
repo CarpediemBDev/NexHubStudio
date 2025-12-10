@@ -24,6 +24,12 @@ const routes = [
       { path: '', name: 'Users', component: UserPage },
       { path: 'search-grid', name: '사용자(검색 그리드)', component: UserSearGridPage },
       { path: 'jqx-grid', name: 'JqxGrid 샘플', component: JqxGridPage },
+      // 업무관리 > 설비지원요청
+      {
+        path: 'equipment-support-request',
+        name: '설비지원요청',
+        component: () => import('../pages/EquipmentSupportRequestPage.vue'),
+      },
       {
         path: 'common-code-groups',
         name: 'CommonCodeGroupList',

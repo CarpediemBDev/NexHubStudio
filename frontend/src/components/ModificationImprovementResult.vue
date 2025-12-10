@@ -108,16 +108,33 @@
         </tr>
       </tbody>
     </table>
+    <!-- 결과등록 버튼 영역 (폼 하단) -->
+    <div class="p-3 bg-light d-flex justify-content-between">
+      <div>
+        <button class="btn btn-outline-secondary me-2" @click="modify">
+          <i class="bi bi-pencil me-1"></i>수정
+        </button>
+        <button class="btn btn-outline-secondary" @click="reject">
+          <i class="bi bi-x-circle me-1"></i>반려
+        </button>
+      </div>
+      <div>
+        <button class="btn btn-outline-secondary me-2" @click="saveDraft">
+          <i class="bi bi-save me-1"></i>임시저장
+        </button>
+        <button class="btn btn-success" @click="submitComplete">
+          <i class="bi bi-check-circle me-1"></i>저장
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'ModificationImprovementResult',
-  props: {
-    modelValue: {
-      type: Object,
-      default: () => ({
+  data() {
+    return {
+      modificationImprovementData: {
         modificationContent: '',
         improvementPurpose: '',
         improvementEffect: '',
@@ -127,21 +144,42 @@ export default {
         participants: '',
         technicalDocs: '',
         modificationFiles: [],
-      }),
-    },
+      },
+    }
   },
-  emits: ['update:modelValue'],
-  computed: {
-    formData: {
-      get() {
-        return this.modelValue
+  name: 'ModificationImprovementResult',
+  data() {
+    return {
+      formData: {
+        modificationContent: '',
+        improvementPurpose: '',
+        improvementEffect: '',
+        modificationCost: '',
+        workStartDate: '',
+        workEndDate: '',
+        participants: '',
+        technicalDocs: '',
+        modificationFiles: [],
       },
-      set(value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
+    }
   },
   methods: {
+    // 결과등록 관련 버튼 메서드
+    saveDraft() {
+      alert('임시저장되었습니다. (개선/개조)')
+    },
+    submitComplete() {
+      alert('저장되었습니다. (개선/개조)')
+      // 필요시 emit 등으로 부모에 완료 알림
+    },
+    modify() {
+      alert('수정 요청되었습니다. (개선/개조)')
+    },
+    reject() {
+      if (confirm('정말로 반려하시겠습니까?')) {
+        alert('반려 처리되었습니다. (개선/개조)')
+      }
+    },
     handleFileUpload(event) {
       const files = event.target.files
       for (let i = 0; i < files.length; i++) {
