@@ -470,6 +470,8 @@ export default {
   gap: 6px;
   align-items: flex-start;
   padding: 8px;
+  max-height: 160px; /* 그룹별 스크롤 영역 높이, 필요시 조정 */
+  overflow-y: auto;
 }
 
 .assigned-badge {
