@@ -29,7 +29,7 @@
               class="form-control mb-3"
               placeholder="🔍 이름 또는 부서 검색..."
             />
-            <div class="shared-user-box border rounded" style="height: 600px; overflow-y: auto">
+            <div class="shared-user-box border rounded">
               <div
                 v-for="user in filteredUsers"
                 :key="user.id"
@@ -52,21 +52,23 @@
                   <!-- 배정된 그룹 표시 (모든 그룹) -->
                   <span v-if="getUserAssignedGroups(user.id).length > 0" class="ms-2 d-flex gap-1">
                     <span
+                      v-if="getUserAssignedGroups(user.id).includes('processWorker')"
+                      class="badge badge-info"
+                      >공정사원</span
+                    >
+                    <span
                       v-if="getUserAssignedGroups(user.id).includes('researcher')"
                       class="badge bg-primary"
-                      style="font-size: 0.65rem"
                       >연구원</span
                     >
                     <span
                       v-if="getUserAssignedGroups(user.id).includes('operation')"
                       class="badge bg-success"
-                      style="font-size: 0.65rem"
                       >오퍼</span
                     >
                     <span
                       v-if="getUserAssignedGroups(user.id).includes('worker')"
                       class="badge bg-warning text-dark"
-                      style="font-size: 0.65rem"
                       >실무자</span
                     >
                   </span>
@@ -110,8 +112,16 @@
           <i class="bi bi-arrow-right fs-5"></i>
           <small class="d-block">실무자</small>
         </button>
+        <button
+          class="btn btn-outline-info shared-arrow-btn"
+          @click="moveToProcessWorker"
+          :disabled="selectedUsers.length === 0"
+          title="공정사원으로 배정"
+        >
+          <i class="bi bi-arrow-right fs-5"></i>
+          <small class="d-block">공정사원</small>
+        </button>
       </div>
-
       <!-- 오른쪽: 배정된 그룹들 -->
       <div class="col-md-7">
         <!-- 연구원 그룹 -->
@@ -123,7 +133,7 @@
             </div>
           </div>
           <div class="card-body p-3">
-            <div class="assigned-box" style="min-height: 80px">
+            <div class="assigned-box">
               <span
                 v-for="user in researchers"
                 :key="user.id"
@@ -141,7 +151,6 @@
             </div>
           </div>
         </div>
-
         <!-- 오퍼레이션 그룹 -->
         <div class="card mb-3 border-success">
           <div class="card-header bg-success bg-opacity-10 border-success">
@@ -151,7 +160,7 @@
             </div>
           </div>
           <div class="card-body p-3">
-            <div class="assigned-box" style="min-height: 80px">
+            <div class="assigned-box">
               <span
                 v-for="user in operations"
                 :key="user.id"
@@ -169,7 +178,6 @@
             </div>
           </div>
         </div>
-
         <!-- 실무자 그룹 -->
         <div class="card mb-3 border-warning">
           <div class="card-header bg-warning bg-opacity-10 border-warning">
@@ -179,7 +187,7 @@
             </div>
           </div>
           <div class="card-body p-3">
-            <div class="assigned-box" style="min-height: 80px">
+            <div class="assigned-box">
               <span
                 v-for="user in workers"
                 :key="user.id"
@@ -197,7 +205,33 @@
             </div>
           </div>
         </div>
-
+        <!-- 공정사원 그룹 -->
+        <div class="card mb-3 border-info">
+          <div class="card-header bg-info bg-opacity-10 border-info">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 text-info"><i class="bi bi-person-lines-fill me-2"></i>공정사원</h6>
+              <span class="badge bg-info text-dark">{{ processWorkers.length }}</span>
+            </div>
+          </div>
+          <div class="card-body p-3">
+            <div class="assigned-box">
+              <span
+                v-for="user in processWorkers"
+                :key="user.id"
+                class="assigned-badge badge-info"
+                @click="removeFromProcessWorker(user.id)"
+                title="클릭하여 제거"
+              >
+                {{ user.name }}
+                <i class="bi bi-x-circle ms-1"></i>
+              </span>
+              <div v-if="processWorkers.length === 0" class="empty-state">
+                <i class="bi bi-inbox fs-4 d-block mb-2 text-muted"></i>
+                <small class="text-muted">배정된 공정사원이 없습니다</small>
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- 저장 버튼 -->
         <div class="text-end">
           <button class="btn btn-primary btn-lg" @click="saveAssignments">
@@ -245,6 +279,7 @@ export default {
       researchers: [],
       operations: [],
       workers: [],
+      processWorkers: [], // 공정사원
     }
   },
   computed: {
@@ -276,6 +311,7 @@ export default {
       if (this.researchers.find((u) => u.id === userId)) groups.push('researcher')
       if (this.operations.find((u) => u.id === userId)) groups.push('operation')
       if (this.workers.find((u) => u.id === userId)) groups.push('worker')
+      if (this.processWorkers.find((u) => u.id === userId)) groups.push('processWorker')
       return groups
     },
 
@@ -391,6 +427,7 @@ export default {
         researchers: this.researchers.map((u) => u.id),
         operations: this.operations.map((u) => u.id),
         workers: this.workers.map((u) => u.id),
+        processWorkers: this.processWorkers.map((u) => u.id),
       }
       showToast('사용자 배정이 저장되었습니다.', { type: 'success' })
     },
@@ -403,6 +440,8 @@ export default {
 .shared-user-box {
   background-color: #f8f9fa;
   padding: 12px;
+  height: 600px;
+  overflow-y: auto;
 }
 
 .shared-user-item {
@@ -470,7 +509,7 @@ export default {
   gap: 6px;
   align-items: flex-start;
   padding: 8px;
-  max-height: 160px; /* 그룹별 스크롤 영역 높이, 필요시 조정 */
+  height: 100px;
   overflow-y: auto;
 }
 
@@ -549,7 +588,6 @@ export default {
 /* 빈 상태 */
 .empty-state {
   text-align: center;
-  padding: 20px 0;
   width: 100%;
 }
 </style>
