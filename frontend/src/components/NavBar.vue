@@ -162,6 +162,7 @@ export default {
           children: [
             { label: '사용자 배정 (세로)', to: '/user-assignment-vertical' },
             { label: '사용자 배정 (공통목록)', to: '/user-assignment-shared' },
+            { label: '사용자 배정 (신규)', to: '/user-assignment-shared-new' },
           ],
         },
         {

@@ -50,26 +50,29 @@
                   <span>{{ user.name }}</span>
                   <small class="ms-auto text-muted">{{ user.department }}</small>
                   <!-- 배정된 그룹 표시 (모든 그룹) -->
-                  <span v-if="getUserAssignedGroups(user.id).length > 0" class="ms-2 d-flex gap-1">
+                  <span
+                    v-if="getUserAssignedGroups(user.id).length > 0"
+                    class="ms-2 d-flex gap-1 badge-group-wrap"
+                  >
                     <span
                       v-if="getUserAssignedGroups(user.id).includes('processWorker')"
-                      class="badge badge-info"
+                      class="badge badge-process"
                       >공정사원</span
                     >
                     <span
                       v-if="getUserAssignedGroups(user.id).includes('researcher')"
-                      class="badge bg-primary"
+                      class="badge badge-research"
                       >연구원</span
                     >
                     <span
                       v-if="getUserAssignedGroups(user.id).includes('operation')"
-                      class="badge bg-success"
-                      >오퍼</span
+                      class="badge badge-operation"
+                      >오퍼레이션</span
                     >
                     <span
                       v-if="getUserAssignedGroups(user.id).includes('worker')"
-                      class="badge bg-warning text-dark"
-                      >실무자</span
+                      class="badge badge-worker"
+                      >현장사원</span
                     >
                   </span>
                 </div>
@@ -86,7 +89,7 @@
       <!-- 중앙: 화살표 버튼 -->
       <div class="col-md-1 d-flex flex-column justify-content-center align-items-center gap-3">
         <button
-          class="btn btn-outline-primary shared-arrow-btn"
+          class="btn btn-research shared-arrow-btn"
           @click="moveToResearcher"
           :disabled="selectedUsers.length === 0"
           title="연구원으로 배정"
@@ -95,25 +98,25 @@
           <small class="d-block">연구원</small>
         </button>
         <button
-          class="btn btn-outline-success shared-arrow-btn"
+          class="btn btn-operation shared-arrow-btn"
           @click="moveToOperation"
           :disabled="selectedUsers.length === 0"
           title="오퍼레이션으로 배정"
         >
           <i class="bi bi-arrow-right fs-5"></i>
-          <small class="d-block">오퍼</small>
+          <small class="d-block">오퍼레이션</small>
         </button>
         <button
-          class="btn btn-outline-warning shared-arrow-btn"
+          class="btn btn-worker shared-arrow-btn"
           @click="moveToWorker"
           :disabled="selectedUsers.length === 0"
-          title="실무자로 배정"
+          title="현장사원으로 배정"
         >
           <i class="bi bi-arrow-right fs-5"></i>
-          <small class="d-block">실무자</small>
+          <small class="d-block">현장사원</small>
         </button>
         <button
-          class="btn btn-outline-info shared-arrow-btn"
+          class="btn btn-process shared-arrow-btn"
           @click="moveToProcessWorker"
           :disabled="selectedUsers.length === 0"
           title="공정사원으로 배정"
@@ -129,7 +132,7 @@
           <div class="card-header bg-primary bg-opacity-10 border-primary">
             <div class="d-flex justify-content-between align-items-center">
               <h6 class="mb-0 text-primary"><i class="bi bi-people-fill me-2"></i>연구원</h6>
-              <span class="badge bg-primary">{{ researchers.length }}</span>
+              <span class="badge badge-research">{{ researchers.length }}</span>
             </div>
           </div>
           <div class="card-body p-3">
@@ -137,7 +140,7 @@
               <span
                 v-for="user in researchers"
                 :key="user.id"
-                class="assigned-badge badge-primary"
+                class="assigned-badge badge-research"
                 @click="removeFromResearcher(user.id)"
                 title="클릭하여 제거"
               >
@@ -156,7 +159,7 @@
           <div class="card-header bg-success bg-opacity-10 border-success">
             <div class="d-flex justify-content-between align-items-center">
               <h6 class="mb-0 text-success"><i class="bi bi-gear-fill me-2"></i>오퍼레이션</h6>
-              <span class="badge bg-success">{{ operations.length }}</span>
+              <span class="badge badge-operation">{{ operations.length }}</span>
             </div>
           </div>
           <div class="card-body p-3">
@@ -164,7 +167,7 @@
               <span
                 v-for="user in operations"
                 :key="user.id"
-                class="assigned-badge badge-success"
+                class="assigned-badge badge-operation"
                 @click="removeFromOperation(user.id)"
                 title="클릭하여 제거"
               >
@@ -178,12 +181,14 @@
             </div>
           </div>
         </div>
-        <!-- 실무자 그룹 -->
+        <!-- 현장사원 그룹 -->
         <div class="card mb-3 border-warning">
           <div class="card-header bg-warning bg-opacity-10 border-warning">
             <div class="d-flex justify-content-between align-items-center">
-              <h6 class="mb-0 text-warning"><i class="bi bi-person-badge-fill me-2"></i>실무자</h6>
-              <span class="badge bg-warning text-dark">{{ workers.length }}</span>
+              <h6 class="mb-0 text-warning">
+                <i class="bi bi-person-badge-fill me-2"></i>현장사원
+              </h6>
+              <span class="badge badge-worker">{{ workers.length }}</span>
             </div>
           </div>
           <div class="card-body p-3">
@@ -191,7 +196,7 @@
               <span
                 v-for="user in workers"
                 :key="user.id"
-                class="assigned-badge badge-warning"
+                class="assigned-badge badge-worker"
                 @click="removeFromWorker(user.id)"
                 title="클릭하여 제거"
               >
@@ -200,17 +205,19 @@
               </span>
               <div v-if="workers.length === 0" class="empty-state">
                 <i class="bi bi-inbox fs-4 d-block mb-2 text-muted"></i>
-                <small class="text-muted">배정된 실무자가 없습니다</small>
+                <small class="text-muted">배정된 현장사원이 없습니다</small>
               </div>
             </div>
           </div>
         </div>
         <!-- 공정사원 그룹 -->
-        <div class="card mb-3 border-info">
-          <div class="card-header bg-info bg-opacity-10 border-info">
+        <div class="card mb-3 border-process">
+          <div class="card-header bg-process bg-opacity-100 border-process">
             <div class="d-flex justify-content-between align-items-center">
-              <h6 class="mb-0 text-info"><i class="bi bi-person-lines-fill me-2"></i>공정사원</h6>
-              <span class="badge bg-info text-dark">{{ processWorkers.length }}</span>
+              <h6 class="mb-0 text-process">
+                <i class="bi bi-person-lines-fill me-2"></i>공정사원
+              </h6>
+              <span class="badge badge-process">{{ processWorkers.length }}</span>
             </div>
           </div>
           <div class="card-body p-3">
@@ -218,7 +225,7 @@
               <span
                 v-for="user in processWorkers"
                 :key="user.id"
-                class="assigned-badge badge-info"
+                class="assigned-badge badge-process"
                 @click="removeFromProcessWorker(user.id)"
                 title="클릭하여 제거"
               >
@@ -278,7 +285,7 @@ export default {
       // 배정된 사용자
       researchers: [],
       operations: [],
-      workers: [],
+      workers: [], // 현장사원
       processWorkers: [], // 공정사원
     }
   },
@@ -377,7 +384,7 @@ export default {
       }
     },
 
-    // 실무자로 이동 (다중)
+    // 현장사원으로 이동 (다중)
     moveToWorker() {
       let count = 0
       this.selectedUsers.forEach((userId) => {
@@ -389,7 +396,23 @@ export default {
       })
       this.selectedUsers = []
       if (count > 0) {
-        showToast(`${count}명을 실무자로 배정했습니다.`, { type: 'success' })
+        showToast(`${count}명을 현장사원으로 배정했습니다.`, { type: 'success' })
+      }
+    },
+
+    // 공정사원으로 이동 (다중)
+    moveToProcessWorker() {
+      let count = 0
+      this.selectedUsers.forEach((userId) => {
+        const user = this.allUsers.find((u) => u.id === userId)
+        if (user && !this.processWorkers.find((p) => p.id === user.id)) {
+          this.processWorkers.push(user)
+          count++
+        }
+      })
+      this.selectedUsers = []
+      if (count > 0) {
+        showToast(`${count}명을 공정사원으로 배정했습니다.`, { type: 'success' })
       }
     },
 
@@ -412,12 +435,13 @@ export default {
       }
     },
 
+    // 현장사원에서 제거
     removeFromWorker(userId) {
       const index = this.workers.findIndex((u) => u.id === userId)
       if (index !== -1) {
         const user = this.workers[index]
         this.workers.splice(index, 1)
-        showToast(`${user.name}을(를) 실무자에서 제거했습니다.`, { type: 'info' })
+        showToast(`${user.name}을(를) 현장사원에서 제거했습니다.`, { type: 'info' })
       }
     },
 
@@ -509,7 +533,7 @@ export default {
   gap: 6px;
   align-items: flex-start;
   padding: 8px;
-  height: 100px;
+  height: 95px;
   overflow-y: auto;
 }
 
@@ -542,34 +566,82 @@ export default {
   opacity: 1;
 }
 
-.badge-primary {
-  background-color: #e7f1ff;
-  color: #0d6efd;
-  border-color: #0d6efd;
+/* 연구원 배지/버튼 */
+.badge-research,
+.btn-research {
+  background-color: #e7f1ff !important;
+  color: #0d6efd !important;
+  border: 3px solid #0d6efd !important;
+}
+.btn-research:disabled {
+  opacity: 1;
+  background-color: #e7f1ff !important;
+  color: #0d6efd !important;
+  border: 3px solid #0d6efd !important;
+}
+.badge-research:hover,
+.btn-research:hover:not(:disabled) {
+  background-color: #cfe2ff !important;
+  color: #084298 !important;
 }
 
-.badge-primary:hover {
-  background-color: #cfe2ff;
+/* 오퍼레이션 배지/버튼 */
+.badge-operation,
+.btn-operation {
+  background-color: #d1f4e0 !important;
+  color: #198754 !important;
+  border: 3px solid #198754 !important;
+}
+.btn-operation:disabled {
+  opacity: 1;
+  background-color: #d1f4e0 !important;
+  color: #198754 !important;
+  border: 3px solid #198754 !important;
+}
+.badge-operation:hover,
+.btn-operation:hover:not(:disabled) {
+  background-color: #b8eed3 !important;
+  color: #145c32 !important;
 }
 
-.badge-success {
-  background-color: #d1f4e0;
-  color: #198754;
-  border-color: #198754;
+/* 현장사원 배지/버튼 (진한 노랑) */
+.badge-worker,
+.btn-worker {
+  background-color: #ffd600 !important;
+  color: #7c5a00 !important;
+  border: 3px solid #ffc107 !important;
+}
+.btn-worker:disabled {
+  opacity: 1;
+  background-color: #ffd600 !important;
+  color: #7c5a00 !important;
+  border: 3px solid #ffc107 !important;
+}
+.badge-worker:hover,
+.btn-worker:hover:not(:disabled) {
+  background-color: #ffb300 !important;
+  color: #7c5a00 !important;
 }
 
-.badge-success:hover {
-  background-color: #b8eed3;
+/* 공정사원 배지/버튼 (세련된 쿨그레이) */
+.badge-process,
+.btn-process,
+.assigned-badge.badge-process {
+  background-color: #e0e4ea !important;
+  color: #374151 !important;
+  border: 3px solid #7b8694 !important;
 }
-
-.badge-warning {
-  background-color: #fff3cd;
-  color: #cc9a06;
-  border-color: #ffc107;
+.btn-process:disabled {
+  opacity: 1;
+  background-color: #e0e4ea !important;
+  color: #374151 !important;
+  border: 3px solid #7b8694 !important;
 }
-
-.badge-warning:hover {
-  background-color: #ffe69c;
+.badge-process:hover,
+.btn-process:hover:not(:disabled),
+.assigned-badge.badge-process:hover {
+  background-color: #c7ccd3 !important;
+  color: #374151 !important;
 }
 
 /* 체크박스 스타일 */

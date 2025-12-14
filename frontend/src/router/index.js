@@ -51,6 +51,11 @@ const routes = [
         name: '사용자 배정 (공통목록)',
         component: UserAssignmentShared,
       },
+      {
+        path: 'user-assignment-shared-new',
+        name: '사용자 배정 (신규)',
+        component: () => import('../pages/UserAssignmentSharedNew.vue'),
+      },
       // 게시판
       { path: 'posts', name: '게시판', component: PostListPage },
       { path: 'posts/write', name: '게시글 작성', component: PostWritePage },
