@@ -625,8 +625,7 @@ export default {
 
 /* 공정사원 배지/버튼 (세련된 쿨그레이) */
 .badge-process,
-.btn-process,
-.assigned-badge.badge-process {
+.btn-process {
   background-color: #e0e4ea !important;
   color: #374151 !important;
   border: 3px solid #7b8694 !important;
@@ -638,8 +637,7 @@ export default {
   border: 3px solid #7b8694 !important;
 }
 .badge-process:hover,
-.btn-process:hover:not(:disabled),
-.assigned-badge.badge-process:hover {
+.btn-process:hover:not(:disabled) {
   background-color: #c7ccd3 !important;
   color: #374151 !important;
 }
