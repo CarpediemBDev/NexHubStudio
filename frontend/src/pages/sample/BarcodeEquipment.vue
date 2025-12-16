@@ -89,7 +89,8 @@ async function getPrice() {
   }
   const code = `${type.value}-${ym.value}${padSerial(serial.value)}`
   try {
-    const res = await axios.get('http://localhost:3001/api/price', { params: { code } })
+    // Spring 백엔드 프록시로 요청 (CORS 문제 없음)
+    const res = await axios.get('/api/barcode/price', { params: { code } })
     price.value = res.data
   } catch (e) {
     error.value = '가격 요청 실패'
