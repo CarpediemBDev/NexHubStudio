@@ -201,6 +201,11 @@ export default {
             { label: '공지사항' },
           ],
         },
+        // 샘플 메뉴 추가
+        {
+          label: '샘플',
+          children: [{ label: '설비 바코드 샘플', to: '/sample/barcode-equipment' }],
+        },
       ],
     }
   },

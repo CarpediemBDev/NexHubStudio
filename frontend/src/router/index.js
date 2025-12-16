@@ -68,6 +68,12 @@ const routes = [
       // 업무 의뢰
       { path: 'request-workflow', name: '업무 의뢰', component: RequestWorkflowPage },
       { path: 'work-request-form', name: '업무 의뢰서', component: WorkRequestFormPage },
+      // 샘플
+      {
+        path: 'sample/barcode-equipment',
+        name: '설비 바코드 샘플',
+        component: () => import('../pages/sample/BarcodeEquipment.vue'),
+      },
     ],
   },
 ]
