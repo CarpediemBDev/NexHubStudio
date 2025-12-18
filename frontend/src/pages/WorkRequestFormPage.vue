@@ -505,6 +505,7 @@ export default {
   data() {
     return {
       currentStep: 'request', // request, receive, progress, complete
+      currentUser: 'hong',
       steps: [
         { key: 'request', label: '의뢰', icon: 'bi bi-file-text' },
         { key: 'receive', label: '접수', icon: 'bi bi-clipboard-check' },
@@ -566,6 +567,15 @@ export default {
         recipe: '',
       },
     }
+  },
+  computed: {
+    isEditable() {
+      if (!this.formData.assignee) return false
+      return this.formData.assignee
+        .split(',')
+        .map((s) => s.trim())
+        .includes(this.currentUser)
+    },
   },
   watch: {
     currentStep: {
