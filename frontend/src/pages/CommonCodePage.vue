@@ -70,7 +70,7 @@
           </div>
         </div>
 
-        <JqxCustomeGrid
+        <JqxCustomGrid
           ref="grd"
           :localdata="rows"
           :datafields="datafields"
@@ -85,13 +85,13 @@
 </template>
 
 <script>
-import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import JqxCustomGrid from '@/components/JqxCustomGrid.vue'
 import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'CommonCodePage',
-  components: { JqxCustomeGrid },
+  components: { JqxCustomGrid },
   data() {
     return {
       allCodes: [],

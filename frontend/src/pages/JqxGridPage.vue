@@ -25,7 +25,7 @@
 
     <!-- 그리드 -->
     <div class="content-card">
-      <JqxCustomeGrid
+      <JqxCustomGrid
         ref="grd"
         :localdata="rows"
         :datafields="datafields"
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import JqxCustomGrid from '@/components/JqxCustomGrid.vue'
 import SearchGrid from '@/components/SearchGrid.vue'
 import { openUserPopup } from '@/utils/showPop.js'
 import http from '@/utils/http'
@@ -47,7 +47,7 @@ import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'JqxGridPage',
-  components: { JqxCustomeGrid, SearchGrid },
+  components: { JqxCustomGrid, SearchGrid },
   data() {
     return {
       rows: [],

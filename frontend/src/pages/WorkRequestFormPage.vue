@@ -439,6 +439,29 @@
                 <col style="width: 85%" />
               </colgroup>
               <tbody>
+                <!-- 진행 내역 -->
+                <tr>
+                   <th class="table-light align-top pt-3">진행 내역</th>
+                   <td colspan="2">
+                      <div class="mb-2 text-end">
+                        <button class="btn btn-sm btn-primary me-1" @click="addProgressRow">
+                          <i class="bi bi-plus-circle me-1"></i>추가
+                        </button>
+                        <button class="btn btn-sm btn-danger" @click="deleteProgressRow">
+                          <i class="bi bi-trash me-1"></i>삭제
+                        </button>
+                      </div>
+                      <JqxCustomGrid
+                        ref="progressGrid"
+                        :localdata="progressRows"
+                        :datafields="progressDatafields"
+                        :columns="progressColumns"
+                        selectionmode="checkbox"
+                        :height="300"
+                        theme="bootstrap"
+                      />
+                   </td>
+                </tr>
                 <!-- 지원 유형별 결과 등록 컴포넌트 -->
                 <tr>
                   <td colspan="2" class="p-0">
@@ -451,8 +474,7 @@
                     <!-- 설비셋업해제 -->
                     <SetupReleaseResult
                       v-else-if="
-                        formData.supportType === 'setup-release' ||
-                        formData.supportType === 'setup-setup'
+                        formData.supportType === 'setup-release'
                       "
                     />
 
@@ -486,7 +508,7 @@
 </template>
 
 <script>
-import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import JqxCustomGrid from '@/components/JqxCustomGrid.vue'
 import { openUserPopup } from '@/utils/showPop.js'
 import EquipmentSupportResult from '@/components/EquipmentSupportResult.vue'
 import FailureRepairResult from '@/components/FailureRepairResult.vue'
@@ -496,7 +518,7 @@ import ModificationImprovementResult from '@/components/ModificationImprovementR
 export default {
   name: 'WorkRequestFormPage',
   components: {
-    JqxCustomeGrid,
+    JqxCustomGrid,
     EquipmentSupportResult,
     FailureRepairResult,
     SetupReleaseResult,

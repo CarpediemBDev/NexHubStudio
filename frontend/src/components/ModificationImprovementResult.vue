@@ -132,21 +132,7 @@
 
 <script>
 export default {
-  data() {
-    return {
-      modificationImprovementData: {
-        modificationContent: '',
-        improvementPurpose: '',
-        improvementEffect: '',
-        modificationCost: '',
-        workStartDate: '',
-        workEndDate: '',
-        participants: '',
-        technicalDocs: '',
-        modificationFiles: [],
-      },
-    }
-  },
+
   name: 'ModificationImprovementResult',
   data() {
     return {

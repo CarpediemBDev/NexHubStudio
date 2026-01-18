@@ -1,5 +1,5 @@
 <template>
-  <div class="jqx-custome-grid">
+  <div class="jqx-custom-grid">
     <JqxGrid
       ref="grid"
       :width="width"
@@ -17,6 +17,7 @@
       :columnsresize="columnsresize"
       :columnsreorder="columnsreorder"
       :autoheight="autoheight"
+      showRowStatus="showRowStatus"
     />
   </div>
 </template>
@@ -27,7 +28,7 @@ import 'jqwidgets-scripts/jqwidgets/styles/jqx.base.css'
 import 'jqwidgets-scripts/jqwidgets/styles/jqx.bootstrap.css'
 
 export default {
-  name: 'JqxCustomeGrid',
+  name: 'JqxCustomGrid',
   components: { JqxGrid },
   props: {
     localdata: { type: Array, default: () => [] },
@@ -202,23 +203,23 @@ export default {
 
 <style scoped>
 /* 헤더 톤다운 */
-.jqx-custome-grid :deep(.jqx-grid-column-header) {
+.jqx-custom-grid :deep(.jqx-grid-column-header) {
   background: linear-gradient(180deg, #f8f9fa, #f1f3f5);
   border-bottom: 1px solid #e5e7eb;
   font-weight: 600;
 }
 /* hover */
-.jqx-custome-grid :deep(.jqx-grid-cell-hover) {
+.jqx-custom-grid :deep(.jqx-grid-cell-hover) {
   background-color: #eef5ff !important;
 }
 /* 선택색 */
-.jqx-custome-grid :deep(.jqx-grid-cell-selected) {
+.jqx-custom-grid :deep(.jqx-grid-cell-selected) {
   background-color: #cfe2ff !important;
   color: #052c65 !important;
 }
 
 /* 상태 아이콘 중앙 정렬 */
-.jqx-custome-grid :deep(.jqs-state-cell) {
+.jqx-custom-grid :deep(.jqs-state-cell) {
   width: 100% !important;
   height: 100% !important;
   display: flex !important;
@@ -228,31 +229,31 @@ export default {
 }
 
 /* 행 상태별 백그라운드 스타일링 */
-.jqx-custome-grid :deep(.jqs-row-a) {
+.jqx-custom-grid :deep(.jqs-row-a) {
   background-color: #f2fbf7;
 }
-.jqx-custome-grid :deep(.jqs-row-u) {
+.jqx-custom-grid :deep(.jqs-row-u) {
   background-color: #fffaf0;
 }
-.jqx-custome-grid :deep(.jqs-row-d) {
+.jqx-custom-grid :deep(.jqs-row-d) {
   background-color: #fff5f5;
   text-decoration: line-through;
 }
 
 /* A: 추가 => '+' */
-.jqx-custome-grid :deep(.jqs-row-a .jqs-state-cell::after) {
+.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell::after) {
   content: '+';
   color: #0f766e; /* 텍스트/테두리 */
 }
 
 /* U: 수정 => 'v' */
-.jqx-custome-grid :deep(.jqs-row-u .jqs-state-cell::after) {
+.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell::after) {
   content: '✓';
   color: #0f766e; /* 텍스트/테두리 */
 }
 
 /* D: 삭제 => '-' */
-.jqx-custome-grid :deep(.jqs-row-d .jqs-state-cell::after) {
+.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell::after) {
   content: '-';
   color: #b91c1c;
 }

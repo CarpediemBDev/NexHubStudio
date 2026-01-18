@@ -123,7 +123,7 @@
           </div>
         </div>
 
-        <JqxCustomeGrid
+        <JqxCustomGrid
           ref="grd"
           :localdata="codes"
           :datafields="datafields"
@@ -139,14 +139,14 @@
 </template>
 
 <script>
-import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import JqxCustomGrid from '@/components/JqxCustomGrid.vue'
 import CodeTree from '@/components/CodeTree.vue'
 import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'CommonCodeGroupDetailPage',
-  components: { JqxCustomeGrid, CodeTree },
+  components: { JqxCustomGrid, CodeTree },
   data() {
     return {
       groupId: null,

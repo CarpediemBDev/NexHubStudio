@@ -186,27 +186,7 @@
 
 <script>
 export default {
-  data() {
-    return {
-      setupReleaseData: {
-        content: '',
-        summary: '',
-        purpose: '',
-        schedule: '',
-        progress: '',
-        resultInspection: '',
-        resultHardware: '',
-        resultProcess: '',
-        conclusion: '',
-        plan: '',
-        issue: '',
-        delayReason: '',
-        worker: '',
-        workTime: '',
-        files: [],
-      },
-    }
-  },
+
   name: 'SetupReleaseResult',
   data() {
     return {

@@ -81,8 +81,8 @@
                 <i class="bi bi-trash me-1"></i>삭제
               </button>
             </div>
-            <!-- JqxCustomeGrid는 실제 프로젝트에서 import 필요 -->
-            <JqxCustomeGrid
+            <!-- JqxCustomGrid는 실제 프로젝트에서 import 필요 -->
+            <JqxCustomGrid
               ref="progressGrid"
               :localdata="progressRows"
               :datafields="progressDatafields"
@@ -156,22 +156,12 @@
 </template>
 
 <script>
-import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import JqxCustomGrid from '@/components/JqxCustomGrid.vue'
 export default {
-  data() {
-    return {
-      equipmentSupportData: {
-        supportContent: '',
-        supportTime: '',
-        supportPersonnel: 1,
-        supportNotes: '',
-        supportFiles: [],
-      },
-    }
-  },
+
   name: 'EquipmentSupportResult',
   components: {
-    JqxCustomeGrid,
+    JqxCustomGrid,
   },
   data() {
     return {
@@ -261,8 +251,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.equipment-support-result {
-  /* 필요한 스타일 추가 */
-}
-</style>
+

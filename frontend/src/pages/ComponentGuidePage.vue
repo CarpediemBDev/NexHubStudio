@@ -2,16 +2,16 @@
   <div class="container-fluid py-3">
     <h2 class="mb-4">공통 컴포넌트 사용 가이드</h2>
 
-    <!-- JqxCustomeGrid 가이드 -->
+    <!-- JqxCustomGrid 가이드 -->
     <div class="card mb-4 border-primary">
       <div class="card-header bg-primary text-white border-primary">
-        <h4 class="mb-0">JqxCustomeGrid - 그리드 컴포넌트</h4>
+        <h4 class="mb-0">JqxCustomGrid - 그리드 컴포넌트</h4>
       </div>
       <div class="card-body">
         <div class="row">
           <div class="col-md-6">
             <h5 class="text-primary">예시</h5>
-            <JqxCustomeGrid
+            <JqxCustomGrid
               ref="exampleGrid"
               :localdata="exampleData"
               :datafields="exampleDatafields"
@@ -678,7 +678,7 @@
 </template>
 
 <script>
-import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import JqxCustomGrid from '@/components/JqxCustomGrid.vue'
 import SearchGrid from '@/components/SearchGrid.vue'
 import PagedList from '@/components/PagedList.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
@@ -687,7 +687,7 @@ import { showToast } from '@/utils/toastUtil.js'
 export default {
   name: 'ComponentGuidePage',
   components: {
-    JqxCustomeGrid,
+    JqxCustomGrid,
     SearchGrid,
     PagedList,
     MultiSelect,
@@ -708,7 +708,7 @@ export default {
       selectedColors: [],
       colors: ['빨강', '파랑', '노랑', '초록', '보라', '주황', '분홍'],
 
-      // JqxCustomeGrid 예시 데이터
+      // JqxCustomGrid 예시 데이터
       exampleData: [
         { id: 1, name: '홍길동', email: 'hong@example.com', role: 'Admin' },
         { id: 2, name: '김철수', email: 'kim@example.com', role: 'User' },
@@ -851,7 +851,7 @@ export default {
 - max-reached: 최대 선택 개수 도달 시`,
 
       gridCode: `<template>
-  <JqxCustomeGrid
+  <JqxCustomGrid
     ref="grid"
     :localdata="rows"
     :datafields="datafields"
@@ -862,10 +862,10 @@ export default {
 </template>
 
 <script>
-import JqxCustomeGrid from '@/components/JqxCustomeGrid.vue'
+import JqxCustomGrid from '@/components/JqxCustomGrid.vue'
 
 export default {
-  components: { JqxCustomeGrid },
+  components: { JqxCustomGrid },
   data() {
     return {
       rows: [

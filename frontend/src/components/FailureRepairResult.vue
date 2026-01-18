@@ -418,31 +418,7 @@
 
 <script>
 export default {
-  data() {
-    return {
-      failureRepairData: {
-        vendorManager: '',
-        purchaseCost: '',
-        project: '',
-        failureStatus: '',
-        selectedCauses: [],
-        causeNote: '',
-        causeRows: [],
-        repairAction: '',
-        selectedMeasures: [],
-        measureDetails: {
-          개조개선: '',
-          횡전개: '',
-          'OPLS/SOP': '',
-          기타: '',
-        },
-        partRows: [],
-        delayReason: '',
-        workerRows: [],
-        repairFiles: [],
-      },
-    }
-  },
+
   name: 'FailureRepairResult',
   data() {
     return {
