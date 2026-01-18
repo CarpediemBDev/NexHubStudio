@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
         h3 {
             color: #0d47a1;
             border-bottom: 2px solid #0d47a1;

@@ -7,6 +7,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f9f9f9;
         }
         h3 {
             color: #0d47a1;
@@ -39,8 +40,9 @@
     </style>
 </head>
 <body>
-    <h3>설비셋업/해제 결과</h3>
-    <table>
+    <div style="background-color: white; padding: 30px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <h3>[미리보기] 설비셋업/해제 결과</h3>
+        <table>
         <colgroup>
             <col style="width: 18%" />
             <col style="width: 82%" />
@@ -48,56 +50,55 @@
         <tbody>
             <tr>
                 <th>내용</th>
-                <td>${formData.content}</td>
+                <td>신규 증설 라인(Line 5) 진공 챔버 셋업 작업</td>
             </tr>
             <tr>
                 <th>개요(설비)</th>
-                <td>${formData.summary}</td>
+                <td>VC-05 진공 챔버 (Model: V-1000)</td>
             </tr>
             <tr>
                 <th>목적(배경)</th>
-                <td>${formData.purpose}</td>
+                <td>생산량 증대에 따른 신규 라인 증설</td>
             </tr>
             <tr>
                 <th>세부일정</th>
-                <td>${formData.schedule}</td>
+                <td>1일차: 반입 및 안착 / 2일차: 배관 연결 / 3일차: 전원 연결 및 시운전</td>
             </tr>
             <tr>
                 <th>진행내용</th>
-                <td>${formData.progress}</td>
+                <td>전원 케이블 연결 완료, 진공 펌프 테스트 완료, 리크 테스트 실시</td>
             </tr>
             <tr>
                 <th>결과(Inspection)</th>
-                <td>${formData.resultInspection}</td>
+                <td>진공도 10^-5 Torr 도달 확인 (기준 만족)</td>
             </tr>
             <tr>
                 <th>결과(Hardware)</th>
-                <td>${formData.resultHardware}</td>
+                <td>챔버 내부 파손 없음, 게이트 밸브 작동 원활</td>
             </tr>
             <tr>
                 <th>결과(Process)</th>
-                <td>${formData.resultProcess}</td>
+                <td>공정 레시피 다운로드 및 테스트 런 정상 수행</td>
             </tr>
             <tr>
                 <th>결론(완료)</th>
-                <td>${formData.conclusion}</td>
+                <td>셋업 완료. 양산 이관 가능.</td>
             </tr>
             <tr>
                 <th>활용계획</th>
-                <td>${formData.plan}</td>
+                <td>내일부터 양산 Lot 투입 예정</td>
             </tr>
             <tr>
                 <th>미진사항</th>
-                <td>${formData.issue}</td>
+                <td>없음</td>
             </tr>
             <tr>
                 <th>지연 사유</th>
-                <td>${formData.delayReason}</td>
+                <td>-</td>
             </tr>
             <tr>
                 <th>작업자/시간</th>
                 <td>
-                    #if($formData.workerRows && $formData.workerRows.size() > 0)
                     <table style="width: 100%; margin-top: 5px; border: 1px solid #b0c4de;">
                         <thead>
                             <tr>
@@ -107,35 +108,31 @@
                             </tr>
                         </thead>
                         <tbody>
-                            #foreach($row in $formData.workerRows)
                             <tr>
-                                <td class="text-center">${row.worker}</td>
-                                <td class="text-center">${row.department}</td>
-                                <td class="text-center">${row.workTime}</td>
+                                <td class="text-center">강셋업</td>
+                                <td class="text-center">기술팀</td>
+                                <td class="text-center">480</td>
                             </tr>
-                            #end
+                            <tr>
+                                <td class="text-center">조지원</td>
+                                <td class="text-center">기술팀</td>
+                                <td class="text-center">480</td>
+                            </tr>
                         </tbody>
                     </table>
-                    #else
-                        -
-                    #end
                 </td>
             </tr>
             <tr>
                 <th>파일첨부</th>
                 <td>
-                    #if($formData.files && $formData.files.size() > 0)
-                        <ul>
-                        #foreach($file in $formData.files)
-                            <li>${file}</li>
-                        #end
-                        </ul>
-                    #else
-                        -
-                    #end
+                    <ul>
+                        <li>setup_checklist.xlsx</li>
+                        <li>leak_test_result.pdf</li>
+                    </ul>
                 </td>
             </tr>
         </tbody>
     </table>
+    </div>
 </body>
 </html>
