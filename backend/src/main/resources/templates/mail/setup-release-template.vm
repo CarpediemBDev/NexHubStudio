@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        h3 {
+            color: #0d47a1;
+            border-bottom: 2px solid #0d47a1;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Malgun Gothic', Dotum, Arial, sans-serif;
+            font-size: 13px;
+            border: 1px solid #b0c4de;
+        }
+        th, td {
+            border: 1px solid #b0c4de;
+            padding: 10px;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #eaf4fa;
+            color: #2c3e50;
+            text-align: center;
+            font-weight: bold;
+            width: 18%;
+        }
+        .text-center { text-align: center; }
+        .text-end { text-align: right; }
+        .mb-3 { margin-bottom: 1rem; }
+        .sub-header { background-color: #d6eaf8 !important; }
+    </style>
+</head>
+<body>
+    <h3>설비셋업/해제 결과</h3>
+    <table>
+        <colgroup>
+            <col style="width: 18%" />
+            <col style="width: 82%" />
+        </colgroup>
+        <tbody>
+            <tr>
+                <th>내용</th>
+                <td>${formData.content}</td>
+            </tr>
+            <tr>
+                <th>개요(설비)</th>
+                <td>${formData.summary}</td>
+            </tr>
+            <tr>
+                <th>목적(배경)</th>
+                <td>${formData.purpose}</td>
+            </tr>
+            <tr>
+                <th>세부일정</th>
+                <td>${formData.schedule}</td>
+            </tr>
+            <tr>
+                <th>진행내용</th>
+                <td>${formData.progress}</td>
+            </tr>
+            <tr>
+                <th>결과(Inspection)</th>
+                <td>${formData.resultInspection}</td>
+            </tr>
+            <tr>
+                <th>결과(Hardware)</th>
+                <td>${formData.resultHardware}</td>
+            </tr>
+            <tr>
+                <th>결과(Process)</th>
+                <td>${formData.resultProcess}</td>
+            </tr>
+            <tr>
+                <th>결론(완료)</th>
+                <td>${formData.conclusion}</td>
+            </tr>
+            <tr>
+                <th>활용계획</th>
+                <td>${formData.plan}</td>
+            </tr>
+            <tr>
+                <th>미진사항</th>
+                <td>${formData.issue}</td>
+            </tr>
+            <tr>
+                <th>지연 사유</th>
+                <td>${formData.delayReason}</td>
+            </tr>
+            <tr>
+                <th>작업자/시간</th>
+                <td>
+                    #if($formData.workerRows && $formData.workerRows.size() > 0)
+                    <table style="width: 100%; margin-top: 5px; border: 1px solid #b0c4de;">
+                        <thead>
+                            <tr>
+                                <th class="sub-header">작업자</th>
+                                <th class="sub-header">소속부서</th>
+                                <th class="sub-header">작업시간(분)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            #foreach($row in $formData.workerRows)
+                            <tr>
+                                <td class="text-center">${row.worker}</td>
+                                <td class="text-center">${row.department}</td>
+                                <td class="text-center">${row.workTime}</td>
+                            </tr>
+                            #end
+                        </tbody>
+                    </table>
+                    #else
+                        -
+                    #end
+                </td>
+            </tr>
+            <tr>
+                <th>파일첨부</th>
+                <td>
+                    #if($formData.files && $formData.files.size() > 0)
+                        <ul>
+                        #foreach($file in $formData.files)
+                            <li>${file}</li>
+                        #end
+                        </ul>
+                    #else
+                        -
+                    #end
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

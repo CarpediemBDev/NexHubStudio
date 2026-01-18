@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        h3 {
+            color: #0d47a1;
+            border-bottom: 2px solid #0d47a1;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Malgun Gothic', Dotum, Arial, sans-serif;
+            font-size: 13px;
+            border: 1px solid #b0c4de;
+        }
+        th, td {
+            border: 1px solid #b0c4de;
+            padding: 10px;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #eaf4fa;
+            color: #2c3e50;
+            text-align: center;
+            font-weight: bold;
+            width: 15%;
+        }
+        .text-center { text-align: center; }
+        .text-end { text-align: right; }
+        .mb-3 { margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <h3>개조/개선 결과</h3>
+    <table>
+        <colgroup>
+            <col style="width: 15%" />
+            <col style="width: 85%" />
+        </colgroup>
+        <tbody>
+            <tr>
+                <th>개조/개선 내용</th>
+                <td>${formData.modificationContent}</td>
+            </tr>
+            <tr>
+                <th>개선 목적</th>
+                <td>${formData.improvementPurpose}</td>
+            </tr>
+            <tr>
+                <th>개선 효과</th>
+                <td>${formData.improvementEffect}</td>
+            </tr>
+            <tr>
+                <th>투입 비용</th>
+                <td>${formData.modificationCost}</td>
+            </tr>
+            <tr>
+                <th>작업 기간</th>
+                <td>
+                    ${formData.workStartDate} ~ ${formData.workEndDate}
+                </td>
+            </tr>
+            <tr>
+                <th>참여 인원</th>
+                <td>${formData.participants}</td>
+            </tr>
+            <tr>
+                <th>기술 문서</th>
+                <td>${formData.technicalDocs}</td>
+            </tr>
+            <tr>
+                <th>첨부파일</th>
+                <td>
+                    #if($formData.modificationFiles && $formData.modificationFiles.size() > 0)
+                        <ul>
+                        #foreach($file in $formData.modificationFiles)
+                            <li>${file}</li>
+                        #end
+                        </ul>
+                    #else
+                        -
+                    #end
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
