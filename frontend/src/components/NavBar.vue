@@ -150,7 +150,7 @@ export default {
         {
           label: '사용자 관리',
           children: [
-            { label: '사용자', to: '/' },
+            { label: '사용자', to: '/users' },
             { label: '사용자(검색Grid)', to: '/search-grid' },
             { label: 'JqxGrid 샘플', to: '/jqx-grid' },
             { label: '그룹 관리' },
