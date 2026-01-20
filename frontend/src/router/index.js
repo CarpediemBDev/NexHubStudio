@@ -99,6 +99,11 @@ const routes = [
         name: "설비 바코드 샘플",
         component: () => import("../pages/sample/BarcodeEquipment.vue"),
       },
+      {
+        path: "sample/portal",
+        name: "포털 메인 샘플",
+        component: () => import("../pages/sample/PortalSample.vue"),
+      },
     ],
   },
 ];

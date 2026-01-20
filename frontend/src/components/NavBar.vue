@@ -204,7 +204,10 @@ export default {
         // 샘플 메뉴 추가
         {
           label: '샘플',
-          children: [{ label: '설비 바코드 샘플', to: '/sample/barcode-equipment' }],
+          children: [
+            { label: '설비 바코드 샘플', to: '/sample/barcode-equipment' },
+            { label: '포털 메인 샘플', to: '/sample/portal' },
+          ],
         },
       ],
     }
