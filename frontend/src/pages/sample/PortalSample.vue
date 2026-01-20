@@ -75,16 +75,14 @@
             
             <!-- 카드 그리드 -->
             <div class="flex-grid four-columns">
-                <div class="grid-item" v-for="(notice, index) in notices" :key="`notice-${index}`">
-                    <div class="content-card">
-                         <!-- 카드 내부 레이아웃 -->
-                        <div class="card-inner">
-                            <div class="card-center">
-                                <p class="card-desc">{{ notice.preview }}</p>
-                            </div>
-                            <div class="card-bottom">
-                                <span class="card-date">{{ notice.date }}</span>
-                            </div>
+                <div class="content-card" v-for="(notice, index) in notices" :key="`notice-${index}`">
+                    <!-- 카드 내부 레이아웃 -->
+                    <div class="card-inner">
+                        <div class="card-center">
+                            <p class="card-desc">{{ notice.preview }}</p>
+                        </div>
+                        <div class="card-bottom">
+                            <span class="card-date">{{ notice.date }}</span>
                         </div>
                     </div>
                 </div>
@@ -99,16 +97,14 @@
             </div>
 
             <div class="flex-grid two-columns">
-                <div class="grid-item" v-for="(manual, index) in manuals" :key="`manual-${index}`">
-                    <div class="content-card">
-                        <div class="card-inner">
-                            <div class="card-center">
-                                <p class="card-desc card-title-text">{{ manual.title }}</p>
-                            </div>
-                            <div class="card-bottom">
-                                <span class="card-date">Ver {{ manual.version }}</span>
-                                <span class="card-date">{{ manual.date }}</span>
-                            </div>
+                <div class="content-card" v-for="(manual, index) in manuals" :key="`manual-${index}`">
+                    <div class="card-inner">
+                        <div class="card-center">
+                            <p class="card-desc card-title-text">{{ manual.title }}</p>
+                        </div>
+                        <div class="card-bottom">
+                            <span class="card-date">Ver {{ manual.version }}</span>
+                            <span class="card-date">{{ manual.date }}</span>
                         </div>
                     </div>
                 </div>
@@ -299,18 +295,14 @@ export default {
   gap: 1rem;
 }
 
-.grid-item {
-  min-width: 200px; 
-}
-
 /* 4컬럼 그리드 계산 */
-.four-columns .grid-item {
+.four-columns .content-card {
   flex: 1 1 calc(25% - 1rem); 
   max-width: 100%; 
 }
 
 /* 2컬럼 그리드 계산 */
-.two-columns .grid-item {
+.two-columns .content-card {
   flex: 1 1 calc(50% - 1rem); 
 }
 
@@ -381,13 +373,13 @@ export default {
 
 /* 반응형 처리 */
 @media (max-width: 992px) {
-  .four-columns .grid-item {
+  .four-columns .content-card {
     flex: 1 1 calc(50% - 1rem); /* 태블릿: 한 줄에 2개 */
   }
 }
 @media (max-width: 576px) {
-  .four-columns .grid-item,
-  .two-columns .grid-item {
+  .four-columns .content-card,
+  .two-columns .content-card {
     flex: 1 1 100%; /* 모바일: 한 줄에 1개 */
   }
   .board-container {
