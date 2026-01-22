@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -15,8 +16,13 @@ import java.util.List;
 @Builder
 public class PostRequest {
     private Long id; // 수정 시 사용
+
+    @Size(min = 2, max = 100, message = "{validation.size.title}")
     private String title;
+
+    @Size(min = 1, message = "{validation.size.content}")
     private String content;
+
     private String status; // PUBLISHED, DRAFT
     private String isPublic; // 공개여부 (public, private)
     private List<Long> attachmentIds; // 업로드된 파일 id 목록 (선택)

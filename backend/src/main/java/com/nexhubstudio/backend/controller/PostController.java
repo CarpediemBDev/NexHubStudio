@@ -29,7 +29,7 @@ public class PostController {
      */
     @PostMapping
     public ResponseEntity<ApiResponse<PostResponse>> createPost(
-            @RequestBody PostRequest request,
+            @RequestBody @jakarta.validation.Valid PostRequest request,
             @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String userId) {
         PostResponse post = postService.createPost(request, userId);
         return ResponseEntity.ok(ApiResponse.success("게시글 작성 성공", post));
@@ -41,7 +41,7 @@ public class PostController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<PostResponse>> updatePost(
             @PathVariable Long id,
-            @RequestBody PostRequest request,
+            @RequestBody @jakarta.validation.Valid PostRequest request,
             @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String userId) {
         PostResponse post = postService.updatePost(id, request, userId);
         return ResponseEntity.ok(ApiResponse.success("게시글 수정 성공", post));
