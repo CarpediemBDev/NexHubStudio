@@ -1,13 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8">
     <style>
         body {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f9f9f9;
         }
         h3 {
             color: #0d47a1;
@@ -37,173 +36,220 @@
         .mb-3 { margin-bottom: 1rem; }
         .sub-header { background-color: #d6eaf8 !important; }
     </style>
-  </head>
-  <body>
-    <div style="background-color: white; padding: 30px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <h3>[미리보기] 고장수리 결과</h3>
-        <table>
-      <colgroup>
-        <col style="width: 15%" />
-        <col style="width: 35%" />
-        <col style="width: 15%" />
-        <col style="width: 35%" />
-      </colgroup>
-      <tbody>
-        <tr>
-          <th>업체담당자</th>
-          <td>이담당</td>
-          <th>구매비용</th>
-          <td>500,000원</td>
-        </tr>
-        <tr>
-          <th>과제</th>
-          <td colspan="3">2023 하반기 설비 고도화 프로젝트</td>
-        </tr>
-        <tr>
-          <th>고장현황</th>
-          <td colspan="3">
-            Line 3 컨베이어 벨트 구동 멈춤 현상 발생. 모터 과열 경고등 점등.
-          </td>
-        </tr>
-        <tr>
-          <th>주요원인</th>
-          <td colspan="3">
-            <div style="margin-bottom: 5px">
-              <strong>선택된 원인:</strong>
-              <span
-                style="
-                  display: inline-block;
-                  padding: 2px 5px;
-                  border: 1px solid #ccc;
-                  border-radius: 3px;
-                  margin-right: 5px;
-                "
-                >노후</span
-              >
-              <span
-                style="
-                  display: inline-block;
-                  padding: 2px 5px;
-                  border: 1px solid #ccc;
-                  border-radius: 3px;
-                  margin-right: 5px;
-                "
-                >과열</span
-              >
-            </div>
-            <div>
-              <strong>비고:</strong> 5년 이상 사용으로 인한 베어링 마모 추정
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th>발생원인 상세</th>
-          <td colspan="3">
-            <ul>
-              <li>구동부 베어링 파손으로 인한 회전 부하 증가</li>
-              <li>냉각 팬 오작동으로 인한 내부 온도 상승</li>
-            </ul>
-          </td>
-        </tr>
-        <tr>
-          <th>조치 수리역</th>
-          <td colspan="3">
-            베어링 세트 교체 및 냉각 팬 수리 완료. 구리스 도포 작업 수행.
-          </td>
-        </tr>
-        <tr>
-          <th>추가 대책</th>
-          <td colspan="3">
-            <table style="width: 100%">
-              <thead>
-                <tr>
-                  <th class="sub-header" style="width: 30%;">구분</th>
-                  <th style="background-color: #e9ecef">상세내역</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="text-center">횡전개</td>
-                  <td>유사 설비(Line 1, 2) 베어링 상태 긴급 점검 실시</td>
-                </tr>
-                <tr>
-                  <td class="text-center">OPLS/SOP</td>
-                  <td>일상 점검 항목에 모터 온도 체크 추가</td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th>사용부품</th>
-          <td colspan="3">
-            <table style="width: 100%">
-              <thead>
-                <tr>
-                  <th style="background-color: #e9ecef">설비</th>
-                  <th style="background-color: #e9ecef">부품명</th>
-                  <th style="background-color: #e9ecef">Maker</th>
-                  <th style="background-color: #e9ecef">규격</th>
-                  <th style="background-color: #e9ecef">수량</th>
-                  <th style="background-color: #e9ecef">출고일</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>CV-03</td>
-                  <td>Ball Bearing</td>
-                  <td>NSK</td>
-                  <td>6204ZZ</td>
-                  <td class="text-center">4</td>
-                  <td class="text-center">2023-10-02</td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th>지연사유</th>
-          <td colspan="3">
-            자재실 재고 부족으로 인근 대리점 퀵 배송 대기 (2시간 지연)
-          </td>
-        </tr>
-        <tr>
-          <th>작업자/시간</th>
-          <td colspan="3">
-            <table style="width: 100%">
-              <thead>
-                <tr>
-                  <th style="background-color: #e9ecef">작업자</th>
-                  <th style="background-color: #e9ecef">소속부서</th>
-                  <th style="background-color: #e9ecef">작업시간(분)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="text-center">박기술</td>
-                  <td class="text-center">보전1팀</td>
-                  <td class="text-center">120</td>
-                </tr>
-                <tr>
-                  <td class="text-center">최보조</td>
-                  <td class="text-center">보전1팀</td>
-                  <td class="text-center">120</td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th>파일첨부</th>
-          <td colspan="3">
-            <ul>
-              <li>repair_before.jpg</li>
-              <li>repair_after.jpg</li>
-              <li>receipt.pdf</li>
-            </ul>
-          </td>
-        </tr>
-      </tbody>
+</head>
+<body>
+
+    <h3>고장수리</h3>
+    <table>
+        <colgroup>
+            <col style="width: 15%" />
+            <col style="width: 35%" />
+            <col style="width: 15%" />
+            <col style="width: 35%" />
+        </colgroup>
+        <tbody>
+            <tr>
+                <th>제목</th>
+                <td colspan="3">Line 3 컨베이어 벨트 구동 멈춤 수리 요청</td>
+            </tr>
+            <tr>
+                <th>요청번호</th>
+                <td>REQ-2023-1005</td>
+                <th>과제</th>
+                <td>PJ-2023-002</td>
+            </tr>
+            <tr>
+                <th>요청자</th>
+                <td>박생산</td>
+                <th>완료요청일</th>
+                <td>2023-10-02</td>
+            </tr>
+             <tr>
+                <th>디바이스명</th>
+                <td>CV-03</td>
+                <th>위치</th>
+                <td>B동 1층 포장라인</td>
+            </tr>
+            <tr>
+                <th>내용</th>
+                <td colspan="3">Line 3 포장 공정의 메인 컨베이어 벨트가 작동하다가 갑자기 멈췄습니다. 긴급 수리 부탁드립니다.</td>
+            </tr>
+             <tr>
+                <th>첨부파일</th>
+                <td colspan="3">
+                        <ul>
+                            <li>error_code_log.txt</li>
+                            <li>site_video.mp4</li>
+                        </ul>
+                </td>
+            </tr>
+
+            <tr>
+                <th>지원 유형</th>
+                <td>고장수리</td>
+                <th>승인 여부</th>
+                <td>
+                     승인
+                </td>
+            </tr>
+            <tr>
+                <th>완료 예정일</th>
+                <td>2023-10-02 14:00</td>
+                <th>처리 방식</th>
+                <td>
+                    외주 (한울테크)
+                </td>
+            </tr>
+             <tr>
+                <th>접수 담당자</th>
+                <td colspan="3">최보전</td>
+            </tr>
+            <tr>
+                <th>레시피</th>
+                <td>-</td>
+                 <th>협의자</th>
+                <td>김공장장</td>
+            </tr>
+             <tr>
+                <th>접수 의견</th>
+                <td colspan="3">모터 과부하로 인한 정지로 추정됨. 외주 업체 긴급 호출하였습니다.</td>
+            </tr>
+             <tr>
+                <th>첨부파일</th>
+                <td colspan="3">
+                        -
+                </td>
+            </tr>
+
+            <tr>
+                <th>업체담당자</th>
+                <td>이담당</td>
+                <th>구매비용</th>
+                <td>500,000원</td>
+            </tr>
+            <tr>
+                <th>과제</th>
+                <td colspan="3">2023 하반기 설비 고도화 프로젝트</td>
+            </tr>
+            <tr>
+                <th>고장현황</th>
+                <td colspan="3">Line 3 컨베이어 벨트 구동 멈춤 현상 발생. 모터 과열 경고등 점등.</td>
+            </tr>
+            <tr>
+                <th>주요원인</th>
+                <td colspan="3">
+                    <div style="margin-bottom: 5px;">
+                        <strong>선택된 원인:</strong>
+                                <span style="display: inline-block; padding: 2px 5px; border: 1px solid #ccc; border-radius: 3px; margin-right: 5px;">노후</span>
+                                <span style="display: inline-block; padding: 2px 5px; border: 1px solid #ccc; border-radius: 3px; margin-right: 5px;">과열</span>
+                    </div>
+                    <div><strong>비고:</strong> 5년 이상 사용으로 인한 베어링 마모 추정</div>
+                </td>
+            </tr>
+            <tr>
+                <th>발생원인 상세</th>
+                <td colspan="3">
+                    <ul>
+                            <li>구동부 베어링 파손으로 인한 회전 부하 증가</li>
+                            <li>냉각 팬 오작동으로 인한 내부 온도 상승</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <th>조치 수리역</th>
+                <td colspan="3">베어링 세트 교체 및 냉각 팬 수리 완료. 구리스 도포 작업 수행.</td>
+            </tr>
+            <tr>
+                <th>추가 대책</th>
+                <td colspan="3">
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th class="sub-header">구분</th>
+                                <th class="sub-header">상세내역</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">횡전개</td>
+                                <td>유사 설비(Line 1, 2) 베어링 상태 긴급 점검 실시</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">OPLS/SOP</td>
+                                <td>일상 점검 항목에 모터 온도 체크 추가</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th>사용부품</th>
+                <td colspan="3">
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th class="sub-header">설비</th>
+                                <th class="sub-header">부품명</th>
+                                <th class="sub-header">Maker</th>
+                                <th class="sub-header">규격</th>
+                                <th class="sub-header">수량</th>
+                                <th class="sub-header">출고일</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CV-03</td>
+                                <td>Ball Bearing</td>
+                                <td>NSK</td>
+                                <td>6204ZZ</td>
+                                <td class="text-center">4</td>
+                                <td class="text-center">2023-10-02</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th>지연사유</th>
+                <td colspan="3">자재실 재고 부족으로 인근 대리점 퀵 배송 대기 (2시간 지연)</td>
+            </tr>
+            <tr>
+                <th>작업자/시간</th>
+                <td colspan="3">
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th class="sub-header">작업자</th>
+                                <th class="sub-header">소속부서</th>
+                                <th class="sub-header">작업시간(분)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">박기술</td>
+                                <td class="text-center">보전1팀</td>
+                                <td class="text-center">120</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">최보조</td>
+                                <td class="text-center">보전1팀</td>
+                                <td class="text-center">120</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th>파일첨부</th>
+                <td colspan="3">
+                        <ul>
+                            <li>repair_before.jpg</li>
+                            <li>repair_after.jpg</li>
+                            <li>receipt.pdf</li>
+                        </ul>
+                </td>
+            </tr>
+        </tbody>
     </table>
-  </body>
+</body>
 </html>

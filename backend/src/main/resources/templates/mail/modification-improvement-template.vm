@@ -38,46 +38,140 @@
     </style>
 </head>
 <body>
-    <h3>개조/개선 결과</h3>
+
+    <h3>설비 개조/개선</h3>
     <table>
         <colgroup>
             <col style="width: 15%" />
-            <col style="width: 85%" />
+            <col style="width: 35%" />
+            <col style="width: 15%" />
+            <col style="width: 35%" />
         </colgroup>
         <tbody>
             <tr>
+                <th>제목</th>
+                <td colspan="3">${formData.title}</td>
+            </tr>
+            <tr>
+                <th>요청번호</th>
+                <td>${formData.requestNo}</td>
+                <th>과제</th>
+                <td>${formData.project}</td>
+            </tr>
+            <tr>
+                <th>요청자</th>
+                <td>${formData.requester}</td>
+                <th>완료요청일</th>
+                <td>${formData.dueDate}</td>
+            </tr>
+             <tr>
+                <th>디바이스명</th>
+                <td>${formData.deviceName}</td>
+                <th>위치</th>
+                <td>${formData.location}</td>
+            </tr>
+            <tr>
+                <th>내용</th>
+                <td colspan="3">${formData.content}</td>
+            </tr>
+             <tr>
+                <th>첨부파일</th>
+                <td colspan="3">
+                    #if($formData.files && $formData.files.size() > 0)
+                        <ul>
+                        #foreach($file in $formData.files)
+                            <li>${file}</li>
+                        #end
+                        </ul>
+                    #else
+                        -
+                    #end
+                </td>
+            </tr>
+        </tbody>
+            </tr>
+
+            <tr>
+                <th>지원 유형</th>
+                <td>${formData.supportType}</td>
+                <th>승인 여부</th>
+                <td>
+                    #if($formData.approvalStatus == 'approved') 승인
+                    #elseif($formData.approvalStatus == 'rejected') 반려
+                    #else - #end
+                </td>
+            </tr>
+            <tr>
+                <th>완료 예정일</th>
+                <td>${formData.expectedCompletionDate}</td>
+                <th>처리 방식</th>
+                <td>
+                    ${formData.processingMethod}
+                    #if($formData.outsourcingCompany) (${formData.outsourcingCompany}) #end
+                </td>
+            </tr>
+             <tr>
+                <th>접수 담당자</th>
+                <td colspan="3">${formData.assignee}</td>
+            </tr>
+            <tr>
+                <th>레시피</th>
+                <td>${formData.recipe}</td>
+                 <th>협의자</th>
+                <td>${formData.consultants}</td>
+            </tr>
+             <tr>
+                <th>접수 의견</th>
+                <td colspan="3">${formData.receiveComment}</td>
+            </tr>
+             <tr>
+                <th>첨부파일</th>
+                <td colspan="3">
+                     #if($formData.receiveFiles && $formData.receiveFiles.size() > 0)
+                        <ul>
+                        #foreach($file in $formData.receiveFiles)
+                            <li>${file}</li>
+                        #end
+                        </ul>
+                    #else
+                        -
+                    #end
+                </td>
+            </tr>
+
+            <tr>
                 <th>개조/개선 내용</th>
-                <td>${formData.modificationContent}</td>
+                <td colspan="3">${formData.modificationContent}</td>
             </tr>
             <tr>
                 <th>개선 목적</th>
-                <td>${formData.improvementPurpose}</td>
+                <td colspan="3">${formData.improvementPurpose}</td>
             </tr>
             <tr>
                 <th>개선 효과</th>
-                <td>${formData.improvementEffect}</td>
+                <td colspan="3">${formData.improvementEffect}</td>
             </tr>
             <tr>
                 <th>투입 비용</th>
-                <td>${formData.modificationCost}</td>
+                <td colspan="3">${formData.modificationCost}</td>
             </tr>
             <tr>
                 <th>작업 기간</th>
-                <td>
+                <td colspan="3">
                     ${formData.workStartDate} ~ ${formData.workEndDate}
                 </td>
             </tr>
             <tr>
                 <th>참여 인원</th>
-                <td>${formData.participants}</td>
+                <td colspan="3">${formData.participants}</td>
             </tr>
             <tr>
                 <th>기술 문서</th>
-                <td>${formData.technicalDocs}</td>
+                <td colspan="3">${formData.technicalDocs}</td>
             </tr>
             <tr>
                 <th>첨부파일</th>
-                <td>
+                <td colspan="3">
                     #if($formData.modificationFiles && $formData.modificationFiles.size() > 0)
                         <ul>
                         #foreach($file in $formData.modificationFiles)

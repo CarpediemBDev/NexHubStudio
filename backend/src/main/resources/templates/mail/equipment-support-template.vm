@@ -39,32 +39,126 @@
     </style>
 </head>
 <body>
-    <h3>설비지원 결과</h3>
+
+    <h3>설비지원</h3>
     <table>
         <colgroup>
             <col style="width: 15%" />
-            <col style="width: 85%" />
+            <col style="width: 35%" />
+            <col style="width: 15%" />
+            <col style="width: 35%" />
         </colgroup>
         <tbody>
             <tr>
+                <th>제목</th>
+                <td colspan="3">${formData.title}</td>
+            </tr>
+            <tr>
+                <th>요청번호</th>
+                <td>${formData.requestNo}</td>
+                <th>과제</th>
+                <td>${formData.project}</td>
+            </tr>
+            <tr>
+                <th>요청자</th>
+                <td>${formData.requester}</td>
+                <th>완료요청일</th>
+                <td>${formData.dueDate}</td>
+            </tr>
+             <tr>
+                <th>디바이스명</th>
+                <td>${formData.deviceName}</td>
+                <th>위치</th>
+                <td>${formData.location}</td>
+            </tr>
+            <tr>
+                <th>내용</th>
+                <td colspan="3">${formData.content}</td>
+            </tr>
+             <tr>
+                <th>첨부파일</th>
+                <td colspan="3">
+                    #if($formData.files && $formData.files.size() > 0)
+                        <ul>
+                        #foreach($file in $formData.files)
+                            <li>${file}</li>
+                        #end
+                        </ul>
+                    #else
+                        -
+                    #end
+                </td>
+            </tr>
+        </tbody>
+            </tr>
+
+            <tr>
+                <th>지원 유형</th>
+                <td>${formData.supportType}</td>
+                <th>승인 여부</th>
+                <td>
+                    #if($formData.approvalStatus == 'approved') 승인
+                    #elseif($formData.approvalStatus == 'rejected') 반려
+                    #else - #end
+                </td>
+            </tr>
+            <tr>
+                <th>완료 예정일</th>
+                <td>${formData.expectedCompletionDate}</td>
+                <th>처리 방식</th>
+                <td>
+                    ${formData.processingMethod}
+                    #if($formData.outsourcingCompany) (${formData.outsourcingCompany}) #end
+                </td>
+            </tr>
+             <tr>
+                <th>접수 담당자</th>
+                <td colspan="3">${formData.assignee}</td>
+            </tr>
+            <tr>
+                <th>레시피</th>
+                <td>${formData.recipe}</td>
+                 <th>협의자</th>
+                <td>${formData.consultants}</td>
+            </tr>
+             <tr>
+                <th>접수 의견</th>
+                <td colspan="3">${formData.receiveComment}</td>
+            </tr>
+             <tr>
+                <th>첨부파일</th>
+                <td colspan="3">
+                     #if($formData.receiveFiles && $formData.receiveFiles.size() > 0)
+                        <ul>
+                        #foreach($file in $formData.receiveFiles)
+                            <li>${file}</li>
+                        #end
+                        </ul>
+                    #else
+                        -
+                    #end
+                </td>
+            </tr>
+
+            <tr>
                 <th>지원 내용</th>
-                <td>${formData.supportContent}</td>
+                <td colspan="3">${formData.supportContent}</td>
             </tr>
             <tr>
                 <th>소요 시간</th>
-                <td>${formData.supportTime}</td>
+                <td colspan="3">${formData.supportTime}</td>
             </tr>
             <tr>
                 <th>지원 인원</th>
-                <td>${formData.supportPersonnel} 명</td>
+                <td colspan="3">${formData.supportPersonnel} 명</td>
             </tr>
             <tr>
                 <th>특이 사항</th>
-                <td>${formData.supportNotes}</td>
+                <td colspan="3">${formData.supportNotes}</td>
             </tr>
             <tr>
                 <th>첨부파일</th>
-                <td>
+                <td colspan="3">
                     #if($formData.supportFiles && $formData.supportFiles.size() > 0)
                         <ul>
                         #foreach($file in $formData.supportFiles)
@@ -78,7 +172,7 @@
             </tr>
             <tr>
                 <th>진행 내역</th>
-                <td>
+                <td colspan="3">
                     #if($progressRows && $progressRows.size() > 0)
                     <table style="width: 100%; margin-top: 5px; border: 1px solid #b0c4de;">
                         <thead>
@@ -109,7 +203,7 @@
             </tr>
             <tr>
                 <th>첨부파일 1</th>
-                <td>
+                <td colspan="3">
                     #if($resultFiles1 && $resultFiles1.size() > 0)
                         <ul>
                         #foreach($file in $resultFiles1)
@@ -123,7 +217,7 @@
             </tr>
             <tr>
                 <th>첨부파일 2</th>
-                <td>
+                <td colspan="3">
                     #if($resultFiles2 && $resultFiles2.size() > 0)
                         <ul>
                         #foreach($file in $resultFiles2)
