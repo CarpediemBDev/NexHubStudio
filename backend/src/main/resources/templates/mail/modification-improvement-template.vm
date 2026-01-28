@@ -30,7 +30,6 @@
             color: #2c3e50;
             text-align: center;
             font-weight: bold;
-            width: 15%;
         }
         .text-center { text-align: center; }
         .text-end { text-align: right; }
@@ -88,8 +87,7 @@
                     #end
                 </td>
             </tr>
-        </tbody>
-            </tr>
+
 
             <tr>
                 <th>지원 유형</th>

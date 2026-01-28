@@ -88,8 +88,7 @@
                     #end
                 </td>
             </tr>
-        </tbody>
-            </tr>
+
 
             <tr>
                 <th>지원 유형</th>
@@ -193,7 +192,7 @@
                 <th>추가 대책</th>
                 <td colspan="3">
                     #if($formData.selectedMeasures && $formData.selectedMeasures.size() > 0)
-                    <table style="width: 100%;">
+                    <table style="width: 100%; margin-top: 5px;">
                         <thead>
                             <tr>
                                 <th class="sub-header">구분</th>
@@ -218,7 +217,7 @@
                 <th>사용부품</th>
                 <td colspan="3">
                     #if($formData.partRows && $formData.partRows.size() > 0)
-                    <table style="width: 100%;">
+                    <table style="width: 100%; margin-top: 5px;">
                         <thead>
                             <tr>
                                 <th class="sub-header">설비</th>
@@ -255,7 +254,7 @@
                 <th>작업자/시간</th>
                 <td colspan="3">
                     #if($formData.workerRows && $formData.workerRows.size() > 0)
-                    <table style="width: 100%;">
+                    <table style="width: 100%; margin-top: 5px;">
                         <thead>
                             <tr>
                                 <th class="sub-header">작업자</th>
