@@ -100,6 +100,26 @@ export default {
   created() {
     this.bind()
   },
+  mounted() {
+    // 컨테이너 리사이즈 감지 (사이드바 토글 등 윈도우 리사이즈가 발생하지 않는 레이아웃 변경 대응)
+    if (window.ResizeObserver) {
+      this.resizeObserver = new ResizeObserver(() => {
+        // 과도한 호출 방지
+        window.requestAnimationFrame(() => {
+          if (this.$refs.grid) {
+            // refresh 호출 시 jqxGrid가 부모 컨테이너(width='100%')의 변경된 픽셀 값을 다시 계산함
+            this.$refs.grid.refresh()
+          }
+        })
+      })
+      this.resizeObserver.observe(this.$el)
+    }
+  },
+  beforeUnmount() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+    }
+  },
   methods: {
     // 부모에서 this.$refs.gridComp.add(...) 식으로 호출
     add(initial = {}, position = 'first') {

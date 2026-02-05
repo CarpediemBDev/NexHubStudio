@@ -13,18 +13,28 @@
     -->
   <div class="app-layout">
     <!-- Header -->
-    <header>
+    <header class="app-header">
       <NavBar />
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <router-view v-slot="{ Component }">
-        <transition :name="transitionName" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-    </main>
+    <!-- Body (Sidebar + Content) -->
+    <div class="app-body d-flex">
+      <!-- Sidebar (Desktop only) -->
+      <aside class="d-none d-lg-block">
+        <AppSidebar :is-collapsed="isSidebarCollapsed" @toggle="toggleSidebar" />
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="p-3 h-100">
+          <router-view v-slot="{ Component }">
+            <transition :name="transitionName" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </div>
+      </main>
+    </div>
 
     <!-- Footer -->
     <footer class="app-footer">
@@ -44,15 +54,17 @@
 
 <script>
 import NavBar from '../components/NavBar.vue'
+import AppSidebar from '../components/AppSidebar.vue'
 import '../assets/styles/transitions.css'
 
 export default {
   name: 'MainLayout',
-  components: { NavBar },
+  components: { NavBar, AppSidebar },
   data() {
     return {
       transitionName: 'slide-right',
       lastPos: null,
+      isSidebarCollapsed: false,
     }
   },
   watch: {
@@ -62,6 +74,11 @@ export default {
 
       this.transitionName = isBack ? 'slide-left' : 'slide-right'
       this.lastPos = currentPos
+    },
+  },
+  methods: {
+    toggleSidebar() {
+      this.isSidebarCollapsed = !this.isSidebarCollapsed
     },
   },
 }
@@ -75,15 +92,32 @@ export default {
   flex-direction: column;
 }
 
+/* 헤더는 고정 높이 또는 자연스럽게 */
+.app-header {
+  z-index: 1000;
+  position: relative;
+}
+
+/* 바디: 남은 높이 모두 차지 */
+.app-body {
+  flex: 1;
+  min-height: 0; /* 중요: 내부 스크롤을 위해 */
+  overflow: hidden; /* 전체 페이지 스크롤 방지, 내부 스크롤 권장 */
+}
+
+/* 메인 컨텐츠 영역 */
 .main-content {
   flex: 1;
-  min-height: 0; /* flex item shrinking 허용 */
+  min-width: 0; /* Flex item shrinking 문제 방지 */
+  background-color: #f8f9fa; /* 배경색 살짝 */
+  overflow-y: auto; /* 내용 많을 때 스크롤 */
+  position: relative;
 }
 
 .app-footer {
   background-color: var(--bs-light);
   border-top: 1px solid var(--bs-border-color);
-  padding: 1rem 0;
-  margin-top: auto;
+  padding: 0.5rem 0;
+  z-index: 1000;
 }
 </style>

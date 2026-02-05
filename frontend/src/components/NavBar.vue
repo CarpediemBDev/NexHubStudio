@@ -31,23 +31,13 @@
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- 데스크톱: 드롭다운 2단 -->
+        <!-- 데스크톱: 드롭다운 2단 (사이드바 추가로 인해 상단 메뉴 숨김 처리) -->
         <div class="navbar-collapse d-none d-lg-flex">
-          <ul class="navbar-nav me-auto">
-            <li v-for="(grp, i) in menu" :key="`m-${i}`" class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                {{ grp.label }}
-              </a>
-              <ul class="dropdown-menu">
-                <li v-for="(item, j) in grp.children" :key="`mi-${i}-${j}`">
-                  <RouterLink v-if="item.to" class="dropdown-item" :to="item.to">
-                    {{ item.label }}
-                  </RouterLink>
-                  <span v-else class="dropdown-item text-muted">{{ item.label }}</span>
-                </li>
-              </ul>
-            </li>
-          </ul>
+          <!-- <ul class="navbar-nav me-auto"> ... </ul> -->
+          
+          <!-- Spacer to push user info to right -->
+           <div class="me-auto"></div>
+
           <span class="navbar-text small text-muted">Vue3 + Bootstrap 5</span>
         </div>
       </div>
