@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
         String traceId = UUID.randomUUID().toString();
-        log.warn("[{}] Business Exception: {} - {}", traceId, e.getCode(), e.getMessage());
+        log.error("[{}] Business Exception: {} - {}", traceId, e.getCode(), e.getMessage());
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .code(e.getCode())
                 .message(e.getMessage())
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {
         String traceId = UUID.randomUUID().toString();
-        log.warn("[{}] Invalid Argument: {}", traceId, e.getMessage());
+        log.error("[{}] Invalid Argument: {}", traceId, e.getMessage());
         String message = e.getMessage() != null ? e.getMessage() : ErrorCode.INVALID_INPUT.getMessage();
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .code(ErrorCode.INVALID_INPUT.getCode())
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException e) {
         String traceId = UUID.randomUUID().toString();
-        log.warn("[{}] Validation Error: {}", traceId, e.getMessage());
+        log.error("[{}] Validation Error: {}", traceId, e.getMessage());
         String message = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .code(ErrorCode.INVALID_INPUT.getCode())
