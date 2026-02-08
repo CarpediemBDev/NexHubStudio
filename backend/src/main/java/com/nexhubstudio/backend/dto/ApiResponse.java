@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 /**
  * API 공통 응답 DTO
@@ -17,12 +18,14 @@ public class ApiResponse<T> {
     private String code;
     private String message;
     private T data;
+    private String traceId;
 
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
                 .code("SUCCESS")
                 .message("성공")
                 .data(data)
+                .traceId(UUID.randomUUID().toString())
                 .build();
     }
 
@@ -31,6 +34,7 @@ public class ApiResponse<T> {
                 .code("SUCCESS")
                 .message(message)
                 .data(data)
+                .traceId(UUID.randomUUID().toString())
                 .build();
     }
 }
