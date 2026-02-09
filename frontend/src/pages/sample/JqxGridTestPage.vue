@@ -98,7 +98,7 @@ export default {
 }
 .highlight {
   border: 2px solid #42b983;
-  background: #c0df0c;
+  background: #eaffea;
 }
 h3 { margin-top: 0; }
 </style>
