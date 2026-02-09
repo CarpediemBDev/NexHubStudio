@@ -2,7 +2,7 @@
   <div class="jqx-custom-grid">
     <JqxGrid
       ref="grid"
-      :width="width"
+      width="100%"
       :height="height"
       :theme="theme"
       :source="adapter"
@@ -276,5 +276,27 @@ export default {
 .jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell::after) {
   content: '-';
   color: #b91c1c;
+}
+
+/* --- 가로 스크롤 제거를 위한 핵심 스타일 --- */
+/* 1. 컨테이너가 테두리를 담당 */
+.jqx-custom-grid {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #c5c5c5; /* jqx 기본 테두리 색상과 유사하게 맞춤 */
+  box-sizing: border-box;
+  overflow: hidden; /* 그리드 밖으로 튀어나가는 1px 방지 */
+}
+
+/* 2. jqxGrid 자체의 테두리는 제거 (100% + border = 오버플로우 원인 제거) */
+.jqx-custom-grid :deep(.jqx-grid),
+.jqx-custom-grid :deep(.jqx-border-bootstrap),
+.jqx-custom-grid :deep(.jqx-widget-content) {
+  border-width: 0px !important;
+}
+
+/* 3. 스크롤바가 생기더라도 박스 안쪽에 생기도록 */
+.jqx-custom-grid :deep(*) {
+  box-sizing: border-box;
 }
 </style>
