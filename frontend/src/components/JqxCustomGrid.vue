@@ -228,14 +228,15 @@ export default {
   border-bottom: 1px solid #e5e7eb;
   font-weight: 600;
 }
-/* hover */
+/* hover: GitHub Table Hover Style */
 .jqx-custom-grid :deep(.jqx-grid-cell-hover) {
-  background-color: #eef5ff !important;
+  background-color: #f6f8fa !important;
+  color: #24292f !important;
 }
-/* 선택색 */
+/* 선택색: GitHub Blue Highlight */
 .jqx-custom-grid :deep(.jqx-grid-cell-selected) {
-  background-color: #cfe2ff !important;
-  color: #052c65 !important;
+  background-color: #ddf4ff !important;
+  color: #0969da !important;
 }
 
 /* 상태 아이콘 중앙 정렬 */
