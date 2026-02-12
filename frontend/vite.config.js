@@ -1,21 +1,16 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 import { resolve } from 'path'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), basicSsl()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
     },
   },
   server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        // do not rewrite, backend already serves under /api via servlet path
-      },
-    },
+    // proxy configuration removed for direct access
   },
 })

@@ -51,8 +51,6 @@ mvnw.cmd
 .stylelintcache
 
 # --- Env files (예시는 유지) ---
-.env
-.env.*
 !.env.example
 
 # --- Tests / coverage / reports ---
@@ -81,7 +79,7 @@ Thumbs.db
 *.swo
 *.swn
 *.orig
-*.local
+*.orig
 *.tgz
 *.zip
 
