@@ -7,7 +7,7 @@
       :rows="rows"
       :gridProps="gridProps"
       style="width: 100%; height: 100%;"
-      @onInitialized="onGridInitialized"
+      @onInitialized="initGrid"
     >
       <slot></slot>
     </RealGridVue>
@@ -33,6 +33,7 @@ export default {
       gridProps: {
         display: {
           fitStyle: 'evenFill',
+          syncGridHeight: 'always', // 마지막행 자투리 여백제거
           rowHeight: 40,
           headerHeight: 40
         }
@@ -40,7 +41,7 @@ export default {
     }
   },
   methods: {
-    onGridInitialized(gridView) {
+    initGrid(gridView) {
       this.gridView = gridView
       this.dataProvider = gridView.getDataSource()
 
@@ -57,6 +58,7 @@ export default {
 
       this.gridView.setStateBar({ visible: true })
       this.gridView.setCheckBar({ visible: true })
+      this.gridView.setFooter({ visible: false }) // 합계행(Footer) 숨김 처리
 
       this.$emit('init', { gridView, dataProvider: this.dataProvider })
     },

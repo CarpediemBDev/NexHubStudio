@@ -55,6 +55,7 @@ export default {
 
       this.gridView.setStateBar({ visible: true })
       this.gridView.setCheckBar({ visible: true })
+      this.gridView.setFooter({ visible: false }) // 합계행(Footer) 숨김 처리
 
       // Set fields and columns from props
       this.dataProvider.setFields(this.fields)
@@ -64,7 +65,8 @@ export default {
       this.gridView.setDisplayOptions({
         fitStyle: 'evenFill',
         rowHeight: 40,
-        headerHeight: 40
+        headerHeight: 40,
+        syncGridHeight: 'always', // 마지막행 자투리 여백제거
       })
 
       // Load initial rows

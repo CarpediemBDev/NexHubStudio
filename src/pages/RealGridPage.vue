@@ -113,7 +113,6 @@ export default {
         const res = await fetch(url)
         const data = await res.json()
         this.users = Array.isArray(data) ? data : data.users || []
-        showToast('데이터가 성공적으로 로드되었습니다.', { type: 'success' })
       } catch (error) {
         console.error('Error loading users:', error)
         showToast('데이터를 로드하는 데 실패했습니다.', { type: 'danger' })
@@ -128,7 +127,6 @@ export default {
         dept: '개발지원팀',
         role: '연구원'
       })
-      showToast('새 행이 추가되었습니다.', { type: 'info' })
     },
 
     deleteChecked() {
