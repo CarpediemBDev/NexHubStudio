@@ -15,6 +15,7 @@
     "bootstrap-icons": "^1.13.1",
     "jqwidgets-scripts": "^19.2.0",
     "realgrid": "^2.9.7",
+    "realgrid-vue": "^0.9.8",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
   },

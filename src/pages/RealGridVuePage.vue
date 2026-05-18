@@ -2,8 +2,8 @@
   <div class="container py-3">
     <!-- Header Page Title -->
     <div class="mb-3">
-      <h4 class="fw-bold text-dark m-0">RealGrid 샘플 (공통 컴포넌트형)</h4>
-      <p class="text-muted small mb-0">공통 컴포넌트인 RealGridCommonJs를 활용하여 간결하게 작성된 고성능 그리드 샘플입니다.</p>
+      <h4 class="fw-bold text-dark m-0">RealGrid-Vue 샘플 (공통 슬롯 컴포넌트형)</h4>
+      <p class="text-muted small mb-0">공식 <span class="badge bg-primary-soft text-primary font-monospace">realgrid-vue</span> 래퍼를 캡슐화한 RealGridCommonVue를 적용한 그리드 샘플입니다.</p>
     </div>
 
     <!-- Toolbar Buttons -->
@@ -22,74 +22,76 @@
       </button>
     </div>
 
-    <!-- Grid Container Card using Common JS Component -->
+    <!-- Grid Container Card with Common Vue Slot Component -->
     <div class="card shadow-sm border-light mb-4">
       <div class="card-body p-0">
-        <RealGridCommonJs
+        <!-- Using the encapsulated slot-based Common grid component -->
+        <RealGridCommonVue
           ref="realgridComp"
-          :fields="gridFields"
-          :columns="gridColumns"
-          :rows="users"
+          :rows="rows"
           height="560px"
           @init="onGridInit"
-        />
+        >
+            <!-- Defining Data Fields dynamically inside slot -->
+            <RGDataField fieldName="userId" dataType="text" />
+            <RGDataField fieldName="name" dataType="text" />
+            <RGDataField fieldName="dept" dataType="text" />
+            <RGDataField fieldName="role" dataType="text" />
+
+            <!-- Defining Visual Columns dynamically inside slot -->
+            <RGDataColumn
+              name="userId"
+              fieldName="userId"
+              width="120"
+              :header="{ text: 'ID' }"
+              :editable="false"
+              :styles="{ textAlignment: 'center' }"
+            />
+            <RGDataColumn
+              name="name"
+              fieldName="name"
+              width="160"
+              :header="{ text: '이름' }"
+              :styles="{ textAlignment: 'near' }"
+            />
+            <RGDataColumn
+              name="dept"
+              fieldName="dept"
+              width="160"
+              :header="{ text: '부서' }"
+              :styles="{ textAlignment: 'near' }"
+              :mergeRule="{ criteria: 'value' }"
+            />
+            <RGDataColumn
+              name="role"
+              fieldName="role"
+              width="200"
+              :header="{ text: '역할' }"
+              :styles="{ textAlignment: 'near' }"
+            />
+          </RealGridCommonVue>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
+// Import our newly created Common Vue wrapper component
+import RealGridCommonVue from '@/components/RealGridCommonVue.vue'
+// Import visual grid items for slot rendering
+import { RGDataField, RGDataColumn } from 'realgrid-vue'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
-  name: 'RealGridPage',
+  name: 'RealGridVuePage',
   components: {
-    RealGridCommonJs
+    RealGridCommonVue,
+    RGDataField,
+    RGDataColumn
   },
   data() {
     return {
-      users: [],
-      // 필드 스펙 정의
-      gridFields: [
-        { fieldName: 'userId', dataType: 'text' },
-        { fieldName: 'name', dataType: 'text' },
-        { fieldName: 'dept', dataType: 'text' },
-        { fieldName: 'role', dataType: 'text' }
-      ],
-      // 컬럼 레이아웃 정의
-      gridColumns: [
-        {
-          name: 'userId',
-          fieldName: 'userId',
-          width: '120',
-          header: { text: 'ID' },
-          editable: false,
-          styles: { textAlignment: 'center' }
-        },
-        {
-          name: 'name',
-          fieldName: 'name',
-          width: '160',
-          header: { text: '이름' },
-          styles: { textAlignment: 'near' }
-        },
-        {
-          name: 'dept',
-          fieldName: 'dept',
-          width: '160',
-          header: { text: '부서' },
-          styles: { textAlignment: 'near' },
-          mergeRule: { criteria: 'value' } // [예제] 부서명이 같은 행끼리 셀 병합
-        },
-        {
-          name: 'role',
-          fieldName: 'role',
-          width: '200',
-          header: { text: '역할' },
-          styles: { textAlignment: 'near' }
-        }
-      ]
+      rows: [] // Bound to RealGridCommonVue rows prop
     }
   },
   mounted() {
@@ -98,12 +100,12 @@ export default {
   methods: {
     // 공통 컴포넌트 탈출구(Escape Hatch): gridView 원본 직접 제어
     onGridInit({ gridView }) {
-      console.log('RealGridCommonJs 인스턴스 직접 제어 시작')
+      console.log('RealGridCommonVue 인스턴스 직접 제어 시작')
       
       // [예제 - 틀고정] ID 컬럼(첫 번째 컬럼)을 좌측에 고정
       gridView.setFixedOptions({
-        colCount: 1, 
-        resizable: true 
+        colCount: 1,
+        resizable: true
       })
     },
 
@@ -112,8 +114,9 @@ export default {
         const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
         const res = await fetch(url)
         const data = await res.json()
-        this.users = Array.isArray(data) ? data : data.users || []
-        showToast('데이터가 성공적으로 로드되었습니다.', { type: 'success' })
+        this.rows = Array.isArray(data) ? data : data.users || []
+        
+        showToast('데이터가 성공적으로 로드되었습니다. (realgrid-vue 공통형)', { type: 'success' })
       } catch (error) {
         console.error('Error loading users:', error)
         showToast('데이터를 로드하는 데 실패했습니다.', { type: 'danger' })
@@ -121,14 +124,14 @@ export default {
     },
 
     addRow() {
-      const tempId = 'user_' + Math.random().toString(36).substring(2, 8)
+      const tempId = 'vue_user_' + Math.random().toString(36).substring(2, 8)
       this.$refs.realgridComp.addRow({
         userId: tempId,
-        name: '새 사용자',
-        dept: '개발지원팀',
+        name: '새 사용자 (Vue)',
+        dept: '마케팅지원팀',
         role: '연구원'
       })
-      showToast('새 행이 추가되었습니다.', { type: 'info' })
+      showToast('새 행이 추가되었습니다. (realgrid-vue 공통형)', { type: 'info' })
     },
 
     deleteChecked() {
@@ -137,7 +140,7 @@ export default {
         showToast('선택된 사용자가 없습니다.', { type: 'warning' })
         return
       }
-      showToast(`${count}건이 삭제 표시되었습니다.`, { type: 'warning' })
+      showToast(`${count}건이 삭제 표시되었습니다. (realgrid-vue 공통형)`, { type: 'warning' })
     },
 
     async saveData() {
@@ -149,11 +152,11 @@ export default {
         return
       }
 
-      console.log('서버로 저장할 RealGrid 데이터:', changes)
+      console.log('서버로 저장할 RealGrid-Vue 데이터:', changes)
 
-      showToast('저장 성공!', { type: 'success' })
+      showToast('저장 성공! (realgrid-vue 공통형)', { type: 'success' })
       alert(
-        `저장 완료!\n` +
+        `[realgrid-vue 래퍼 저장 완료]\n` +
         `- 추가: ${changes.created.length}건\n` +
         `- 수정: ${changes.updated.length}건\n` +
         `- 삭제: ${changes.deleted.length}건`
@@ -168,6 +171,10 @@ export default {
 <style scoped>
 .container {
   max-width: 1200px;
+}
+
+.bg-primary-soft {
+  background-color: rgba(59, 130, 246, 0.1);
 }
 
 /* ==========================================================================

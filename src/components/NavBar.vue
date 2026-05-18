@@ -154,6 +154,7 @@ export default {
             { label: '사용자(검색Grid)', to: '/search-grid' },
             { label: 'JqxGrid 샘플', to: '/jqx-grid' },
             { label: 'RealGrid 샘플', to: '/real-grid' },
+            { label: 'RealGrid-Vue 샘플', to: '/real-grid-vue' },
             { label: '그룹 관리' },
             { label: '설정' },
           ],
