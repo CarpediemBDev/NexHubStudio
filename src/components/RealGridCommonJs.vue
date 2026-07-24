@@ -7,6 +7,7 @@
 <script>
 import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
+import { markRaw } from 'vue'
 
 export default {
   name: 'RealGridCommonJs',
@@ -37,9 +38,12 @@ export default {
       const container = this.$refs.gridElement
       if (!container) return
 
-      // Create instances
-      this.dataProvider = new RealGrid.LocalDataProvider(false)
-      this.gridView = new RealGrid.GridView(container)
+      // Create instances with markRaw (Official RealGrid Vue 3 Best Practice)
+      const LocalDataProvider = RealGrid.LocalDataProvider || RealGrid.default?.LocalDataProvider
+      const GridView = RealGrid.GridView || RealGrid.default?.GridView
+
+      this.dataProvider = markRaw(new LocalDataProvider(false))
+      this.gridView = markRaw(new GridView(container))
       this.gridView.setDataSource(this.dataProvider)
 
       // Enterprise default options

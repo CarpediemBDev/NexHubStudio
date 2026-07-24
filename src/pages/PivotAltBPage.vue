@@ -87,6 +87,7 @@
 <script>
 import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
+import { markRaw } from 'vue'
 import { buildPivotMatrix } from '@/utils/pivotUtil.js'
 import { showToast } from '@/utils/toastUtil.js'
 
@@ -94,9 +95,6 @@ export default {
   name: 'PivotAltBPage',
   data() {
     return {
-      container: null,
-      dataProvider: null,
-      gridView: null,
       pivotOptions: {
         rowField: 'dept',
         colField: 'quarter',
@@ -128,6 +126,12 @@ export default {
       ]
     }
   },
+  created() {
+    // RealGrid 공식 Vue3 가이드: 그리드 인스턴스는 markRaw / non-reactive 멤버로 관리
+    this.container = null
+    this.dataProvider = null
+    this.gridView = null
+  },
   mounted() {
     this.initGrid()
   },
@@ -143,12 +147,13 @@ export default {
       const LocalDataProvider = RealGrid.LocalDataProvider || RealGrid.default?.LocalDataProvider
       const GridView = RealGrid.GridView || RealGrid.default?.GridView
 
-      this.dataProvider = new LocalDataProvider(true)
-      this.gridView = new GridView(this.container)
+      this.dataProvider = markRaw(new LocalDataProvider(true))
+      this.gridView = markRaw(new GridView(this.container))
       this.gridView.setDataSource(this.dataProvider)
 
-      // 그리드 표시 스타일 튜닝
+      // 그리드 표시 스타일 튜닝 (가로 여백 꽉 차게)
       this.gridView.setDisplayOptions({
+        fitStyle: 'evenFill',
         columnMovable: false,
         rowHoverType: 'row'
       })
