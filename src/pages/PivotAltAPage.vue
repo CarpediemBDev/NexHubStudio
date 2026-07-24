@@ -74,8 +74,8 @@
 </template>
 
 <script>
-import RealGrid from 'realgrid'
-import 'realgrid/dist/realgrid-style.css'
+import * as RealGrid from 'realgrid'
+import 'realgrid/dist/realgrid-white.css'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
@@ -115,8 +115,11 @@ export default {
   methods: {
     initGrid() {
       this.container = this.$refs.gridElement
-      this.dataProvider = new RealGrid.LocalDataProvider(true)
-      this.gridView = new RealGrid.GridView(this.container)
+      const LocalDataProvider = RealGrid.LocalDataProvider || RealGrid.default?.LocalDataProvider
+      const GridView = RealGrid.GridView || RealGrid.default?.GridView
+
+      this.dataProvider = new LocalDataProvider(true)
+      this.gridView = new GridView(this.container)
       this.gridView.setDataSource(this.dataProvider)
 
       // 필드 스펙
@@ -178,10 +181,9 @@ export default {
       })
 
       // 2. 그룹 푸터(소계) 설정
-      this.gridView.setRowGroupOptions({
+      this.gridView.setRowGroup({
         summaryMode: 'aggregate',
-        mergeMode: true,
-        expandedAdornments: 'both' // 상단 및 하단 모두 합계 표출
+        mergeMode: true
       })
 
       // 데이터 삽입
@@ -194,14 +196,14 @@ export default {
     setPresetGroup(groupFields, groupName) {
       if (!this.gridView) return
       this.activeGroup = groupName
-      this.gridView.setGroupBy(groupFields)
+      this.gridView.groupBy(groupFields)
       showToast(`${groupFields.join(', ')} 기준 그룹핑이 적용되었습니다.`, { type: 'info' })
     },
 
     clearGroupBy() {
       if (!this.gridView) return
       this.activeGroup = 'none'
-      this.gridView.setGroupBy([])
+      this.gridView.groupBy([])
       showToast('그룹핑이 해제되었습니다.', { type: 'warning' })
     },
 

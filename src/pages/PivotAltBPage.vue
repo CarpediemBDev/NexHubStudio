@@ -85,8 +85,8 @@
 </template>
 
 <script>
-import RealGrid from 'realgrid'
-import 'realgrid/dist/realgrid-style.css'
+import * as RealGrid from 'realgrid'
+import 'realgrid/dist/realgrid-white.css'
 import { buildPivotMatrix } from '@/utils/pivotUtil.js'
 import { showToast } from '@/utils/toastUtil.js'
 
@@ -140,8 +140,11 @@ export default {
   methods: {
     initGrid() {
       this.container = this.$refs.gridElement
-      this.dataProvider = new RealGrid.LocalDataProvider(true)
-      this.gridView = new RealGrid.GridView(this.container)
+      const LocalDataProvider = RealGrid.LocalDataProvider || RealGrid.default?.LocalDataProvider
+      const GridView = RealGrid.GridView || RealGrid.default?.GridView
+
+      this.dataProvider = new LocalDataProvider(true)
+      this.gridView = new GridView(this.container)
       this.gridView.setDataSource(this.dataProvider)
 
       // 그리드 표시 스타일 튜닝
