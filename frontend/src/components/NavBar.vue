@@ -13,11 +13,11 @@
           >
             <i class="bi bi-arrow-left"></i>
           </button>
-          <span class="navbar-brand fw-semibold mb-0">NexHubStudio</span>
+          <span class="navbar-brand fw-semibold mb-0">NexHub Grid Studio</span>
         </div>
 
         <!-- 데스크톱: 일반 브랜드 -->
-        <a class="navbar-brand fw-semibold d-none d-lg-block" href="#">NexHubStudio</a>
+        <a class="navbar-brand fw-semibold d-none d-lg-block" href="#">NexHub Grid Studio</a>
 
         <!-- 모바일: 햄버거 메뉴만 -->
         <button
@@ -31,13 +31,23 @@
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- 데스크톱: 드롭다운 2단 (사이드바 추가로 인해 상단 메뉴 숨김 처리) -->
+        <!-- 데스크톱: 드롭다운 2단 -->
         <div class="navbar-collapse d-none d-lg-flex">
-          <!-- <ul class="navbar-nav me-auto"> ... </ul> -->
-          
-          <!-- Spacer to push user info to right -->
-           <div class="me-auto"></div>
-
+          <ul class="navbar-nav me-auto">
+            <li v-for="(grp, i) in menu" :key="`m-${i}`" class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                {{ grp.label }}
+              </a>
+              <ul class="dropdown-menu">
+                <li v-for="(item, j) in grp.children" :key="`mi-${i}-${j}`">
+                  <RouterLink v-if="item.to" class="dropdown-item" :to="item.to">
+                    {{ item.label }}
+                  </RouterLink>
+                  <span v-else class="dropdown-item text-muted">{{ item.label }}</span>
+                </li>
+              </ul>
+            </li>
+          </ul>
           <span class="navbar-text small text-muted">Vue3 + Bootstrap 5</span>
         </div>
       </div>
@@ -140,19 +150,21 @@ export default {
         {
           label: '사용자 관리',
           children: [
-            { label: '사용자', to: '/users' },
+            { label: '사용자', to: '/' },
             { label: '사용자(검색Grid)', to: '/search-grid' },
             { label: 'JqxGrid 샘플', to: '/jqx-grid' },
+            { label: 'RealGrid 샘플', to: '/real-grid' },
+            { label: 'RealGrid-Vue 샘플', to: '/real-grid-vue' },
             { label: '그룹 관리' },
             { label: '설정' },
           ],
         },
         {
-          label: '사용자 배정',
+          label: '피벗 비교 예제',
           children: [
-            { label: '사용자 배정 (세로)', to: '/user-assignment-vertical' },
-            { label: '사용자 배정 (공통목록)', to: '/user-assignment-shared' },
-            { label: '사용자 배정 (신규)', to: '/user-assignment-shared-new' },
+            { label: '1. RealPivot 체험', to: '/real-pivot' },
+            { label: '2. 대안 A (행 그룹핑&소계)', to: '/pivot-alt-a' },
+            { label: '3. 대안 B (동적 교차표)', to: '/pivot-alt-b' },
           ],
         },
         {
@@ -160,44 +172,8 @@ export default {
           children: [{ label: '강좌 목록' }, { label: '수강 현황' }, { label: '시험/평가' }],
         },
         {
-          label: '게시판',
-          children: [
-            { label: '게시글 목록', to: '/posts' },
-            { label: '게시글 작성', to: '/posts/write' },
-            { label: '파일 관리', to: '/files' },
-          ],
-        },
-        {
-          label: '모니터링',
-          children: [{ label: '설비 모니터링', to: '/equipment-monitor' }],
-        },
-        {
-          label: '업무 관리',
-          children: [
-            { label: '업무 의뢰', to: '/request-workflow' },
-            { label: '업무 의뢰서', to: '/work-request-form' },
-            { label: '설비지원요청', to: '/equipment-support-request' },
-          ],
-        },
-        {
-          label: '개발 가이드',
-          children: [{ label: '공통 컴포넌트 가이드', to: '/component-guide' }],
-        },
-        {
           label: '시스템',
-          children: [
-            { label: '공통코드 그룹', to: '/common-code-groups' },
-            { label: '환경설정' },
-            { label: '공지사항' },
-          ],
-        },
-        // 샘플 메뉴 추가
-        {
-          label: '샘플',
-          children: [
-            { label: '설비 바코드 샘플', to: '/sample/barcode-equipment' },
-            { label: '포털 메인 샘플', to: '/sample/portal' },
-          ],
+          children: [{ label: '환경설정' }, { label: '공지사항' }],
         },
       ],
     }

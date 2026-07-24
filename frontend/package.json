@@ -1,21 +1,22 @@
 {
-  "name": "nexhubstudio-bootstrap",
+  "name": "nexhub-grid-studio",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "make:db": "node ./scripts/make-db.mjs --count=100 --seed=42"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "axios": "^1.13.2",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.13.1",
     "jqwidgets-scripts": "^19.2.0",
+    "realgrid": "^2.9.7",
+    "realgrid-vue": "^0.9.8",
     "vue": "^3.5.12",
-    "vue-datepicker-next": "^1.0.3",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
