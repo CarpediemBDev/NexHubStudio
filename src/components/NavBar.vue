@@ -13,11 +13,11 @@
           >
             <i class="bi bi-arrow-left"></i>
           </button>
-          <span class="navbar-brand fw-semibold mb-0">userPopExample</span>
+          <span class="navbar-brand fw-semibold mb-0">NexHub Grid Studio</span>
         </div>
 
         <!-- 데스크톱: 일반 브랜드 -->
-        <a class="navbar-brand fw-semibold d-none d-lg-block" href="#">userPopExample</a>
+        <a class="navbar-brand fw-semibold d-none d-lg-block" href="#">NexHub Grid Studio</a>
 
         <!-- 모바일: 햄버거 메뉴만 -->
         <button
@@ -157,6 +157,14 @@ export default {
             { label: 'RealGrid-Vue 샘플', to: '/real-grid-vue' },
             { label: '그룹 관리' },
             { label: '설정' },
+          ],
+        },
+        {
+          label: '피벗 비교 예제',
+          children: [
+            { label: '1. RealPivot 체험', to: '/real-pivot' },
+            { label: '2. 대안 A (행 그룹핑&소계)', to: '/pivot-alt-a' },
+            { label: '3. 대안 B (동적 교차표)', to: '/pivot-alt-b' },
           ],
         },
         {

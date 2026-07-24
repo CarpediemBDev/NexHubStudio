@@ -1,178 +1,86 @@
-# userPopExample
+# 🚀 NexHub Grid & RealGrid Pivot Studio
 
-Vue 3 + Bootstrap 5 + JqWidgets를 사용한 사용자 관리 시스템 예제입니다.
+Vue 3 + RealGrid 2 + Bootstrap 5 기반의 **엔터프라이즈 그리드 및 피벗(Pivot) 솔루션 비교·구축 예제 시스템**입니다.
 
-## 🚀 빠른 시작
+---
 
-이 프로젝트는 **Volta**로 Node와 npm 버전을 고정합니다. 로컬/CI/배포 환경 어디서든 동일한 런타임을 보장합니다.
+## 📌 주요 특징 및 피벗 예제 3종
 
-이 프로젝트는 **Volta**로 Node와 npm 버전을 고정합니다.
+본 프로젝트는 RealGrid 2 구축 환경에서 엑셀 피벗(Pivot Table) 요구사항을 해결하기 위한 **3가지 구현 방식**을 실시간 비교 및 검증할 수 있는 샘플 화면을 제공합니다.
 
-**설치 (Window / Linux)**
+### 1. 피벗 비교 예제 3종 (`/pivot-alt-a`, `/pivot-alt-b`, `/real-pivot`)
+1. **RealPivot 체험 및 가이드 (`/real-pivot`)**:
+   - 엑셀 피벗과 동일하게 행/열/값 드롭존 필드 드래그 앤 드롭 시뮬레이션 UI.
+   - RealPivot 전용 SDK 연동 가이드 및 3종 구현 비교표 제공.
+2. **피벗 대안 A: RealGrid 2 행 그룹핑 & 소계 (`/pivot-alt-a`)**:
+   - 추가 라이선스 없는 **RealGrid 2 기본 기능** 활용.
+   - 상단 `groupingPanel`을 통한 1~3단계 동적 행 그룹핑, 부서/직급별 소계/합계(`groupFooter`), 전체 총계(`columnFooter`) 및 접기/펴기.
+3. **피벗 대안 B: 동적 교차표 Matrix (`/pivot-alt-b`)**:
+   - 행 축 / 열 축 / 집계 대상을 선택하면 원본 Flat JSON을 가로/세로 매트릭스로 변환하는 **`pivotUtil.js`** 피벗 엔진 연동.
+   - RealGrid 동적 컬럼(Dynamic Columns) 및 다차원 헤더 바인딩.
+
+### 2. 그리드 기초 및 공통 컴포넌트 샘플
+- **RealGridCommonJs**: Vue 3에서 RealGrid 2 인스턴스를 탈출구(Escape Hatch)로 직접 제어할 수 있는 고성능 공통 래퍼 컴포넌트 (`src/components/RealGridCommonJs.vue`).
+- **JqxGrid 샘플**: 기존 JqWidgets Grid 샘플 통합.
+
+---
+
+## ⚡ 빠른 시작 (Quick Start)
+
+이 프로젝트는 **Volta**로 Node와 npm 버전을 고정하여 개발 환경의 일관성을 보장합니다.
 
 ```bash
-wget -qO- https://get.volta.sh | bash
-# 설치 후 새 터미널 열기
-```
+# 1. 의존성 패키지 설치
+npm install
 
-### 2) 프로젝트 실행
-
-```bash
-# 의존성 설치
-npm i
-
-# 샘플 데이터 생성 (100명, 시드 42)
+# 2. 목업 데이터 생성 (public/db.json)
 npm run make:db
 
-# 개발서버 실행
+# 3. 개발 서버 실행
 npm run dev
 ```
 
+---
+
 ## 📁 프로젝트 구조
-
-### 아키텍처 개요
-
-```
-Vue Router Children 방식 사용
-App.vue → MainLayout → 각 페이지들
-```
-
-### 폴더 구조
 
 ```
 src/
-├── App.vue                      # 🎯 라우터 + 페이지 전환 애니메이션
-│
-├── layouts/                     # 📐 레이아웃 컴포넌트
-│   └── MainLayout.vue          # Header + Main + Footer 구조
-│
 ├── pages/                       # 📄 페이지 컴포넌트
+│   ├── RealGridPage.vue        # RealGrid 2 기본 샘플
+│   ├── RealGridVuePage.vue     # RealGrid-Vue 래퍼 샘플
+│   ├── PivotAltAPage.vue       # [NEW] 피벗 대안 A (행 그룹핑&소계)
+│   ├── PivotAltBPage.vue       # [NEW] 피벗 대안 B (동적 교차표 Matrix)
+│   ├── RealPivotPage.vue       # [NEW] RealPivot 체험 및 가이드
 │   ├── UserPage.vue            # 사용자 관리 페이지
-│   ├── UserSearGridPage.vue    # 사용자 검색 그리드 페이지
 │   └── JqxGridPage.vue         # JqxGrid 샘플 페이지
 │
-├── components/                  # 🧩 재사용 컴포넌트
-│   ├── NavBar.vue              # 네비게이션 바 (반응형)
-│   ├── UserPopup.vue           # 사용자 선택 모달
-│   ├── SelectedUsers.vue       # 선택된 사용자 목록
-│   ├── SearchGrid.vue          # 검색 그리드
-│   ├── PagedList.vue           # 페이지네이션
-│   └── JqxCustomeGrid.vue      # JqxGrid 래퍼
+├── components/                  # 🧩 공통 컴포넌트
+│   ├── RealGridCommonJs.vue    # RealGrid 2 공통 래퍼 컴포넌트
+│   └── NavBar.vue              # 피벗 메뉴가 통합된 반응형 네비게이션
 │
 ├── utils/                       # 🛠️ 유틸리티
-│   ├── showPop.js              # 모달 관리 시스템
-│   ├── generateMockUsers.js    # 목업 데이터 생성
-│   └── toastUtil.js            # 토스트 알림
-│
-├── assets/                      # 🎨 정적 자원
-│   └── styles/
-│       └── transitions.css     # 페이지 전환 애니메이션
+│   ├── pivotUtil.js            # [NEW] Raw Data -> Matrix Pivot 변환 엔진
+│   ├── showPop.js              # 드래그 가능 모달 시스템
+│   └── toastUtil.js            # 토스트 알림 유틸
 │
 └── router/                      # 🛣️ 라우팅
-    └── index.js                # Vue Router 설정
+    └── index.js                # Vue Router (피벗 3종 라우트 등록)
 ```
 
-## 🏗️ 핵심 아키텍처
-
-### 1. Layout System (Children 방식)
-
-```javascript
-// router/index.js
-{
-  path: '/',
-  component: MainLayout,           // 공통 레이아웃
-  children: [
-    { path: '', component: UserPage },
-    { path: 'search-grid', component: UserSearGridPage },
-    { path: 'jqx-grid', component: JqxGridPage }
-  ]
-}
-```
-
-### 2. Modal Management System
-
-```javascript
-// 3가지 사용 방식 제공
-import { openUserPopup } from '@/utils/showPop.js'
-
-// 방식 1: 헬퍼 함수 (추천)
-const users = await openUserPopup()
-
-// 방식 2: 직접 호출
-const users = await show(UserPopup, params, options)
-
-// 방식 3: 플러그인 (전역)
-const users = await this.$modal.show(UserPopup, params)
-```
-
-### 3. Component Features
-
-- **드래그 가능한 모달**: showPop.js에서 중앙 관리
-- **반응형 네비게이션**: 데스크톱(드롭다운) + 모바일(오프캔버스)
-- **페이지네이션**: 좌측 목록 + 우측 선택 목록 각각 독립적
-- **정렬/필터링**: 클라이언트 사이드 처리
-
-## 🎨 UI/UX Features
-
-### 페이지 전환 애니메이션
-
-```css
-/* transitions.css에서 관리 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s;
-}
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.3s;
-}
-.scale-enter-active,
-.scale-leave-active {
-  transition: all 0.3s;
-}
-```
-
-### 반응형 디자인
-
-- **Desktop**: Bootstrap 드롭다운 메뉴
-- **Mobile**: Bootstrap 오프캔버스 메뉴
-- **Grid**: Bootstrap responsive classes 활용
+---
 
 ## 🔧 기술 스택
 
-- **Frontend**: Vue 3 (Options API)
-- **UI Framework**: Bootstrap 5
-- **Grid Component**: JqWidgets
-- **Router**: Vue Router 4
+- **Frontend Framework**: Vue 3 (Options API)
+- **Grid Solution**: RealGrid 2 (`realgrid` ^2.9.7), `realgrid-vue` (^0.9.8), RealPivot (Simulated)
+- **UI Framework**: Bootstrap 5 + Bootstrap Icons
 - **Build Tool**: Vite
-- **Package Manager**: npm
-- **Runtime**: Node.js (Volta 관리)
+- **Runtime**: Node.js v22.19.0 (Volta)
 
-## 📝 주요 기능
+---
 
-1. **사용자 관리**: 목록 조회, 선택, 이동 기능
-2. **모달 시스템**: 드래그 가능한 사용자 선택 팝업
-3. **검색/정렬**: 실시간 필터링 및 정렬
-4. **페이지네이션**: 대량 데이터 처리
-5. **반응형 UI**: 모바일/데스크톱 최적화
+## 📄 라이선스 및 참고사항
 
-## 🗂️ 데이터 관리
-
-```bash
-# 목업 데이터 생성
-npm run make:db
-
-# 생성된 파일
-public/db.json  # 100명의 가상 사용자 데이터
-```
-
-## 📄 라이센스
-
-이 프로젝트는 학습 및 포트폴리오 목적으로 제작되었습니다.
-
-### 주의사항
-
-- **JqWidgets**: 이 프로젝트에서 사용된 JqWidgets는 상용 라이선스가 필요합니다
-  - 비상업적 용도(학습/테스트)로만 무료 사용 가능
-  - 상업적 사용 시 라이선스 구매 필요: https://www.jqwidgets.com/license/
-- 기타 오픈소스 라이브러리는 각각의 라이선스를 따릅니다
+- **RealGrid 2**: `src/main.js`에 전역 라이선스 키가 등록되어 있습니다.
+- **RealPivot**: 엑셀 피벗과 100% 동일한 드래그앤드롭 사용 시 별도 라이선스가 필요하며, 없을 경우 본 프로젝트의 **대안 A(그룹핑)** 또는 **대안 B(동적 교차표)** 방식을 권장합니다.

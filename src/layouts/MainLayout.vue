@@ -31,10 +31,10 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-6">
-            <small class="text-muted"> © 2025 userPopExample. All rights reserved. </small>
+            <small class="text-muted"> © 2026 NexHub Grid Studio. All rights reserved. </small>
           </div>
           <div class="col-md-6 text-md-end">
-            <small class="text-muted"> Vue 3 + Bootstrap 5 + JqWidgets </small>
+            <small class="text-muted"> Vue 3 + RealGrid 2 + RealPivot + Bootstrap 5 </small>
           </div>
         </div>
       </div>
