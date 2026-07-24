@@ -1,34 +1,16 @@
-# NexHubStudio - Full Stack Application
+# 🚀 NexHubStudio - Full Stack Application
 
-Vue 3 + Express.js를 활용한 사용자 관리 시스템
+Vue 3 + Express.js 기반의 사용자 관리 및 **엔터프라이즈 그리드 (RealGrid 2 / JqWidgets) & 피벗(Pivot) 솔루션 비교 풀스택 시스템**입니다.
 
-## 🏗️ 프로젝트 구조
-
-```
-NexHubStudio/
-├── frontend/          # Vue 3 프론트엔드
-│   ├── src/
-│   ├── public/
-│   ├── package.json
-│   └── vite.config.js
-├── backend/           # Express.js 백엔드
-│   ├── src/
-│   ├── package.json
-│   └── .env
-└── README.md
-```
-
-# NexHubStudio - Full Stack Application
-
-Vue 3 + Express.js를 활용한 사용자 관리 시스템
+---
 
 ## 🏗️ 프로젝트 구조
 
 ```
 NexHubStudio/
-├── frontend/          # 🎨 Vue 3 프론트엔드
+├── frontend/          # 🎨 Vue 3 프론트엔드 (RealGrid 2 + RealPivot + JqWidgets)
 │   ├── src/          # 소스 코드
-│   ├── public/       # 정적 파일
+│   ├── public/       # 정적 파일 및 목업 DB
 │   └── README.md     # Frontend 개발 가이드
 ├── backend/           # 🚀 Express.js 백엔드
 │   ├── src/          # API 서버 코드
@@ -36,10 +18,21 @@ NexHubStudio/
 └── README.md         # 프로젝트 개요 (현재 파일)
 ```
 
-## 🚀 빠른 시작
+---
+
+## 📌 주요 기능 및 피벗 예제 3종
+
+본 프로젝트는 RealGrid 2 구축 환경에서 엑셀 피벗(Pivot Table) 요구사항을 해결하기 위한 **3가지 구현 방식**을 실시간 비교 및 검증할 수 있는 샘플 화면을 포함하고 있습니다.
+
+1. **RealPivot 체험 및 가이드 (`/real-pivot`)**: 엑셀 피벗과 동일한 행/열/값 드롭존 필드 드래그 앤 드롭 시뮬레이션 UI.
+2. **피벗 대안 A: RealGrid 2 행 그룹핑 & 소계 (`/pivot-alt-a`)**: 추가 라이선스 없는 **RealGrid 2 기본 기능**을 활용한 1~3단계 동적 행 그룹핑 및 소계/합계.
+3. **피벗 대안 B: 동적 교차표 Matrix (`/pivot-alt-b`)**: raw 데이터를 가로/세로 매트릭스로 동적 변환하는 피벗 엔진 유틸리티 연동.
+
+---
+
+## 🚀 빠른 시작 (Quick Start)
 
 ### 1. Frontend 실행
-
 ```bash
 cd frontend
 npm install
@@ -47,7 +40,6 @@ npm run dev           # http://localhost:5173
 ```
 
 ### 2. Backend 실행
-
 ```bash
 cd backend
 npm install
@@ -55,229 +47,31 @@ cp .env.example .env  # 환경 변수 설정
 npm run dev          # http://localhost:3001
 ```
 
+---
+
 ## 🛠️ 기술 스택
 
-| Frontend     | Backend      | Database |
-| ------------ | ------------ | -------- |
-| Vue 3        | Express.js   | MySQL    |
-| Vue Router 4 | JWT 인증     |          |
-| Bootstrap 5  | bcrypt       |          |
-| JqWidgets    | helmet, cors |          |
-| Vite         | nodemon      |          |
+| 구분 | 주요 기술 |
+| :--- | :--- |
+| **Frontend** | Vue 3, RealGrid 2, `realgrid-vue`, JqWidgets (`jqwidgets-scripts`), Vue Router 4, Bootstrap 5, Vite |
+| **Backend** | Express.js, JWT 인증, bcrypt, helmet, cors |
+| **Runtime / Tools** | Node.js v22.19.0 (Volta) |
 
-## 📋 개발 진행 상황
+---
 
-### ✅ 완료된 기능
+## 📄 상용 라이브러리 저작권 및 라이선스 고지 (License & Copyright Notice)
 
-- [x] 사용자 관리 UI (Vue 3)
-- [x] 반응형 디자인 (Bootstrap 5)
-- [x] 모달 시스템 (드래그 지원)
-- [x] 페이지 전환 애니메이션
-- [x] 모바일 네비게이션 (햄버거 메뉴)
-- [x] Backend 프로젝트 구조
+본 프로젝트는 **기능 비교, 기술 검토(PoC) 및 학습/테스트 목적**으로 제작되었습니다. 프로젝트에 사용된 상용 웹 그리드 솔루션의 소유권 및 라이선스 정책은 다음과 같습니다.
 
-### 🚧 진행 중인 작업
+### 1. RealGrid 2 & RealPivot
+- **저작권자**: (주)우리테크 (WooriTech Co., Ltd.)
+- **사용 정책**: 본 프로젝트의 RealGrid 및 RealPivot 관련 기능은 개발자 평가/학습용 라이선스 환경(`localhost`)에서 구동됩니다.
+- **주의 사항**: 본 프로젝트를 상업적 목적의 실제 서비스로 배포하거나 운영할 경우, 반드시 [(주)우리테크 공식 웹사이트](https://www.realgrid.com/)를 통해 정식 상용 라이선스를 구득해야 합니다.
 
-- [ ] JWT 인증/인가 구현
-- [ ] 사용자 CRUD API
-- [ ] 메뉴 권한 관리
-- [ ] 데이터베이스 연동
-- [ ] Frontend-Backend 통합
+### 2. JqWidgets (jqxGrid)
+- **저작권자**: JQWidgets Ltd.
+- **사용 정책**: JqWidgets는 비상업적(Non-Commercial), 개인 학습 및 사전 평가 목적으로 무료 사용이 가능합니다.
+- **주의 사항**: 상업적 애플리케이션에 탑재하여 배포할 경우 [JQWidgets Ltd. 라이선스 정책](https://www.jqwidgets.com/license/)에 따라 상용 라이선스를 구매해야 합니다.
 
-## 🔧 개발 환경 정보
-
-### 포트 설정
-
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:3001
-
-### API 엔드포인트
-
-- `GET /api/health` - 서버 상태 확인
-- `POST /api/auth/login` - 로그인
-- `GET /api/users` - 사용자 목록
-- `GET /api/menu` - 메뉴 데이터
-
-## 📚 상세 문서
-
-- **Frontend 가이드**: [`frontend/README.md`](./frontend/README.md)
-- **Backend API 문서**: [`backend/README.md`](./backend/README.md)
-
-## 🌐 라이브 데모
-
-- **Frontend**: [배포 URL 예정]
-- **API 문서**: [Swagger 문서 예정]
-
-## 🤝 기여 가이드
-
-1. Feature 브랜치 생성: `git checkout -b feature/new-feature`
-2. 변경사항 커밋: `git commit -m "feat: add new feature"`
-3. 브랜치 푸시: `git push origin feature/new-feature`
-4. Pull Request 생성
-
-## 🚀 빠른 시작
-
-이 프로젝트는 **Volta**로 Node와 npm 버전을 고정합니다. 로컬/CI/배포 환경 어디서든 동일한 런타임을 보장합니다.
-
-이 프로젝트는 **Volta**로 Node와 npm 버전을 고정합니다.
-
-**설치 (Window / Linux)**
-
-```bash
-wget -qO- https://get.volta.sh | bash
-# 설치 후 새 터미널 열기
-```
-
-### 2) 프로젝트 실행
-
-```bash
-# 의존성 설치
-npm i
-
-# 샘플 데이터 생성 (100명, 시드 42)
-npm run dev
-```
-
-## 📁 프로젝트 구조
-
-### 아키텍처 개요
-
-```
-Vue Router Children 방식 사용
-App.vue → MainLayout → 각 페이지들
-```
-
-### 폴더 구조
-
-```
-src/
-├── App.vue                      # 🎯 라우터 + 페이지 전환 애니메이션
-│
-├── layouts/                     # 📐 레이아웃 컴포넌트
-│   └── MainLayout.vue          # Header + Main + Footer 구조
-│
-├── pages/                       # 📄 페이지 컴포넌트
-│   ├── UserPage.vue            # 사용자 관리 페이지
-│   ├── UserSearGridPage.vue    # 사용자 검색 그리드 페이지
-│   └── JqxGridPage.vue         # JqxGrid 샘플 페이지
-│
-├── components/                  # 🧩 재사용 컴포넌트
-│   ├── NavBar.vue              # 네비게이션 바 (반응형)
-│   ├── UserPopup.vue           # 사용자 선택 모달
-│   ├── SelectedUsers.vue       # 선택된 사용자 목록
-│   ├── SearchGrid.vue          # 검색 그리드
-│   ├── PagedList.vue           # 페이지네이션
-│   └── JqxCustomeGrid.vue      # JqxGrid 래퍼
-│
-├── utils/                       # 🛠️ 유틸리티
-│   ├── showPop.js              # 모달 관리 시스템
-│   └── toastUtil.js            # 토스트 알림
-│
-├── assets/                      # 🎨 정적 자원
-│   └── styles/
-│       └── transitions.css     # 페이지 전환 애니메이션
-│
-└── router/                      # 🛣️ 라우팅
-    └── index.js                # Vue Router 설정
-```
-
-## 🏗️ 핵심 아키텍처
-
-### 1. Layout System (Children 방식)
-
-```javascript
-// router/index.js
-{
-  path: '/',
-  component: MainLayout,           // 공통 레이아웃
-  children: [
-    { path: '', component: UserPage },
-    { path: 'search-grid', component: UserSearGridPage },
-    { path: 'jqx-grid', component: JqxGridPage }
-  ]
-}
-```
-
-### 2. Modal Management System
-
-```javascript
-// 3가지 사용 방식 제공
-import { openUserPopup } from '@/utils/showPop.js'
-
-// 방식 1: 헬퍼 함수 (추천)
-const users = await openUserPopup()
-
-// 방식 2: 직접 호출
-const users = await show(UserPopup, params, options)
-
-// 방식 3: 플러그인 (전역)
-const users = await this.$modal.show(UserPopup, params)
-```
-
-### 3. Component Features
-
-- **드래그 가능한 모달**: showPop.js에서 중앙 관리
-- **반응형 네비게이션**: 데스크톱(드롭다운) + 모바일(오프캔버스)
-- **페이지네이션**: 좌측 목록 + 우측 선택 목록 각각 독립적
-- **정렬/필터링**: 클라이언트 사이드 처리
-
-## 🎨 UI/UX Features
-
-### 페이지 전환 애니메이션
-
-```css
-/* transitions.css에서 관리 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s;
-}
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.3s;
-}
-.scale-enter-active,
-.scale-leave-active {
-  transition: all 0.3s;
-}
-```
-
-### 반응형 디자인
-
-- **Desktop**: Bootstrap 드롭다운 메뉴
-- **Mobile**: Bootstrap 오프캔버스 메뉴
-- **Grid**: Bootstrap responsive classes 활용
-
-## 🔧 기술 스택
-
-- **Frontend**: Vue 3 (Options API)
-- **UI Framework**: Bootstrap 5
-- **Grid Component**: JqWidgets
-- **Router**: Vue Router 4
-- **Build Tool**: Vite
-- **Package Manager**: npm
-- **Runtime**: Node.js (Volta 관리)
-
-## 📝 주요 기능
-
-1. **사용자 관리**: 목록 조회, 선택, 이동 기능
-2. **모달 시스템**: 드래그 가능한 사용자 선택 팝업
-3. **검색/정렬**: 실시간 필터링 및 정렬
-4. **페이지네이션**: 대량 데이터 처리
-5. **반응형 UI**: 모바일/데스크톱 최적화
-
-## 🗂️ 데이터 관리
-
-```bash
-# 목업 데이터 생성
-```
-
-## 📄 라이센스
-
-이 프로젝트는 학습 및 포트폴리오 목적으로 제작되었습니다.
-
-### 주의사항
-
-- **JqWidgets**: 이 프로젝트에서 사용된 JqWidgets는 상용 라이선스가 필요합니다
-  - 비상업적 용도(학습/테스트)로만 무료 사용 가능
-  - 상업적 사용 시 라이선스 구매 필요: https://www.jqwidgets.com/license/
-- 기타 오픈소스 라이브러리는 각각의 라이선스를 따릅니다
+### 3. Open Source Stack
+- Vue 3, Express.js, Bootstrap 5, Vite, Vue Router 등은 **MIT License**를 준수합니다.
