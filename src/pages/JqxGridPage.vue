@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="github-page">
     <div class="page-header">
       <h2 class="page-title">JQWidgets 그리드 예제</h2>
@@ -11,15 +11,18 @@
     </div>
 
     <!-- 액션 버튼 -->
-    <div class="action-bar">
-      <button class="github-btn github-btn-primary" @click="add">
-        <i class="bi bi-plus-circle"></i> 추가
+    <div class="action-bar d-flex align-items-center gap-1.5 justify-content-end mb-3">
+      <button class="btn-compact btn-compact-secondary" title="새 행 추가" @click="add">
+        <i class="bi bi-plus-lg text-success me-0.5"></i>
+        <span>추가</span>
       </button>
-      <button class="github-btn github-btn-danger" @click="deleteSelected">
-        <i class="bi bi-trash"></i> 삭제
+      <button class="btn-compact btn-compact-secondary" title="선택 행 삭제" @click="deleteSelected">
+        <i class="bi bi-dash-lg text-danger me-0.5"></i>
+        <span>삭제</span>
       </button>
-      <button class="github-btn github-btn-success" @click="saveData">
-        <i class="bi bi-save"></i> 저장
+      <button class="btn-compact btn-compact-save ms-1" title="변경사항 저장" @click="saveData">
+        <i class="bi bi-check2 me-0.5"></i>
+        <span>저장</span>
       </button>
     </div>
 

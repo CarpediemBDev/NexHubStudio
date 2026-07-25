@@ -11,18 +11,31 @@
       <div class="card-body p-2.5 d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">바닐라 JS 래퍼</span>
-          <span class="text-muted small">LocalDataProvider & GridView 바닐라 제어</span>
+          <!-- Quick Search Bar -->
+          <QuickSearchBar
+            :searchResult="searchResult"
+            @search="onGridSearch"
+            @clear="searchResult = { count: 0, current: 0 }"
+          />
         </div>
         <div class="d-flex align-items-center gap-1.5 ms-auto">
-          <button class="btn-compact btn-compact-secondary" @click="addRow">
-            <i class="bi bi-plus-lg text-success"></i>
+          <button class="btn-compact btn-compact-secondary" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
+            <i class="bi bi-eye text-primary me-0.5"></i>
+            <span>컬럼</span>
+          </button>
+          <button class="btn-compact btn-compact-secondary" title="엑셀 파일 내보내기" @click="exportExcel">
+            <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
+            <span>엑셀</span>
+          </button>
+          <button class="btn-compact btn-compact-secondary" title="새 행 추가" @click="addRow">
+            <i class="bi bi-plus-lg text-success me-0.5"></i>
             <span>추가</span>
           </button>
-          <button class="btn-compact btn-compact-secondary" @click="deleteChecked">
-            <i class="bi bi-dash-lg text-danger"></i>
+          <button class="btn-compact btn-compact-secondary" title="선택 행 삭제" @click="deleteChecked">
+            <i class="bi bi-dash-lg text-danger me-0.5"></i>
             <span>삭제</span>
           </button>
-          <button class="btn-compact btn-compact-save ms-1" @click="saveData">
+          <button class="btn-compact btn-compact-save ms-1" title="변경사항 저장" @click="saveData">
             <i class="bi bi-check2 me-0.5"></i>
             <span>저장</span>
           </button>
@@ -44,20 +57,35 @@
         />
       </div>
     </div>
+
+    <!-- Column Picker Modal -->
+    <ColumnPickerModal
+      :isOpen="isColumnPickerOpen"
+      :columns="columnPickerCols"
+      @close="isColumnPickerOpen = false"
+      @toggle-column="onToggleColumn"
+    />
   </div>
 </template>
 
 <script>
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
+import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
+import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'RealGridPage',
   components: {
-    RealGridCommonJs
+    RealGridCommonJs,
+    ColumnPickerModal,
+    QuickSearchBar
   },
   data() {
     return {
+      searchResult: { count: 0, current: 0 },
+      isColumnPickerOpen: false,
+      columnPickerCols: [],
       users: [],
       gridFields: [
         { fieldName: 'userId', dataType: 'text' },
@@ -210,6 +238,31 @@ export default {
       )
 
       this.$refs.realgridComp.clearRowStates()
+    },
+
+    exportExcel() {
+      if (this.$refs.realgridComp) {
+        this.$refs.realgridComp.exportToExcel('RealGrid_User_List.xlsx')
+      }
+    },
+
+    openColumnPicker() {
+      if (this.$refs.realgridComp) {
+        this.columnPickerCols = this.$refs.realgridComp.getColumnsInfo()
+        this.isColumnPickerOpen = true
+      }
+    },
+
+    onToggleColumn({ name, visible }) {
+      if (this.$refs.realgridComp) {
+        this.$refs.realgridComp.setColumnVisible(name, visible)
+      }
+    },
+
+    onGridSearch({ query, direction }) {
+      if (this.$refs.realgridComp) {
+        this.searchResult = this.$refs.realgridComp.searchGrid(query, direction)
+      }
     }
   }
 }

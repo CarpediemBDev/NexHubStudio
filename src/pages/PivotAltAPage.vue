@@ -11,11 +11,11 @@
       </p>
     </div>
 
-    <!-- Unified Management Toolbar (B2B Compact Enterprise Style - 100% 원본 스펙) -->
+    <!-- Unified Management Toolbar (Confirmed Model 2: Smart Search Popover & Role-based Clean Division) -->
     <div class="card bg-light border-0 mb-3 shadow-sm">
       <div class="card-body p-2.5 d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <!-- Left Side: View Management & Saved Views -->
-        <div class="d-flex align-items-center gap-2 flex-wrap">
+        <!-- Left Group: View & Layout Tools -->
+        <div class="d-flex align-items-center gap-1.5 flex-wrap">
           <!-- Reset to Flat Raw Data -->
           <button
             class="btn-compact"
@@ -26,24 +26,50 @@
             <span>원본 보기</span>
           </button>
 
+          <!-- Integrated Preset Dropdown -->
+          <div class="dropdown">
+            <button
+              class="btn-compact dropdown-toggle"
+              :class="activeGroup !== 'none' && activeGroup.startsWith('preset_') ? 'btn-compact-preset-active' : 'btn-compact-secondary'"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="bi bi-lightning-charge-fill text-warning me-0.5"></i>
+              <span>{{ activePresetName }}</span>
+            </button>
+            <ul class="dropdown-menu shadow-sm fs-7">
+              <li><h6 class="dropdown-header py-1">⚡ 빠른 프리셋 선택</h6></li>
+              <li v-for="preset in quickPresets" :key="preset.id">
+                <button
+                  class="dropdown-item d-flex align-items-center justify-content-between py-1.5"
+                  :class="{ active: activeGroup === preset.id }"
+                  @click="applyView(preset)"
+                >
+                  <span><i :class="['bi', preset.icon, 'me-1.5']"></i>{{ preset.name }}</span>
+                  <i class="bi bi-check2 ms-2" v-if="activeGroup === preset.id"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+
           <!-- Save Current View Button -->
-          <button class="btn-compact btn-compact-secondary" @click="saveCurrentView">
-            <i class="bi bi-bookmark-plus text-primary me-0.5"></i>
-            <span>현재 뷰 저장</span>
+          <button class="btn-compact btn-compact-secondary" title="현재 뷰 상태 저장" @click="saveCurrentView">
+            <i class="bi bi-bookmark-plus text-warning me-0.5"></i>
+            <span>뷰 저장</span>
           </button>
 
-          <!-- Dynamic User Saved Views Chips -->
-          <div v-if="userSavedViews.length > 0" class="d-flex align-items-center gap-1.5 ms-2 ps-2 border-start">
-            <span class="fw-semibold text-secondary small me-1"><i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:</span>
+          <!-- User Saved Views Badge Chips -->
+          <div v-if="userSavedViews.length > 0" class="d-flex align-items-center gap-1.5 ms-1 ps-2 border-start">
+            <span class="fw-semibold text-secondary small me-1" style="font-size: 12px;"><i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:</span>
             <div
               v-for="view in userSavedViews"
               :key="view.id"
-              class="badge py-1.5 px-2.5 border cursor-pointer d-flex align-items-center gap-1.5 transition-all fw-normal"
+              class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal"
               :class="activeGroup === view.id ? 'bg-primary text-white shadow-sm' : 'bg-white text-dark border-secondary-subtle'"
               @click="applyView(view)"
             >
               <span>{{ view.name }}</span>
-              <small :class="activeGroup === view.id ? 'text-white-50' : 'text-muted'">({{ getFieldLabelsText(view.fields) }})</small>
               <i
                 class="bi bi-x-circle text-danger ms-1 opacity-75"
                 title="삭제"
@@ -53,32 +79,51 @@
           </div>
         </div>
 
-        <!-- Right Side (Far Right): B2B Compact CRUD Action Buttons -->
+        <!-- Right Group: Smart Expandable Search & Data Action Buttons -->
         <div class="d-flex align-items-center gap-1.5 ms-auto">
-          <!-- 추가 (Option B: Grouped state disables CRUD) -->
+          <!-- Smart Expandable Search Bar -->
+          <QuickSearchBar
+            :searchResult="searchResult"
+            @search="onGridSearch"
+            @clear="searchResult = { count: 0, current: 0 }"
+          />
+
+          <!-- Column Picker -->
+          <button class="btn-compact btn-compact-secondary" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
+            <i class="bi bi-eye text-primary me-0.5"></i>
+            <span>컬럼</span>
+          </button>
+
+          <!-- Excel Export -->
+          <button class="btn-compact btn-compact-secondary" title="엑셀 파일 내보내기" @click="exportExcel">
+            <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
+            <span>엑셀</span>
+          </button>
+
+          <!-- 추가 -->
           <button
             class="btn-compact btn-compact-secondary"
             :disabled="isGrouped"
             :title="isGrouped ? '그룹핑(피벗) 상태에서는 원본 보기에서만 데이터 추가가 가능합니다' : '새 행 추가'"
             @click="addRow"
           >
-            <i class="bi bi-plus-lg text-success"></i>
+            <i class="bi bi-plus-lg text-success me-0.5"></i>
             <span>추가</span>
           </button>
 
-          <!-- 삭제 (Option B: Grouped state disables CRUD) -->
+          <!-- 삭제 -->
           <button
             class="btn-compact btn-compact-secondary"
             :disabled="isGrouped"
             :title="isGrouped ? '그룹핑(피벗) 상태에서는 원본 보기에서만 데이터 삭제가 가능합니다' : '선택 행 삭제'"
             @click="deleteChecked"
           >
-            <i class="bi bi-dash-lg text-danger"></i>
+            <i class="bi bi-dash-lg text-danger me-0.5"></i>
             <span>삭제</span>
           </button>
 
           <!-- 저장 -->
-          <button class="btn-compact btn-compact-save ms-1" @click="saveData">
+          <button class="btn-compact btn-compact-save ms-1" @click="saveData" title="변경사항 저장">
             <i class="bi bi-check2 me-0.5"></i>
             <span>저장</span>
           </button>
@@ -103,16 +148,30 @@
         />
       </div>
     </div>
+
+    <!-- Column Picker Modal -->
+    <ColumnPickerModal
+      :isOpen="isColumnPickerOpen"
+      :columns="columnPickerCols"
+      @close="isColumnPickerOpen = false"
+      @toggle-column="onToggleColumn"
+    />
   </div>
 </template>
 
 <script>
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
+import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
+import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'PivotAltAPage',
-  components: { RealGridCommonJs },
+  components: {
+    RealGridCommonJs,
+    ColumnPickerModal,
+    QuickSearchBar
+  },
   props: {
     initialGroup: {
       type: Array,
@@ -121,7 +180,16 @@ export default {
   },
   data() {
     return {
+      searchResult: { count: 0, current: 0 },
+      isColumnPickerOpen: false,
+      columnPickerCols: [],
       activeGroup: 'none',
+      quickPresets: [
+        { id: 'preset_dept', name: '부서별', fields: ['dept'], icon: 'bi-building' },
+        { id: 'preset_dept_role', name: '부서 ➔ 직급별', fields: ['dept', 'role'], icon: 'bi-diagram-3' },
+        { id: 'preset_region_dept', name: '지역 ➔ 부서별', fields: ['region', 'dept'], icon: 'bi-geo-alt' },
+        { id: 'preset_region_dept_role', name: '지역 ➔ 부서 ➔ 직급별', fields: ['region', 'dept', 'role'], icon: 'bi-layers' }
+      ],
       userSavedViews: [],
       gridFields: [
         { fieldName: 'userId', dataType: 'text' },
@@ -189,6 +257,13 @@ export default {
   computed: {
     isGrouped() {
       return this.activeGroup !== 'none'
+    },
+    activePresetName() {
+      const found = this.quickPresets.find(p => p.id === this.activeGroup)
+      if (found) return found.name
+      const saved = this.userSavedViews.find(v => v.id === this.activeGroup)
+      if (saved) return saved.name
+      return '빠른 프리셋'
     }
   },
   mounted() {
@@ -411,6 +486,31 @@ export default {
         this.$refs.realgridComp.clearRowStates()
       }
       showToast('서버 저장 완료 및 행 상태(C,U,D)가 클리어되었습니다.', { type: 'success' })
+    },
+
+    exportExcel() {
+      if (this.$refs.realgridComp) {
+        this.$refs.realgridComp.exportToExcel('Pivot_AltA_Group_Export.xlsx')
+      }
+    },
+
+    openColumnPicker() {
+      if (this.$refs.realgridComp) {
+        this.columnPickerCols = this.$refs.realgridComp.getColumnsInfo()
+        this.isColumnPickerOpen = true
+      }
+    },
+
+    onToggleColumn({ name, visible }) {
+      if (this.$refs.realgridComp) {
+        this.$refs.realgridComp.setColumnVisible(name, visible)
+      }
+    },
+
+    onGridSearch({ query, direction, isTyping }) {
+      if (this.$refs.realgridComp) {
+        this.searchResult = this.$refs.realgridComp.searchGrid(query, direction, isTyping)
+      }
     }
   }
 }
@@ -452,6 +552,13 @@ export default {
   border: 1px solid #1f2937;
   color: #ffffff;
 }
+.btn-compact-preset-active {
+  background-color: #2563eb;
+  border: 1px solid #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.25);
+}
 .btn-compact-save {
   background-color: #2563eb;
   border: 1px solid #2563eb;
@@ -461,6 +568,28 @@ export default {
 .btn-compact-save:hover {
   background-color: #1d4ed8;
   border-color: #1d4ed8;
+}
+.btn-segmented {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 4px 11px;
+  transition: all 0.15s ease-in-out;
+}
+.btn-segmented-outline {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  color: #4b5563;
+}
+.btn-segmented-outline:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+.btn-segmented-active {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 .cursor-pointer {
   cursor: pointer;
