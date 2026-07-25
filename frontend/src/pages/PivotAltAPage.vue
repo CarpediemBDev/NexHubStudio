@@ -267,11 +267,24 @@ export default {
     },
 
     expandAll() {
-      if (this.gridView) this.gridView.expandGroup(null, true, true)
+      if (!this.gridView) return
+      // 2회 멀티패스 순회: 완전히 싹 접힌 상태에서도 1차/2차 모든 그룹을 100% 쫙 펼칩니다
+      for (let pass = 0; pass < 2; pass++) {
+        const count = this.gridView.getItemCount()
+        for (let i = 0; i < count; i++) {
+          try { this.gridView.expandGroup(i, true, true) } catch (e) {}
+        }
+      }
+      showToast('모든 부서 그룹 행이 쫙 펼쳐졌습니다.', { type: 'info' })
     },
 
     collapseAll() {
-      if (this.gridView) this.gridView.collapseGroup(null, true)
+      if (!this.gridView) return
+      const count = this.gridView.getItemCount()
+      for (let i = count - 1; i >= 0; i--) {
+        try { this.gridView.collapseGroup(i, true) } catch (e) {}
+      }
+      showToast('모든 그룹 행이 싹 접혔습니다 (소계 요약 보기).', { type: 'info' })
     },
 
     getHeaderText(colName) {
