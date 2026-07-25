@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="border rounded-3">
     <div class="p-2 border-bottom d-flex justify-content-between align-items-center">
       <small class="text-muted">선택 {{ users.length }}명</small>

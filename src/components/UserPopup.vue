@@ -1,4 +1,4 @@
-<!-- UserPopup.vue -->
+﻿<!-- UserPopup.vue -->
 <template>
   <div class="modal fade show" style="display: block" tabindex="-1" role="dialog" aria-modal="true">
     <div class="modal-dialog" ref="dlg" :style="dialogInlineStyle">
@@ -119,7 +119,7 @@
 <script>
 import SelectedUsers from './SelectedUsers.vue'
 import PagedList from './PagedList.vue'
-import { generateMockUsers } from '../utils/generateMockUsers.js'
+import http from '@/utils/http'
 
 export default {
   name: 'UserPopup',
@@ -127,6 +127,7 @@ export default {
   emits: ['close', 'confirm'],
   props: {
     preselectedIds: { type: Array, default: () => [] },
+    modalId: { type: String, default: '' },
 
     /* 사이즈/레이아웃 옵션 */
     maxWidth: { type: [Number, String], default: 960 },
@@ -145,7 +146,6 @@ export default {
       leftPageSize: 10,
       rightPage: 1,
       rightPageSize: 10,
-      loading: true,
     }
   },
   computed: {
@@ -235,18 +235,8 @@ export default {
   },
   methods: {
     async loadUsers() {
-      this.loading = true
-      try {
-        const res = await fetch(`${import.meta.env.BASE_URL}db.json`, { cache: 'no-store' })
-        if (!res.ok) throw new Error('db.json not found')
-        const json = await res.json()
-        this.users = Array.isArray(json) ? json : json.users || []
-      } catch (e) {
-        console.warn('[Popup] db.json 로드 실패 → 목업으로 대체', e)
-        this.users = generateMockUsers(100, { seed: 43 })
-      } finally {
-        this.loading = false
-      }
+      const res = await http.get('/users')
+      this.users = res.data ?? []
     },
 
     onClose() {
