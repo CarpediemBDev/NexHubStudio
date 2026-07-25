@@ -87,3 +87,6 @@ Thumbs.db
 *.sketch
 *.psd
 *.ai
+
+# Local JDK
+jdk21/

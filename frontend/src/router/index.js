@@ -15,6 +15,11 @@ import FileListPage from "../pages/FileListPage.vue";
 import EquipmentMonitorPage from "../pages/EquipmentMonitorPage.vue";
 import RequestWorkflowPage from "../pages/RequestWorkflowPage.vue";
 import WorkRequestFormPage from "../pages/WorkRequestFormPage.vue";
+import PivotAltAPage from "../pages/PivotAltAPage.vue";
+import PivotAltBPage from "../pages/PivotAltBPage.vue";
+import RealPivotPage from "../pages/RealPivotPage.vue";
+import RealGridPage from "../pages/RealGridPage.vue";
+import RealGridVuePage from "../pages/RealGridVuePage.vue";
 
 const routes = [
   {
@@ -93,6 +98,12 @@ const routes = [
         name: "업무 의뢰서",
         component: WorkRequestFormPage,
       },
+      // RealGrid & Pivot
+      { path: "real-grid", name: "RealGrid 샘플(JS)", component: RealGridPage },
+      { path: "real-grid-vue", name: "RealGrid-Vue 샘플(Vue3)", component: RealGridVuePage },
+      { path: "pivot-alt-a", name: "RealGrid Pivot A", component: PivotAltAPage },
+      { path: "pivot-alt-b", name: "RealGrid Pivot B", component: PivotAltBPage },
+      { path: "real-pivot", name: "RealGrid Pivot", component: RealPivotPage },
       // 샘플
       {
         path: "sample/barcode-equipment",

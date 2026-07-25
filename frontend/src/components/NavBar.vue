@@ -13,11 +13,11 @@
           >
             <i class="bi bi-arrow-left"></i>
           </button>
-          <span class="navbar-brand fw-semibold mb-0">NexHub Grid Studio</span>
+          <RouterLink to="/" class="navbar-brand fw-semibold mb-0 text-decoration-none">NexHub Grid Studio</RouterLink>
         </div>
 
         <!-- 데스크톱: 일반 브랜드 -->
-        <a class="navbar-brand fw-semibold d-none d-lg-block" href="#">NexHub Grid Studio</a>
+        <RouterLink to="/" class="navbar-brand fw-semibold d-none d-lg-block text-decoration-none">NexHub Grid Studio</RouterLink>
 
         <!-- 모바일: 햄버거 메뉴만 -->
         <button
@@ -148,32 +148,51 @@ export default {
       // 중간 '사용자 목록' 단계 없이 바로 라우트 연결
       menu: [
         {
-          label: '사용자 관리',
+          label: '사용자 & 배정 관리',
           children: [
-            { label: '사용자', to: '/' },
-            { label: '사용자(검색Grid)', to: '/search-grid' },
+            { label: '사용자 목록', to: '/users' },
+            { label: '사용자 (검색Grid)', to: '/search-grid' },
+            { label: '사용자 배정 (세로)', to: '/user-assignment-vertical' },
+            { label: '사용자 배정 (공통목록)', to: '/user-assignment-shared' },
+            { label: '사용자 배정 (신규)', to: '/user-assignment-shared-new' },
+          ],
+        },
+        {
+          label: '그리드 & 피벗 Studio',
+          children: [
+            { label: 'RealGrid (바닐라 JS형)', to: '/real-grid' },
+            { label: 'RealGrid (Vue3 Slot형)', to: '/real-grid-vue' },
+            { label: 'Pivot A (동적 행 그룹핑)', to: '/pivot-alt-a' },
+            { label: 'Pivot B (Matrix 교차표)', to: '/pivot-alt-b' },
+            { label: 'RealPivot (체험 가이드)', to: '/real-pivot' },
             { label: 'JqxGrid 샘플', to: '/jqx-grid' },
-            { label: 'RealGrid 샘플', to: '/real-grid' },
-            { label: 'RealGrid-Vue 샘플', to: '/real-grid-vue' },
-            { label: '그룹 관리' },
-            { label: '설정' },
           ],
         },
         {
-          label: '피벗 비교 예제',
+          label: '업무 & 설비 관리',
           children: [
-            { label: '1. RealPivot 체험', to: '/real-pivot' },
-            { label: '2. 대안 A (행 그룹핑&소계)', to: '/pivot-alt-a' },
-            { label: '3. 대안 B (동적 교차표)', to: '/pivot-alt-b' },
+            { label: '업무 의뢰', to: '/request-workflow' },
+            { label: '업무 의뢰서 작성', to: '/work-request-form' },
+            { label: '설비 지원 요청', to: '/equipment-support-request' },
+            { label: '설비 모니터링', to: '/equipment-monitor' },
           ],
         },
         {
-          label: '교육 관리',
-          children: [{ label: '강좌 목록' }, { label: '수강 현황' }, { label: '시험/평가' }],
+          label: '게시판 & 파일 관리',
+          children: [
+            { label: '게시글 목록', to: '/posts' },
+            { label: '게시글 작성', to: '/posts/write' },
+            { label: '파일 관리', to: '/files' },
+          ],
         },
         {
-          label: '시스템',
-          children: [{ label: '환경설정' }, { label: '공지사항' }],
+          label: '시스템 & 개발 가이드',
+          children: [
+            { label: '공통코드 그룹 관리', to: '/common-code-groups' },
+            { label: '공통 컴포넌트 가이드', to: '/component-guide' },
+            { label: '설비 바코드 샘플', to: '/sample/barcode-equipment' },
+            { label: '포털 메인 샘플', to: '/sample/portal' },
+          ],
         },
       ],
     }

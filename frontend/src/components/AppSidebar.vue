@@ -68,32 +68,40 @@ export default {
       openGroups: [], // 펼쳐진 그룹 인덱스
       menu: [
         {
-          label: '사용자 관리',
+          label: '사용자 & 배정 관리',
           icon: 'bi-people',
           children: [
-            { label: '사용자', to: '/users' },
-            { label: '사용자(검색Grid)', to: '/search-grid' },
-            { label: 'JqxGrid 샘플', to: '/jqx-grid' },
-            { label: '그룹 관리' },
-            { label: '설정' },
-          ],
-        },
-        {
-          label: '사용자 배정',
-          icon: 'bi-person-check',
-          children: [
+            { label: '사용자 목록', to: '/users' },
+            { label: '사용자 (검색Grid)', to: '/search-grid' },
             { label: '사용자 배정 (세로)', to: '/user-assignment-vertical' },
             { label: '사용자 배정 (공통목록)', to: '/user-assignment-shared' },
             { label: '사용자 배정 (신규)', to: '/user-assignment-shared-new' },
           ],
         },
         {
-          label: '교육 관리',
-          icon: 'bi-book',
-          children: [{ label: '강좌 목록' }, { label: '수강 현황' }, { label: '시험/평가' }],
+          label: '그리드 & 피벗 Studio',
+          icon: 'bi-grid-3x3-gap',
+          children: [
+            { label: 'RealGrid (바닐라 JS형)', to: '/real-grid' },
+            { label: 'RealGrid (Vue3 Slot형)', to: '/real-grid-vue' },
+            { label: 'Pivot A (동적 행 그룹핑)', to: '/pivot-alt-a' },
+            { label: 'Pivot B (Matrix 교차표)', to: '/pivot-alt-b' },
+            { label: 'RealPivot (체험 가이드)', to: '/real-pivot' },
+            { label: 'JqxGrid 샘플', to: '/jqx-grid' },
+          ],
         },
         {
-          label: '게시판',
+          label: '업무 & 설비 관리',
+          icon: 'bi-clipboard-check',
+          children: [
+            { label: '업무 의뢰', to: '/request-workflow' },
+            { label: '업무 의뢰서 작성', to: '/work-request-form' },
+            { label: '설비 지원 요청', to: '/equipment-support-request' },
+            { label: '설비 모니터링', to: '/equipment-monitor' },
+          ],
+        },
+        {
+          label: '게시판 & 파일 관리',
           icon: 'bi-journal-text',
           children: [
             { label: '게시글 목록', to: '/posts' },
@@ -102,37 +110,11 @@ export default {
           ],
         },
         {
-          label: '모니터링',
-          icon: 'bi-display',
-          children: [{ label: '설비 모니터링', to: '/equipment-monitor' }],
-        },
-        {
-          label: '업무 관리',
-          icon: 'bi-clipboard-check',
-          children: [
-            { label: '업무 의뢰', to: '/request-workflow' },
-            { label: '업무 의뢰서', to: '/work-request-form' },
-            { label: '설비지원요청', to: '/equipment-support-request' },
-          ],
-        },
-        {
-          label: '개발 가이드',
-          icon: 'bi-code-slash',
-          children: [{ label: '공통 컴포넌트 가이드', to: '/component-guide' }],
-        },
-        {
-          label: '시스템',
+          label: '시스템 & 개발 가이드',
           icon: 'bi-gear',
           children: [
-            { label: '공통코드 그룹', to: '/common-code-groups' },
-            { label: '환경설정' },
-            { label: '공지사항' },
-          ],
-        },
-        {
-          label: '샘플',
-          icon: 'bi-box-seam',
-          children: [
+            { label: '공통코드 그룹 관리', to: '/common-code-groups' },
+            { label: '공통 컴포넌트 가이드', to: '/component-guide' },
             { label: '설비 바코드 샘플', to: '/sample/barcode-equipment' },
             { label: '포털 메인 샘플', to: '/sample/portal' },
           ],

@@ -1,30 +1,29 @@
 <!-- MainLayout.vue -->
 <template>
-  <!-- 
-  transition name 옵션:
-    "fade" - 페이드 인/아웃
-    "slide" - 좌우 슬라이드
-    "slide-up" - 상하 슬라이드
-    "scale" - 스케일 
-  mode 설명:
-    out-in:  [페이지A 사라짐] → [빈 화면] → [페이지B 나타남]
-    in-out:  [페이지A + 페이지B 겹침] → [페이지A 사라짐]
-    기본값:   [페이지A 사라짐 + 페이지B 나타남 동시에]
-    -->
   <div class="app-layout">
     <!-- Header -->
-    <header>
+    <header class="app-header">
       <NavBar />
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <router-view v-slot="{ Component }">
-        <transition :name="transitionName" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-    </main>
+    <!-- Body (Sidebar + Content) -->
+    <div class="app-body d-flex">
+      <!-- Sidebar (Desktop only) -->
+      <aside class="d-none d-lg-block">
+        <AppSidebar :is-collapsed="isSidebarCollapsed" @toggle="toggleSidebar" />
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="p-3 h-100">
+          <router-view v-slot="{ Component }">
+            <transition :name="transitionName" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </div>
+      </main>
+    </div>
 
     <!-- Footer -->
     <footer class="app-footer">
@@ -44,15 +43,17 @@
 
 <script>
 import NavBar from '../components/NavBar.vue'
+import AppSidebar from '../components/AppSidebar.vue'
 import '../assets/styles/transitions.css'
 
 export default {
   name: 'MainLayout',
-  components: { NavBar },
+  components: { NavBar, AppSidebar },
   data() {
     return {
       transitionName: 'slide-right',
       lastPos: null,
+      isSidebarCollapsed: false,
     }
   },
   watch: {
@@ -64,26 +65,49 @@ export default {
       this.lastPos = currentPos
     },
   },
+  methods: {
+    toggleSidebar() {
+      this.isSidebarCollapsed = !this.isSidebarCollapsed
+    },
+  },
 }
 </script>
 
 <style scoped>
 /* 전체 레이아웃 */
 .app-layout {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
+/* 헤더 */
+.app-header {
+  z-index: 1000;
+  position: relative;
+}
+
+/* 바디: 남은 높이 차지 */
+.app-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 메인 컨텐츠 영역 */
 .main-content {
   flex: 1;
-  min-height: 0; /* flex item shrinking 허용 */
+  min-width: 0;
+  background-color: var(--nex-bg, #f0f2f5);
+  overflow-y: auto;
+  position: relative;
 }
 
 .app-footer {
   background-color: var(--bs-light);
   border-top: 1px solid var(--bs-border-color);
-  padding: 1rem 0;
-  margin-top: auto;
+  padding: 0.5rem 0;
+  z-index: 1000;
 }
 </style>

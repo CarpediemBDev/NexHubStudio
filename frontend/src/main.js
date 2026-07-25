@@ -8,6 +8,17 @@ import { showToast } from './utils/toastUtil'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import './assets/styles/premium-theme.css'
+
+import * as RealGrid from 'realgrid'
+
+// Global RealGrid License Registration
+const REALGRID_LICENSE_KEY = 'upVcPE+wPOmtLjqyBIh9RkM/nBOseBrflwxYpzGZyYm9cY8amGDkiMnVeQKUHJDjW2y71jtk+wte7L7C4dZzvAQJWvkYy9V+QpwmX48tCKehFoMe5uSeYufUj4hn1OLrPa/ZZTiSPjmVFt7dhTvzBQ=='
+if (typeof RealGrid?.setLicenseKey === 'function') {
+  RealGrid.setLicenseKey(REALGRID_LICENSE_KEY)
+} else if (typeof RealGrid?.default?.setLicenseKey === 'function') {
+  RealGrid.default.setLicenseKey(REALGRID_LICENSE_KEY)
+}
 
 // showToast를 전역으로 노출
 window.showToast = showToast

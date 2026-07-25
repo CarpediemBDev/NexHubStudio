@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <!-- Grid Container Card -->
+    <!-- Grid Container Card (RealGridCommonJs 기반 계층 조립) -->
     <div class="card shadow-sm border-light mb-4">
       <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center">
         <span class="fw-semibold text-dark small">
@@ -78,21 +78,24 @@
         </span>
       </div>
       <div class="card-body p-0">
-        <div ref="gridElement" style="width: 100%; height: 530px;"></div>
+        <RealGridCommonJs
+          ref="realgridComp"
+          height="530px"
+          @init="onGridInit"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import * as RealGrid from 'realgrid'
-import 'realgrid/dist/realgrid-white.css'
-import { markRaw } from 'vue'
+import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import { buildPivotMatrix } from '@/utils/pivotUtil.js'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'PivotAltBPage',
+  components: { RealGridCommonJs },
   data() {
     return {
       pivotOptions: {
@@ -102,7 +105,6 @@ export default {
         aggType: 'sum'
       },
       pivotSummaryText: '',
-      // 샘플 다차원 데이터 (연도, 분기, 지역, 부서, 직급, 실적 데이터 포함)
       rawSalesData: [
         { dept: '개발 1팀', role: '수석', region: '서울', year: '2025년', quarter: '1분기', sales: 3200, salary: 1800, bonus: 150 },
         { dept: '개발 1팀', role: '책임', region: '서울', year: '2025년', quarter: '2분기', sales: 4500, salary: 1800, bonus: 200 },
@@ -126,45 +128,32 @@ export default {
       ]
     }
   },
-  created() {
-    // RealGrid 공식 Vue3 가이드: 그리드 인스턴스는 markRaw / non-reactive 멤버로 관리
-    this.container = null
-    this.dataProvider = null
-    this.gridView = null
-  },
-  mounted() {
-    this.initGrid()
-  },
-  beforeUnmount() {
-    if (this.gridView) {
-      this.gridView.destroy()
-      this.dataProvider.destroy()
-    }
-  },
   methods: {
-    initGrid() {
-      this.container = this.$refs.gridElement
-      const LocalDataProvider = RealGrid.LocalDataProvider || RealGrid.default?.LocalDataProvider
-      const GridView = RealGrid.GridView || RealGrid.default?.GridView
+    onGridInit({ gridView, dataProvider }) {
+      this.gridView = gridView
+      this.dataProvider = dataProvider
 
-      this.dataProvider = markRaw(new LocalDataProvider(true))
-      this.gridView = markRaw(new GridView(this.container))
-      this.gridView.setDataSource(this.dataProvider)
+      // 마우스 우클릭 동적 행/열 고정 컨텍스트 메뉴 (1:1 완벽 통일)
+      this.gridView.setContextMenu([
+        { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
+        { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
+        { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
+        { label: '-' },
+        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
+      ])
 
-      // 그리드 표시 스타일 튜닝 (가로 여백 꽉 차게)
-      this.gridView.setDisplayOptions({
-        fitStyle: 'evenFill',
-        columnMovable: false,
-        rowHoverType: 'row'
-      })
+      this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
+        if (this.$refs.realgridComp) {
+          this.$refs.realgridComp.handleDynamicFixing(item, clickData)
+        }
+      }
 
       this.applyPivot()
     },
 
     applyPivot() {
-      if (!this.gridView || !this.dataProvider) return
+      if (!this.$refs.realgridComp) return
 
-      // 행 축과 열 축이 같으면 경고 후 예외 처리
       if (this.pivotOptions.rowField === this.pivotOptions.colField) {
         showToast('행 축과 열 축은 서로 다른 필드를 선택해야 합니다.', { type: 'danger' })
         return
@@ -173,15 +162,12 @@ export default {
       // pivotUtil을 사용해 Raw -> Matrix 피벗 변환
       const matrixResult = buildPivotMatrix(this.rawSalesData, this.pivotOptions)
 
-      // 1. 기존 필드 & 컬럼 제거 후 동적 구성
-      this.dataProvider.clearRows()
-      this.dataProvider.setFields(matrixResult.fields)
-      this.gridView.setColumns(matrixResult.columns)
+      // 공통 컴포넌트 API를 통해 동적 필드/컬럼/행 업데이트
+      this.$refs.realgridComp.setFields(matrixResult.fields)
+      this.$refs.realgridComp.setColumns(matrixResult.columns)
+      this.$refs.realgridComp.setRows(matrixResult.rows)
 
-      // 2. 피벗 행 데이터 렌더링
-      this.dataProvider.setRows(matrixResult.rows)
-
-      // 3. 요약 정보 갱신
+      // 요약 정보 갱신
       this.pivotSummaryText = `행: ${matrixResult.rows.length}개 그룹 | 피벗 열: ${matrixResult.colKeys.length}개`
       showToast('피벗 매트릭스가 동적으로 새로고침되었습니다.', { type: 'success' })
     }
