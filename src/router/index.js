@@ -1,4 +1,4 @@
-﻿import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import MainLayout from "../layouts/MainLayout.vue";
 import UserPage from "../pages/UserPage.vue";
 import UserSearGridPage from "../pages/UserSearGridPage.vue";
@@ -23,97 +23,113 @@ import RealGridVuePage from "../pages/RealGridVuePage.vue";
 
 const routes = [
   {
+    path: "/login",
+    name: "Login",
+    component: () => import("../pages/auth/LoginPage.vue"),
+    meta: { title: "로그인", hidden: true }
+  },
+  {
     path: "/",
     component: MainLayout,
     children: [
+      // 1. 대시보드 (단독)
       {
         path: "",
         name: "Main",
         component: () => import("../pages/MainPage.vue"),
+        meta: { title: "대시보드", icon: "bi-house-door", keepAlive: true }
       },
-      { path: "users", name: "Users", component: UserPage },
+
+      // 2. 시스템 관리 (그룹)
       {
-        path: "search-grid",
-        name: "사용자(검색 그리드)",
-        component: UserSearGridPage,
+        path: "system",
+        name: "SystemGroup",
+        meta: { title: "시스템 관리", icon: "bi-gear-fill" },
+        children: [
+          { path: "menus", name: "MenuManagement", component: () => import("../pages/admin/MenuPermissionPage.vue"), meta: { title: "메뉴 및 권한 관리", icon: "bi-menu-button-wide", keepAlive: true } },
+          { path: "departments", name: "DepartmentManagement", component: () => import("../pages/admin/DepartmentPage.vue"), meta: { title: "부서 관리", icon: "bi-diagram-3", keepAlive: true } },
+          { path: "common-codes", name: "CommonCodeManagement", component: () => import("../pages/admin/CommonCodePage.vue"), meta: { title: "공통 코드 관리", icon: "bi-list-ul", keepAlive: true } }
+        ]
       },
-      { path: "jqx-grid", name: "JqxGrid 샘플", component: JqxGridPage },
-      // 업무관리 > 설비지원요청
+
+      // 3. 사용자 & 배정 관리 (그룹)
       {
-        path: "equipment-support-request",
-        name: "설비지원요청",
-        component: () => import("../pages/EquipmentSupportRequestPage.vue"),
+        path: "user-group",
+        name: "UserGroup",
+        meta: { title: "사용자 & 배정 관리", icon: "bi-people-fill" },
+        children: [
+          { path: "users", name: "Users", component: UserPage, meta: { title: "사용자 목록", icon: "bi-person-badge", keepAlive: true } },
+          { path: "search-grid", name: "UserSearchGrid", component: UserSearGridPage, meta: { title: "사용자 검색 그리드", icon: "bi-search", keepAlive: true } },
+          { path: "user-assignment-vertical", name: "UserAssignmentVertical", component: UserAssignmentVertical, meta: { title: "사용자 배정(세로)", icon: "bi-person-lines-fill", keepAlive: true } },
+          { path: "user-assignment-shared", name: "UserAssignmentShared", component: UserAssignmentShared, meta: { title: "사용자 배정(공통)", icon: "bi-person-gear", keepAlive: true } },
+          { path: "user-assignment-shared-new", name: "UserAssignmentSharedNew", component: () => import("../pages/UserAssignmentSharedNew.vue"), meta: { title: "사용자 배정(신규)", icon: "bi-person-plus", keepAlive: true } }
+        ]
       },
+
+      // 4. RealGrid & 피벗 스튜디오 (그룹)
       {
-        path: "common-code-groups",
-        name: "CommonCodeGroupList",
-        component: CommonCodeGroupListPage,
+        path: "grid-studio",
+        name: "GridStudioGroup",
+        meta: { title: "RealGrid & 피벗 스튜디오", icon: "bi-grid-3x3-gap-fill" },
+        children: [
+          { path: "vue", name: "RealGridVueSample", component: RealGridVuePage, meta: { title: "RealGrid (Vue3)", icon: "bi-grid-3x3-gap", keepAlive: true } },
+          { path: "js", name: "RealGridJsSample", component: RealGridPage, meta: { title: "RealGrid (JS)", icon: "bi-grid-3x3", keepAlive: true } },
+          { path: "pivot-a", name: "PivotA", component: PivotAltAPage, meta: { title: "Pivot 분석 A", icon: "bi-pie-chart", keepAlive: true } },
+          { path: "pivot-b", name: "PivotB", component: PivotAltBPage, meta: { title: "Pivot 분석 B", icon: "bi-pie-chart-fill", keepAlive: true } },
+          { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "Real Pivot Engine", icon: "bi-bar-chart-steps", keepAlive: true } }
+        ]
       },
+
+      // 5. 업무 & 게시판 관리 (그룹)
       {
-        path: "common-code-groups/:groupId",
-        name: "CommonCodeGroupDetail",
-        component: CommonCodeGroupDetailPage,
+        path: "work-group",
+        name: "WorkGroup",
+        meta: { title: "업무 & 게시판 관리", icon: "bi-briefcase-fill" },
+        children: [
+          { path: "posts", name: "PostList", component: PostListPage, meta: { title: "게시판 목록", icon: "bi-card-text", keepAlive: true } },
+          { path: "files", name: "FileList", component: FileListPage, meta: { title: "파일 관리", icon: "bi-folder", keepAlive: true } },
+          { path: "equipment-monitor", name: "EquipmentMonitor", component: EquipmentMonitorPage, meta: { title: "설비 모니터링", icon: "bi-display", keepAlive: true } },
+          { path: "request-workflow", name: "RequestWorkflow", component: RequestWorkflowPage, meta: { title: "업무 의뢰 워크플로우", icon: "bi-briefcase", keepAlive: true } },
+          { path: "equipment-support-request", name: "EquipmentSupportRequest", component: () => import("../pages/EquipmentSupportRequestPage.vue"), meta: { title: "설비 지원 요청", icon: "bi-tools", keepAlive: true } }
+        ]
       },
+
+      // 6. UI 컴포넌트 & 샘플 (그룹)
       {
-        path: "component-guide",
-        name: "공통 컴포넌트 가이드",
-        component: ComponentGuidePage,
+        path: "sample-group",
+        name: "SampleGroup",
+        meta: { title: "UI 컴포넌트 & 샘플", icon: "bi-layers-fill" },
+        children: [
+          { path: "jqx-grid", name: "JqxGridSample", component: JqxGridPage, meta: { title: "JqxGrid 샘플", icon: "bi-table", keepAlive: true } },
+          { path: "component-guide", name: "ComponentGuide", component: ComponentGuidePage, meta: { title: "UI 컴포넌트 가이드", icon: "bi-book", keepAlive: true } },
+          { path: "datepicker-gallery", name: "DatePickerGallery", component: () => import("../pages/sample/DatePickerGalleryPage.vue"), meta: { title: "DatePicker 갤러리", icon: "bi-calendar-week", keepAlive: true } },
+          { path: "barcode-equipment", name: "BarcodeEquipment", component: () => import("../pages/sample/BarcodeEquipment.vue"), meta: { title: "설비 바코드 샘플", icon: "bi-upc-scan", keepAlive: true } },
+          { path: "portal", name: "PortalSample", component: () => import("../pages/sample/PortalSample.vue"), meta: { title: "포털 메인 샘플", icon: "bi-layout-text-window", keepAlive: true } }
+        ]
       },
-      {
-        path: "user-assignment-vertical",
-        name: "사용자 배정 (세로)",
-        component: UserAssignmentVertical,
-      },
-      {
-        path: "user-assignment-shared",
-        name: "사용자 배정 (공통목록)",
-        component: UserAssignmentShared,
-      },
-      {
-        path: "user-assignment-shared-new",
-        name: "사용자 배정 (신규)",
-        component: () => import("../pages/UserAssignmentSharedNew.vue"),
-      },
-      // 게시판
-      { path: "posts", name: "게시판", component: PostListPage },
-      { path: "posts/write", name: "게시글 작성", component: PostWritePage },
-      { path: "posts/:id", name: "게시글 상세", component: PostDetailPage },
-      { path: "posts/:id/edit", name: "게시글 수정", component: PostWritePage },
-      // 파일
-      { path: "files", name: "파일 관리", component: FileListPage },
-      // 설비 모니터링
-      {
-        path: "equipment-monitor",
-        name: "설비 모니터링",
-        component: EquipmentMonitorPage,
-      },
-      // 업무 의뢰
-      {
-        path: "request-workflow",
-        name: "업무 의뢰",
-        component: RequestWorkflowPage,
-      },
-      {
-        path: "work-request-form",
-        name: "업무 의뢰서",
-        component: WorkRequestFormPage,
-      },
-      // RealGrid & Pivot
-      { path: "real-grid", name: "RealGrid 샘플(JS)", component: RealGridPage },
-      { path: "real-grid-vue", name: "RealGrid-Vue 샘플(Vue3)", component: RealGridVuePage },
-      { path: "pivot-alt-a", name: "RealGrid Pivot A", component: PivotAltAPage },
-      { path: "pivot-alt-b", name: "RealGrid Pivot B", component: PivotAltBPage },
-      { path: "real-pivot", name: "RealGrid Pivot", component: RealPivotPage },
+
+      // 기존 호환성 단독 경로 유지 (hidden)
+      { path: "users", component: UserPage, meta: { hidden: true } },
+      { path: "search-grid", component: UserSearGridPage, meta: { hidden: true } },
+      { path: "user-assignment-vertical", component: UserAssignmentVertical, meta: { hidden: true } },
+      { path: "user-assignment-shared", component: UserAssignmentShared, meta: { hidden: true } },
+      { path: "real-grid", component: RealGridPage, meta: { hidden: true } },
+      { path: "real-grid-vue", component: RealGridVuePage, meta: { hidden: true } },
+      { path: "pivot-alt-a", component: PivotAltAPage, meta: { hidden: true } },
+      { path: "pivot-alt-b", component: PivotAltBPage, meta: { hidden: true } },
+      { path: "real-pivot", component: RealPivotPage, meta: { hidden: true } },
       // 샘플
       {
         path: "sample/barcode-equipment",
         name: "설비 바코드 샘플",
         component: () => import("../pages/sample/BarcodeEquipment.vue"),
+        meta: { title: "바코드 샘플", icon: "bi-upc-scan", keepAlive: true }
       },
       {
         path: "sample/portal",
         name: "포털 메인 샘플",
         component: () => import("../pages/sample/PortalSample.vue"),
+        meta: { title: "포털 샘플", icon: "bi-layout-text-window", keepAlive: true }
       },
     ],
   },

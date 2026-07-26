@@ -1,17 +1,16 @@
-﻿<template>
-  <div class="container-fluid py-3">
-    <h2 class="mb-4">사용자 배정 (세로 레이아웃)</h2>
-
+<template>
+  <div class="container-fluid py-1 bg-theme-main text-theme-primary min-vh-100">
     <!-- 연구원 그룹 -->
-    <div class="card mb-4 border-primary">
-      <div class="card-header bg-primary bg-opacity-10 border-primary">
-        <h5 class="mb-0 text-primary">연구원 배정</h5>
+    <div class="card mb-4 border-primary bg-theme-card text-theme-primary shadow-sm">
+      <div class="card-header bg-primary bg-opacity-10 border-primary d-flex align-items-center justify-content-between">
+        <h5 class="mb-0 text-primary fw-bold">연구원 배정</h5>
+        <span class="badge bg-primary px-2.5 py-1.5">선택됨 {{ researchers.length }}명</span>
       </div>
       <div class="card-body">
-        <div class="row">
-          <!-- 전체 사용자 목록 -->
+        <div class="row g-3">
+          <!-- 전체 사용자 목록 (Left Box) -->
           <div class="col-md-5">
-            <div class="mb-2">
+            <div class="d-flex justify-content-between align-items-center mb-2">
               <div class="form-check">
                 <input
                   class="form-check-input"
@@ -20,12 +19,12 @@
                   :checked="isAllResearcherSelected"
                   @change="toggleSelectAllResearcher"
                 />
-                <label class="form-check-label" for="selectAllResearcher">
-                  전체 선택 <span class="text-muted">({{ availableUsers.length }})</span>
+                <label class="form-check-label fw-bold text-theme-primary" for="selectAllResearcher">
+                  전체 선택 <span class="text-theme-secondary">({{ availableUsers.length }})</span>
                 </label>
               </div>
             </div>
-            <div class="transfer-box border rounded" style="height: 300px; overflow-y: auto">
+            <div class="transfer-box border border-theme rounded-3 p-2" style="height: 320px; overflow-y: auto">
               <div
                 v-for="user in availableUsers"
                 :key="user.id"
@@ -43,42 +42,42 @@
                     :checked="selectedAvailable.researcher.includes(user.id)"
                     @click.stop="toggleAvailableSelect('researcher', user.id)"
                   />
-                  <span>{{ user.name }}</span>
-                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                  <span class="fw-bold text-theme-primary">{{ user.name }}</span>
+                  <small class="ms-auto text-theme-secondary bg-theme-subcard px-2 py-0.5 rounded border border-theme">{{ user.department }}</small>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 화살표 버튼 -->
-          <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-2">
+          <!-- 화살표 이동 버튼 (Center Buttons) -->
+          <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-3">
             <button
-              class="btn btn-sm btn-outline-primary transfer-btn"
+              class="btn btn-primary transfer-btn shadow"
               @click="moveToResearcher"
               :disabled="selectedAvailable.researcher.length === 0"
               title="연구원으로 추가"
             >
-              <i class="bi bi-chevron-right"></i>
+              <i class="bi bi-chevron-right fs-5"></i>
             </button>
             <button
-              class="btn btn-sm btn-outline-secondary transfer-btn"
+              class="btn btn-secondary transfer-btn shadow"
               @click="removeFromResearcher"
               :disabled="selectedAssigned.researcher.length === 0"
               title="연구원에서 제거"
             >
-              <i class="bi bi-chevron-left"></i>
+              <i class="bi bi-chevron-left fs-5"></i>
             </button>
           </div>
 
-          <!-- 선택된 연구원 -->
+          <!-- 선택된 연구원 (Right Box) -->
           <div class="col-md-5">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0">선택된 연구원</h6>
-              <span class="badge bg-primary">{{ researchers.length }}</span>
+              <h6 class="mb-0 fw-bold text-theme-primary">선택된 연구원</h6>
+              <span class="badge bg-primary px-2 py-1">{{ researchers.length }}명</span>
             </div>
             <div
-              class="transfer-box transfer-box-assigned border rounded"
-              style="height: 300px; overflow-y: auto"
+              class="transfer-box transfer-box-assigned border border-theme rounded-3 p-2"
+              style="height: 320px; overflow-y: auto"
             >
               <div
                 v-for="user in researchers"
@@ -94,13 +93,13 @@
                     :checked="selectedAssigned.researcher.includes(user.id)"
                     @click.stop="toggleAssignedSelect('researcher', user.id)"
                   />
-                  <span>{{ user.name }}</span>
-                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                  <span class="fw-bold text-theme-primary">{{ user.name }}</span>
+                  <small class="ms-auto text-theme-secondary bg-theme-subcard px-2 py-0.5 rounded border border-theme">{{ user.department }}</small>
                 </div>
               </div>
-              <div v-if="researchers.length === 0" class="text-center text-muted py-5">
-                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                <small>배정된 연구원이 없습니다</small>
+              <div v-if="researchers.length === 0" class="empty-state-box text-center py-5">
+                <i class="bi bi-inbox fs-2 d-block mb-2 text-theme-secondary"></i>
+                <small class="text-theme-secondary">배정된 연구원이 없습니다</small>
               </div>
             </div>
           </div>
@@ -109,12 +108,13 @@
     </div>
 
     <!-- 오퍼레이션 그룹 -->
-    <div class="card mb-4 border-success">
-      <div class="card-header bg-success bg-opacity-10 border-success">
-        <h5 class="mb-0 text-success">오퍼레이션 배정</h5>
+    <div class="card mb-4 border-success bg-theme-card text-theme-primary shadow-sm">
+      <div class="card-header bg-success bg-opacity-10 border-success d-flex align-items-center justify-content-between">
+        <h5 class="mb-0 text-success fw-bold">오퍼레이션 배정</h5>
+        <span class="badge bg-success px-2.5 py-1.5">선택됨 {{ operations.length }}명</span>
       </div>
       <div class="card-body">
-        <div class="row">
+        <div class="row g-3">
           <!-- 전체 사용자 목록 -->
           <div class="col-md-5">
             <div class="mb-2">
@@ -126,12 +126,12 @@
                   :checked="isAllOperationSelected"
                   @change="toggleSelectAllOperation"
                 />
-                <label class="form-check-label" for="selectAllOperation">
-                  전체 선택 <span class="text-muted">({{ availableUsers.length }})</span>
+                <label class="form-check-label fw-bold text-theme-primary" for="selectAllOperation">
+                  전체 선택 <span class="text-theme-secondary">({{ availableUsers.length }})</span>
                 </label>
               </div>
             </div>
-            <div class="transfer-box border rounded" style="height: 300px; overflow-y: auto">
+            <div class="transfer-box border border-theme rounded-3 p-2" style="height: 320px; overflow-y: auto">
               <div
                 v-for="user in availableUsers"
                 :key="user.id"
@@ -149,42 +149,42 @@
                     :checked="selectedAvailable.operation.includes(user.id)"
                     @click.stop="toggleAvailableSelect('operation', user.id)"
                   />
-                  <span>{{ user.name }}</span>
-                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                  <span class="fw-bold text-theme-primary">{{ user.name }}</span>
+                  <small class="ms-auto text-theme-secondary bg-theme-subcard px-2 py-0.5 rounded border border-theme">{{ user.department }}</small>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- 화살표 버튼 -->
-          <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-2">
+          <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-3">
             <button
-              class="btn btn-sm btn-outline-success transfer-btn"
+              class="btn btn-success transfer-btn shadow"
               @click="moveToOperation"
               :disabled="selectedAvailable.operation.length === 0"
               title="오퍼레이션으로 추가"
             >
-              <i class="bi bi-chevron-right"></i>
+              <i class="bi bi-chevron-right fs-5"></i>
             </button>
             <button
-              class="btn btn-sm btn-outline-secondary transfer-btn"
+              class="btn btn-secondary transfer-btn shadow"
               @click="removeFromOperation"
               :disabled="selectedAssigned.operation.length === 0"
               title="오퍼레이션에서 제거"
             >
-              <i class="bi bi-chevron-left"></i>
+              <i class="bi bi-chevron-left fs-5"></i>
             </button>
           </div>
 
           <!-- 선택된 오퍼레이션 -->
           <div class="col-md-5">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0">선택된 오퍼레이션</h6>
-              <span class="badge bg-success">{{ operations.length }}</span>
+              <h6 class="mb-0 fw-bold text-theme-primary">선택된 오퍼레이션</h6>
+              <span class="badge bg-success px-2 py-1">{{ operations.length }}명</span>
             </div>
             <div
-              class="transfer-box transfer-box-assigned border rounded"
-              style="height: 300px; overflow-y: auto"
+              class="transfer-box transfer-box-assigned border border-theme rounded-3 p-2"
+              style="height: 320px; overflow-y: auto"
             >
               <div
                 v-for="user in operations"
@@ -200,13 +200,13 @@
                     :checked="selectedAssigned.operation.includes(user.id)"
                     @click.stop="toggleAssignedSelect('operation', user.id)"
                   />
-                  <span>{{ user.name }}</span>
-                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                  <span class="fw-bold text-theme-primary">{{ user.name }}</span>
+                  <small class="ms-auto text-theme-secondary bg-theme-subcard px-2 py-0.5 rounded border border-theme">{{ user.department }}</small>
                 </div>
               </div>
-              <div v-if="operations.length === 0" class="text-center text-muted py-5">
-                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                <small>배정된 오퍼레이션이 없습니다</small>
+              <div v-if="operations.length === 0" class="empty-state-box text-center py-5">
+                <i class="bi bi-inbox fs-2 d-block mb-2 text-theme-secondary"></i>
+                <small class="text-theme-secondary">배정된 오퍼레이션이 없습니다</small>
               </div>
             </div>
           </div>
@@ -215,12 +215,13 @@
     </div>
 
     <!-- 실무자 그룹 -->
-    <div class="card mb-4 border-warning">
-      <div class="card-header bg-warning bg-opacity-10 border-warning">
-        <h5 class="mb-0 text-warning">실무자 배정</h5>
+    <div class="card mb-4 border-warning bg-theme-card text-theme-primary shadow-sm">
+      <div class="card-header bg-warning bg-opacity-10 border-warning d-flex align-items-center justify-content-between">
+        <h5 class="mb-0 text-warning fw-bold">실무자 배정</h5>
+        <span class="badge bg-warning text-dark px-2.5 py-1.5">선택됨 {{ workers.length }}명</span>
       </div>
       <div class="card-body">
-        <div class="row">
+        <div class="row g-3">
           <!-- 전체 사용자 목록 -->
           <div class="col-md-5">
             <div class="mb-2">
@@ -232,12 +233,12 @@
                   :checked="isAllWorkerSelected"
                   @change="toggleSelectAllWorker"
                 />
-                <label class="form-check-label" for="selectAllWorker">
-                  전체 선택 <span class="text-muted">({{ availableUsers.length }})</span>
+                <label class="form-check-label fw-bold text-theme-primary" for="selectAllWorker">
+                  전체 선택 <span class="text-theme-secondary">({{ availableUsers.length }})</span>
                 </label>
               </div>
             </div>
-            <div class="transfer-box border rounded" style="height: 300px; overflow-y: auto">
+            <div class="transfer-box border border-theme rounded-3 p-2" style="height: 320px; overflow-y: auto">
               <div
                 v-for="user in availableUsers"
                 :key="user.id"
@@ -255,42 +256,42 @@
                     :checked="selectedAvailable.worker.includes(user.id)"
                     @click.stop="toggleAvailableSelect('worker', user.id)"
                   />
-                  <span>{{ user.name }}</span>
-                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                  <span class="fw-bold text-theme-primary">{{ user.name }}</span>
+                  <small class="ms-auto text-theme-secondary bg-theme-subcard px-2 py-0.5 rounded border border-theme">{{ user.department }}</small>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- 화살표 버튼 -->
-          <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-2">
+          <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-3">
             <button
-              class="btn btn-sm btn-outline-warning transfer-btn"
+              class="btn btn-warning text-dark transfer-btn shadow fw-bold"
               @click="moveToWorker"
               :disabled="selectedAvailable.worker.length === 0"
               title="실무자로 추가"
             >
-              <i class="bi bi-chevron-right"></i>
+              <i class="bi bi-chevron-right fs-5"></i>
             </button>
             <button
-              class="btn btn-sm btn-outline-secondary transfer-btn"
+              class="btn btn-secondary transfer-btn shadow"
               @click="removeFromWorker"
               :disabled="selectedAssigned.worker.length === 0"
               title="실무자에서 제거"
             >
-              <i class="bi bi-chevron-left"></i>
+              <i class="bi bi-chevron-left fs-5"></i>
             </button>
           </div>
 
           <!-- 선택된 실무자 -->
           <div class="col-md-5">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0">선택된 실무자</h6>
-              <span class="badge bg-warning text-dark">{{ workers.length }}</span>
+              <h6 class="mb-0 fw-bold text-theme-primary">선택된 실무자</h6>
+              <span class="badge bg-warning text-dark px-2 py-1">{{ workers.length }}명</span>
             </div>
             <div
-              class="transfer-box transfer-box-assigned border rounded"
-              style="height: 300px; overflow-y: auto"
+              class="transfer-box transfer-box-assigned border border-theme rounded-3 p-2"
+              style="height: 320px; overflow-y: auto"
             >
               <div
                 v-for="user in workers"
@@ -306,13 +307,13 @@
                     :checked="selectedAssigned.worker.includes(user.id)"
                     @click.stop="toggleAssignedSelect('worker', user.id)"
                   />
-                  <span>{{ user.name }}</span>
-                  <small class="ms-auto text-muted">{{ user.department }}</small>
+                  <span class="fw-bold text-theme-primary">{{ user.name }}</span>
+                  <small class="ms-auto text-theme-secondary bg-theme-subcard px-2 py-0.5 rounded border border-theme">{{ user.department }}</small>
                 </div>
               </div>
-              <div v-if="workers.length === 0" class="text-center text-muted py-5">
-                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                <small>배정된 실무자가 없습니다</small>
+              <div v-if="workers.length === 0" class="empty-state-box text-center py-5">
+                <i class="bi bi-inbox fs-2 d-block mb-2 text-theme-secondary"></i>
+                <small class="text-theme-secondary">배정된 실무자가 없습니다</small>
               </div>
             </div>
           </div>
@@ -322,8 +323,8 @@
 
     <!-- 저장 버튼 -->
     <div class="text-end">
-      <button class="btn btn-primary btn-lg" @click="saveAssignments">
-        <i class="bi bi-save"></i> 저장
+      <button class="btn btn-primary btn-lg px-4 shadow" @click="saveAssignments">
+        <i class="bi bi-save me-1"></i> 저장
       </button>
     </div>
   </div>
@@ -331,9 +332,13 @@
 
 <script>
 import { showToast } from '@/utils/toastUtil.js'
+import PageHeader from '@/components/PageHeader.vue'
 
 export default {
   name: 'UserAssignmentVertical',
+  components: {
+    PageHeader,
+  },
   data() {
     return {
       // 전체 사용자 목록
@@ -509,11 +514,6 @@ export default {
 
     // 저장
     saveAssignments() {
-      const data = {
-        researchers: this.researchers.map((u) => u.id),
-        operations: this.operations.map((u) => u.id),
-        workers: this.workers.map((u) => u.id),
-      }
       showToast('사용자 배정이 저장되었습니다.', { type: 'success' })
     },
   },
@@ -523,51 +523,60 @@ export default {
 <style scoped>
 /* Transfer 박스 스타일 */
 .transfer-box {
-  background-color: #fafafa;
-  padding: 8px;
+  background-color: var(--bg-subcard) !important;
 }
 
 .transfer-box-assigned {
-  background-color: #f0f7ff;
+  background-color: var(--bg-subcard) !important;
 }
 
 /* Transfer 아이템 */
 .transfer-item {
-  padding: 8px 12px;
-  margin-bottom: 4px;
-  background-color: white;
-  border: 1px solid #e9ecef;
-  border-radius: 4px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease-in-out;
 }
 
 .transfer-item:hover {
-  border-color: #0d6efd;
-  background-color: #f8f9fa;
+  border-color: var(--b2b-color-primary);
+  background-color: var(--bg-subcard);
 }
 
 .transfer-item.selected {
-  border-color: #0d6efd;
-  background-color: #e7f1ff;
+  border-color: var(--b2b-color-primary);
+  background-color: var(--b2b-color-primary-subtle);
+  color: var(--text-primary);
 }
 
 .transfer-item.assigned {
-  background-color: #f8f9fa;
-  opacity: 0.7;
-  border-left: 3px solid #198754;
+  background-color: var(--bg-subcard);
+  border-left: 3px solid #10b981;
+  opacity: 0.85;
 }
 
 .transfer-item.assigned:hover {
-  opacity: 0.85;
+  opacity: 1;
 }
 
 /* Transfer 버튼 */
 .transfer-btn {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: 4px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.transfer-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* 체크박스 스타일 */

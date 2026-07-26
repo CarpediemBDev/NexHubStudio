@@ -1,9 +1,9 @@
-﻿<template>
-  <div class="border rounded-3">
-    <div class="p-2 border-bottom d-flex justify-content-between align-items-center">
-      <small class="text-muted">선택 {{ users.length }}명</small>
+<template>
+  <div class="b2b-card">
+    <div class="b2b-card-header bg-theme-subcard">
+      <span class="b2b-text-sm text-theme-secondary fw-bold">선택 {{ users.length }}명</span>
       <button
-        class="btn btn-outline-secondary btn-sm"
+        class="btn-b2b-action btn-sm"
         :disabled="!users.length"
         @click="$emit('clear')"
         type="button"
@@ -12,23 +12,26 @@
       </button>
     </div>
 
-    <div class="p-2">
-      <div v-if="!users.length" class="text-muted small py-2">체크박스로 사용자를 선택하세요.</div>
+    <div class="b2b-card-body p-2">
+      <div v-if="!users.length" class="text-theme-secondary b2b-text-sm py-4 text-center">
+        <i class="bi bi-inbox fs-4 d-block mb-1 opacity-75"></i>
+        체크박스로 사용자를 선택하세요.
+      </div>
 
       <div
         v-else
         v-for="u in users"
         :key="u.userId"
-        class="d-flex align-items-start border rounded-3 p-2 mb-2"
+        class="d-flex align-items-center justify-content-between border border-theme bg-theme-card rounded-3 p-2 mb-2"
       >
         <div>
-          <strong class="me-1">{{ u.name }}</strong>
-          <span class="text-muted">{{ u.userId }}</span>
-          <span class="text-muted"> · {{ u.dept }}</span>
-          <span class="text-muted"> · {{ u.role }}</span>
+          <strong class="me-1 text-theme-primary b2b-text-body">{{ u.name }}</strong>
+          <span class="text-theme-secondary b2b-text-sm">({{ u.userId }})</span>
+          <span class="text-theme-secondary b2b-text-sm"> · {{ u.dept }}</span>
+          <span class="text-theme-secondary b2b-text-sm"> · {{ u.role }}</span>
         </div>
 
-        <button class="btn-close ms-auto" @click="$emit('remove', u.userId)" type="button"></button>
+        <button class="btn-close ms-auto b2b-text-sm" @click="$emit('remove', u.userId)" type="button"></button>
       </div>
     </div>
   </div>

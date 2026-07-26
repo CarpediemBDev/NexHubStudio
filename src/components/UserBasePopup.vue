@@ -1,28 +1,28 @@
 <template>
   <div class="modal fade show" style="display: block" tabindex="-1" role="dialog" aria-modal="true">
     <div class="modal-dialog" ref="dlg" :style="dialogInlineStyle">
-      <div class="modal-content shadow" :style="modalContentStyle">
-        <div class="modal-header" @pointerdown="onDragStart">
-          <h5 class="modal-title">사용자 선택</h5>
-          <button type="button" class="btn-close" aria-label="Close" @click="onClose"></button>
+      <div class="modal-content b2b-modal-content" :style="modalContentStyle">
+        <div class="modal-header b2b-modal-header" @pointerdown="onDragStart">
+          <h6 class="b2b-modal-title m-0">사용자 선택</h6>
+          <button type="button" class="btn-close b2b-text-sm" aria-label="Close" @click="onClose"></button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body b2b-modal-body">
           <div class="row g-3">
             <!-- LEFT: 전체 사용자 목록 -->
             <div class="col-12 col-lg-6">
-              <div class="border rounded-3 h-100 d-flex flex-column">
-                <div class="p-2 border-bottom">
+              <div class="border border-theme bg-theme-card rounded-3 h-100 d-flex flex-column">
+                <div class="p-2 border-bottom border-theme">
                   <input
                     v-model="leftKeyword"
-                    class="form-control form-control-sm"
+                    class="form-control form-control-sm bg-theme-card text-theme-primary border-theme"
                     placeholder="검색(ID/이름/부서/직무)"
                   />
                 </div>
                 <div class="p-0 flex-grow-1">
                   <div class="table-responsive code-inherit h-100">
                     <table class="table table-sm table-hover mb-0 align-middle">
-                      <thead class="table-light position-sticky top-0">
+                      <thead class="bg-theme-subcard text-theme-primary position-sticky top-0 border-bottom border-theme">
                         <tr>
                           <th style="width: 44px">
                             <div class="form-check m-0 d-flex justify-content-center">
@@ -37,10 +37,10 @@
                               />
                             </div>
                           </th>
-                          <th class="text-nowrap">UserId</th>
-                          <th>사용자명</th>
-                          <th>부서명</th>
-                          <th>직무</th>
+                          <th class="text-nowrap text-theme-primary">UserId</th>
+                          <th class="text-theme-primary">사용자명</th>
+                          <th class="text-theme-primary">부서명</th>
+                          <th class="text-theme-primary">직무</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -56,11 +56,11 @@
                             </div>
                           </td>
                           <td>
-                            <span class="font-monospace text-body">{{ u.userId }}</span>
+                            <span class="font-monospace text-theme-primary">{{ u.userId }}</span>
                           </td>
-                          <td>{{ u.name }}</td>
-                          <td>{{ u.dept }}</td>
-                          <td>{{ u.role }}</td>
+                          <td class="text-theme-primary">{{ u.name }}</td>
+                          <td class="text-theme-primary">{{ u.dept }}</td>
+                          <td class="text-theme-primary">{{ u.role }}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -81,12 +81,12 @@
           </div>
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer b2b-modal-footer">
           <small class="me-auto text-muted"
             >체크박스로 여러 명 선택 후 <strong>확인</strong>을 누르세요.</small
           >
-          <button class="btn btn-outline-secondary" @click="onClose">취소</button>
-          <button class="btn btn-success" :disabled="!checkedIds.length" @click="emitConfirm">
+          <button class="btn-b2b-action" @click="onClose">취소</button>
+          <button class="btn-b2b-primary" :disabled="!checkedIds.length" @click="emitConfirm">
             확인 ({{ checkedIds.length }})
           </button>
         </div>
@@ -298,20 +298,41 @@ export default {
 
 <style scoped>
 /* dvh 우선, 폴백은 vh + clamp */
-.modal-content {
+.b2b-modal-content {
   height: clamp(var(--min-h, 560px), var(--pref-vh, 80vh), var(--max-h, 720px));
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-radius: var(--b2b-radius-sm) !important;
+  border: 1px solid var(--b2b-color-slate) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  background-color: var(--b2b-color-bg-body);
 }
+
 @supports (height: 100dvh) {
-  .modal-content {
+  .b2b-modal-content {
     height: clamp(var(--min-h, 560px), var(--pref-dvh, 80dvh), var(--max-h, 720px));
   }
 }
-.modal-body {
+
+.b2b-modal-header {
+  background-color: var(--b2b-color-bg-card);
+  border-bottom: 1px solid var(--b2b-color-border) !important;
+  padding: 12px 16px;
+  cursor: move;
+}
+
+.b2b-modal-body {
   flex: 1 1 auto;
   overflow: auto;
+  padding: 16px;
+  background-color: var(--b2b-color-bg-body);
+}
+
+.b2b-modal-footer {
+  background-color: var(--b2b-color-bg-card);
+  border-top: 1px solid var(--b2b-color-border) !important;
+  padding: 12px 16px;
 }
 
 @media (max-width: 576px) {
@@ -319,13 +340,10 @@ export default {
     width: calc(100vw - 12px) !important;
   }
 }
-.modal-header {
-  cursor: move;
-}
 
 /* 이 테이블 내부에서는 <code>색 대신 본문색으로 */
 .code-inherit code {
-  color: var(--bs-body-color) !important;
+  color: var(--b2b-color-text-main) !important;
   background: transparent;
   padding: 0;
 }

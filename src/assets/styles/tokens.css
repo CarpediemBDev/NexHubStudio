@@ -1,0 +1,505 @@
+:root, [data-theme="light"] {
+  /* Corporate Slate/Indigo Accent */
+  --b2b-color-primary: #2563EB;
+  --b2b-color-primary-hover: #1D4ED8;
+  --b2b-color-primary-subtle: #EFF6FF;
+  --b2b-color-slate: #1E293B;
+
+  /* Standard Design Tokens (CSS Variables) - Light Mode */
+  --bg-main: #F8FAFC;        /* slate-50 */
+  --bg-card: #FFFFFF;        /* white */
+  --bg-subcard: #F1F5F9;     /* slate-100 */
+  --bg-header: #F1F5F9;      /* slate-100 */
+  --text-primary: #1E293B;   /* slate-800 */
+  --text-secondary: #64748B; /* slate-500 */
+  --text-muted: #94A3B8;     /* slate-400 */
+  --border-color: #E2E8F0;   /* slate-200 */
+  
+  /* Legacy/B2B Tokens Mapping */
+  --b2b-color-bg-body: var(--bg-main);
+  --b2b-color-bg-card: var(--bg-card);
+  --b2b-color-border: var(--border-color);
+  --b2b-color-text-main: var(--text-primary);
+  --b2b-color-text-muted: var(--text-secondary);
+  --b2b-color-header-bg: #FFFFFF;
+  --b2b-color-tab-bg: #F1F5F9;
+  --b2b-color-hover-bg: #F1F5F9;
+  
+  /* Sidebar Tokens - Light Mode */
+  --b2b-sidebar-bg: #FFFFFF;
+  --b2b-sidebar-logo-bg: #F8FAFC;
+  --b2b-sidebar-border: #E2E8F0;
+  --b2b-sidebar-text: #475569;
+  --b2b-sidebar-hover: #F1F5F9;
+  --b2b-sidebar-active-bg: #EFF6FF;
+  --b2b-sidebar-active-text: #2563EB;
+
+  /* Semantic Colors */
+  --b2b-color-danger: #DC2626;
+  --b2b-color-danger-hover: #B91C1C;
+  --b2b-color-success: #16A34A;
+
+  /* Typography */
+  --b2b-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --b2b-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --b2b-font-size-base: 13px;
+  
+  /* Radii & Sizes */
+  --b2b-radius-sm: 2px;
+  --b2b-radius-md: 3px;
+  --b2b-height-compact: 28px;
+  --b2b-height-normal: 32px;
+}
+
+/* --- Dark / Navy Global Theme Mode --- */
+[data-theme="dark"],
+[data-theme="dark-navy"] {
+  --b2b-color-primary: #3B82F6;
+  --b2b-color-primary-hover: #60A5FA;
+  --b2b-color-primary-subtle: rgba(59, 130, 246, 0.15);
+  --b2b-color-slate: #0F172A;
+  
+  /* Standard Design Tokens (CSS Variables) - Dark Navy Mode */
+  --bg-main: #0F172A;        /* slate-900 (더 깊은 네이비) */
+  --bg-card: #1E293B;        /* slate-800 (카드 네이비) */
+  --bg-subcard: rgba(30, 41, 59, 0.85); /* slate-800/85 */
+  --bg-header: #334155;      /* slate-700 */
+  --text-primary: #F8FAFC;   /* slate-100 (밝은 폰트) */
+  --text-secondary: #94A3B8; /* slate-400 (차분한 서브 폰트) */
+  --text-muted: #64748B;     /* slate-500 */
+  --border-color: #334155;   /* slate-700 (어두운 구분선) */
+
+  /* Legacy/B2B Tokens Mapping */
+  --b2b-color-bg-body: var(--bg-main);
+  --b2b-color-bg-card: var(--bg-card);
+  --b2b-color-border: var(--border-color);
+  --b2b-color-text-main: var(--text-primary);
+  --b2b-color-text-muted: var(--text-secondary);
+  --b2b-color-header-bg: var(--bg-card);
+  --b2b-color-tab-bg: var(--bg-main);
+  --b2b-color-hover-bg: #334155;
+
+  /* Sidebar Tokens - Dark Navy Mode */
+  --b2b-sidebar-bg: #1E293B;
+  --b2b-sidebar-logo-bg: #0F172A;
+  --b2b-sidebar-border: #0F172A;
+  --b2b-sidebar-text: #CBD5E1;
+  --b2b-sidebar-hover: #334155;
+  --b2b-sidebar-active-bg: rgba(59, 130, 246, 0.15);
+  --b2b-sidebar-active-text: #60A5FA;
+}
+
+/* Tabular Nums for tables and numbers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--b2b-font-family-mono);
+}
+
+/* Semantic Design Tokens Utility Classes */
+.bg-theme-main {
+  background-color: var(--bg-main) !important;
+}
+.bg-theme-card {
+  background-color: var(--bg-card) !important;
+}
+.bg-theme-subcard {
+  background-color: var(--bg-subcard) !important;
+}
+.bg-theme-header {
+  background-color: var(--bg-header) !important;
+}
+.text-theme-primary {
+  color: var(--text-primary) !important;
+}
+.text-theme-secondary {
+  color: var(--text-secondary) !important;
+}
+.border-theme {
+  border-color: var(--border-color) !important;
+}
+
+/* ==========================================================================
+   GLOBAL UTILITY CLASS OVERRIDES FOR AUTOMATIC DARK NAVY THEME COMPATIBILITY
+   ========================================================================== */
+
+/* 1. Backgrounds & Containers */
+[data-theme="dark"] .bg-white,
+[data-theme="dark-navy"] .bg-white,
+[data-theme="dark"] .bg-light,
+[data-theme="dark-navy"] .bg-light,
+[data-theme="dark"] .bg-body,
+[data-theme="dark-navy"] .bg-body,
+[data-theme="dark"] .bg-body-tertiary,
+[data-theme="dark-navy"] .bg-body-tertiary,
+[data-theme="dark"] .bg-body-secondary,
+[data-theme="dark-navy"] .bg-body-secondary,
+[data-theme="dark"] .list-group-item,
+[data-theme="dark-navy"] .list-group-item {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 2. Sub-containers, Subcards & Table Headers */
+[data-theme="dark"] .bg-light-subtle,
+[data-theme="dark-navy"] .bg-light-subtle,
+[data-theme="dark"] .table-light,
+[data-theme="dark-navy"] .table-light {
+  background-color: var(--bg-subcard) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .table,
+[data-theme="dark-navy"] .table,
+[data-theme="dark"] .table td,
+[data-theme="dark-navy"] .table td,
+[data-theme="dark"] .table th,
+[data-theme="dark-navy"] .table th {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* 마우스 올렸을 때 Navy색으로 변경되는 호버 효과 제거 */
+[data-theme="dark"] .table-hover tbody tr:hover,
+[data-theme="dark-navy"] .table-hover tbody tr:hover,
+[data-theme="dark"] .table-hover tbody tr:hover td,
+[data-theme="dark-navy"] .table-hover tbody tr:hover td {
+  background-color: inherit !important;
+  color: inherit !important;
+}
+
+/* 3. Cards, Modals, Popovers & Dropdowns */
+[data-theme="dark"] .card,
+[data-theme="dark-navy"] .card,
+[data-theme="dark"] .card-header,
+[data-theme="dark-navy"] .card-header,
+[data-theme="dark"] .card-footer,
+[data-theme="dark-navy"] .card-footer,
+[data-theme="dark"] .modal-content,
+[data-theme="dark-navy"] .modal-content,
+[data-theme="dark"] .modal-header,
+[data-theme="dark-navy"] .modal-header,
+[data-theme="dark"] .modal-body,
+[data-theme="dark-navy"] .modal-body,
+[data-theme="dark"] .modal-footer,
+[data-theme="dark-navy"] .modal-footer,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark-navy"] .dropdown-menu,
+[data-theme="dark"] .popover,
+[data-theme="dark-navy"] .popover,
+[data-theme="dark"] .toast,
+[data-theme="dark-navy"] .toast {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .dropdown-item,
+[data-theme="dark-navy"] .dropdown-item {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark-navy"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus,
+[data-theme="dark-navy"] .dropdown-item:focus {
+  background-color: var(--b2b-color-hover-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 4. Text Utilities */
+[data-theme="dark"] .text-dark,
+[data-theme="dark-navy"] .text-dark,
+[data-theme="dark"] .text-body,
+[data-theme="dark-navy"] .text-body,
+[data-theme="dark"] .text-black,
+[data-theme="dark-navy"] .text-black {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .text-muted,
+[data-theme="dark-navy"] .text-muted,
+[data-theme="dark"] .text-secondary,
+[data-theme="dark-navy"] .text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* 5. Borders & Dividers */
+[data-theme="dark"] .border,
+[data-theme="dark-navy"] .border,
+[data-theme="dark"] .border-light,
+[data-theme="dark-navy"] .border-light,
+[data-theme="dark"] .border-secondary,
+[data-theme="dark-navy"] .border-secondary,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark-navy"] .border-bottom,
+[data-theme="dark"] .border-top,
+[data-theme="dark-navy"] .border-top,
+[data-theme="dark"] .border-start,
+[data-theme="dark-navy"] .border-start,
+[data-theme="dark"] .border-end,
+[data-theme="dark-navy"] .border-end,
+[data-theme="dark"] hr,
+[data-theme="dark-navy"] hr {
+  border-color: var(--border-color) !important;
+}
+
+/* 6. Form Controls & Inputs */
+/* dark: 기존 card 배경 유지 */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .input-group-text,
+[data-theme="dark"] .dp__input {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* dark-navy: 입력창 인지성 강화 — 배경 살짝 밝게(#263348) + 테두리(#475569) */
+[data-theme="dark-navy"] .form-control,
+[data-theme="dark-navy"] .form-select,
+[data-theme="dark-navy"] .input-group-text,
+[data-theme="dark-navy"] .dp__input {
+  background-color: #263348 !important;  /* slate-800과 slate-700 중간 */
+  color: var(--text-primary) !important;
+  border-color: #475569 !important;      /* slate-600 — 확실히 보이는 선 */
+}
+
+/* 다크/다크네이비 placeholder 텍스트 가독성 강화 (slate-400) */
+[data-theme="dark"] .form-control::placeholder,
+[data-theme="dark-navy"] .form-control::placeholder,
+[data-theme="dark"] .dp__input::placeholder,
+[data-theme="dark-navy"] .dp__input::placeholder {
+  color: #94A3B8 !important;
+  opacity: 0.85 !important;
+}
+
+/* dark focus */
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--b2b-color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+}
+
+/* dark-navy focus — 배경 유지 + primary 테두리 강조 */
+[data-theme="dark-navy"] .form-control:focus,
+[data-theme="dark-navy"] .form-select:focus {
+  background-color: #263348 !important;
+  color: var(--text-primary) !important;
+  border-color: var(--b2b-color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.30) !important;
+}
+
+[data-theme="dark"] .form-check-input,
+[data-theme="dark-navy"] .form-check-input {
+  background-color: var(--bg-card) !important;
+  border-color: #475569 !important;
+}
+
+[data-theme="dark"] .form-check-input:checked,
+[data-theme="dark-navy"] .form-check-input:checked {
+  background-color: var(--b2b-color-primary) !important;
+  border-color: var(--b2b-color-primary) !important;
+}
+
+
+/* 7. Buttons */
+[data-theme="dark"] .btn-light,
+[data-theme="dark-navy"] .btn-light,
+[data-theme="dark"] .btn-outline-secondary,
+[data-theme="dark-navy"] .btn-outline-secondary {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .btn-light:hover,
+[data-theme="dark-navy"] .btn-light:hover,
+[data-theme="dark"] .btn-outline-secondary:hover,
+[data-theme="dark-navy"] .btn-outline-secondary:hover {
+  background-color: var(--border-color) !important;
+  color: #FFFFFF !important;
+  border-color: var(--text-secondary) !important;
+}
+
+/* ==========================================================================
+   B2B TYPOGRAPHY SYSTEM
+   ========================================================================== */
+.b2b-text-display {
+  font-size: 1.5rem !important; /* 24px */
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+.b2b-text-h1,
+.page-title {
+  font-size: 1.1875rem !important; /* 19px */
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+
+.b2b-text-h2,
+.section-title {
+  font-size: 0.9375rem !important; /* 15px */
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+.b2b-text-body {
+  font-size: 0.8125rem !important; /* 13px - B2B Standard */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+}
+
+.b2b-text-sm {
+  font-size: 0.75rem !important; /* 12px */
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+}
+
+.b2b-text-xs,
+.caption {
+  font-size: 0.6875rem !important; /* 11px */
+  font-weight: 400 !important;
+  line-height: 1.3 !important;
+}
+
+/* ==========================================================================
+   B2B BADGE & TAG SYSTEM
+   ========================================================================== */
+.b2b-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  border-radius: 9999px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.b2b-badge-primary {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: #2563EB;
+}
+
+.b2b-badge-success {
+  background-color: rgba(22, 163, 74, 0.12);
+  color: #16A34A;
+}
+
+.b2b-badge-warning {
+  background-color: rgba(217, 119, 6, 0.12);
+  color: #D97706;
+}
+
+.b2b-badge-danger {
+  background-color: rgba(220, 38, 38, 0.12);
+  color: #DC2626;
+}
+
+.b2b-badge-secondary {
+  background-color: var(--bg-subcard);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.b2b-badge-outline {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+/* Dark mode badge adjustments */
+[data-theme="dark"] .b2b-badge-primary,
+[data-theme="dark-navy"] .b2b-badge-primary {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60A5FA;
+}
+
+[data-theme="dark"] .b2b-badge-success,
+[data-theme="dark-navy"] .b2b-badge-success {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #4ADE80;
+}
+
+[data-theme="dark"] .b2b-badge-warning,
+[data-theme="dark-navy"] .b2b-badge-warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #FBBF24;
+}
+
+[data-theme="dark"] .b2b-badge-danger,
+[data-theme="dark-navy"] .b2b-badge-danger {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #F87171;
+}
+
+/* ==========================================================================
+   B2B CARD & CONTAINER SYSTEM
+   ========================================================================== */
+.b2b-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.b2b-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  min-height: 42px;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.b2b-card-body {
+  padding: 16px;
+}
+
+/* ==========================================================================
+   B2B MODAL LAYOUT SYSTEM
+   ========================================================================== */
+.b2b-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.b2b-modal-title {
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.b2b-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+}
+
+/* ==========================================================================
+   B2B FORM LABEL & SEARCH BAR
+   ========================================================================== */
+.b2b-form-label {
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+

@@ -1,13 +1,13 @@
-﻿<template>
-  <div class="github-page">
+<template>
+  <div class="b2b-page-container">
     <!-- 페이지 헤더 -->
-    <div class="page-header">
-      <div class="header-content">
-        <h2 class="page-title">사용자 관리</h2>
-        <p class="page-subtitle">시스템 사용자 목록을 조회하고 관리합니다</p>
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="fw-bold m-0" style="color: var(--b2b-color-text-main)">사용자 관리</h4>
+        <p class="small mb-0 mt-1" style="color: var(--b2b-color-text-muted)">시스템 사용자 목록을 조회하고 관리합니다</p>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-primary github-btn github-btn-primary" @click="openPopup()">
+      <div>
+        <button class="btn-b2b-primary" @click="openPopup()">
           <i class="bi bi-plus-lg"></i> 사용자 추가
         </button>
       </div>
@@ -17,24 +17,23 @@
       <!-- LEFT: 사용자 목록 -->
       <div class="col-12 col-lg-6">
         <!-- 검색바 -->
-        <div class="filter-bar">
-          <div class="search-wrapper">
-            <i class="bi bi-search search-icon"></i>
+        <div class="b2b-toolbar mb-3 p-2 bg-theme-subcard border border-theme rounded-2">
+          <div class="input-group input-group-sm rounded-2">
+            <span class="input-group-text bg-theme-card border-theme text-theme-secondary">
+              <i class="bi bi-search"></i>
+            </span>
             <input
               v-model="keyword"
-              class="form-control search-input"
+              class="form-control form-control-sm b2b-text-body bg-theme-card text-theme-primary border-theme"
               placeholder="ID, 이름, 부서, 직무로 검색..."
             />
-          </div>
-          <div class="result-info">
-            <span>총 {{ visibleUsers.length }}명</span>
           </div>
         </div>
 
         <!-- 사용자 목록 테이블 -->
-        <div class="content-card">
-          <div class="table-responsive">
-            <table class="table github-table table-hover mb-0 align-middle">
+        <div class="b2b-grid-card">
+          <div class="b2b-grid-wrapper table-responsive" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-hover mb-0 align-middle">
               <thead>
                 <tr>
                   <th class="text-center" style="width: 50px">
@@ -48,7 +47,7 @@
                     />
                   </th>
                   <th
-                    class="user-select-none"
+                    class="user-select-none fw-semibold"
                     @click="sortBy('userId')"
                     :aria-sort="ariaSort('userId')"
                     style="cursor: pointer"
@@ -56,7 +55,7 @@
                     UserId <small class="text-muted">{{ sortIndicator('userId') }}</small>
                   </th>
                   <th
-                    class="user-select-none"
+                    class="user-select-none fw-semibold"
                     @click="sortBy('name')"
                     :aria-sort="ariaSort('name')"
                     style="cursor: pointer"
@@ -64,7 +63,7 @@
                     사용자명 <small class="text-muted">{{ sortIndicator('name') }}</small>
                   </th>
                   <th
-                    class="user-select-none"
+                    class="user-select-none fw-semibold"
                     @click="sortBy('dept')"
                     :aria-sort="ariaSort('dept')"
                     style="cursor: pointer"
@@ -72,7 +71,7 @@
                     부서명 <small class="text-muted">{{ sortIndicator('dept') }}</small>
                   </th>
                   <th
-                    class="user-select-none"
+                    class="user-select-none fw-semibold"
                     @click="sortBy('role')"
                     :aria-sort="ariaSort('role')"
                     style="cursor: pointer"
@@ -81,7 +80,7 @@
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody v-if="visibleUsers.length > 0">
                 <tr v-for="u in visibleUsers" :key="u.userId">
                   <td class="text-center">
                     <input
@@ -92,23 +91,23 @@
                     />
                   </td>
                   <td>
-                    <code class="github-code">{{ u.userId }}</code>
+                    <span class="text-theme-primary">{{ u.userId }}</span>
                   </td>
                   <td>
-                    <button
-                      class="btn btn-link btn-sm p-0 text-decoration-none"
-                      @click="openPopup()"
-                    >
-                      {{ u.name }}
-                    </button>
+                    <span class="text-theme-primary" style="cursor:pointer" @click="openPopup()">{{ u.name }}</span>
                   </td>
-                  <td class="text-github-secondary">{{ u.dept }}</td>
-                  <td class="text-github-secondary">{{ u.role }}</td>
+                  <td class="text-theme-primary">{{ u.dept }}</td>
+                  <td class="text-theme-primary">{{ u.role }}</td>
                 </tr>
-                <tr v-if="visibleUsers.length === 0">
-                  <td colspan="5" class="empty-state">
-                    <i class="bi bi-inbox"></i>
-                    <div>데이터가 없습니다</div>
+              </tbody>
+              <tbody v-else>
+                <tr>
+                  <td colspan="5" class="p-0 border-0">
+                    <div class="b2b-empty-state">
+                      <i class="bi bi-search"></i>
+                      <h6 class="b2b-empty-state-title">조회된 데이터가 없습니다</h6>
+                      <p class="b2b-empty-state-desc">검색 조건을 입력하고 조회를 눌러주세요.</p>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -270,5 +269,4 @@ export default {
 </script>
 
 <style scoped>
-@import '@/assets/styles/github-theme.css';
 </style>

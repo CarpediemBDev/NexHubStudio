@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="modal-backdrop" @click.self="close">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -124,16 +124,16 @@
           </div>
 
           <!-- 미리보기 -->
-          <div class="preview-box mt-4 p-3 bg-light rounded">
-            <div class="fw-bold mb-2">미리보기</div>
+          <div class="preview-box mt-4 p-3 bg-theme-subcard rounded border border-theme">
+            <div class="fw-bold mb-2 text-theme-primary">미리보기</div>
             <div class="d-flex align-items-center gap-2">
               <i
                 :class="form.icon || 'bi bi-folder'"
                 :style="{ fontSize: '1.5rem', color: form.colorCode || '#6c757d' }"
               ></i>
               <div>
-                <div class="fw-bold">{{ form.groupName || '그룹명' }}</div>
-                <small class="text-muted">{{ form.description || '설명' }}</small>
+                <div class="fw-bold text-theme-primary">{{ form.groupName || '그룹명' }}</div>
+                <small class="text-theme-secondary">{{ form.description || '설명' }}</small>
               </div>
               <span
                 class="badge ms-auto"
@@ -148,7 +148,7 @@
           </div>
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer border-theme">
           <button type="button" class="btn btn-secondary" @click="close">취소</button>
           <button type="button" class="btn btn-primary" @click="save">
             <i class="bi bi-save"></i> 저장
@@ -255,7 +255,8 @@ export default {
 }
 
 .modal-dialog {
-  background: white;
+  background: var(--bg-card);
+  color: var(--text-primary);
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   max-width: 700px;
@@ -268,13 +269,15 @@ export default {
 
 .modal-content {
   border: none;
+  background: var(--bg-card);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 2rem);
 }
 
 .modal-header {
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 1px solid var(--border-color);
   padding: 1rem 1.5rem;
   flex-shrink: 0;
 }
@@ -286,12 +289,12 @@ export default {
 }
 
 .modal-footer {
-  border-top: 2px solid #dee2e6;
+  border-top: 1px solid var(--border-color);
   padding: 1rem 1.5rem;
   flex-shrink: 0;
 }
 
 .preview-box {
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
 }
 </style>

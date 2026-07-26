@@ -15,19 +15,29 @@
     <div class="row g-3">
       <!-- LEFT: 사용자 목록 -->
       <div class="col-12">
-        <div class="card shadow-sm">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <h2 class="h5 mb-0">사용자 목록</h2>
-            <input
-              v-model="keyword"
-              class="form-control form-control-sm w-auto"
-              placeholder="검색: ID/이름/부서/직무"
-            />
+        <div class="b2b-card shadow-sm">
+          <div class="b2b-card-header bg-theme-subcard py-2.5 px-3">
+            <h5 class="b2b-text-h2 text-theme-primary mb-0 d-flex align-items-center gap-2">
+              사용자 목록
+              <span class="b2b-badge b2b-badge-secondary ms-1">총 {{ visibleUsers.length }}명</span>
+            </h5>
+            
+            <!-- 라운드 돋보기 인풋 박스 UI (라인 일체형) -->
+            <div class="input-group input-group-sm rounded-2 search-input-box" style="width: 260px;">
+              <span class="input-group-text bg-theme-card border-theme border-end-0 text-theme-secondary px-2.5">
+                <i class="bi bi-search"></i>
+              </span>
+              <input
+                v-model="keyword"
+                class="form-control form-control-sm border-theme border-start-0 ps-1 b2b-text-body bg-theme-card text-theme-primary"
+                placeholder="ID / 이름 / 부서 / 직무 검색..."
+              />
+            </div>
           </div>
-          <div class="card-body p-0">
+          <div class="b2b-card-body p-0">
             <div class="table-responsive">
               <table class="table table-hover table-sm mb-0 align-middle">
-                <thead class="table-light">
+                <thead>
                   <tr>
                     <th style="width: 44px">
                       <div class="form-check m-0 d-flex justify-content-center">
@@ -43,7 +53,7 @@
                       </div>
                     </th>
                     <th
-                      class="user-select-none text-nowrap"
+                      class="user-select-none text-nowrap fw-semibold"
                       scope="col"
                       @click="sortBy('userId')"
                       :aria-sort="ariaSort('userId')"
@@ -51,7 +61,7 @@
                       UserId <small class="text-muted">{{ sortIndicator('userId') }}</small>
                     </th>
                     <th
-                      class="user-select-none text-nowrap"
+                      class="user-select-none text-nowrap fw-semibold"
                       scope="col"
                       @click="sortBy('name')"
                       :aria-sort="ariaSort('name')"
@@ -59,7 +69,7 @@
                       사용자명 <small class="text-muted">{{ sortIndicator('name') }}</small>
                     </th>
                     <th
-                      class="user-select-none text-nowrap"
+                      class="user-select-none text-nowrap fw-semibold"
                       scope="col"
                       @click="sortBy('dept')"
                       :aria-sort="ariaSort('dept')"
@@ -67,7 +77,7 @@
                       부서명 <small class="text-muted">{{ sortIndicator('dept') }}</small>
                     </th>
                     <th
-                      class="user-select-none text-nowrap"
+                      class="user-select-none text-nowrap fw-semibold"
                       scope="col"
                       @click="sortBy('role')"
                       :aria-sort="ariaSort('role')"
@@ -76,7 +86,7 @@
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody v-if="visibleUsers.length > 0">
                   <tr v-for="u in visibleUsers" :key="u.userId">
                     <td>
                       <div class="form-check m-0 d-flex justify-content-center">
@@ -90,15 +100,25 @@
                       </div>
                     </td>
                     <td>
-                      <span class="font-monospace text-body">{{ u.userId }}</span>
+                      <span class="text-theme-primary">{{ u.userId }}</span>
                     </td>
                     <td>
-                      <button class="btn btn-outline-primary btn-sm" @click="openPopup()">
-                        {{ u.name }}
-                      </button>
+                      <span class="text-theme-primary" style="cursor:pointer" @click="openPopup()">{{ u.name }}</span>
                     </td>
                     <td>{{ u.dept }}</td>
                     <td>{{ u.role }}</td>
+                  </tr>
+                </tbody>
+                <!-- Empty State (데이터 없음) 뷰 (최소 높이 200px) -->
+                <tbody v-else>
+                  <tr>
+                    <td colspan="5" class="p-0 border-0">
+                      <div class="b2b-empty-state">
+                        <i class="bi bi-search"></i>
+                        <h6 class="b2b-empty-state-title">조회된 데이터가 없습니다</h6>
+                        <p class="b2b-empty-state-desc">검색 조건을 입력하거나 다른 키워드로 조회를 눌러주세요.</p>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -180,9 +200,12 @@ export default {
     },
   },
   methods: {
-    loadUsers() {
+    loadUsers(searchParams) {
+      if (searchParams) {
+        alert('[조회 요청 Payload]\n\n' + JSON.stringify(searchParams, null, 2))
+      }
       http
-        .get('/users')
+        .get('/users', { params: searchParams })
         .then((res) => {
           this.users = res.data.data
         })

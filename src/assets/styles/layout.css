@@ -1,0 +1,46 @@
+/* B2B Application Layout */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--b2b-color-bg-body);
+  color: var(--b2b-color-text-main);
+  font-family: var(--b2b-font-family);
+  font-size: var(--b2b-font-size-base);
+}
+
+.b2b-page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.b2b-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background-color: var(--b2b-color-bg-card);
+  border-bottom: 1px solid var(--b2b-color-border);
+  min-height: 48px;
+}
+
+.b2b-grid-wrapper {
+  flex: 1 1 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.b2b-grid-card {
+  flex: 1 1 auto;
+  background-color: var(--b2b-color-bg-card);
+  border: 1px solid var(--b2b-color-border);
+  border-radius: var(--b2b-radius-md);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

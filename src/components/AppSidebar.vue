@@ -1,7 +1,7 @@
-﻿<template>
-  <div class="app-sidebar bg-white border-end" :class="{ collapsed: isCollapsed }">
+<template>
+  <div class="app-sidebar bg-theme-card border-end border-theme" :class="{ collapsed: isCollapsed }">
     <!-- 사이드바 헤더 (접기/펼치기 버튼) -->
-    <div class="sidebar-header d-flex align-items-center justify-content-end p-3 border-bottom">
+    <div class="sidebar-header d-flex align-items-center justify-content-end p-3 border-bottom border-theme">
       <button class="btn btn-sm btn-outline-secondary border-0" @click="$emit('toggle')">
         <i class="bi" :class="isCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'"></i>
       </button>
@@ -159,20 +159,20 @@ export default {
 }
 
 .nav-link {
-  color: #333;
+  color: var(--text-primary);
   cursor: pointer;
   border-radius: 6px;
 }
 .nav-link:hover {
-  background-color: #f8f9fa;
-  color: #0d6efd;
+  background-color: var(--bg-subcard);
+  color: var(--b2b-color-primary);
 }
 
 /* 활성 링크 */
 .router-link-active {
-  color: #0d6efd;
+  color: var(--b2b-color-primary);
   font-weight: 600;
-  background-color: #e7f1ff;
+  background-color: var(--b2b-color-primary-subtle);
 }
 
 /* 서브메뉴 애니메이션 */

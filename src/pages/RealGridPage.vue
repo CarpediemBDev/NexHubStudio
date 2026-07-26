@@ -1,5 +1,5 @@
 <template>
-  <div class="container py-3">
+  <div class="b2b-page-container">
     <!-- Header Page Title -->
     <div class="mb-3">
       <h4 class="fw-bold text-dark m-0">RealGrid 샘플 (공통 컴포넌트형)</h4>
@@ -7,8 +7,8 @@
     </div>
 
     <!-- Unified Management Toolbar (B2B Compact Enterprise Style) -->
-    <div class="card bg-light border-0 mb-3 shadow-sm">
-      <div class="card-body p-2.5 d-flex align-items-center justify-content-between">
+    <div class="b2b-toolbar">
+      <div class="d-flex align-items-center justify-content-between w-100">
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">바닐라 JS 래퍼</span>
           <!-- Quick Search Bar -->
@@ -19,23 +19,23 @@
           />
         </div>
         <div class="d-flex align-items-center gap-1.5 ms-auto">
-          <button class="btn-compact btn-compact-secondary" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
+          <button class="btn-b2b-action" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
             <i class="bi bi-eye text-primary me-0.5"></i>
             <span>컬럼</span>
           </button>
-          <button class="btn-compact btn-compact-secondary" title="엑셀 파일 내보내기" @click="exportExcel">
+          <button class="btn-b2b-action" title="엑셀 파일 내보내기" @click="exportExcel">
             <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
             <span>엑셀</span>
           </button>
-          <button class="btn-compact btn-compact-secondary" title="새 행 추가" @click="addRow">
+          <button class="btn-b2b-action" title="새 행 추가" @click="addRow">
             <i class="bi bi-plus-lg text-success me-0.5"></i>
             <span>추가</span>
           </button>
-          <button class="btn-compact btn-compact-secondary" title="선택 행 삭제" @click="deleteChecked">
+          <button class="btn-b2b-action" title="선택 행 삭제" @click="deleteChecked">
             <i class="bi bi-dash-lg text-danger me-0.5"></i>
             <span>삭제</span>
           </button>
-          <button class="btn-compact btn-compact-save ms-1" title="변경사항 저장" @click="saveData">
+          <button class="btn-b2b-primary ms-1" title="변경사항 저장" @click="saveData">
             <i class="bi bi-check2 me-0.5"></i>
             <span>저장</span>
           </button>
@@ -44,15 +44,14 @@
     </div>
 
     <!-- Grid Container Card using Common JS Component -->
-    <div class="card shadow-sm border-light mb-4">
-      <div class="card-body p-0">
+    <div class="b2b-grid-card mb-4">
+      <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
           :fields="gridFields"
           :columns="gridColumns"
           :rows="users"
           :useFooter="true"
-          height="580px"
           @init="onGridInit"
         />
       </div>

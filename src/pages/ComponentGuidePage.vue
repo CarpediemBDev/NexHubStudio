@@ -1,6 +1,79 @@
-﻿<template>
+<template>
   <div class="container-fluid py-3">
-    <h2 class="mb-4">공통 컴포넌트 사용 가이드</h2>
+    <h2 class="mb-4 text-theme-primary fw-bold">공통 컴포넌트 & 디자인 시스템 가이드</h2>
+
+    <!-- B2B Design Tokens & Standardized CSS Showcase -->
+    <div class="b2b-card mb-4">
+      <div class="b2b-card-header bg-theme-subcard">
+        <h4 class="b2b-text-h2 text-theme-primary mb-0">✨ B2B 프론트엔드 공통 CSS 디자인 시스템</h4>
+        <span class="b2b-badge b2b-badge-primary">Standardized System</span>
+      </div>
+      <div class="b2b-card-body">
+        <div class="row g-4">
+          <!-- 1. Typography -->
+          <div class="col-md-6 col-lg-3">
+            <div class="p-3 border border-theme rounded-2 bg-theme-subcard h-100">
+              <h6 class="b2b-text-h2 text-theme-primary mb-3">1. 타이포그래피 (Typography)</h6>
+              <div class="d-flex flex-column gap-2">
+                <div><span class="b2b-text-display text-theme-primary">Display 24px</span> <code class="b2b-text-xs">.b2b-text-display</code></div>
+                <div><span class="b2b-text-h1 text-theme-primary">Heading 1 (19px)</span> <code class="b2b-text-xs">.b2b-text-h1</code></div>
+                <div><span class="b2b-text-h2 text-theme-primary">Heading 2 (15px)</span> <code class="b2b-text-xs">.b2b-text-h2</code></div>
+                <div><span class="b2b-text-body text-theme-primary">Body 13px (B2B Standard)</span> <code class="b2b-text-xs">.b2b-text-body</code></div>
+                <div><span class="b2b-text-sm text-theme-secondary">Small 12px</span> <code class="b2b-text-xs">.b2b-text-sm</code></div>
+                <div><span class="b2b-text-xs text-theme-muted">Extra Small 11px</span> <code class="b2b-text-xs">.b2b-text-xs</code></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Enterprise Compact Buttons -->
+          <div class="col-md-6 col-lg-3">
+            <div class="p-3 border border-theme rounded-2 bg-theme-subcard h-100">
+              <h6 class="b2b-text-h2 text-theme-primary mb-3">2. 버튼 시스템 (Buttons)</h6>
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <button class="btn-b2b-primary">Primary (30px)</button>
+                <button class="btn-b2b-action">Action/Secondary</button>
+                <button class="btn-b2b-success">Success</button>
+                <button class="btn-b2b-danger">Danger</button>
+                <button class="btn-b2b-warning">Warning</button>
+                <button class="btn-b2b-icon btn-b2b-action" title="아이콘 전용"><i class="bi bi-gear"></i></button>
+              </div>
+              <p class="b2b-text-xs text-theme-secondary mb-0"><code>.btn-b2b-*</code> 및 <code>.btn-compact</code> 높이 30px, 폰트 13px 통일</p>
+            </div>
+          </div>
+
+          <!-- 3. Badges & Status Chips -->
+          <div class="col-md-6 col-lg-3">
+            <div class="p-3 border border-theme rounded-2 bg-theme-subcard h-100">
+              <h6 class="b2b-text-h2 text-theme-primary mb-3">3. 배지 & 태그 (Badges)</h6>
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="b2b-badge b2b-badge-primary">Primary</span>
+                <span class="b2b-badge b2b-badge-success">Success</span>
+                <span class="b2b-badge b2b-badge-warning">Warning</span>
+                <span class="b2b-badge b2b-badge-danger">Danger</span>
+                <span class="b2b-badge b2b-badge-secondary">Secondary</span>
+                <span class="b2b-badge b2b-badge-outline">Outline</span>
+              </div>
+              <div class="d-flex align-items-center gap-3 b2b-text-sm">
+                <span><span class="status-dot status-dot-success me-1"></span>온라인</span>
+                <span><span class="status-dot status-dot-danger me-1"></span>점검중</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Form Labels & Cards -->
+          <div class="col-md-6 col-lg-3">
+            <div class="p-3 border border-theme rounded-2 bg-theme-subcard h-100">
+              <h6 class="b2b-text-h2 text-theme-primary mb-3">4. 폼 라벨 & 인풋 (Form Controls)</h6>
+              <div class="mb-2">
+                <label class="b2b-form-label">검색어 입력</label>
+                <input type="text" class="form-control form-control-sm b2b-text-body" placeholder="13px 표준 규격 인풋" />
+              </div>
+              <p class="b2b-text-xs text-theme-secondary mb-0"><code>.b2b-form-label</code> + <code>form-control-sm</code></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- JqxCustomGrid 가이드 -->
     <div class="card mb-4 border-primary">

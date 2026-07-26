@@ -1,42 +1,47 @@
 <template>
-  <div class="github-page">
-    <div class="page-header">
-      <h2 class="page-title">JQWidgets 그리드 예제</h2>
-      <p class="page-subtitle">사용자 목록을 관리하는 그리드 페이지입니다</p>
+  <div class="b2b-page-container">
+    <div class="mb-3">
+      <h4 class="fw-bold text-dark m-0">JQWidgets 그리드 예제</h4>
+      <p class="text-muted small mb-0 mt-1">사용자 목록을 관리하는 그리드 페이지입니다</p>
     </div>
 
-    <!-- SearchGrid -->
-    <div class="filter-bar">
-      <SearchGrid ref="searchGrid" @open-user-popup="openPopup" @search="loadUsers" />
-    </div>
+    <div class="b2b-toolbar">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 w-100">
+        <!-- SearchGrid -->
+        <div class="d-flex align-items-center flex-grow-1 me-3">
+          <SearchGrid ref="searchGrid" @open-user-popup="openPopup" @search="loadUsers" class="w-100" />
+        </div>
 
-    <!-- 액션 버튼 -->
-    <div class="action-bar d-flex align-items-center gap-1.5 justify-content-end mb-3">
-      <button class="btn-compact btn-compact-secondary" title="새 행 추가" @click="add">
-        <i class="bi bi-plus-lg text-success me-0.5"></i>
-        <span>추가</span>
-      </button>
-      <button class="btn-compact btn-compact-secondary" title="선택 행 삭제" @click="deleteSelected">
-        <i class="bi bi-dash-lg text-danger me-0.5"></i>
-        <span>삭제</span>
-      </button>
-      <button class="btn-compact btn-compact-save ms-1" title="변경사항 저장" @click="saveData">
-        <i class="bi bi-check2 me-0.5"></i>
-        <span>저장</span>
-      </button>
+        <!-- 액션 버튼 -->
+        <div class="d-flex align-items-center gap-1.5 ms-auto">
+          <button class="btn-b2b-action" title="새 행 추가" @click="add">
+            <i class="bi bi-plus-lg text-success me-0.5"></i>
+            <span>추가</span>
+          </button>
+          <button class="btn-b2b-action" title="선택 행 삭제" @click="deleteSelected">
+            <i class="bi bi-dash-lg text-danger me-0.5"></i>
+            <span>삭제</span>
+          </button>
+          <button class="btn-b2b-primary ms-1" title="변경사항 저장" @click="saveData">
+            <i class="bi bi-check2 me-0.5"></i>
+            <span>저장</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- 그리드 -->
-    <div class="content-card">
-      <JqxCustomGrid
-        ref="grd"
-        :localdata="rows"
-        :datafields="datafields"
-        :columns="columns"
-        selectionmode="checkbox"
-        :height="560"
-        theme="bootstrap"
-      />
+    <div class="b2b-grid-card mb-4">
+      <div class="b2b-grid-wrapper">
+        <JqxCustomGrid
+          ref="grd"
+          :localdata="rows"
+          :datafields="datafields"
+          :columns="columns"
+          selectionmode="checkbox"
+          theme="bootstrap"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -162,12 +167,4 @@ export default {
 </script>
 
 <style scoped>
-@import '@/assets/styles/github-theme.css';
-
-.action-bar {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  justify-content: flex-end;
-}
 </style>
