@@ -1,113 +1,67 @@
-﻿<!-- MainLayout.vue -->
 <template>
-  <div class="app-layout">
-    <!-- Header -->
-    <header class="app-header">
-      <NavBar />
-    </header>
+  <div class="vben-layout d-flex h-100 overflow-hidden">
+    <!-- Left Collapsible Sidebar -->
+    <VbenSidebar :collapsed="isSidebarCollapsed" />
 
-    <!-- Body (Sidebar + Content) -->
-    <div class="app-body d-flex">
-      <!-- Sidebar (Desktop only) -->
-      <aside class="d-none d-lg-block">
-        <AppSidebar :is-collapsed="isSidebarCollapsed" @toggle="toggleSidebar" />
-      </aside>
+    <!-- Right Workspace -->
+    <div class="vben-main-wrapper d-flex flex-column flex-grow-1 overflow-hidden">
+      <!-- Header -->
+      <VbenHeader @toggle-sidebar="toggleSidebar" />
+      
+      <!-- Multi-Tab Bar -->
+      <VbenTabBar />
 
-      <!-- Main Content -->
-      <main class="main-content">
-        <div class="p-3 h-100">
-          <router-view v-slot="{ Component }">
-            <transition :name="transitionName" mode="out-in">
-              <component :is="Component" />
-            </transition>
-          </router-view>
-        </div>
+      <!-- Main Workspace -->
+      <main class="vben-workspace flex-grow-1 overflow-auto p-3 position-relative">
+        <!-- Global Breadcrumb Header -->
+        <PageHeader />
+        <router-view v-slot="{ Component, route }">
+          <keep-alive>
+            <component :is="Component" :key="route.fullPath" />
+          </keep-alive>
+        </router-view>
       </main>
     </div>
-
-    <!-- Footer -->
-    <footer class="app-footer">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-md-6">
-            <small class="text-muted"> © 2026 NexHub Grid Studio. All rights reserved. </small>
-          </div>
-          <div class="col-md-6 text-md-end">
-            <small class="text-muted"> Vue 3 + RealGrid 2 + RealPivot + Bootstrap 5 </small>
-          </div>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
-<script>
-import NavBar from '../components/NavBar.vue'
-import AppSidebar from '../components/AppSidebar.vue'
-import '../assets/styles/transitions.css'
+<script setup>
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import VbenSidebar from '../components/vben/VbenSidebar.vue';
+import VbenHeader from '../components/vben/VbenHeader.vue';
+import VbenTabBar from '../components/vben/VbenTabBar.vue';
+import PageHeader from '../components/PageHeader.vue';
+import { useTabStore } from '../stores/tabStore';
 
-export default {
-  name: 'MainLayout',
-  components: { NavBar, AppSidebar },
-  data() {
-    return {
-      transitionName: 'slide-right',
-      lastPos: null,
-      isSidebarCollapsed: false,
-    }
-  },
-  watch: {
-    $route() {
-      const currentPos = history.state?.position || 0
-      const isBack = this.lastPos !== null && currentPos < this.lastPos
+const isSidebarCollapsed = ref(false);
+const tabStore = useTabStore();
+const route = useRoute();
 
-      this.transitionName = isBack ? 'slide-left' : 'slide-right'
-      this.lastPos = currentPos
-    },
+const toggleSidebar = () => {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value;
+};
+
+// Add tab when route changes
+watch(
+  () => route.path,
+  () => {
+    tabStore.addTab(route);
   },
-  methods: {
-    toggleSidebar() {
-      this.isSidebarCollapsed = !this.isSidebarCollapsed
-    },
-  },
-}
+  { immediate: true }
+);
 </script>
 
 <style scoped>
-/* 전체 레이아웃 */
-.app-layout {
+.vben-layout {
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  width: 100vw;
+  background-color: var(--b2b-color-bg-body);
 }
-
-/* 헤더 */
-.app-header {
-  z-index: 1000;
-  position: relative;
-}
-
-/* 바디: 남은 높이 차지 */
-.app-body {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* 메인 컨텐츠 영역 */
-.main-content {
-  flex: 1;
+.vben-main-wrapper {
   min-width: 0;
-  background-color: var(--nex-bg, #f0f2f5);
-  overflow-y: auto;
-  position: relative;
 }
-
-.app-footer {
-  background-color: var(--bs-light);
-  border-top: 1px solid var(--bs-border-color);
-  padding: 0.5rem 0;
-  z-index: 1000;
+.vben-workspace {
+  background-color: var(--b2b-color-bg-body);
 }
 </style>

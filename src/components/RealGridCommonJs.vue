@@ -9,6 +9,7 @@ import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
 import { showToast } from '@/utils/toastUtil.js'
+import { useTabStore } from '@/stores/tabStore.js'
 
 export default {
   name: 'RealGridCommonJs',
@@ -22,6 +23,11 @@ export default {
     softDeleting: { type: Boolean, default: true },
     hideDeletedRows: { type: Boolean, default: true },
     editable: { type: Boolean, default: true }
+  },
+  computed: {
+    currentTheme() {
+      return this.$tabStore?.sidebarTheme || 'light'
+    }
   },
   watch: {
     rows: {
@@ -47,10 +53,22 @@ export default {
           this.gridView.setColumns(newColumns)
         }
       }
+    },
+    // ✨ computed 경유로 Pinia 테마 변경 감지
+    currentTheme(newTheme) {
+      this.applyGridTheme(newTheme)
     }
+  },
+  created() {
+    // Pinia 태마 스토어 연결
+    this.$tabStore = useTabStore()
   },
   mounted() {
     this.initGrid()
+    // 마운트 시 현재 테마 1회 적용
+    this.$nextTick(() => {
+      this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
+    })
   },
   beforeUnmount() {
     this.destroyGrid()
@@ -78,8 +96,24 @@ export default {
         commitWhenLeave: true
       })
 
-      this.gridView.setStateBar({ visible: true })
-      this.gridView.setCheckBar({ visible: true })
+      // StateBar: 행 상태 컬러 뱃지 (추가=초록, 수정=파랑, 삭제=빨강)
+      this.gridView.setStateBar({
+        visible: true,
+        width: 6,
+        stateStyles: {
+          insert: { background: '#22c55e' },   // 추가 → 초록
+          update: { background: '#3b82f6' },   // 수정 → 파랑
+          delete: { background: '#ef4444' },   // 삭제 → 빨강
+          read:   { background: 'transparent' } // 기본 → 투명
+        }
+      })
+      // CheckBar: 전체선택 헤더 중앙 정렬
+      this.gridView.setCheckBar({
+        visible: true,
+        width: 36,
+        head: 'check',
+        headCheckCallback: null
+      })
       this.gridView.setFooter({ visible: this.useFooter })
 
       // 행 그룹핑 패널 지원 (피벗 A용)
@@ -110,8 +144,51 @@ export default {
       }
 
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
+      // 초기 테마 적용
+      this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
     },
-    
+
+    // =========================================================
+    // 🎨 동적 테마 연동: 제어열(indicator / checkBar / stateBar)
+    // =========================================================
+    getGridThemeStyles(theme) {
+      const isDark = theme === 'dark' || theme === 'dark-navy'
+      const isNavy = theme === 'dark-navy'
+
+      if (isDark) {
+        const bg     = isNavy ? '#1e293b' : '#1e293b'  // slate-800
+        const headBg = isNavy ? '#0f172a' : '#111827'  // slate-900
+        const border = isNavy ? '1px solid #334155' : '1px solid #374151'
+        const color  = '#f8fafc'
+        const cell   = { background: bg, color, borderRight: border }
+        const head   = { background: headBg, color, borderBottom: border }
+        return {
+          indicator: { ...cell, head },
+          checkBar:  { ...cell, head },
+          stateBar:  { background: bg, borderRight: border },
+        }
+      } else {
+        // Light 테마 — tokens.css 정확히 일치
+        const cell = { background: '#FFFFFF', color: '#1E293B', borderRight: '1px solid #E2E8F0' }
+        const head = { background: '#F1F5F9', color: '#1E293B', borderBottom: '1px solid #E2E8F0' }
+        return {
+          indicator: { ...cell, head },
+          checkBar:  { ...cell, head },
+          stateBar:  { background: '#FFFFFF', borderRight: '1px solid #E2E8F0' },
+        }
+      }
+    },
+
+    applyGridTheme(theme) {
+      if (!this.gridView) return
+      try {
+        const styles = this.getGridThemeStyles(theme)
+        this.gridView.setStyles(styles)
+      } catch (e) {
+        console.warn('[RealGrid] applyGridTheme error:', e)
+      }
+    },
+
     // Public API methods exposed via refs
     setFixedOptions(options) {
       if (this.gridView) {

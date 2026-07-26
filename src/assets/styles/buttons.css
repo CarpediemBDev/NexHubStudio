@@ -1,0 +1,207 @@
+/* ==========================================================================
+   B2B COMPACT ENTERPRISE BUTTON SYSTEM (UNIFIED APP-WIDE BUTTON STYLES)
+   ========================================================================== */
+
+/* Standard Compact Enterprise Buttons */
+.btn-b2b-action,
+.btn-b2b-primary,
+.btn-b2b-danger,
+.btn-b2b-success,
+.btn-b2b-warning,
+.btn-compact {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  height: 30px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 5px !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-in-out !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Global Bootstrap .btn Override (Excludes custom circular / transfer / specialized sizing buttons) */
+.btn:not(.shared-arrow-btn):not(.btn-action):not(.transfer-btn):not(.btn-circle):not(.btn-custom):not(.btn-lg):not(.btn-sm):not(.btn-link):not(.btn-close) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 5px;
+  line-height: 1;
+}
+
+/* Size Variants */
+.btn-lg {
+  height: 36px !important;
+  font-size: 14px !important;
+  padding: 0 16px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+}
+
+.btn-sm {
+  height: 26px !important;
+  font-size: 12px !important;
+  padding: 0 8px !important;
+  border-radius: 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+.btn-icon-only,
+.btn-b2b-icon {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Secondary / Action Button (Default Dark Navy / Light Card Button) */
+.btn-secondary,
+.btn-outline-secondary,
+.btn-light,
+.btn-b2b-action {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled),
+.btn-outline-secondary:hover:not(:disabled),
+.btn-light:hover:not(:disabled),
+.btn-b2b-action:hover:not(:disabled) {
+  background-color: var(--bg-subcard);
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+/* Primary Button (Vibrant Blue Accent) */
+.btn-primary,
+.btn-b2b-primary {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border-color: #2563EB;
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-b2b-primary:hover:not(:disabled) {
+  background-color: #1D4ED8;
+  border-color: #1D4ED8;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+}
+
+/* Success Button (Green Accent) */
+.btn-success,
+.btn-b2b-success {
+  background-color: #16A34A;
+  color: #FFFFFF;
+  border-color: #16A34A;
+}
+
+.btn-success:hover:not(:disabled),
+.btn-b2b-success:hover:not(:disabled) {
+  background-color: #15803D;
+  border-color: #15803D;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Danger Button (Red Accent) */
+.btn-danger,
+.btn-b2b-danger {
+  background-color: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+}
+
+.btn-danger:hover:not(:disabled),
+.btn-b2b-danger:hover:not(:disabled) {
+  background-color: #B91C1C;
+  border-color: #B91C1C;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Warning Button (Amber/Orange Accent) */
+.btn-warning,
+.btn-b2b-warning {
+  background-color: #D97706;
+  color: #FFFFFF;
+  border-color: #D97706;
+}
+
+.btn-warning:hover:not(:disabled),
+.btn-b2b-warning:hover:not(:disabled) {
+  background-color: #B45309;
+  border-color: #B45309;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Disabled State */
+.btn:disabled,
+.btn-b2b-action:disabled,
+.btn-b2b-primary:disabled,
+.btn-b2b-danger:disabled,
+.btn-b2b-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* --- Dark / Dark Navy Theme Button Overrides --- */
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark-navy"] .btn-secondary,
+[data-theme="dark"] .btn-outline-secondary,
+[data-theme="dark-navy"] .btn-outline-secondary,
+[data-theme="dark"] .btn-light,
+[data-theme="dark-navy"] .btn-light,
+[data-theme="dark"] .btn-b2b-action,
+[data-theme="dark-navy"] .btn-b2b-action {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .btn-secondary:hover:not(:disabled),
+[data-theme="dark-navy"] .btn-secondary:hover:not(:disabled),
+[data-theme="dark"] .btn-outline-secondary:hover:not(:disabled),
+[data-theme="dark-navy"] .btn-outline-secondary:hover:not(:disabled),
+[data-theme="dark"] .btn-light:hover:not(:disabled),
+[data-theme="dark-navy"] .btn-light:hover:not(:disabled),
+[data-theme="dark"] .btn-b2b-action:hover:not(:disabled),
+[data-theme="dark-navy"] .btn-b2b-action:hover:not(:disabled) {
+  background-color: var(--border-color);
+  border-color: var(--text-secondary);
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .btn-primary,
+[data-theme="dark-navy"] .btn-primary,
+[data-theme="dark"] .btn-b2b-primary,
+[data-theme="dark-navy"] .btn-b2b-primary {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border-color: #3B82F6;
+}

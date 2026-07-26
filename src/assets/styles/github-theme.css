@@ -1,11 +1,12 @@
-﻿/* GitHub 스타일 공통 테마 */
+/* GitHub 스타일 공통 테마 - Theme Variable Aware */
 
 /* 페이지 기본 스타일 */
 .github-page {
   padding: 2rem 3rem;
   max-width: 1600px;
   margin: 0 auto;
-  background: white;
+  background: var(--bg-main);
+  color: var(--text-primary);
   min-height: 100vh;
 }
 
@@ -16,7 +17,7 @@
   align-items: flex-start;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #d0d7de;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .header-content {
@@ -26,14 +27,14 @@
 .page-title {
   font-size: 1.75rem;
   font-weight: 600;
-  color: #24292f;
+  color: var(--text-primary);
   margin: 0 0 0.25rem 0;
 }
 
 .page-subtitle {
   font-size: 0.9rem;
   margin: 0;
-  color: #57606a;
+  color: var(--text-secondary);
 }
 
 .header-actions {
@@ -43,8 +44,8 @@
 
 /* 필터/검색바 */
 .filter-bar {
-  background: white;
-  border: 1px solid #d0d7de;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -65,13 +66,15 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6e7781;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
 .search-input {
   padding-left: 2.5rem;
-  border-color: #d0d7de;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
   font-size: 0.9rem;
 }
 
@@ -82,13 +85,14 @@
 
 .result-info {
   font-size: 0.875rem;
-  color: #57606a;
+  color: var(--text-secondary);
 }
 
 /* 컨텐츠 카드 */
 .content-card {
-  background: white;
-  border: 1px solid #d0d7de;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -99,13 +103,13 @@
 }
 
 .github-table thead {
-  background: #f6f8fa;
-  border-bottom: 1px solid #d0d7de;
+  background: var(--bg-subcard);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .github-table thead th {
   font-weight: 600;
-  color: #57606a;
+  color: var(--text-secondary);
   font-size: 0.75rem;
   padding: 0.75rem 1rem;
   text-transform: uppercase;
@@ -116,9 +120,9 @@
 .github-table tbody td {
   padding: 0.875rem 1rem;
   vertical-align: middle;
-  border-top: 1px solid #d8dee4;
+  border-top: 1px solid var(--border-color);
   font-size: 0.875rem;
-  color: #24292f;
+  color: var(--text-primary);
 }
 
 .github-table tbody tr:first-child td {
@@ -131,16 +135,16 @@
 }
 
 .github-table .row-clickable:hover {
-  background-color: #f6f8fa !important;
+  background-color: var(--bg-subcard) !important;
 }
 
 /* 유틸리티 클래스 */
 .github-code {
-  background: #eff1f3;
+  background: var(--bg-subcard);
   padding: 0.2rem 0.4rem;
   border-radius: 3px;
   font-size: 0.8125rem;
-  color: #0969da;
+  color: #3b82f6;
   font-weight: 500;
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono',
     monospace;
@@ -152,7 +156,8 @@
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: 12px;
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 .color-badge {
@@ -160,7 +165,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--border-color);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease;
 }
@@ -171,7 +176,7 @@
 
 .icon-display {
   font-size: 1.25rem;
-  color: #57606a;
+  color: var(--text-secondary);
 }
 
 /* 버튼 스타일 */
@@ -181,6 +186,9 @@
   font-weight: 500;
   border-radius: 6px;
   transition: all 0.15s ease;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .github-btn-primary {
@@ -196,8 +204,8 @@
 
 .github-btn-danger {
   color: #cf222e;
-  border-color: rgba(207, 34, 46, 0.2);
-  background: white;
+  border-color: rgba(207, 34, 46, 0.3);
+  background: var(--bg-card);
 }
 
 .github-btn-danger:hover {
@@ -208,22 +216,22 @@
 
 /* 텍스트 색상 */
 .text-github-primary {
-  color: #24292f;
+  color: var(--text-primary);
 }
 
 .text-github-secondary {
-  color: #57606a;
+  color: var(--text-secondary);
 }
 
 .text-github-tertiary {
-  color: #6e7781;
+  color: var(--text-muted);
 }
 
 /* 빈 상태 */
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #6e7781;
+  color: var(--text-secondary);
 }
 
 .empty-state i {

@@ -1,23 +1,23 @@
 <template>
   <div v-if="isOpen" class="modal-backdrop-custom d-flex align-items-center justify-content-center">
-    <div class="modal-card-custom bg-white rounded-3 shadow-lg border-0 overflow-hidden" style="width: 440px; max-width: 95vw;">
+    <div class="modal-card-custom bg-theme-card rounded-3 shadow-lg border-theme overflow-hidden" style="width: 440px; max-width: 95vw;">
       <!-- Modal Header -->
-      <div class="px-4 py-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+      <div class="px-4 py-3 bg-theme-subcard border-bottom border-theme d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-2">
           <i class="bi bi-eye text-primary fs-5"></i>
-          <h5 class="fw-bold text-dark m-0 fs-6">컬럼 표시 / 숨기기 설정 (Column Picker)</h5>
+          <h5 class="fw-bold text-theme-primary m-0 fs-6">컬럼 표시 / 숨기기 설정 (Column Picker)</h5>
         </div>
         <button type="button" class="btn-close" @click="$emit('close')"></button>
       </div>
 
       <!-- Quick Action Toolbar -->
-      <div class="px-4 py-2 bg-body-tertiary border-bottom d-flex align-items-center justify-content-between">
-        <span class="text-muted small">총 {{ columnList.length }}개 컬럼 중 {{ visibleCount }}개 표시 중</span>
+      <div class="px-4 py-2 bg-theme-subcard border-bottom border-theme d-flex align-items-center justify-content-between">
+        <span class="text-theme-secondary b2b-text-sm">총 {{ columnList.length }}개 컬럼 중 {{ visibleCount }}개 표시 중</span>
         <div class="d-flex gap-1.5">
-          <button class="btn btn-xs btn-outline-primary py-0.5 px-2 text-nowrap" style="font-size: 12px;" @click="showAll">
+          <button class="btn btn-sm btn-outline-primary text-nowrap" @click="showAll">
             모두 보기
           </button>
-          <button class="btn btn-xs btn-outline-secondary py-0.5 px-2 text-nowrap" style="font-size: 12px;" @click="resetDefault">
+          <button class="btn btn-sm btn-outline-secondary text-nowrap" @click="resetDefault">
             기본 설정
           </button>
         </div>
@@ -29,8 +29,8 @@
           <div
             v-for="col in columnList"
             :key="col.name"
-            class="d-flex align-items-center justify-content-between p-2 rounded-2 border transition-all cursor-pointer"
-            :class="col.visible ? 'bg-light border-primary-subtle' : 'bg-body-secondary opacity-75 border-secondary-subtle'"
+            class="d-flex align-items-center justify-content-between p-2 rounded-2 border border-theme transition-all cursor-pointer"
+            :class="col.visible ? 'bg-theme-subcard' : 'opacity-75 bg-theme-main'"
             @click="toggleCol(col)"
           >
             <div class="d-flex align-items-center gap-2">
@@ -44,9 +44,9 @@
                   @change="toggleCol(col)"
                 />
               </div>
-              <span class="fw-semibold text-dark small ms-2">{{ col.headerText }}</span>
+              <span class="fw-semibold text-theme-primary b2b-text-sm ms-2">{{ col.headerText }}</span>
             </div>
-            <span class="badge" :class="col.visible ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'">
+            <span class="b2b-badge" :class="col.visible ? 'b2b-badge-primary' : 'b2b-badge-secondary'">
               {{ col.visible ? '표시' : '숨김' }}
             </span>
           </div>
@@ -54,7 +54,7 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-4 py-3 bg-light border-top d-flex justify-content-end">
+      <div class="px-4 py-3 bg-theme-subcard border-top border-theme d-flex justify-content-end">
         <button type="button" class="btn btn-sm btn-primary px-4 fw-semibold shadow-sm" @click="$emit('close')">
           확인
         </button>

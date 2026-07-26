@@ -1,4 +1,5 @@
-﻿import { createApp } from 'vue'
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import vValidation from './directives/validation'
@@ -9,6 +10,11 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './assets/styles/premium-theme.css'
+import './assets/styles/tokens.css'
+import './assets/styles/layout.css'
+import './assets/styles/buttons.css'
+import './assets/styles/grid-theme.css'
+import './assets/styles/datepicker-theme.css'
 
 import * as RealGrid from 'realgrid'
 
@@ -24,6 +30,8 @@ if (typeof RealGrid?.setLicenseKey === 'function') {
 window.showToast = showToast
 
 const app = createApp(App)
+const pinia = createPinia()
+app.use(pinia)
 app.use(router)
 app.directive('validation', vValidation)
 app.directive('validated-form', vValidatedForm)

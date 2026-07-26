@@ -1,19 +1,8 @@
 <template>
-  <div class="container py-3">
-    <!-- Header Title -->
-    <div class="mb-3">
-      <div class="d-flex align-items-center gap-2">
-        <h4 class="fw-bold text-dark m-0">피벗 대안 B: 동적 교차표 (Cross-Tab Matrix)</h4>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">동적 Matrix 가공</span>
-      </div>
-      <p class="text-muted small mb-0 mt-1">
-        행/열 차원 및 집계 대상을 자유롭게 선택하면, 원본 Flat 데이터를 가로/세로 매트릭스 피벗 구조로 동적 변환하여 RealGrid 2 컬럼을 바인딩합니다.
-      </p>
-    </div>
-
+  <div class="b2b-page-container">
     <!-- Pivot Control Panel Bar -->
-    <div class="card bg-light border-0 mb-3 shadow-sm">
-      <div class="card-body p-2.5 d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div class="b2b-toolbar">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 w-100">
         <div class="d-flex align-items-center gap-3 flex-wrap">
           <!-- Inline quick selects -->
           <div class="d-flex align-items-center gap-1.5">
@@ -63,26 +52,26 @@
           />
 
           <!-- Open Pivot Field Dialog Button -->
-          <button class="btn-compact btn-compact-secondary" title="피벗 필드 상세 구성 대화상자 모달" @click="openPivotModal">
+          <button class="btn-b2b-action" title="피벗 필드 상세 구성 대화상자 모달" @click="openPivotModal">
             <i class="bi bi-sliders text-primary me-0.5"></i>
             <span>피벗 필드</span>
           </button>
 
           <!-- Column Picker -->
-          <button class="btn-compact btn-compact-secondary" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
+          <button class="btn-b2b-action" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
             <i class="bi bi-eye text-primary me-0.5"></i>
             <span>컬럼</span>
           </button>
 
           <!-- Excel Export -->
-          <button class="btn-compact btn-compact-secondary" title="엑셀 파일 내보내기" @click="exportExcel">
+          <button class="btn-b2b-action" title="엑셀 파일 내보내기" @click="exportExcel">
             <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
             <span>엑셀</span>
           </button>
 
           <!-- 추가 (Disabled in Pivot Matrix view) -->
           <button
-            class="btn-compact btn-compact-secondary"
+            class="btn-b2b-action"
             disabled
             title="동적 매트릭스 피벗 뷰에서는 행 추가가 제한됩니다"
             @click="addRow"
@@ -93,7 +82,7 @@
 
           <!-- 삭제 (Disabled in Pivot Matrix view) -->
           <button
-            class="btn-compact btn-compact-secondary"
+            class="btn-b2b-action"
             disabled
             title="동적 매트릭스 피벗 뷰에서는 행 삭제가 제한됩니다"
             @click="deleteChecked"
@@ -103,7 +92,7 @@
           </button>
 
           <!-- 저장 -->
-          <button class="btn-compact btn-compact-save ms-1" title="피벗 데이터 저장" @click="saveData">
+          <button class="btn-b2b-primary ms-1" title="피벗 데이터 저장" @click="saveData">
             <i class="bi bi-check2 me-0.5"></i>
             <span>저장</span>
           </button>
@@ -112,19 +101,18 @@
     </div>
 
     <!-- Grid Container Card (RealGridCommonJs 기반 계층 조립) -->
-    <div class="card shadow-sm border-light mb-4">
-      <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center">
-        <span class="fw-semibold text-dark small">
+    <div class="b2b-grid-card mb-4">
+      <div class="card-header bg-theme-card border-theme py-2 px-3 d-flex justify-content-between align-items-center">
+        <span class="fw-semibold text-theme-primary small">
           <i class="bi bi-table me-1 text-primary"></i>동적 피벗 생성 결과표
         </span>
         <span class="badge bg-secondary-subtle text-secondary small">
           {{ pivotSummaryText }}
         </span>
       </div>
-      <div class="card-body p-0">
+      <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
-          height="530px"
           @init="onGridInit"
         />
       </div>
@@ -132,12 +120,12 @@
 
     <!-- 🎛️ 피벗 필드 선택 모달 (Pivot Field Selection Dialog Modal) -->
     <div v-if="isModalOpen" class="modal-backdrop-custom d-flex align-items-center justify-content-center">
-      <div class="modal-card-custom bg-white rounded-3 shadow-lg border-0 overflow-hidden" style="width: 540px; max-width: 95vw;">
+      <div class="modal-card-custom bg-theme-card rounded-3 shadow-lg border-theme overflow-hidden" style="width: 540px; max-width: 95vw;">
         <!-- Modal Header -->
-        <div class="px-4 py-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+        <div class="px-4 py-3 bg-theme-subcard border-bottom border-theme d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center gap-2">
             <i class="bi bi-sliders text-primary fs-5"></i>
-            <h5 class="fw-bold text-dark m-0 fs-6">피벗 필드 상세 구성 대화상자</h5>
+            <h5 class="fw-bold text-theme-primary m-0 fs-6">피벗 필드 상세 구성 대화상자</h5>
           </div>
           <button type="button" class="btn-close" @click="closePivotModal"></button>
         </div>
@@ -150,7 +138,7 @@
 
           <!-- 1. 행(Row) 축 선택 -->
           <div class="mb-3">
-            <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1 mb-2">
+            <label class="form-label small fw-bold text-theme-primary d-flex align-items-center gap-1 mb-2">
               <i class="bi bi-arrow-down-up text-primary"></i> 1. 행(Row) 배치 필드 선택
             </label>
             <div class="d-flex flex-wrap gap-2">
@@ -172,7 +160,7 @@
 
           <!-- 2. 열(Column) 축 선택 -->
           <div class="mb-3">
-            <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1 mb-2">
+            <label class="form-label small fw-bold text-theme-primary d-flex align-items-center gap-1 mb-2">
               <i class="bi bi-arrow-left-right text-success"></i> 2. 열(Column) 배치 필드 선택
             </label>
             <div class="d-flex flex-wrap gap-2">
@@ -195,7 +183,7 @@
           <!-- 3. 집계 대상 및 연산 방식 -->
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1 mb-2">
+              <label class="form-label small fw-bold text-theme-primary d-flex align-items-center gap-1 mb-2">
                 <i class="bi bi-calculator text-warning"></i> 3. 집계 수치 필드
               </label>
               <div class="d-flex flex-column gap-1.5">
@@ -214,7 +202,7 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1 mb-2">
+              <label class="form-label small fw-bold text-theme-primary d-flex align-items-center gap-1 mb-2">
                 <i class="bi bi-percent text-info"></i> 4. 연산 방식 (Aggregation)
               </label>
               <div class="d-flex flex-column gap-1.5">
@@ -235,7 +223,7 @@
         </div>
 
         <!-- Modal Footer -->
-        <div class="px-4 py-3 bg-light border-top d-flex justify-content-end gap-2">
+        <div class="px-4 py-3 bg-theme-subcard border-top border-theme d-flex justify-content-end gap-2">
           <button type="button" class="btn btn-sm btn-secondary px-3" @click="closePivotModal">취소</button>
           <button type="button" class="btn btn-sm btn-primary px-4 fw-semibold shadow-sm" @click="applyPivotFromModal">
             <i class="bi bi-check-lg me-1"></i>피벗 구성 적용
@@ -258,12 +246,14 @@
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { buildPivotMatrix } from '@/utils/pivotUtil.js'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'PivotAltBPage',
   components: {
+    PageHeader,
     RealGridCommonJs,
     ColumnPickerModal,
     QuickSearchBar
@@ -439,7 +429,9 @@ export default {
 <style scoped>
 .form-select-sm {
   font-size: 13px;
-  border-color: #d1d5db;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 .modal-backdrop-custom {
   position: fixed;

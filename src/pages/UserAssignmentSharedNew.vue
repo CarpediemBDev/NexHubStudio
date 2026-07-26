@@ -1,30 +1,18 @@
-﻿<template>
-  <div class="assignment-container container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-      <div>
-        <h2 class="fw-bold text-dark mb-1">📢 인원 배치 관리</h2>
-        <p class="text-muted mb-0 small">
-          전체 인원 목록에서 각 파트별 담당자를 선정하여 배정하세요.
-        </p>
-      </div>
-      <button class="btn btn-save shadow-sm px-4 py-2" @click="saveAssignments">
-        <i class="bi bi-check-lg me-2"></i>변경사항 저장
-      </button>
-    </div>
-
+<template>
+  <div class="assignment-container container-fluid py-1 bg-theme-main text-theme-primary">
     <div class="row g-4 h-100">
       <div class="col-lg-4 col-md-5 d-flex flex-column h-100">
-        <div class="card source-card shadow-sm border-0 h-100">
-          <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+        <div class="card source-card shadow-sm border-theme bg-theme-card text-theme-primary h-100">
+          <div class="card-header bg-theme-card border-bottom border-theme pt-3 pb-0">
             <div class="search-wrapper position-relative mb-3">
               <i
-                class="bi bi-search position-absolute text-muted"
+                class="bi bi-search position-absolute text-theme-secondary"
                 style="top: 12px; left: 15px"
               ></i>
               <input
                 v-model="searchQuery"
                 type="text"
-                class="form-control form-control-lg ps-5 bg-light border-0"
+                class="form-control form-control-lg ps-5 bg-theme-subcard text-theme-primary border-theme"
                 placeholder="이름, 부서 검색..."
               />
             </div>
@@ -37,7 +25,7 @@
                   :checked="isAllSelected"
                   @change="toggleSelectAll"
                 />
-                <label class="form-check-label fw-semibold text-secondary" for="selectAll">
+                <label class="form-check-label fw-semibold text-theme-secondary" for="selectAll">
                   전체 선택
                   <span class="badge bg-secondary rounded-pill ms-1">{{
                     filteredUsers.length
@@ -49,8 +37,8 @@
 
           <div class="card-body p-0 custom-scrollbar source-list-body">
             <div v-if="filteredUsers.length === 0" class="empty-placeholder">
-              <i class="bi bi-emoji-dizzy fs-1 text-muted mb-2"></i>
-              <p class="text-muted">검색 결과가 없습니다.</p>
+              <i class="bi bi-emoji-dizzy fs-1 text-theme-secondary mb-2"></i>
+              <p class="text-theme-secondary">검색 결과가 없습니다.</p>
             </div>
 
             <ul class="list-group list-group-flush">
@@ -66,7 +54,7 @@
                     v-if="selectedUsers.includes(user.id)"
                     class="bi bi-check-circle-fill text-primary fs-5"
                   ></i>
-                  <i v-else class="bi bi-circle text-muted fs-5 opacity-50"></i>
+                  <i v-else class="bi bi-circle text-theme-secondary fs-5 opacity-50"></i>
                 </div>
 
                 <div class="avatar shadow-sm" :class="getDeptColor(user.department)">
@@ -75,8 +63,8 @@
 
                 <div class="flex-grow-1">
                   <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-dark">{{ user.name }}</span>
-                    <span class="badge bg-light text-secondary border">{{ user.department }}</span>
+                    <span class="fw-bold text-theme-primary">{{ user.name }}</span>
+                    <span class="badge bg-theme-subcard text-theme-secondary border border-theme">{{ user.department }}</span>
                   </div>
                   <div
                     class="mt-1 d-flex flex-wrap gap-1"
@@ -103,60 +91,56 @@
       <div
         class="col-lg-1 col-md-1 d-flex flex-column justify-content-center align-items-center gap-3 action-column"
       >
-        <div class="action-divider"></div>
-
         <button
-          class="btn btn-action btn-research shadow"
+          class="btn btn-action btn-research shadow-sm"
           @click="moveToResearcher"
           :disabled="!hasSelection"
           title="연구원으로 이동"
         >
-          <i class="bi bi-chevron-right"></i>
-          <span class="tooltip-text">연구원</span>
+          <i class="bi bi-chevron-right fs-6"></i>
+          <small class="btn-sublabel">연구원</small>
         </button>
 
         <button
-          class="btn btn-action btn-operation shadow"
+          class="btn btn-action btn-operation shadow-sm"
           @click="moveToOperation"
           :disabled="!hasSelection"
           title="오퍼레이션으로 이동"
         >
-          <i class="bi bi-chevron-right"></i>
-          <span class="tooltip-text">오퍼</span>
+          <i class="bi bi-chevron-right fs-6"></i>
+          <small class="btn-sublabel">오퍼</small>
         </button>
 
         <button
-          class="btn btn-action btn-worker shadow"
+          class="btn btn-action btn-worker shadow-sm"
           @click="moveToWorker"
           :disabled="!hasSelection"
           title="현장사원으로 이동"
         >
-          <i class="bi bi-chevron-right"></i>
-          <span class="tooltip-text">현장</span>
+          <i class="bi bi-chevron-right fs-6"></i>
+          <small class="btn-sublabel">현장</small>
         </button>
 
         <button
-          class="btn btn-action btn-process shadow"
+          class="btn btn-action btn-process shadow-sm"
           @click="moveToProcessWorker"
           :disabled="!hasSelection"
           title="공정사원으로 이동"
         >
-          <i class="bi bi-chevron-right"></i>
-          <span class="tooltip-text">공정</span>
+          <i class="bi bi-chevron-right fs-6"></i>
+          <small class="btn-sublabel">공정</small>
         </button>
-
-        <div class="action-divider"></div>
       </div>
 
       <div class="col-lg-7 col-md-6">
         <div class="row g-3 h-100">
           <div class="col-md-6">
-            <div class="card target-card border-research h-100 shadow-sm">
+            <div class="card target-card border-research h-100 shadow-sm bg-theme-card text-theme-primary border border-theme">
               <div
-                class="card-header header-research d-flex justify-content-between align-items-center"
+                class="card-header header-research d-flex justify-content-between align-items-center border-bottom border-theme"
               >
                 <span class="fw-bold"><i class="bi bi-flask me-2"></i>연구원</span>
-                <span class="badge bg-white text-primary rounded-pill"
+                <span class="badge bg-primary text-white rounded-pill"
                   >{{ researchers.length }}명</span
                 >
               </div>
@@ -179,14 +163,14 @@
           </div>
 
           <div class="col-md-6">
-            <div class="card target-card border-operation h-100 shadow-sm">
+            <div class="card target-card border-operation h-100 shadow-sm bg-theme-card text-theme-primary border border-theme">
               <div
-                class="card-header header-operation d-flex justify-content-between align-items-center"
+                class="card-header header-operation d-flex justify-content-between align-items-center border-bottom border-theme"
               >
                 <span class="fw-bold"
                   ><i class="bi bi-gear-wide-connected me-2"></i>오퍼레이션</span
                 >
-                <span class="badge bg-white text-success rounded-pill"
+                <span class="badge bg-success text-white rounded-pill"
                   >{{ operations.length }}명</span
                 >
               </div>
@@ -209,12 +193,12 @@
           </div>
 
           <div class="col-md-6">
-            <div class="card target-card border-worker h-100 shadow-sm">
+            <div class="card target-card border-worker h-100 shadow-sm bg-theme-card text-theme-primary border border-theme">
               <div
-                class="card-header header-worker d-flex justify-content-between align-items-center"
+                class="card-header header-worker d-flex justify-content-between align-items-center border-bottom border-theme"
               >
                 <span class="fw-bold"><i class="bi bi-hammer me-2"></i>현장사원</span>
-                <span class="badge bg-white text-dark rounded-pill">{{ workers.length }}명</span>
+                <span class="badge bg-warning text-dark rounded-pill">{{ workers.length }}명</span>
               </div>
               <div class="card-body custom-scrollbar p-2">
                 <TransitionGroup name="list" tag="div" class="d-flex flex-wrap gap-2">
@@ -235,12 +219,12 @@
           </div>
 
           <div class="col-md-6">
-            <div class="card target-card border-process h-100 shadow-sm">
+            <div class="card target-card border-process h-100 shadow-sm bg-theme-card text-theme-primary border border-theme">
               <div
-                class="card-header header-process d-flex justify-content-between align-items-center"
+                class="card-header header-process d-flex justify-content-between align-items-center border-bottom border-theme"
               >
                 <span class="fw-bold"><i class="bi bi-diagram-3 me-2"></i>공정사원</span>
-                <span class="badge bg-white text-secondary rounded-pill"
+                <span class="badge bg-secondary text-white rounded-pill"
                   >{{ processWorkers.length }}명</span
                 >
               </div>
@@ -268,12 +252,17 @@
 </template>
 
 <script>
+import PageHeader from '@/components/PageHeader.vue'
+
 // Toast 유틸이 없다면 임시로 alert 사용
 // import { showToast } from '@/utils/toastUtil.js'
 const showToast = (msg, opt) => console.log(msg) // 임시 대체
 
 export default {
   name: 'ModernUserAssignment',
+  components: {
+    PageHeader,
+  },
   data() {
     return {
       searchQuery: '',
@@ -435,7 +424,8 @@ export default {
 .assignment-container {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial, sans-serif;
-  background-color: #f8f9fa;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   height: 100vh;
   max-height: 100vh;
   display: flex;
@@ -447,9 +437,13 @@ export default {
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 .source-card {
-  background-color: #ffffff;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
 }
 
 /* 커스텀 스크롤바 */
@@ -463,11 +457,11 @@ export default {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-color);
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--text-secondary);
 }
 
 /* 왼쪽 사용자 리스트 스타일 */
@@ -476,45 +470,22 @@ export default {
 }
 .user-item {
   border: none;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s;
 }
 .user-item:hover {
-  background-color: #f8fafc;
+  background-color: var(--bg-subcard);
   transform: translateX(4px);
 }
 .user-item.active-item {
-  background-color: #eff6ff; /* 선택된 항목 배경 */
+  background-color: var(--b2b-color-primary-subtle); /* 선택된 항목 배경 */
+  color: var(--text-primary);
 }
 .user-item:last-child {
   border-bottom: none;
-}
-
-/* 아바타 스타일 */
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 16px;
-  color: white;
-  flex-shrink: 0;
-}
-.avatar-blue {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-.avatar-green {
-  background: linear-gradient(135deg, #10b981, #059669);
-}
-.avatar-pink {
-  background: linear-gradient(135deg, #ec4899, #db2777);
-}
-.avatar-gray {
-  background: linear-gradient(135deg, #94a3b8, #64748b);
 }
 
 /* 중앙 액션 버튼 스타일 */
@@ -522,67 +493,50 @@ export default {
   height: 100%;
 }
 .btn-action {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  color: white;
+  width: 60px !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  border: 1px solid transparent !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  position: relative;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15) !important;
+  line-height: 1 !important;
 }
+
+.btn-sublabel {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  margin-top: 3px !important;
+  white-space: nowrap !important;
+  color: inherit !important;
+}
+
 .btn-action:hover:not(:disabled) {
-  transform: scale(1.15);
+  transform: scale(1.12) !important;
   z-index: 10;
 }
+
 .btn-action:disabled {
-  background-color: #e2e8f0;
-  color: #94a3b8;
-  cursor: not-allowed;
+  background-color: var(--bg-subcard) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
   box-shadow: none !important;
-  transform: scale(1);
+  transform: scale(1) !important;
 }
-
-/* 툴팁 효과 */
-.tooltip-text {
-  visibility: hidden;
-  position: absolute;
-  right: 120%; /* 버튼 왼쪽으로 */
-  background-color: #1e293b;
-  color: #fff;
-  text-align: center;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.btn-action:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
-
-/* 그룹별 버튼 색상 */
-.btn-research {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-.btn-operation {
-  background: linear-gradient(135deg, #10b981, #059669);
-}
-.btn-worker {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-} /* 현장사원: 주황/엠버 */
-.btn-process {
-  background: linear-gradient(135deg, #64748b, #475569);
-} /* 공정사원: 쿨그레이 */
 
 /* 오른쪽 타겟 카드 스타일 */
 .target-card {
-  background-color: #ffffff;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   border-top: 4px solid transparent; /* 상단 포인트 컬러 */
 }
 .border-research {
@@ -599,21 +553,21 @@ export default {
 }
 
 .card-header {
-  background: transparent;
-  border-bottom: 1px dashed #e2e8f0;
+  background: var(--bg-subcard);
+  border-bottom: 1px dashed var(--border-color);
   padding: 12px 16px;
 }
 .header-research {
-  color: #2563eb;
+  color: #3b82f6;
 }
 .header-operation {
-  color: #059669;
+  color: #10b981;
 }
 .header-worker {
-  color: #d97706;
+  color: #f59e0b;
 }
 .header-process {
-  color: #475569;
+  color: #94a3b8;
 }
 
 /* 배정된 칩 스타일 */
@@ -626,12 +580,13 @@ export default {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  background: white;
-  border: 1px solid transparent;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 .assigned-chip:hover {
   transform: translateY(-2px);
-  background-color: #fff1f2; /* 삭제 느낌의 붉은 배경 */
+  background-color: rgba(225, 29, 72, 0.15); /* 삭제 느낌의 붉은 배경 */
   border-color: #fda4af;
   color: #e11d48;
 }
@@ -644,8 +599,8 @@ export default {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: #e2e8f0;
-  color: #64748b;
+  background-color: var(--border-color);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -654,40 +609,9 @@ export default {
   font-weight: bold;
 }
 
-/* 칩 그룹별 테두리 포인트 */
-.chip-research {
-  border-left: 3px solid #3b82f6;
-}
-.chip-operation {
-  border-left: 3px solid #10b981;
-}
-.chip-worker {
-  border-left: 3px solid #f59e0b;
-}
-.chip-process {
-  border-left: 3px solid #64748b;
-}
-
-.remove-icon {
-  font-size: 1.1em;
-  opacity: 0.5;
-}
-.assigned-chip:hover .remove-icon {
-  opacity: 1;
-}
-
-/* 빈 상태 */
-.empty-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
-  opacity: 0.5;
-}
 .empty-target {
   text-align: center;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 0.85rem;
   margin-top: 20px;
   font-style: italic;

@@ -15,13 +15,13 @@
     </button>
 
     <!-- Expanded Sliding Search Box -->
-    <div v-else class="quick-search-bar d-inline-flex align-items-center gap-1 bg-white border border-primary-subtle rounded-2 px-2 py-1 shadow-sm animation-slide-in">
+    <div v-else class="quick-search-bar d-inline-flex align-items-center gap-1 bg-theme-card border border-theme rounded-2 px-2 py-1 shadow-sm animation-slide-in">
       <i class="bi bi-search text-primary small me-1"></i>
       <input
         ref="searchInput"
         type="text"
-        class="form-control form-control-sm border-0 p-0 shadow-none text-dark bg-transparent"
-        style="width: 130px; font-size: 13px;"
+        class="form-control form-control-sm b2b-text-body border-0 p-0 shadow-none text-theme-primary bg-transparent"
+        style="width: 130px;"
         v-model="searchQuery"
         placeholder="검색어 입력..."
         @keyup.enter="triggerSearch('next')"
@@ -30,34 +30,34 @@
       />
 
       <!-- Result Count Badge -->
-      <span v-if="searchResult.count > 0" class="badge bg-primary text-white px-1.5 py-0.5 small me-1" style="font-size: 11px;">
+      <span v-if="searchResult.count > 0" class="b2b-badge b2b-badge-primary me-1">
         {{ searchResult.current }}/{{ searchResult.count }}
       </span>
 
       <!-- Action Buttons -->
-      <div class="d-flex align-items-center gap-0.5 border-start ps-1 ms-0.5">
+      <div class="d-flex align-items-center gap-0.5 border-start border-theme ps-1 ms-0.5">
         <button
-          class="btn btn-xs btn-light p-1 line-height-1 border-0 rounded"
+          class="btn btn-xs btn-theme-action p-1 line-height-1 border-0 rounded"
           title="이전 (Shift+Enter)"
           :disabled="!searchQuery.trim()"
           @click="triggerSearch('prev')"
         >
-          <i class="bi bi-chevron-up text-secondary" style="font-size: 11px;"></i>
+          <i class="bi bi-chevron-up text-theme-secondary b2b-text-xs"></i>
         </button>
         <button
-          class="btn btn-xs btn-light p-1 line-height-1 border-0 rounded"
+          class="btn btn-xs btn-theme-action p-1 line-height-1 border-0 rounded"
           title="다음 (Enter)"
           :disabled="!searchQuery.trim()"
           @click="triggerSearch('next')"
         >
-          <i class="bi bi-chevron-down text-secondary" style="font-size: 11px;"></i>
+          <i class="bi bi-chevron-down text-theme-secondary b2b-text-xs"></i>
         </button>
         <button
-          class="btn btn-xs btn-light p-1 line-height-1 border-0 rounded ms-0.5 text-danger"
+          class="btn btn-xs btn-theme-action p-1 line-height-1 border-0 rounded ms-0.5 text-danger"
           title="닫기"
           @click="toggleExpand"
         >
-          <i class="bi bi-x-lg" style="font-size: 11px;"></i>
+          <i class="bi bi-x-lg b2b-text-xs"></i>
         </button>
       </div>
     </div>
@@ -138,14 +138,21 @@ export default {
   line-height: 1;
 }
 .btn-compact-secondary {
-  background-color: #ffffff;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 .btn-compact-secondary:hover {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
-  color: #111827;
+  background-color: var(--bg-subcard);
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+.btn-theme-action {
+  background-color: var(--bg-subcard);
+  color: var(--text-primary);
+}
+.btn-theme-action:hover:not(:disabled) {
+  background-color: var(--border-color);
 }
 .btn-xs {
   padding: 1px 4px;

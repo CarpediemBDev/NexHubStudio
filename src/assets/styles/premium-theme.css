@@ -15,15 +15,15 @@
   --nex-accent-rgb: 139, 92, 246;
   --nex-accent-light: #a78bfa;
   
-  /* Neutral Colors */
-  --nex-bg: #f0f2f5;
-  --nex-bg-card: #ffffff;
-  --nex-border: #e2e8f0;
-  --nex-border-light: #f1f5f9;
+  /* Neutral Colors (Mapped to Theme Tokens) */
+  --nex-bg: var(--bg-main);
+  --nex-bg-card: var(--bg-card);
+  --nex-border: var(--border-color);
+  --nex-border-light: var(--border-color);
   
-  --nex-text-primary: #0f172a;
-  --nex-text-secondary: #475569;
-  --nex-text-muted: #94a3b8;
+  --nex-text-primary: var(--text-primary);
+  --nex-text-secondary: var(--text-secondary);
+  --nex-text-muted: var(--text-muted);
   
   /* Status Colors */
   --nex-success: #10b981;
@@ -249,14 +249,14 @@ body {
   text-decoration: none;
 }
 .btn-compact-secondary {
-  background-color: #ffffff;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 .btn-compact-secondary:hover:not(:disabled) {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
-  color: #111827;
+  background-color: var(--bg-subcard);
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
 }
 .btn-compact-secondary:disabled {
   opacity: 0.55;

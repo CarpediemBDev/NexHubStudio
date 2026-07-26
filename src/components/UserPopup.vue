@@ -1,4 +1,4 @@
-﻿<!-- UserPopup.vue -->
+<!-- UserPopup.vue -->
 <template>
   <div class="modal fade show" style="display: block" tabindex="-1" role="dialog" aria-modal="true">
     <div class="modal-dialog" ref="dlg" :style="dialogInlineStyle">
@@ -12,19 +12,24 @@
           <div class="row g-3">
             <!-- LEFT: 전체 사용자 목록 -->
             <div class="col-12 col-lg-6">
-              <div class="border rounded-3">
-                <div class="p-2 border-bottom">
-                  <input
-                    v-model="leftKeyword"
-                    class="form-control form-control-sm"
-                    placeholder="검색(ID/이름/부서/직무)"
-                  />
+              <div class="border border-theme rounded-3 bg-theme-card">
+                <div class="p-2 border-bottom border-theme bg-theme-subcard">
+                  <div class="input-group input-group-sm rounded-2">
+                    <span class="input-group-text bg-theme-card border-theme text-theme-secondary">
+                      <i class="bi bi-search"></i>
+                    </span>
+                    <input
+                      v-model="leftKeyword"
+                      class="form-control form-control-sm b2b-text-body bg-theme-card text-theme-primary border-theme"
+                      placeholder="검색(ID/이름/부서/직무)"
+                    />
+                  </div>
                 </div>
 
                 <!-- 표는 직접 렌더, 아래에 Pager만 '붙임' -->
                 <div class="table-responsive">
                   <table class="table table-sm table-hover mb-0 align-middle">
-                    <thead class="table-light position-sticky top-0">
+                    <thead class="position-sticky top-0">
                       <tr>
                         <th style="width: 44px">
                           <div class="form-check m-0 d-flex justify-content-center">
@@ -39,14 +44,13 @@
                             />
                           </div>
                         </th>
-                        <th class="text-nowrap">UserId</th>
-                        <th>사용자명</th>
-                        <th>부서명</th>
-                        <th>직무</th>
+                        <th class="text-nowrap fw-semibold">UserId</th>
+                        <th class="fw-semibold">사용자명</th>
+                        <th class="fw-semibold">부서명</th>
+                        <th class="fw-semibold">직무</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      <!-- ✅ 여기서 items 대신 paginatedLeft 사용 -->
+                    <tbody v-if="paginatedLeft.length > 0">
                       <tr v-for="u in paginatedLeft" :key="u.userId">
                         <td>
                           <div class="form-check m-0 d-flex justify-content-center">
@@ -59,11 +63,22 @@
                           </div>
                         </td>
                         <td>
-                          <span class="font-monospace text-body">{{ u.userId }}</span>
+                          <span class="font-monospace text-theme-primary fw-semibold">{{ u.userId }}</span>
                         </td>
-                        <td>{{ u.name }}</td>
+                        <td class="fw-medium">{{ u.name }}</td>
                         <td>{{ u.dept }}</td>
                         <td>{{ u.role }}</td>
+                      </tr>
+                    </tbody>
+                    <tbody v-else>
+                      <tr>
+                        <td colspan="5" class="p-0 border-0">
+                          <div class="b2b-empty-state py-4" style="min-height: 180px;">
+                            <i class="bi bi-search"></i>
+                            <h6 class="b2b-empty-state-title">조회된 데이터가 없습니다</h6>
+                            <p class="b2b-empty-state-desc">검색어를 입력하고 조회를 눌러주세요.</p>
+                          </div>
+                        </td>
                       </tr>
                     </tbody>
                   </table>

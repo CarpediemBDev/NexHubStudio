@@ -1,5 +1,5 @@
-﻿<template>
-  <div class="main-page container-fluid p-4 bg-light">
+<template>
+  <div class="main-page container-fluid p-4 bg-theme-main text-theme-primary">
     <!-- Hero Section -->
     <div class="row mb-4">
       <div class="col-12">
@@ -31,15 +31,15 @@
     <div class="row g-4 mb-4">
       <!-- Work Request Status -->
       <div class="col-md-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100 status-card">
+        <div class="card border-theme bg-theme-card shadow-sm h-100 status-card">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-3 p-3 me-3">
                 <i class="bi bi-file-earmark-text fs-4"></i>
               </div>
               <div>
-                <h6 class="text-muted mb-1 text-uppercase small fw-bold">오늘 요청된 업무</h6>
-                <h3 class="mb-0 fw-bold">12 <span class="fs-6 text-success fw-normal">(+3)</span></h3>
+                <h6 class="text-theme-secondary mb-1 text-uppercase small fw-bold">오늘 요청된 업무</h6>
+                <h3 class="mb-0 fw-bold text-theme-primary">12 <span class="fs-6 text-success fw-normal">(+3)</span></h3>
               </div>
             </div>
             <div class="progress" style="height: 6px">
@@ -51,15 +51,15 @@
 
       <!-- Pending Approvals -->
       <div class="col-md-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100 status-card">
+        <div class="card border-theme bg-theme-card shadow-sm h-100 status-card">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-3 p-3 me-3">
                 <i class="bi bi-hourglass-split fs-4"></i>
               </div>
               <div>
-                <h6 class="text-muted mb-1 text-uppercase small fw-bold">승인 대기</h6>
-                <h3 class="mb-0 fw-bold">5</h3>
+                <h6 class="text-theme-secondary mb-1 text-uppercase small fw-bold">승인 대기</h6>
+                <h3 class="mb-0 fw-bold text-theme-primary">5</h3>
               </div>
             </div>
             <div class="progress" style="height: 6px">
@@ -71,15 +71,15 @@
 
       <!-- Equipment Alerts -->
       <div class="col-md-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100 status-card">
+        <div class="card border-theme bg-theme-card shadow-sm h-100 status-card">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="icon-box bg-danger bg-opacity-10 text-danger rounded-3 p-3 me-3">
                 <i class="bi bi-exclamation-triangle fs-4"></i>
               </div>
               <div>
-                <h6 class="text-muted mb-1 text-uppercase small fw-bold">설비 알림</h6>
-                <h3 class="mb-0 fw-bold">2</h3>
+                <h6 class="text-theme-secondary mb-1 text-uppercase small fw-bold">설비 알림</h6>
+                <h3 class="mb-0 fw-bold text-theme-primary">2</h3>
               </div>
             </div>
             <div class="progress" style="height: 6px">
@@ -91,15 +91,15 @@
 
       <!-- Active Users -->
       <div class="col-md-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100 status-card">
+        <div class="card border-theme bg-theme-card shadow-sm h-100 status-card">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="icon-box bg-info bg-opacity-10 text-info rounded-3 p-3 me-3">
                 <i class="bi bi-people fs-4"></i>
               </div>
               <div>
-                <h6 class="text-muted mb-1 text-uppercase small fw-bold">접속 사용자</h6>
-                <h3 class="mb-0 fw-bold">48</h3>
+                <h6 class="text-theme-secondary mb-1 text-uppercase small fw-bold">접속 사용자</h6>
+                <h3 class="mb-0 fw-bold text-theme-primary">48</h3>
               </div>
             </div>
             <div class="progress" style="height: 6px">
@@ -115,51 +115,51 @@
       <!-- Main: Recent Notices / Workflow Status -->
       <div class="col-lg-8">
         <!-- Notice Board -->
-        <div class="card border-0 shadow-sm mb-4">
-          <div class="card-header bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
-            <h5 class="card-title fw-bold mb-0">📢 최신 공지사항</h5>
-            <router-link to="/posts" class="btn btn-sm btn-light">더보기</router-link>
+        <div class="card border-theme bg-theme-card shadow-sm mb-4">
+          <div class="card-header bg-theme-card border-bottom border-theme py-3 d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0 text-theme-primary">📢 최신 공지사항</h5>
+            <router-link to="/posts" class="btn btn-sm btn-b2b-action">더보기</router-link>
           </div>
           <div class="card-body p-0">
             <div class="list-group list-group-flush">
-              <a href="#" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" v-for="post in notices" :key="post.id">
+              <a href="#" class="list-group-item list-group-item-action bg-theme-card border-bottom border-theme py-3 d-flex justify-content-between align-items-center" v-for="post in notices" :key="post.id">
                 <div>
                   <span class="badge bg-primary bg-opacity-10 text-primary me-2">{{ post.category }}</span>
-                  <span class="fw-medium text-dark">{{ post.title }}</span>
+                  <span class="fw-medium text-theme-primary">{{ post.title }}</span>
                 </div>
-                <small class="text-muted">{{ post.date }}</small>
+                <small class="text-theme-secondary">{{ post.date }}</small>
               </a>
             </div>
           </div>
         </div>
 
         <!-- Recent Workflows -->
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
-            <h5 class="card-title fw-bold mb-0">📋 최근 업무 의뢰</h5>
-            <router-link to="/request-workflow" class="btn btn-sm btn-light">전체보기</router-link>
+        <div class="card border-theme bg-theme-card shadow-sm">
+          <div class="card-header bg-theme-card border-bottom border-theme py-3 d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0 text-theme-primary">📋 최근 업무 의뢰</h5>
+            <router-link to="/request-workflow" class="btn btn-sm btn-b2b-action">전체보기</router-link>
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 text-nowrap">
-              <thead class="bg-light">
-                <tr>
-                  <th class="border-0 ps-4">제목</th>
-                  <th class="border-0">요청자</th>
-                  <th class="border-0">상태</th>
-                  <th class="border-0 pe-4">일자</th>
+              <thead>
+                <tr class="bg-theme-subcard border-bottom border-theme">
+                  <th class="ps-4 text-theme-primary border-0">제목</th>
+                  <th class="text-theme-primary border-0">요청자</th>
+                  <th class="text-theme-primary border-0">상태</th>
+                  <th class="pe-4 text-theme-primary border-0">일자</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="workflow in workflows" :key="workflow.id">
+                <tr v-for="workflow in workflows" :key="workflow.id" class="border-bottom border-theme">
                   <td class="ps-4">
                     <div class="d-flex align-items-center">
-                      <div class="avatar rounded-circle bg-secondary bg-opacity-25 text-secondary me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem">
+                      <div class="avatar rounded-circle bg-secondary bg-opacity-25 text-theme-primary me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem">
                         {{ workflow.type[0] }}
                       </div>
-                      <span class="fw-medium">{{ workflow.title }}</span>
+                      <span class="fw-medium text-theme-primary">{{ workflow.title }}</span>
                     </div>
                   </td>
-                  <td>{{ workflow.requester }}</td>
+                  <td class="text-theme-primary">{{ workflow.requester }}</td>
                   <td>
                     <span class="badge rounded-pill" 
                       :class="{
@@ -170,7 +170,7 @@
                       {{ workflow.status }}
                     </span>
                   </td>
-                  <td class="text-muted pe-4">{{ workflow.date }}</td>
+                  <td class="text-theme-secondary pe-4">{{ workflow.date }}</td>
                 </tr>
               </tbody>
             </table>
@@ -181,14 +181,14 @@
       <!-- Sidebar: Quick Links & Equipment -->
       <div class="col-lg-4">
         <!-- Quick Links -->
-        <div class="card border-0 shadow-sm mb-4">
-          <div class="card-header bg-white py-3 border-bottom-0">
-            <h5 class="card-title fw-bold mb-0">🚀 바로가기</h5>
+        <div class="card border-theme bg-theme-card shadow-sm mb-4">
+          <div class="card-header bg-theme-card border-bottom border-theme py-3">
+            <h5 class="card-title fw-bold mb-0 text-theme-primary">🚀 바로가기</h5>
           </div>
           <div class="card-body">
             <div class="row g-3">
               <div class="col-6" v-for="link in quickLinks" :key="link.title">
-                <router-link :to="link.to" class="d-block p-3 rounded-3 bg-light text-decoration-none text-center hover-up transition-fast text-dark">
+                <router-link :to="link.to" class="d-block p-3 rounded-3 bg-theme-subcard border border-theme text-decoration-none text-center hover-up transition-fast text-theme-primary">
                   <i :class="link.icon" class="fs-3 mb-2 d-block" :style="{ color: link.color }"></i>
                   <span class="small fw-semibold">{{ link.title }}</span>
                 </router-link>
@@ -198,12 +198,12 @@
         </div>
 
         <!-- Equipment Status Mini -->
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white py-3 border-bottom-0">
-            <h5 class="card-title fw-bold mb-0">⚙️ 주요 설비 상태</h5>
+        <div class="card border-theme bg-theme-card shadow-sm">
+          <div class="card-header bg-theme-card border-bottom border-theme py-3">
+            <h5 class="card-title fw-bold mb-0 text-theme-primary">⚙️ 주요 설비 상태</h5>
           </div>
           <div class="card-body pt-0">
-            <div v-for="eq in equipmentStatus" :key="eq.name" class="d-flex align-items-center py-3 border-bottom last-border-0">
+            <div v-for="eq in equipmentStatus" :key="eq.name" class="d-flex align-items-center py-3 border-bottom border-theme last-border-0">
               <div class="me-3 position-relative">
                 <div class="rounded-circle d-flex align-items-center justify-content-center text-white" 
                   :class="eq.status === 'Normal' ? 'bg-success' : 'bg-danger'"
@@ -212,8 +212,8 @@
                 </div>
               </div>
               <div class="flex-grow-1">
-                <h6 class="mb-0 fw-semibold">{{ eq.name }}</h6>
-                <small class="text-muted">{{ eq.code }}</small>
+                <h6 class="mb-0 fw-semibold text-theme-primary">{{ eq.name }}</h6>
+                <small class="text-theme-secondary">{{ eq.code }}</small>
               </div>
               <span class="badge" :class="eq.status === 'Normal' ? 'bg-success' : 'bg-danger'">
                 {{ eq.status }}
@@ -282,7 +282,7 @@ export default {
 
 .hover-up:hover {
   transform: translateY(-3px);
-  background-color: #e9ecef !important;
+  background-color: var(--b2b-color-hover-bg) !important;
 }
 
 .transition-fast {

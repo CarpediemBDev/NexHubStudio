@@ -1,0 +1,410 @@
+/* NexHub Studio - Modern Custom DatePicker Theme */
+@import '@vuepic/vue-datepicker/dist/main.css';
+
+:root,
+[data-theme="light"] {
+  --dp-background-color: var(--bg-card, #ffffff);
+  --dp-text-color: var(--text-primary, #1e293b);
+  --dp-hover-color: var(--bg-subcard, #f1f5f9);
+  --dp-hover-text-color: var(--b2b-color-primary, #2563eb);
+  --dp-hover-icon-color: var(--b2b-color-primary, #2563eb);
+  --dp-primary-color: var(--b2b-color-primary, #2563eb);
+  --dp-primary-text-color: #ffffff;
+  --dp-secondary-color: var(--text-muted, #94a3b8);
+  --dp-border-color: var(--border-color, #e2e8f0);
+  --dp-border-color-hover: var(--b2b-color-primary, #2563eb);
+  --dp-disabled-color: #f1f5f9;
+  --dp-scroll-bar-background: #f1f5f9;
+  --dp-scroll-bar-color: #cbd5e1;
+  --dp-success-color: var(--b2b-color-success, #16a34a);
+  --dp-icon-color: var(--text-secondary, #64748b);
+  --dp-danger-color: var(--b2b-color-danger, #dc2626);
+  --dp-border-radius: 6px;
+  --dp-cell-border-radius: 6px;
+  --dp-font-family: inherit;
+  --dp-font-size: 13px;
+  --dp-preview-font-size: 12px;
+  --dp-time-font-size: 12px;
+}
+
+[data-theme="dark"],
+[data-theme="dark-navy"] {
+  --dp-background-color: var(--bg-card, #1e293b);
+  --dp-text-color: var(--text-primary, #f8fafc);
+  --dp-hover-color: var(--bg-subcard, #334155);
+  --dp-hover-text-color: #60a5fa;
+  --dp-hover-icon-color: #60a5fa;
+  --dp-primary-color: var(--b2b-color-primary, #3b82f6);
+  --dp-primary-text-color: #ffffff;
+  --dp-secondary-color: var(--text-muted, #64748b);
+  --dp-border-color: var(--border-color, #334155);
+  --dp-border-color-hover: #3b82f6;
+  --dp-disabled-color: #1e293b;
+  --dp-scroll-bar-background: #0f172a;
+  --dp-scroll-bar-color: #334155;
+  --dp-icon-color: var(--text-secondary, #94a3b8);
+  --dp-border-radius: 6px;
+  --dp-cell-border-radius: 6px;
+}
+
+/* Custom Overrides for DatePicker Input Control
+   NOTE: vue-datepicker v14 renamed classes (dp__input -> dp--input). Both are
+   listed so the styling survives across versions. */
+.b2b-datepicker-custom .dp--input,
+.b2b-datepicker-custom .dp__input {
+  background-color: var(--bg-card, #ffffff);
+  color: var(--text-primary, #1e293b);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding: 0.25rem 1.75rem 0.25rem 1.9rem;
+  height: 31px;
+  width: 100%;
+  box-shadow: none;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.b2b-datepicker-custom .dp--input:focus,
+.b2b-datepicker-custom .dp--input-focus,
+.b2b-datepicker-custom .dp__input:focus,
+.b2b-datepicker-custom .dp__input_focus {
+  border-color: var(--b2b-color-primary, #2563eb);
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.15);
+}
+
+.b2b-datepicker-custom .dp--input-icon,
+.b2b-datepicker-custom .dp__input_icon {
+  left: 0;
+  display: flex;
+  align-items: center;
+}
+
+.b2b-datepicker-custom .dp--clear-icon,
+.b2b-datepicker-custom .dp__clear_icon {
+  right: 6px;
+}
+
+/* Custom Overrides for DatePicker Wrapper */
+.b2b-datepicker-wrapper,
+.b2b-modern-datepicker-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.dp--outer-menu-wrap,
+.dp__outer_menu_wrap,
+.dp--menu-wrapper {
+  z-index: 99999 !important;
+}
+
+/* Menu Popup styling */
+.dp--menu,
+.dp__menu {
+  border: 1px solid var(--border-color, #e2e8f0) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  z-index: 99999 !important;
+}
+
+/* Modern Range Selection Custom Highlight Styling */
+.b2b-modern-datepicker .dp__range_start,
+.b2b-modern-datepicker .dp__range_end,
+.b2b-modern-datepicker .dp--range-start,
+.b2b-modern-datepicker .dp--range-end,
+.dp--menu .dp__range_start,
+.dp--menu .dp__range_end,
+.dp--menu .dp--range-start,
+.dp--menu .dp--range-end {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4) !important;
+}
+
+.b2b-modern-datepicker .dp__range_between,
+.b2b-modern-datepicker .dp--range-between,
+.dp--menu .dp__range_between,
+.dp--menu .dp--range-between {
+  background-color: rgba(37, 99, 235, 0.12) !important;
+  color: #1d4ed8 !important;
+  font-weight: 600 !important;
+  border-radius: 0 !important;
+}
+
+.dp--arrow-top,
+.dp--arrow-bottom,
+.dp__arrow_top,
+.dp__arrow_bottom {
+  display: none !important;
+}
+
+.dp__cell_inner {
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.dp__month_year_select {
+  font-weight: 600;
+}
+
+.dp__preset_ranges {
+  border-right: 1px solid var(--border-color, #e2e8f0);
+}
+
+/* Enhanced Time Picker UI */
+.dp__time_picker {
+  padding: 8px 12px;
+  background-color: var(--bg-subcard, #f8fafc);
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 0 0 8px 8px;
+}
+
+.dp__time_display {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--b2b-color-primary, #2563eb);
+}
+
+.dp__time_col {
+  font-weight: 600;
+}
+
+/* Hide useless bottom time picker toggle button ONLY when time picker is disabled */
+.b2b-dp-menu-date-only .dp--tp-wrap,
+.b2b-dp-menu-date-only .dp__tp_wrap,
+.b2b-dp-menu-date-only .dp--button-bottom,
+.b2b-dp-menu-date-only .dp__button_bottom,
+.b2b-dp-menu-date-only .dp--button,
+.b2b-datepicker-custom:not(.has-time-picker) .dp--tp-wrap,
+.b2b-datepicker-custom:not(.has-time-picker) .dp__tp_wrap,
+.b2b-datepicker-custom:not(.has-time-picker) .dp--button-bottom,
+.b2b-datepicker-custom:not(.has-time-picker) .dp__button_bottom {
+  display: none !important;
+}
+
+.b2b-dp-menu-with-time .dp--tp-wrap,
+.b2b-dp-menu-with-time .dp__tp_wrap,
+.b2b-dp-menu-with-time .dp--button-bottom,
+.b2b-dp-menu-with-time .dp__button_bottom,
+.has-time-picker .dp--tp-wrap,
+.has-time-picker .dp__tp_wrap,
+.has-time-picker .dp--button-bottom,
+.has-time-picker .dp__button_bottom {
+  display: flex !important;
+}
+
+/* Style bottom action buttons */
+.dp__action_buttons {
+  gap: 6px;
+}
+
+.dp__action_button {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+/* Shared Preset Sidebar Styling */
+.preset-sidebar {
+  padding: 12px;
+  border-right: 1px solid var(--border-color, #e2e8f0);
+  min-width: 115px;
+  background-color: var(--bg-subcard, #f8fafc);
+}
+
+.preset-title {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preset-chip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preset-chip-btn {
+  padding: 5px 8px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 6px;
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #1e293b);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-chip-btn:hover {
+  background: var(--b2b-color-primary, #2563eb);
+  color: #ffffff;
+  border-color: var(--b2b-color-primary, #2563eb);
+}
+
+/* Custom Integrated YYYY-MM Header Button & Combined Overlay */
+.b2b-combined-month-year-header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.b2b-month-year-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-subcard, #f1f5f9);
+  color: var(--text-primary, #1e293b);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.b2b-month-year-btn:hover {
+  background: var(--b2b-color-primary, #2563eb);
+  color: #ffffff;
+  border-color: var(--b2b-color-primary, #2563eb);
+}
+
+.b2b-month-year-btn .icon-arrow {
+  transition: transform 0.2s ease;
+}
+
+.b2b-month-year-btn .icon-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Combined Overlay Panel */
+.b2b-combined-picker-overlay {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 6px;
+  z-index: 10000;
+  width: 250px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.overlay-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+}
+
+.overlay-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.overlay-body {
+  display: flex;
+  gap: 8px;
+}
+
+.overlay-year-col {
+  width: 85px;
+  display: flex;
+  flex-direction: column;
+}
+
+.overlay-month-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.overlay-col-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.overlay-scroll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 170px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.overlay-scroll-list::-webkit-scrollbar {
+  width: 3px;
+}
+
+.overlay-scroll-list::-webkit-scrollbar-thumb {
+  background: var(--border-color, #cbd5e1);
+  border-radius: 3px;
+}
+
+.overlay-month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  max-height: 170px;
+}
+
+.picker-opt-btn {
+  padding: 4px 2px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 4px;
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #1e293b);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.picker-opt-btn:hover {
+  background: var(--dp-hover-color, #f1f5f9);
+  color: var(--b2b-color-primary, #2563eb);
+  border-color: var(--b2b-color-primary, #2563eb);
+}
+
+.picker-opt-btn.active {
+  background: var(--b2b-color-primary, #2563eb) !important;
+  color: #ffffff !important;
+  border-color: var(--b2b-color-primary, #2563eb) !important;
+  font-weight: 700;
+}
+
+
+
+

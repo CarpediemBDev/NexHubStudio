@@ -1,25 +1,14 @@
 <template>
-  <div class="container py-3">
-    <!-- Header Page Title & Context Guide -->
-    <div class="mb-3">
-      <div class="d-flex align-items-center gap-2">
-        <h4 class="fw-bold text-dark m-0">피벗 대안 A: RealGrid 2 동적 행 그룹핑 & CRUD</h4>
-        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">라이선스 미필요</span>
-      </div>
-      <p class="text-muted small mb-0 mt-1">
-        셀 편집, 행 추가/삭제 및 **C(생성), U(수정), D(삭제)** 상태 추출 저장을 지원하는 고성능 리얼그리드 화면입니다.
-      </p>
-    </div>
-
-    <!-- Unified Management Toolbar (Confirmed Model 2: Smart Search Popover & Role-based Clean Division) -->
-    <div class="card bg-light border-0 mb-3 shadow-sm">
-      <div class="card-body p-2.5 d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <!-- Left Group: View & Layout Tools -->
+  <div class="b2b-page-container">
+    <!-- Unified Management Toolbar (Organized into 3 Clear Functional Groups) -->
+    <div class="b2b-toolbar">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 w-100">
+        <!-- GROUP 1: View & Layout Controls (Left) -->
         <div class="d-flex align-items-center gap-1.5 flex-wrap">
           <!-- Reset to Flat Raw Data -->
           <button
-            class="btn-compact"
-            :class="activeGroup === 'none' ? 'btn-compact-active' : 'btn-compact-secondary'"
+            class="btn-b2b-action"
+            :class="{ 'btn-b2b-primary': activeGroup === 'none' }"
             @click="clearGroupBy"
           >
             <i class="bi bi-table me-0.5"></i>
@@ -29,8 +18,8 @@
           <!-- Integrated Preset Dropdown -->
           <div class="dropdown">
             <button
-              class="btn-compact dropdown-toggle"
-              :class="activeGroup !== 'none' && activeGroup.startsWith('preset_') ? 'btn-compact-preset-active' : 'btn-compact-secondary'"
+              class="btn-b2b-action dropdown-toggle"
+              :class="{ 'btn-b2b-primary': activeGroup !== 'none' && activeGroup.startsWith('preset_') }"
               type="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
@@ -54,7 +43,7 @@
           </div>
 
           <!-- Save Current View Button -->
-          <button class="btn-compact btn-compact-secondary" title="현재 뷰 상태 저장" @click="saveCurrentView">
+          <button class="btn-b2b-action" title="현재 뷰 상태 저장" @click="saveCurrentView">
             <i class="bi bi-bookmark-plus text-warning me-0.5"></i>
             <span>뷰 저장</span>
           </button>
@@ -66,7 +55,7 @@
               v-for="view in userSavedViews"
               :key="view.id"
               class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal"
-              :class="activeGroup === view.id ? 'bg-primary text-white shadow-sm' : 'bg-white text-dark border-secondary-subtle'"
+              :class="activeGroup === view.id ? 'bg-primary text-white shadow-sm' : 'bg-theme-card text-theme-primary border-theme'"
               @click="applyView(view)"
             >
               <span>{{ view.name }}</span>
@@ -79,61 +68,64 @@
           </div>
         </div>
 
-        <!-- Right Group: Smart Expandable Search & Data Action Buttons -->
-        <div class="d-flex align-items-center gap-1.5 ms-auto">
-          <!-- Smart Expandable Search Bar -->
-          <QuickSearchBar
-            :searchResult="searchResult"
-            @search="onGridSearch"
-            @clear="searchResult = { count: 0, current: 0 }"
-          />
+        <!-- GROUP 2 & 3: Data Utilities & Right-Aligned CUD Actions -->
+        <div class="d-flex align-items-center gap-2 ms-auto">
+          <!-- GROUP 2: Data Utilities (Search, Column, Excel) -->
+          <div class="d-flex align-items-center gap-1.5">
+            <QuickSearchBar
+              :searchResult="searchResult"
+              @search="onGridSearch"
+              @clear="searchResult = { count: 0, current: 0 }"
+            />
 
-          <!-- Column Picker -->
-          <button class="btn-compact btn-compact-secondary" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
-            <i class="bi bi-eye text-primary me-0.5"></i>
-            <span>컬럼</span>
-          </button>
+            <button class="btn-b2b-action" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
+              <i class="bi bi-eye text-primary me-0.5"></i>
+              <span>컬럼</span>
+            </button>
 
-          <!-- Excel Export -->
-          <button class="btn-compact btn-compact-secondary" title="엑셀 파일 내보내기" @click="exportExcel">
-            <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
-            <span>엑셀</span>
-          </button>
+            <button class="btn-b2b-action" title="엑셀 파일 내보내기" @click="exportExcel">
+              <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
+              <span>엑셀</span>
+            </button>
+          </div>
 
-          <!-- 추가 -->
-          <button
-            class="btn-compact btn-compact-secondary"
-            :disabled="isGrouped"
-            :title="isGrouped ? '그룹핑(피벗) 상태에서는 원본 보기에서만 데이터 추가가 가능합니다' : '새 행 추가'"
-            @click="addRow"
-          >
-            <i class="bi bi-plus-lg text-success me-0.5"></i>
-            <span>추가</span>
-          </button>
+          <!-- Divider between Utilities and CUD Actions -->
+          <div class="border-end h-75 my-auto" style="height: 20px !important;"></div>
 
-          <!-- 삭제 -->
-          <button
-            class="btn-compact btn-compact-secondary"
-            :disabled="isGrouped"
-            :title="isGrouped ? '그룹핑(피벗) 상태에서는 원본 보기에서만 데이터 삭제가 가능합니다' : '선택 행 삭제'"
-            @click="deleteChecked"
-          >
-            <i class="bi bi-dash-lg text-danger me-0.5"></i>
-            <span>삭제</span>
-          </button>
+          <!-- GROUP 3: CUD Row Operations (Right-Aligned Accent) -->
+          <div class="d-flex align-items-center gap-1.5 ms-1">
+            <button
+              class="btn-b2b-action"
+              :disabled="isGrouped"
+              :title="isGrouped ? '그룹핑(피벗) 상태에서는 원본 보기에서만 데이터 추가가 가능합니다' : '새 행 추가'"
+              @click="addRow"
+            >
+              <i class="bi bi-plus-lg text-success me-0.5"></i>
+              <span>추가</span>
+            </button>
 
-          <!-- 저장 -->
-          <button class="btn-compact btn-compact-save ms-1" @click="saveData" title="변경사항 저장">
-            <i class="bi bi-check2 me-0.5"></i>
-            <span>저장</span>
-          </button>
+            <button
+              class="btn-b2b-action"
+              :disabled="isGrouped"
+              :title="isGrouped ? '그룹핑(피벗) 상태에서는 원본 보기에서만 데이터 삭제가 가능합니다' : '선택 행 삭제'"
+              @click="deleteChecked"
+            >
+              <i class="bi bi-dash-lg text-danger me-0.5"></i>
+              <span>삭제</span>
+            </button>
+
+            <button class="btn-b2b-primary" @click="saveData" title="변경사항 저장">
+              <i class="bi bi-check2 me-0.5"></i>
+              <span>저장</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Grid Container Card using Base Component -->
-    <div class="card shadow-sm border-light mb-4">
-      <div class="card-body p-0">
+    <div class="b2b-grid-card mb-4">
+      <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
           :fields="gridFields"
@@ -143,7 +135,6 @@
           :useFooter="true"
           :softDeleting="true"
           :hideDeletedRows="false"
-          height="580px"
           @init="onGridInit"
         />
       </div>
@@ -163,11 +154,13 @@
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { showToast } from '@/utils/toastUtil.js'
 
 export default {
   name: 'PivotAltAPage',
   components: {
+    PageHeader,
     RealGridCommonJs,
     ColumnPickerModal,
     QuickSearchBar
@@ -517,80 +510,6 @@ export default {
 </script>
 
 <style scoped>
-.btn-compact {
-  height: 30px;
-  padding: 0 10px;
-  font-size: 0.8125rem; /* 13px */
-  font-weight: 500;
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.15s ease-in-out;
-  cursor: pointer;
-  line-height: 1;
-}
-.btn-compact-secondary {
-  background-color: #ffffff;
-  border: 1px solid #d1d5db;
-  color: #374151;
-}
-.btn-compact-secondary:hover:not(:disabled) {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
-  color: #111827;
-}
-.btn-compact-secondary:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  background-color: #f3f4f6;
-  border-color: #e5e7eb;
-  color: #9ca3af;
-}
-.btn-compact-active {
-  background-color: #1f2937;
-  border: 1px solid #1f2937;
-  color: #ffffff;
-}
-.btn-compact-preset-active {
-  background-color: #2563eb;
-  border: 1px solid #2563eb;
-  color: #ffffff;
-  font-weight: 600;
-  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.25);
-}
-.btn-compact-save {
-  background-color: #2563eb;
-  border: 1px solid #2563eb;
-  color: #ffffff;
-  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.2);
-}
-.btn-compact-save:hover {
-  background-color: #1d4ed8;
-  border-color: #1d4ed8;
-}
-.btn-segmented {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  padding: 4px 11px;
-  transition: all 0.15s ease-in-out;
-}
-.btn-segmented-outline {
-  background-color: #ffffff;
-  border-color: #d1d5db;
-  color: #4b5563;
-}
-.btn-segmented-outline:hover {
-  background-color: #f3f4f6;
-  color: #111827;
-}
-.btn-segmented-active {
-  background-color: #2563eb;
-  border-color: #2563eb;
-  color: #ffffff;
-  font-weight: 600;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
-}
 .cursor-pointer {
   cursor: pointer;
 }
