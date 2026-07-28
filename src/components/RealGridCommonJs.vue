@@ -8,26 +8,21 @@
 import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
-import { showToast } from '@/utils/toastUtil.js'
+import realgridCommon from '@/mixins/realgridCommon.js'
 import { useTabStore } from '@/stores/tabStore.js'
 
 export default {
   name: 'RealGridCommonJs',
+  mixins: [realgridCommon],
   props: {
+    // 공통 옵션(editable/softDeleting/hideDeletedRows/useStateBar/useCheckBar/
+    // useIndicator/checkBarExclusive/checkBarWidth/stateBarWidth)은 공통 mixin에서 선언.
     fields: { type: Array, default: () => [] },
     columns: { type: Array, default: () => [] },
     rows: { type: Array, default: () => [] },
     height: { type: String, default: '580px' },
     useGroupPanel: { type: Boolean, default: false },
-    useFooter: { type: Boolean, default: false },
-    softDeleting: { type: Boolean, default: true },
-    hideDeletedRows: { type: Boolean, default: true },
-    editable: { type: Boolean, default: true }
-  },
-  computed: {
-    currentTheme() {
-      return this.$tabStore?.sidebarTheme || 'light'
-    }
+    useFooter: { type: Boolean, default: false }
   },
   watch: {
     rows: {
@@ -53,14 +48,10 @@ export default {
           this.gridView.setColumns(newColumns)
         }
       }
-    },
-    // ✨ computed 경유로 Pinia 테마 변경 감지
-    currentTheme(newTheme) {
-      this.applyGridTheme(newTheme)
     }
   },
   created() {
-    // Pinia 태마 스토어 연결
+    // Pinia 테마 스토어 연결 (믹스인이 아닌 컴포넌트에서 직접 → 순환참조 회피)
     this.$tabStore = useTabStore()
   },
   mounted() {
@@ -69,9 +60,6 @@ export default {
     this.$nextTick(() => {
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
     })
-  },
-  beforeUnmount() {
-    this.destroyGrid()
   },
   methods: {
     initGrid() {
@@ -88,7 +76,7 @@ export default {
       // Enterprise default options
       this.dataProvider.softDeleting = this.softDeleting
       this.gridView.hideDeletedRows = this.hideDeletedRows
-      
+
       this.gridView.setEditOptions({
         editable: this.editable,
         insertable: this.editable,
@@ -96,24 +84,8 @@ export default {
         commitWhenLeave: true
       })
 
-      // StateBar: 행 상태 컬러 뱃지 (추가=초록, 수정=파랑, 삭제=빨강)
-      this.gridView.setStateBar({
-        visible: true,
-        width: 6,
-        stateStyles: {
-          insert: { background: '#22c55e' },   // 추가 → 초록
-          update: { background: '#3b82f6' },   // 수정 → 파랑
-          delete: { background: '#ef4444' },   // 삭제 → 빨강
-          read:   { background: 'transparent' } // 기본 → 투명
-        }
-      })
-      // CheckBar: 전체선택 헤더 중앙 정렬
-      this.gridView.setCheckBar({
-        visible: true,
-        width: 36,
-        head: 'check',
-        headCheckCallback: null
-      })
+      // Indicator / StateBar / CheckBar 공통 제어열 (mixin, props로 제어)
+      this.applyControlBars()
       this.gridView.setFooter({ visible: this.useFooter })
 
       // 행 그룹핑 패널 지원 (피벗 A용)
@@ -148,123 +120,8 @@ export default {
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
     },
 
-    // =========================================================
-    // 🎨 동적 테마 연동: 제어열(indicator / checkBar / stateBar)
-    // =========================================================
-    getGridThemeStyles(theme) {
-      const isDark = theme === 'dark' || theme === 'dark-navy'
-      const isNavy = theme === 'dark-navy'
-
-      if (isDark) {
-        const bg     = isNavy ? '#1e293b' : '#1e293b'  // slate-800
-        const headBg = isNavy ? '#0f172a' : '#111827'  // slate-900
-        const border = isNavy ? '1px solid #334155' : '1px solid #374151'
-        const color  = '#f8fafc'
-        const cell   = { background: bg, color, borderRight: border }
-        const head   = { background: headBg, color, borderBottom: border }
-        return {
-          indicator: { ...cell, head },
-          checkBar:  { ...cell, head },
-          stateBar:  { background: bg, borderRight: border },
-        }
-      } else {
-        // Light 테마 — tokens.css 정확히 일치
-        const cell = { background: '#FFFFFF', color: '#1E293B', borderRight: '1px solid #E2E8F0' }
-        const head = { background: '#F1F5F9', color: '#1E293B', borderBottom: '1px solid #E2E8F0' }
-        return {
-          indicator: { ...cell, head },
-          checkBar:  { ...cell, head },
-          stateBar:  { background: '#FFFFFF', borderRight: '1px solid #E2E8F0' },
-        }
-      }
-    },
-
-    applyGridTheme(theme) {
-      if (!this.gridView) return
-      try {
-        const styles = this.getGridThemeStyles(theme)
-        this.gridView.setStyles(styles)
-      } catch (e) {
-        console.warn('[RealGrid] applyGridTheme error:', e)
-      }
-    },
-
-    // Public API methods exposed via refs
-    setFixedOptions(options) {
-      if (this.gridView) {
-        this.gridView.setFixedOptions(options)
-      }
-    },
-
-    getColumnIndexByName(colName) {
-      if (!this.gridView || !colName) return -1
-      try {
-        if (typeof this.gridView.getColumnIndex === 'function') {
-          return this.gridView.getColumnIndex(colName)
-        }
-        if (typeof this.gridView.columnByName === 'function') {
-          const col = this.gridView.columnByName(colName)
-          if (col) {
-            if (typeof col.displayIndex === 'number' && col.displayIndex >= 0) return col.displayIndex
-            if (typeof col.index === 'number' && col.index >= 0) return col.index
-          }
-        }
-        if (typeof this.gridView.getColumns === 'function') {
-          const cols = this.gridView.getColumns() || []
-          const idx = cols.findIndex(c => c.name === colName || c.fieldName === colName)
-          if (idx >= 0) return idx
-        }
-      } catch (e) {
-        console.warn('getColumnIndexByName error:', e)
-      }
-      return -1
-    },
-
-    handleDynamicFixing(item, clickData) {
-      if (!this.gridView) return false
-      
-      const currentFixed = this.gridView.getFixedOptions ? (this.gridView.getFixedOptions() || {}) : {}
-      let colCount = currentFixed.colCount || 0
-      let rowCount = currentFixed.rowCount || 0
-
-      if (item.tag === 'fixColumn' && clickData.column) {
-        const colIdx = this.getColumnIndexByName(clickData.column)
-        if (colIdx >= 0) {
-          colCount = colIdx + 1
-          this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
-          showToast(`'${clickData.column}' 컬럼까지 열 고정이 적용되었습니다.`, { type: 'success' })
-          return true
-        }
-      } else if (item.tag === 'fixRow' && clickData.itemIndex !== undefined && clickData.itemIndex >= 0) {
-        rowCount = clickData.itemIndex + 1
-        this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
-        showToast(`${rowCount}번째 행까지 행 고정이 적용되었습니다.`, { type: 'success' })
-        return true
-      } else if (item.tag === 'fixBoth' && clickData.column && clickData.itemIndex !== undefined) {
-        const colIdx = this.getColumnIndexByName(clickData.column)
-        if (colIdx >= 0 && clickData.itemIndex >= 0) {
-          colCount = colIdx + 1
-          rowCount = clickData.itemIndex + 1
-          this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
-          showToast(`${rowCount}행 x '${clickData.column}'열 동시 고정이 적용되었습니다.`, { type: 'success' })
-          return true
-        }
-      } else if (item.tag === 'clearFixing') {
-        this.gridView.setFixedOptions({ colCount: 0, rowCount: 0 })
-        showToast('행/열 고정이 해제되었습니다.', { type: 'info' })
-        return true
-      }
-      return false
-    },
-
-    setFields(fields) {
-      if (this.dataProvider) this.dataProvider.setFields(fields)
-    },
-    
-    setColumns(columns) {
-      if (this.gridView) this.gridView.setColumns(columns)
-    },
-
+    // 그리드 전용 Public API (setFields/setColumns/deleteChecked/commit 은 공통 mixin 제공)
+    // 그룹화(groupBy 등)는 GridView 전용 — 트리에는 없음.
     setRows(rows) {
       if (this.dataProvider) this.dataProvider.setRows(rows || [])
     },
@@ -289,174 +146,6 @@ export default {
         this.dataProvider.addRow(rowData)
         const count = this.dataProvider.getRowCount()
         if (this.gridView) this.gridView.setCurrent({ itemIndex: count - 1 })
-      }
-    },
-    
-    deleteChecked() {
-      if (!this.gridView || !this.dataProvider) return 0
-      const checkedRows = this.gridView.getCheckedRows()
-      if (checkedRows.length > 0) {
-        this.dataProvider.removeRows(checkedRows)
-        this.gridView.clearCheckedItems()
-      }
-      return checkedRows.length
-    },
-    
-    getChanges() {
-      if (!this.dataProvider) return { created: [], updated: [], deleted: [] }
-      
-      const createdIdx = this.dataProvider.getStateRows('created') || []
-      const updatedIdx = this.dataProvider.getStateRows('updated') || []
-      const deletedIdx = this.dataProvider.getStateRows('deleted') || []
-
-      const created = createdIdx.map(idx => this.dataProvider.getJsonRow(idx))
-      const updated = updatedIdx.map(idx => this.dataProvider.getJsonRow(idx))
-      const deleted = deletedIdx.map(idx => this.dataProvider.getJsonRow(idx))
-
-      return { created, updated, deleted }
-    },
-
-    clearRowStates() {
-      if (this.dataProvider) this.dataProvider.clearRowStates()
-    },
-
-    exportToExcel(fileName = 'RealGrid_Data.xlsx') {
-      if (!this.gridView) return
-      try {
-        const name = fileName.endsWith('.xlsx') ? fileName : `${fileName}.xlsx`
-        if (typeof this.gridView.exportGrid === 'function') {
-          this.gridView.exportGrid({
-            type: 'excel',
-            target: 'local',
-            fileName: name,
-            showConfirm: false,
-            showProgress: true,
-            indicator: 'visible',
-            header: 'visible',
-            footer: 'visible'
-          })
-          showToast(`'${name}' 엑셀 내보내기를 실행했습니다.`, { type: 'success' })
-        } else {
-          showToast('RealGrid exportGrid 내장 메서드를 호출할 수 없습니다.', { type: 'warning' })
-        }
-      } catch (err) {
-        console.error('Excel export error:', err)
-        showToast('엑셀 파일 내보내기에 실패했습니다.', { type: 'danger' })
-      }
-    },
-
-    getColumnsInfo() {
-      if (!this.gridView) return []
-      try {
-        const cols = this.gridView.getColumns() || []
-        return cols.map(c => ({
-          name: c.name,
-          headerText: c.header?.text || c.name,
-          visible: c.visible !== false
-        }))
-      } catch (e) {
-        return []
-      }
-    },
-
-    setColumnVisible(colName, visible) {
-      if (!this.gridView) return
-      try {
-        this.gridView.setColumnProperty(colName, 'visible', visible)
-      } catch (e) {
-        console.warn('setColumnVisible failed:', e)
-      }
-    },
-
-    searchGrid(query, direction = 'next') {
-      if (!this.gridView || !this.dataProvider || !query || !query.trim()) {
-        return { count: 0, current: 0 }
-      }
-
-      try {
-        const keyword = query.trim().toLowerCase()
-        const rowCount = this.dataProvider.getRowCount()
-        const matches = []
-
-        // RealGrid DataProvider 전수 검사하여 매칭되는 (itemIndex, column) 수집
-        for (let r = 0; r < rowCount; r++) {
-          const rowJson = this.dataProvider.getJsonRow(r) || {}
-
-          for (const [colKey, val] of Object.entries(rowJson)) {
-            if (val !== undefined && val !== null && String(val).toLowerCase().includes(keyword)) {
-              let itemIdx = typeof this.gridView.getItemIndexOfRow === 'function'
-                ? this.gridView.getItemIndexOfRow(r)
-                : r
-
-              // 만약 그룹이 접혀서 숨겨져 있으면(itemIdx < 0), 그룹들을 자동으로 펼쳐서 노출
-              if (itemIdx < 0 && typeof this.gridView.getItemCount === 'function') {
-                const totalItems = this.gridView.getItemCount()
-                for (let i = 0; i < totalItems; i++) {
-                  try { this.gridView.expandGroup(i, true, true) } catch (e) {}
-                }
-                itemIdx = typeof this.gridView.getItemIndexOfRow === 'function'
-                  ? this.gridView.getItemIndexOfRow(r)
-                  : r
-              }
-
-              if (itemIdx >= 0) {
-                matches.push({ itemIndex: itemIdx, dataRow: r, column: colKey })
-              }
-            }
-          }
-        }
-
-        if (matches.length === 0) {
-          showToast(`'${query}' 검색 결과가 없습니다.`, { type: 'warning' })
-          return { count: 0, current: 0 }
-        }
-
-        const currentCell = this.gridView.getCurrent()
-        const startIndex = currentCell && currentCell.itemIndex >= 0 ? currentCell.itemIndex : -1
-        const startColumn = currentCell && currentCell.column ? currentCell.column : ''
-
-        let targetIdx = 0
-        if (direction === 'next') {
-          const found = matches.findIndex(m =>
-            m.itemIndex > startIndex || (m.itemIndex === startIndex && m.column > startColumn)
-          )
-          targetIdx = found >= 0 ? found : 0
-        } else if (direction === 'prev') {
-          const reversed = [...matches].reverse()
-          const found = reversed.findIndex(m =>
-            m.itemIndex < startIndex || (m.itemIndex === startIndex && m.column < startColumn)
-          )
-          if (found >= 0) {
-            targetIdx = matches.length - 1 - found
-          } else {
-            targetIdx = matches.length - 1
-          }
-        }
-
-        const target = matches[targetIdx]
-        if (target) {
-          this.gridView.setCurrent({ itemIndex: target.itemIndex, column: target.column })
-          if (typeof this.gridView.showCell === 'function') {
-            try { this.gridView.showCell(target.itemIndex, target.column) } catch (e) {}
-          }
-          this.gridView.setFocus()
-        }
-
-        return { count: matches.length, current: targetIdx + 1 }
-      } catch (e) {
-        console.error('searchGrid error:', e)
-        return { count: 0, current: 0 }
-      }
-    },
-    
-    destroyGrid() {
-      if (this.gridView) {
-        try { this.gridView.destroy() } catch (e) {}
-        this.gridView = null
-      }
-      if (this.dataProvider) {
-        try { this.dataProvider.destroy() } catch (e) {}
-        this.dataProvider = null
       }
     }
   }

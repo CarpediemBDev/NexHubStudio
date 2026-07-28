@@ -20,6 +20,7 @@ import PivotAltBPage from "../pages/PivotAltBPage.vue";
 import RealPivotPage from "../pages/RealPivotPage.vue";
 import RealGridPage from "../pages/RealGridPage.vue";
 import RealGridVuePage from "../pages/RealGridVuePage.vue";
+import RealGridTreePage from "../pages/RealGridTreePage.vue";
 
 const routes = [
   {
@@ -74,6 +75,7 @@ const routes = [
         children: [
           { path: "vue", name: "RealGridVueSample", component: RealGridVuePage, meta: { title: "RealGrid (Vue3)", icon: "bi-grid-3x3-gap", keepAlive: true } },
           { path: "js", name: "RealGridJsSample", component: RealGridPage, meta: { title: "RealGrid (JS)", icon: "bi-grid-3x3", keepAlive: true } },
+          { path: "tree", name: "RealGridTreeSample", component: RealGridTreePage, meta: { title: "RealGrid 트리", icon: "bi-diagram-3", keepAlive: true } },
           { path: "pivot-a", name: "PivotA", component: PivotAltAPage, meta: { title: "Pivot 분석 A", icon: "bi-pie-chart", keepAlive: true } },
           { path: "pivot-b", name: "PivotB", component: PivotAltBPage, meta: { title: "Pivot 분석 B", icon: "bi-pie-chart-fill", keepAlive: true } },
           { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "Real Pivot Engine", icon: "bi-bar-chart-steps", keepAlive: true } }
@@ -115,6 +117,7 @@ const routes = [
       { path: "user-assignment-shared", component: UserAssignmentShared, meta: { hidden: true } },
       { path: "real-grid", component: RealGridPage, meta: { hidden: true } },
       { path: "real-grid-vue", component: RealGridVuePage, meta: { hidden: true } },
+      { path: "real-grid-tree", component: RealGridTreePage, meta: { hidden: true } },
       { path: "pivot-alt-a", component: PivotAltAPage, meta: { hidden: true } },
       { path: "pivot-alt-b", component: PivotAltBPage, meta: { hidden: true } },
       { path: "real-pivot", component: RealPivotPage, meta: { hidden: true } },

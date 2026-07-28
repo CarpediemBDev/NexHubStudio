@@ -335,23 +335,15 @@ export default {
     },
 
     expandAll() {
-      if (!this.gridView) return
-      // 2회 멀티패스 순회: 완전히 싹 접힌 상태에서도 1차/2차 모든 그룹을 100% 쫙 펼칩니다
-      for (let pass = 0; pass < 2; pass++) {
-        const count = this.gridView.getItemCount()
-        for (let i = 0; i < count; i++) {
-          try { this.gridView.expandGroup(i, true, true) } catch (e) {}
-        }
-      }
+      // 그룹 멀티패스 펼치기는 공통 mixin(expandAllGroups)에서 제공
+      if (!this.$refs.realgridComp) return
+      this.$refs.realgridComp.expandAllGroups()
       showToast('모든 부서 그룹 행이 쫙 펼쳐졌습니다.', { type: 'info' })
     },
 
     collapseAll() {
-      if (!this.gridView) return
-      const count = this.gridView.getItemCount()
-      for (let i = count - 1; i >= 0; i--) {
-        try { this.gridView.collapseGroup(i, true) } catch (e) {}
-      }
+      if (!this.$refs.realgridComp) return
+      this.$refs.realgridComp.collapseAllGroups()
       showToast('모든 그룹 행이 싹 접혔습니다 (소계 요약 보기).', { type: 'info' })
     },
 
@@ -454,8 +446,8 @@ export default {
     },
 
     saveData() {
-      if (!this.gridView || !this.dataProvider) return
-      this.gridView.commit()
+      if (!this.$refs.realgridComp) return
+      this.$refs.realgridComp.commit() // 공통 mixin
 
       const changes = this.$refs.realgridComp ? this.$refs.realgridComp.getChanges() : { created: [], updated: [], deleted: [] }
       const totalChanges = changes.created.length + changes.updated.length + changes.deleted.length

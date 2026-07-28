@@ -1,5 +1,16 @@
 import { defineStore } from 'pinia';
-import router from '../router';
+
+// ⚠️ router 를 모듈 최상위에서 정적 import 하면
+//    tabStore → router → pages → components → tabStore 순환 참조가 생겨
+//    HMR 시 TDZ 오류가 발생한다. router 는 런타임 액션에서만 필요하므로
+//    아래 헬퍼로 지연 로딩하여 순환을 끊는다. (모듈은 앱 시작 시 이미 초기화됨)
+let _router = null;
+async function getRouter() {
+  if (!_router) {
+    _router = (await import('../router')).default;
+  }
+  return _router;
+}
 
 export const useTabStore = defineStore('tab', {
   state: () => {
@@ -33,12 +44,13 @@ export const useTabStore = defineStore('tab', {
       }
       this.activeTab = route.path;
     },
-    closeTab(path) {
+    async closeTab(path) {
       const index = this.visitedTabs.findIndex((tab) => tab.path === path);
       if (index > -1) {
         this.visitedTabs.splice(index, 1);
         if (this.activeTab === path) {
           const nextTab = this.visitedTabs[index] || this.visitedTabs[index - 1];
+          const router = await getRouter();
           if (nextTab) {
             router.push(nextTab.path);
             this.activeTab = nextTab.path;
@@ -49,15 +61,17 @@ export const useTabStore = defineStore('tab', {
         }
       }
     },
-    closeOtherTabs(path) {
+    async closeOtherTabs(path) {
       this.visitedTabs = this.visitedTabs.filter((tab) => tab.path === path);
       if (this.activeTab !== path) {
+        const router = await getRouter();
         router.push(path);
         this.activeTab = path;
       }
     },
-    closeAllTabs() {
+    async closeAllTabs() {
       this.visitedTabs = [];
+      const router = await getRouter();
       router.push('/');
       this.activeTab = '/';
     },

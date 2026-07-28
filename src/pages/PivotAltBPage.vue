@@ -418,8 +418,8 @@ export default {
     },
 
     saveData() {
-      if (!this.gridView || !this.dataProvider) return
-      this.gridView.commit()
+      if (!this.$refs.realgridComp) return
+      this.$refs.realgridComp.commit() // 공통 mixin
       showToast('피벗 매트릭스 설정이 저장되었습니다.', { type: 'success' })
     }
   }
