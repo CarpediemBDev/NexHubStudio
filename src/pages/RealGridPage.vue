@@ -92,6 +92,9 @@ export default {
         { fieldName: 'name', dataType: 'text' },
         { fieldName: 'dept', dataType: 'text' },
         { fieldName: 'role', dataType: 'text' },
+        { fieldName: 'status', dataType: 'text' },
+        { fieldName: 'joinDate', dataType: 'text' },
+        { fieldName: 'activeYn', dataType: 'text' },
         { fieldName: 'salary', dataType: 'number' },
         { fieldName: 'sales', dataType: 'number' }
       ],
@@ -99,7 +102,7 @@ export default {
         {
           name: 'userId',
           fieldName: 'userId',
-          width: '110',
+          width: '90',
           header: { text: 'ID' },
           editable: false,
           styles: { textAlignment: 'center' }
@@ -107,7 +110,7 @@ export default {
         {
           name: 'dept',
           fieldName: 'dept',
-          width: '130',
+          width: '110',
           header: { text: '부서명' },
           styles: { textAlignment: 'near' },
           mergeRule: { criteria: 'value' }
@@ -115,21 +118,58 @@ export default {
         {
           name: 'name',
           fieldName: 'name',
-          width: '120',
+          width: '100',
           header: { text: '이름' },
           styles: { textAlignment: 'center' }
         },
         {
           name: 'role',
           fieldName: 'role',
-          width: '140',
+          width: '120',
           header: { text: '역할/직급' },
           styles: { textAlignment: 'near' }
         },
         {
+          name: 'status',
+          fieldName: 'status',
+          width: '100',
+          header: { text: '재직상태 (셀렉트)' },
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'dropdown',
+            dropDownCount: 4,
+            domainOnly: true,
+            labels: ['재직', '휴직', '퇴사'],
+            values: ['재직', '휴직', '퇴사']
+          }
+        },
+        {
+          name: 'joinDate',
+          fieldName: 'joinDate',
+          width: '110',
+          header: { text: '입사일 (달력)' },
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'date',
+            datetimeFormat: 'yyyy-MM-dd'
+          }
+        },
+        {
+          name: 'activeYn',
+          fieldName: 'activeYn',
+          width: '85',
+          header: { text: '활성 (체크)' },
+          styles: { textAlignment: 'center' },
+          renderer: {
+            type: 'check',
+            trueValues: 'Y',
+            falseValues: 'N'
+          }
+        },
+        {
           name: 'salary',
           fieldName: 'salary',
-          width: '130',
+          width: '110',
           header: { text: '기본급 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
@@ -138,7 +178,7 @@ export default {
         {
           name: 'sales',
           fieldName: 'sales',
-          width: '140',
+          width: '120',
           header: { text: '영업실적 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
@@ -180,14 +220,14 @@ export default {
 
     async loadUsers() {
       const defaultUsers = [
-        { userId: 'u001', name: '김철수', dept: '개발 1팀', role: '수석연구원', salary: 7200, sales: 12000 },
-        { userId: 'u002', name: '이영희', dept: '개발 1팀', role: '책임연구원', salary: 6100, sales: 9800 },
-        { userId: 'u003', name: '박민수', dept: '개발 1팀', role: '선임연구원', salary: 4800, sales: 7500 },
-        { userId: 'u004', name: '정수진', dept: '개발 2팀', role: '수석연구원', salary: 7500, sales: 14500 },
-        { userId: 'u005', name: '홍길동', dept: '개발 2팀', role: '책임연구원', salary: 6300, sales: 11000 },
-        { userId: 'u006', name: '강지훈', dept: '개발 2팀', role: '선임연구원', salary: 4600, sales: 8200 },
-        { userId: 'u007', name: '조유진', dept: '영업 1팀', role: '부장', salary: 8000, sales: 32000 },
-        { userId: 'u008', name: '윤상호', dept: '영업 1팀', role: '차장', salary: 6800, sales: 24000 }
+        { userId: 'u001', name: '김철수', dept: '개발 1팀', role: '수석연구원', status: '재직', joinDate: '2021-03-01', activeYn: 'Y', salary: 7200, sales: 12000 },
+        { userId: 'u002', name: '이영희', dept: '개발 1팀', role: '책임연구원', status: '재직', joinDate: '2022-05-15', activeYn: 'Y', salary: 6100, sales: 9800 },
+        { userId: 'u003', name: '박민수', dept: '개발 1팀', role: '선임연구원', status: '휴직', joinDate: '2023-01-10', activeYn: 'N', salary: 4800, sales: 7500 },
+        { userId: 'u004', name: '정수진', dept: '개발 2팀', role: '수석연구원', status: '재직', joinDate: '2020-11-01', activeYn: 'Y', salary: 7500, sales: 14500 },
+        { userId: 'u005', name: '홍길동', dept: '개발 2팀', role: '책임연구원', status: '재직', joinDate: '2022-08-20', activeYn: 'Y', salary: 6300, sales: 11000 },
+        { userId: 'u006', name: '강지훈', dept: '개발 2팀', role: '선임연구원', status: '재직', joinDate: '2023-04-12', activeYn: 'Y', salary: 4600, sales: 8200 },
+        { userId: 'u007', name: '조유진', dept: '영업 1팀', role: '부장', status: '재직', joinDate: '2019-07-01', activeYn: 'Y', salary: 8000, sales: 32000 },
+        { userId: 'u008', name: '윤상호', dept: '영업 1팀', role: '차장', status: '퇴사', joinDate: '2021-02-15', activeYn: 'N', salary: 6800, sales: 24000 }
       ]
       try {
         const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'

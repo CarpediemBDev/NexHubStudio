@@ -10,45 +10,45 @@
  * ========================================================= */
 export const departmentTree = [
   {
-    deptCode: 'HQ', deptName: '(주) 넥스허브', manager: '대표이사', rank: 'CEO', headcount: 320, status: '운영',
+    deptCode: 'HQ', deptName: '(주) 넥스허브', manager: '대표이사', rank: 'CEO', headcount: 320, status: '운영', createdAt: '2020-01-01', useYn: 'Y',
     children: [
       {
-        deptCode: '1000', deptName: '경영지원본부', manager: '김본부', rank: '본부장', headcount: 45, status: '운영',
+        deptCode: '1000', deptName: '경영지원본부', manager: '김본부', rank: '본부장', headcount: 45, status: '운영', createdAt: '2021-03-15', useYn: 'Y',
         children: [
-          { deptCode: '1100', deptName: '인사팀', manager: '이인사', rank: '팀장', headcount: 12, status: '운영' },
+          { deptCode: '1100', deptName: '인사팀', manager: '이인사', rank: '팀장', headcount: 12, status: '운영', createdAt: '2021-04-01', useYn: 'Y' },
           {
-            deptCode: '1200', deptName: '재무팀', manager: '박재무', rank: '팀장', headcount: 18, status: '운영',
+            deptCode: '1200', deptName: '재무팀', manager: '박재무', rank: '팀장', headcount: 18, status: '운영', createdAt: '2021-04-01', useYn: 'Y',
             children: [
-              { deptCode: '1210', deptName: '회계파트', manager: '최회계', rank: '파트장', headcount: 8, status: '운영' },
-              { deptCode: '1220', deptName: '자금파트', manager: '정자금', rank: '파트장', headcount: 10, status: '운영' }
+              { deptCode: '1210', deptName: '회계파트', manager: '최회계', rank: '파트장', headcount: 8, status: '운영', createdAt: '2022-01-10', useYn: 'Y' },
+              { deptCode: '1220', deptName: '자금파트', manager: '정자금', rank: '파트장', headcount: 10, status: '운영', createdAt: '2022-01-10', useYn: 'Y' }
             ]
           },
-          { deptCode: '1300', deptName: '총무팀', manager: '홍총무', rank: '팀장', headcount: 15, status: '운영' }
+          { deptCode: '1300', deptName: '총무팀', manager: '홍총무', rank: '팀장', headcount: 15, status: '운영', createdAt: '2021-05-01', useYn: 'Y' }
         ]
       },
       {
-        deptCode: '2000', deptName: '연구개발본부', manager: '강연구', rank: '본부장', headcount: 88, status: '운영',
+        deptCode: '2000', deptName: '연구개발본부', manager: '강연구', rank: '본부장', headcount: 88, status: '운영', createdAt: '2021-03-15', useYn: 'Y',
         children: [
           {
-            deptCode: '2100', deptName: '플랫폼개발실', manager: '윤플랫', rank: '실장', headcount: 40, status: '운영',
+            deptCode: '2100', deptName: '플랫폼개발실', manager: '윤플랫', rank: '실장', headcount: 40, status: '운영', createdAt: '2021-06-01', useYn: 'Y',
             children: [
-              { deptCode: '2110', deptName: '프론트엔드팀', manager: '서프론', rank: '팀장', headcount: 18, status: '운영' },
-              { deptCode: '2120', deptName: '백엔드팀', manager: '남백엔', rank: '팀장', headcount: 22, status: '운영' }
+              { deptCode: '2110', deptName: '프론트엔드팀', manager: '서프론', rank: '팀장', headcount: 18, status: '운영', createdAt: '2022-03-01', useYn: 'Y' },
+              { deptCode: '2120', deptName: '백엔드팀', manager: '남백엔', rank: '팀장', headcount: 22, status: '운영', createdAt: '2022-03-01', useYn: 'Y' }
             ]
           },
-          { deptCode: '2200', deptName: '데이터분석실', manager: '문데이', rank: '실장', headcount: 28, status: '운영' },
-          { deptCode: '2300', deptName: 'QA팀', manager: '조큐에', rank: '팀장', headcount: 20, status: '신설' }
+          { deptCode: '2200', deptName: '데이터분석실', manager: '문데이', rank: '실장', headcount: 28, status: '운영', createdAt: '2021-09-01', useYn: 'Y' },
+          { deptCode: '2300', deptName: 'QA팀', manager: '조큐에', rank: '팀장', headcount: 20, status: '신설', createdAt: '2024-01-10', useYn: 'Y' }
         ]
       },
       {
-        deptCode: '3000', deptName: '영업본부', manager: '한영업', rank: '본부장', headcount: 62, status: '운영',
+        deptCode: '3000', deptName: '영업본부', manager: '한영업', rank: '본부장', headcount: 62, status: '운영', createdAt: '2021-03-15', useYn: 'Y',
         children: [
-          { deptCode: '3100', deptName: '국내영업팀', manager: '오국내', rank: '팀장', headcount: 30, status: '운영' },
-          { deptCode: '3200', deptName: '해외영업팀', manager: '신해외', rank: '팀장', headcount: 32, status: '운영' }
+          { deptCode: '3100', deptName: '국내영업팀', manager: '오국내', rank: '팀장', headcount: 30, status: '운영', createdAt: '2021-10-01', useYn: 'Y' },
+          { deptCode: '3200', deptName: '해외영업팀', manager: '신해외', rank: '팀장', headcount: 32, status: '운영', createdAt: '2021-10-01', useYn: 'Y' }
         ]
       },
       {
-        deptCode: '9000', deptName: '미래전략TF', manager: '임전략', rank: 'TF장', headcount: 10, status: '한시조직',
+        deptCode: '9000', deptName: '미래전략TF', manager: '임전략', rank: 'TF장', headcount: 10, status: '한시조직', createdAt: '2024-06-01', useYn: 'Y',
         children: []
       }
     ]

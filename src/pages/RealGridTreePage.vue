@@ -122,15 +122,53 @@ export default {
         { fieldName: 'manager', dataType: 'text' },
         { fieldName: 'rank', dataType: 'text' },
         { fieldName: 'headcount', dataType: 'number' },
-        { fieldName: 'status', dataType: 'text' }
+        { fieldName: 'status', dataType: 'text' },
+        { fieldName: 'createdAt', dataType: 'text' },
+        { fieldName: 'useYn', dataType: 'text' }
       ],
       columns: [
-        { name: 'deptName', fieldName: 'deptName', width: '280', header: { text: '조직명' }, styles: { textAlignment: 'near' } },
-        { name: 'deptCode', fieldName: 'deptCode', width: '110', header: { text: '조직코드' }, editable: false, styles: { textAlignment: 'center' } },
-        { name: 'manager', fieldName: 'manager', width: '110', header: { text: '책임자' }, styles: { textAlignment: 'center' } },
-        { name: 'rank', fieldName: 'rank', width: '100', header: { text: '직책' }, styles: { textAlignment: 'center' } },
-        { name: 'headcount', fieldName: 'headcount', width: '90', header: { text: '인원' }, numberFormat: '#,##0', styles: { textAlignment: 'far' } },
-        { name: 'status', fieldName: 'status', width: '110', header: { text: '상태' }, styles: { textAlignment: 'center' } }
+        { name: 'deptName', fieldName: 'deptName', width: '220', header: { text: '조직명' }, styles: { textAlignment: 'near' } },
+        { name: 'deptCode', fieldName: 'deptCode', width: '90', header: { text: '조직코드' }, editable: false, styles: { textAlignment: 'center' } },
+        { name: 'manager', fieldName: 'manager', width: '85', header: { text: '책임자' }, styles: { textAlignment: 'center' } },
+        { name: 'rank', fieldName: 'rank', width: '80', header: { text: '직책' }, styles: { textAlignment: 'center' } },
+        { name: 'headcount', fieldName: 'headcount', width: '75', header: { text: '인원' }, numberFormat: '#,##0', styles: { textAlignment: 'far' } },
+        {
+          name: 'status',
+          fieldName: 'status',
+          width: '105',
+          header: { text: '상태 (셀렉트)' },
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'dropdown',
+            dropDownCount: 4,
+            domainOnly: true,
+            labels: ['운영', '신설', '한시조직', '폐쇄'],
+            values: ['운영', '신설', '한시조직', '폐쇄']
+          }
+        },
+        {
+          name: 'createdAt',
+          fieldName: 'createdAt',
+          width: '110',
+          header: { text: '설립일 (달력)' },
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'date',
+            datetimeFormat: 'yyyy-MM-dd'
+          }
+        },
+        {
+          name: 'useYn',
+          fieldName: 'useYn',
+          width: '90',
+          header: { text: '사용 (체크)' },
+          styles: { textAlignment: 'center' },
+          renderer: {
+            type: 'check',
+            trueValues: 'Y',
+            falseValues: 'N'
+          }
+        }
       ],
       rows: departmentTree
     }
