@@ -42,6 +42,7 @@ export default {
     checkBarWidth: { type: Number, default: 36 },
     stateBarWidth: { type: Number, default: 6 },
     useFixContextMenu: { type: Boolean, default: true }, // 우클릭 행/열 고정 메뉴
+    useColumnFilter: { type: Boolean, default: true },   // 헤더 컬럼 필터(자동 값목록) 활성화
     // ---- 이식성 의존성 주입 (선택) ----
     theme: { type: String, default: '' },                // '' 이면 <html data-theme>에서 자동 감지
     toast: { type: Function, default: null }             // (message, {type}) 알림 콜백
@@ -293,6 +294,24 @@ export default {
         }
       } catch (e) {
         console.warn('[RealGrid] applyFixContextMenu error:', e)
+      }
+    },
+
+    /**
+     * 헤더 컬럼 필터 활성화. useColumnFilter(기본 true)면 filteringOptions 를 켜고
+     * 각 컬럼 autoFilter=true 로 설정 → 헤더 필터 아이콘 클릭 시 distinct 값 목록 자동 생성.
+     * (RealGrid 공식: column.autoFilter + gridView.setFilteringOptions)
+     */
+    applyColumnFilters() {
+      if (!this.gridView || !this.useColumnFilter) return
+      try {
+        this.gridView.setFilteringOptions({ enabled: true })
+        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+        cols.forEach(c => {
+          try { this.gridView.setColumnProperty(c.name, 'autoFilter', true) } catch (e) { /* noop */ }
+        })
+      } catch (e) {
+        console.warn('[RealGrid] applyColumnFilters error:', e)
       }
     },
 
@@ -581,6 +600,8 @@ export default {
 
       // 우클릭 컨텍스트 메뉴(행/열 고정) 자동 배선 — emit('init') 직전(부모 @init 이 최종 우선)
       this.applyFixContextMenu()
+      // 헤더 컬럼 필터 활성화 (useColumnFilter)
+      this.applyColumnFilters()
 
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
       this.applyGridTheme(this._resolveTheme())
