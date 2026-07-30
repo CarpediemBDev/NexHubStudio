@@ -154,7 +154,9 @@ export default {
     applyGridTheme(theme) {
       if (!this.gridView) return
       try {
-        this.gridView.setStyles(this.getGridThemeStyles(theme))
+        if (typeof this.gridView.setStyles === 'function') {
+          this.gridView.setStyles(this.getGridThemeStyles(theme))
+        }
       } catch (e) {
         console.warn('[RealGrid] applyGridTheme error:', e)
       }

@@ -173,7 +173,9 @@ export default {
       if (!this.gridView) return
       try {
         const styles = this.getGridThemeStyles(theme)
-        this.gridView.setStyles(styles)
+        if (typeof this.gridView.setStyles === 'function') {
+          this.gridView.setStyles(styles)
+        }
       } catch (e) {
         console.warn('[RealGridTree] applyGridTheme error:', e)
       }
@@ -445,19 +447,60 @@ export default {
     // 변경사항 추적 (C / U / D)
     // =========================================================
     getChanges() {
-      if (!this.dataProvider) return { created: [], updated: [], deleted: [] }
-      const createdIdx = this.dataProvider.getStateRows('created') || []
-      const updatedIdx = this.dataProvider.getStateRows('updated') || []
-      const deletedIdx = this.dataProvider.getStateRows('deleted') || []
+      if (!this.dataProvider) return { created: [], updated: [], deleted: [], moved: [] }
+      const dp = this.dataProvider
+      const createdIdx = dp.getStateRows('created') || []
+      const updatedIdx = dp.getStateRows('updated') || []
+      const deletedIdx = dp.getStateRows('deleted') || []
+
+      // moved: 이벤트로 누적한 이동 노드 중 created/deleted 는 제외한다.
+      //  - created 는 최종 위치가 생성 payload 로 처리(별도 재배치 불필요)
+      //  - deleted 는 이동이 무의미
+      const createdSet = new Set(createdIdx)
+      const deletedSet = new Set(deletedIdx)
+      const moved = [...(this._movedRows || [])]
+        .filter(r => !createdSet.has(r) && !deletedSet.has(r))
+        .map(r => this._buildMovedEntry(r))
+        .filter(Boolean)
+
       return {
-        created: createdIdx.map(idx => this.dataProvider.getJsonRow(idx)),
-        updated: updatedIdx.map(idx => this.dataProvider.getJsonRow(idx)),
-        deleted: deletedIdx.map(idx => this.dataProvider.getJsonRow(idx))
+        created: createdIdx.map(idx => dp.getJsonRow(idx)),
+        updated: updatedIdx.map(idx => dp.getJsonRow(idx)),
+        deleted: deletedIdx.map(idx => dp.getJsonRow(idx)),
+        moved
       }
+    },
+
+    /**
+     * 이동 노드 1건의 델타 엔트리 생성.
+     *  { row: 노드 JSON, parentRow: 새 부모 JSON(루트면 null), index: 형제 내 순서(0-base),
+     *    dataRow, parentDataRow(내부 참조) }
+     * 서버 전송 시 소비 페이지가 row/parentRow 에서 자신의 비즈니스 키를 매핑한다.
+     */
+    _buildMovedEntry(dataRow) {
+      const dp = this.dataProvider
+      if (!dp) return null
+      const row = dp.getJsonRow(dataRow)
+      if (!row) return null // 이미 제거된 행 방어
+      let parentDataRow = -1
+      let parentRow = null
+      let index = -1
+      try {
+        parentDataRow = typeof dp.getParent === 'function' ? dp.getParent(dataRow) : -1
+        const siblings = typeof dp.getChildren === 'function'
+          ? (dp.getChildren(parentDataRow >= 0 ? parentDataRow : -1) || [])
+          : []
+        index = siblings.indexOf(dataRow)
+        parentRow = parentDataRow >= 0 ? dp.getJsonRow(parentDataRow) : null
+      } catch (e) {
+        console.warn('[RealGridTree] _buildMovedEntry error:', e)
+      }
+      return { row, parentRow, index, dataRow, parentDataRow }
     },
 
     clearRowStates() {
       if (this.dataProvider) this.dataProvider.clearRowStates()
+      if (this._movedRows) this._movedRows.clear() // 이동 델타 추적 초기화
     },
 
     // =========================================================
@@ -851,6 +894,9 @@ export default {
 
     bindTreeEvents() {
       if (!this.dataProvider) return
+      // 이동(부모변경/형제순서변경) 노드 누적 Set. RealGrid 는 이동을 행 상태(updated)로
+      // 마킹하지 않으므로 getStateRows 로는 못 잡는다 → 이벤트에서 dataRow 를 직접 모은다.
+      if (!this._movedRows) this._movedRows = new Set()
 
       this.dataProvider.onRowParentChanging = (provider, row, parent, index) => {
         if (row === parent) return false
@@ -867,16 +913,19 @@ export default {
       }
 
       this.dataProvider.onRowParentChanged = (provider, row, parent, index) => {
+        this._movedRows.add(row) // 이동 델타 추적
         const itemIdx = this._itemOfDataRow(row)
         this.$emit('parent-changed', { row, parent, index, itemIndex: itemIdx })
       }
 
       this.dataProvider.onRowSiblingMoved = (provider, row, offset) => {
+        this._movedRows.add(row) // 이동 델타 추적
         const itemIdx = this._itemOfDataRow(row)
         this.$emit('node-moved', { row, offset, itemIndex: itemIdx })
       }
 
       this.dataProvider.onRowsSiblingMoved = (provider, rows, offset) => {
+        (rows || []).forEach(r => this._movedRows.add(r)) // 이동 델타 추적
         this.$emit('node-moved', { rows, offset })
       }
     },

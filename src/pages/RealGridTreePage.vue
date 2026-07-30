@@ -360,13 +360,17 @@ export default {
     saveData() {
       this.$refs.treeComp?.commit() // 편집 중인 셀 확정
       const changes = this.$refs.treeComp?.getChanges()
-      const total = (changes?.created.length || 0) + (changes?.updated.length || 0) + (changes?.deleted.length || 0)
+      const total = (changes?.created.length || 0) + (changes?.updated.length || 0)
+        + (changes?.deleted.length || 0) + (changes?.moved.length || 0)
       if (total === 0) {
         showToast('변경사항이 없습니다.', { type: 'warning' })
         return
       }
-      console.log('서버 전송 C, U, D 데이터:', changes)
-      showToast(`저장 성공! (C:${changes.created.length} / U:${changes.updated.length} / D:${changes.deleted.length})`, { type: 'success' })
+      console.log('서버 전송 C, U, D, M(이동) 데이터:', changes)
+      showToast(
+        `저장 성공! (C:${changes.created.length} / U:${changes.updated.length} / D:${changes.deleted.length} / M:${changes.moved.length})`,
+        { type: 'success' }
+      )
       this.$refs.treeComp?.clearRowStates()
     },
 
