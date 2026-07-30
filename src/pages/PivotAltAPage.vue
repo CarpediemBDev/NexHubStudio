@@ -135,6 +135,7 @@
           :useFooter="true"
           :softDeleting="true"
           :hideDeletedRows="false"
+          :toast="gridToast"
           @init="onGridInit"
         />
       </div>
@@ -263,6 +264,10 @@ export default {
     this.loadSavedViews()
   },
   methods: {
+    gridToast(message, opts = {}) {
+      showToast(message, opts)
+    },
+
     onGridInit({ gridView, dataProvider }) {
       this.gridView = gridView
       this.dataProvider = dataProvider

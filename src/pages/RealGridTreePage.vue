@@ -3,32 +3,13 @@
     <!-- Header -->
     <div class="mb-3">
       <h4 class="fw-bold text-dark m-0">RealGrid 트리 (계층형 그리드)</h4>
-      <p class="text-muted small mb-0">TreeView + LocalTreeDataProvider 기반 계층형 트리. 실제 업무 데이터(부서 조직도 / 메뉴 구조)로 구성됩니다.</p>
+      <p class="text-muted small mb-0">TreeView + LocalTreeDataProvider 기반 계층형 조직도 관리. 우클릭 메뉴 및 마우스 드래그 앤 드롭을 통한 노드 변경을 지원합니다.</p>
     </div>
 
     <!-- Toolbar -->
     <div class="b2b-toolbar">
       <div class="d-flex align-items-center justify-content-between w-100">
         <div class="d-flex align-items-center gap-2">
-          <!-- 데이터셋 토글 -->
-          <div class="btn-group btn-group-sm" role="group" aria-label="트리 데이터셋 선택">
-            <button
-              type="button"
-              class="btn"
-              :class="dataset === 'dept' ? 'btn-primary' : 'btn-outline-primary'"
-              @click="switchDataset('dept')"
-            >
-              <i class="bi bi-diagram-3 me-1"></i>부서 조직도
-            </button>
-            <button
-              type="button"
-              class="btn"
-              :class="dataset === 'menu' ? 'btn-primary' : 'btn-outline-primary'"
-              @click="switchDataset('menu')"
-            >
-              <i class="bi bi-list-nested me-1"></i>메뉴 구조
-            </button>
-          </div>
           <QuickSearchBar
             :searchResult="searchResult"
             @search="onTreeSearch"
@@ -36,7 +17,7 @@
           />
         </div>
         <div class="d-flex align-items-center gap-1.5 ms-auto">
-          <!-- 데이터 유틸: 컬럼 피커 / 엑셀 (피벗 A와 동일 위치·패턴) -->
+          <!-- 데이터 유틸: 컬럼 피커 / 엑셀 -->
           <button class="btn-b2b-action" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
             <i class="bi bi-eye text-primary me-0.5"></i>
             <span>컬럼</span>
@@ -46,18 +27,24 @@
             <span>엑셀</span>
           </button>
           <span class="vr mx-1"></span>
+          <!-- 순서 이동 (위로/아래로) -->
+          <button class="btn-b2b-action" title="선택한 노드를 위로 이동" @click="moveNodeUp">
+            <i class="bi bi-arrow-up text-primary me-0.5"></i>
+            <span>위로</span>
+          </button>
+          <button class="btn-b2b-action" title="선택한 노드를 아래로 이동" @click="moveNodeDown">
+            <i class="bi bi-arrow-down text-primary me-0.5"></i>
+            <span>아래로</span>
+          </button>
+          <span class="vr mx-1"></span>
           <!-- CUD (트리 계층 전용) -->
-          <button class="btn-b2b-action" title="선택 노드의 자식 추가" @click="addChild">
-            <i class="bi bi-node-plus text-success me-0.5"></i>
-            <span>자식 추가</span>
+          <button class="btn-b2b-action" title="새 노드 추가" @click="addChild">
+            <i class="bi bi-plus-lg text-success me-0.5"></i>
+            <span>추가</span>
           </button>
-          <button class="btn-b2b-action" title="현재 선택 노드 삭제 (하위 포함)" @click="removeNode">
-            <i class="bi bi-node-minus text-danger me-0.5"></i>
-            <span>노드 삭제</span>
-          </button>
-          <button class="btn-b2b-action" title="체크박스로 선택한 노드 일괄 삭제 (하위 포함)" @click="deleteCheckedNodes">
-            <i class="bi bi-check2-square text-danger me-0.5"></i>
-            <span>선택 삭제</span>
+          <button class="btn-b2b-action" title="선택(포커스) 또는 체크박스로 선택된 노드 삭제 (하위 포함)" @click="removeNode">
+            <i class="bi bi-dash-lg text-danger me-0.5"></i>
+            <span>삭제</span>
           </button>
           <button class="btn-b2b-primary ms-1" title="변경사항 저장" @click="saveData">
             <i class="bi bi-check2 me-0.5"></i>
@@ -70,11 +57,11 @@
     <!-- 요약 badge -->
     <div class="d-flex align-items-center gap-2 mb-2">
       <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-        {{ dataset === 'dept' ? '부서 조직도' : '메뉴 구조 (라우터 실데이터)' }}
+        부서 조직도
       </span>
       <span class="text-muted small">총 {{ nodeCount }}개 노드</span>
       <span class="text-muted small ms-2">
-        <i class="bi bi-info-circle me-1"></i>셀 더블클릭 편집 · 노드 선택 후 [자식 추가]/[노드 삭제] · <b>우클릭</b>으로 펼치기/접기·행열 고정
+        <i class="bi bi-info-circle me-1"></i>맨 왼쪽 <b>[행번호]</b> 영역을 마우스로 드래그하면 노드 순서 및 상위 부모 변경 가능 · 툴바 <b>[위로/아래로]</b> 버튼 · <b>우클릭</b> 메뉴
       </span>
     </div>
 
@@ -83,13 +70,16 @@
       <div class="b2b-grid-wrapper">
         <RealGridTreeJs
           ref="treeComp"
-          :fields="activeFields"
-          :columns="activeColumns"
-          :rows="activeRows"
+          :fields="fields"
+          :columns="columns"
+          :rows="rows"
           childrenField="children"
+          :enableDragAndDrop="enableDnd"
           :expandAllOnLoad="true"
           :hideDeletedRows="false"
-          @init="onTreeInit"
+          :toast="treeToast"
+          @node-moved="onNodeMoved"
+          @parent-changed="onParentChanged"
         />
       </div>
     </div>
@@ -109,7 +99,7 @@ import RealGridTreeJs from '@/components/RealGridTreeJs.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import { showToast } from '@/utils/toastUtil.js'
-import { departmentTree, routesToMenuTree } from '@/data/treeData.js'
+import { departmentTree } from '@/data/treeData.js'
 
 export default {
   name: 'RealGridTreePage',
@@ -120,13 +110,13 @@ export default {
   },
   data() {
     return {
-      dataset: 'dept', // 'dept' | 'menu'
+      enableDnd: true,
       searchResult: { count: 0, current: 0 },
       isColumnPickerOpen: false,
       columnPickerCols: [],
 
-      // ---- 부서 조직도 ----
-      deptFields: [
+      // 부서 조직도 데이터
+      fields: [
         { fieldName: 'deptCode', dataType: 'text' },
         { fieldName: 'deptName', dataType: 'text' },
         { fieldName: 'manager', dataType: 'text' },
@@ -134,7 +124,7 @@ export default {
         { fieldName: 'headcount', dataType: 'number' },
         { fieldName: 'status', dataType: 'text' }
       ],
-      deptColumns: [
+      columns: [
         { name: 'deptName', fieldName: 'deptName', width: '280', header: { text: '조직명' }, styles: { textAlignment: 'near' } },
         { name: 'deptCode', fieldName: 'deptCode', width: '110', header: { text: '조직코드' }, editable: false, styles: { textAlignment: 'center' } },
         { name: 'manager', fieldName: 'manager', width: '110', header: { text: '책임자' }, styles: { textAlignment: 'center' } },
@@ -142,45 +132,20 @@ export default {
         { name: 'headcount', fieldName: 'headcount', width: '90', header: { text: '인원' }, numberFormat: '#,##0', styles: { textAlignment: 'far' } },
         { name: 'status', fieldName: 'status', width: '110', header: { text: '상태' }, styles: { textAlignment: 'center' } }
       ],
-      deptRows: departmentTree,
-
-      // ---- 메뉴 구조 ----
-      menuFields: [
-        { fieldName: 'menuName', dataType: 'text' },
-        { fieldName: 'path', dataType: 'text' },
-        { fieldName: 'icon', dataType: 'text' },
-        { fieldName: 'cache', dataType: 'text' },
-        { fieldName: 'visible', dataType: 'text' }
-      ],
-      menuColumns: [
-        { name: 'menuName', fieldName: 'menuName', width: '280', header: { text: '메뉴명' }, styles: { textAlignment: 'near' } },
-        { name: 'path', fieldName: 'path', width: '240', header: { text: '경로 (Path)' }, styles: { textAlignment: 'near' } },
-        { name: 'icon', fieldName: 'icon', width: '160', header: { text: '아이콘' }, styles: { textAlignment: 'near' } },
-        { name: 'cache', fieldName: 'cache', width: '90', header: { text: 'KeepAlive' }, styles: { textAlignment: 'center' } },
-        { name: 'visible', fieldName: 'visible', width: '90', header: { text: '표시' }, styles: { textAlignment: 'center' } }
-      ],
-      menuRows: []
+      rows: departmentTree
     }
   },
   computed: {
-    activeFields() {
-      return this.dataset === 'dept' ? this.deptFields : this.menuFields
-    },
-    activeColumns() {
-      return this.dataset === 'dept' ? this.deptColumns : this.menuColumns
-    },
-    activeRows() {
-      return this.dataset === 'dept' ? this.deptRows : this.menuRows
-    },
     nodeCount() {
-      return this.countNodes(this.activeRows)
+      return this.countNodes(this.rows)
     }
   },
-  created() {
-    // 라우터 실제 설정에서 메뉴 트리 추출
-    this.menuRows = routesToMenuTree(this.$router.options.routes)
-  },
   methods: {
+    // 트리(자기완결 컴포넌트)의 내부 알림을 이 프로젝트 토스트로 연결
+    treeToast(message, opts = {}) {
+      showToast(message, opts)
+    },
+
     countNodes(rows) {
       if (!Array.isArray(rows)) return 0
       let n = 0
@@ -191,34 +156,85 @@ export default {
       return n
     },
 
-    switchDataset(ds) {
-      if (this.dataset === ds) return
-      this.dataset = ds
-      this.searchResult = { count: 0, current: 0 }
+    makeNewNodeValues() {
+      const rnd = Math.random().toString(36).substring(2, 6).toUpperCase()
+      return {
+        deptCode: 'NEW-' + rnd,
+        deptName: '신규 부서',
+        manager: '',
+        rank: '팀장',
+        headcount: 0,
+        status: '신설'
+      }
     },
 
-    onTreeInit({ gridView }) {
-      // 피벗 A와 동일한 우클릭 컨텍스트 메뉴 패턴 (그룹화 항목은 트리 미지원이라 제외)
-      gridView.setContextMenu([
-        { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
-        { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
-        { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
-        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' },
-        { label: '-' },
-        { label: '➕ 모든 노드 펼치기', tag: 'expandAll' },
-        { label: '➖ 모든 노드 접기', tag: 'collapseAll' }
-      ])
-      gridView.onContextMenuItemClicked = (grid, item, clickData) => {
-        // 공통 컴포넌트 동적 행/열 고정 헬퍼 먼저 처리
-        if (this.$refs.treeComp && this.$refs.treeComp.handleDynamicFixing(item, clickData)) {
-          return
-        }
-        if (item.tag === 'expandAll') {
-          this.expandAll()
-        } else if (item.tag === 'collapseAll') {
-          this.collapseAll()
+    addChild() {
+      const comp = this.$refs.treeComp
+      if (!comp) return
+      const values = this.makeNewNodeValues()
+      const newRow = comp.addChildToCurrent(values, { editColumn: 'deptName' })
+      if (newRow >= 0) {
+        showToast('하위 자식 노드로 새 부서가 추가되었습니다.', { type: 'success' })
+      } else {
+        const rootRow = comp.addRootRow(values)
+        if (rootRow >= 0) {
+          showToast('최상위(루트)에 새 부서가 추가되었습니다.', { type: 'success' })
         }
       }
+    },
+
+    addSibling() {
+      const comp = this.$refs.treeComp
+      if (!comp) return
+      const editCol = this.dataset === 'dept' ? 'deptName' : 'menuName'
+      const values = this.makeNewNodeValues()
+      const newRow = comp.addSiblingToCurrent(values, { editColumn: editCol })
+      if (newRow >= 0) {
+        showToast('동일한 계층(형제 노드)으로 새 행을 추가했습니다.', { type: 'success' })
+      }
+    },
+
+    duplicateNode() {
+      const comp = this.$refs.treeComp
+      if (!comp) return
+      const current = comp.getCurrentNode()
+      if (!current) {
+        showToast('복제할 노드를 먼저 선택해 주세요.', { type: 'warning' })
+        return
+      }
+      const label = this.dataset === 'dept' ? current.deptName : current.menuName
+      const newRow = comp.duplicateCurrentNode()
+      if (newRow >= 0) {
+        showToast(`'${label}' 노드를 성공적으로 복제했습니다.`, { type: 'success' })
+      } else {
+        showToast('노드 복제에 실패했습니다.', { type: 'danger' })
+      }
+    },
+
+    moveNodeUp() {
+      const ok = this.$refs.treeComp?.moveCurrentUp()
+      if (ok) {
+        showToast('선택한 노드를 위로 이동했습니다.', { type: 'info' })
+      } else {
+        showToast('노드를 더 이상 위로 이동할 수 없거나 노드가 선택되지 않았습니다.', { type: 'warning' })
+      }
+    },
+
+    moveNodeDown() {
+      const ok = this.$refs.treeComp?.moveCurrentDown()
+      if (ok) {
+        showToast('선택한 노드를 아래로 이동했습니다.', { type: 'info' })
+      } else {
+        showToast('노드를 더 이상 아래로 이동할 수 없거나 노드가 선택되지 않았습니다.', { type: 'warning' })
+      }
+    },
+
+    onNodeMoved({ row, offset }) {
+      showToast('드래그 앤 드롭: 노드 순서가 변경되었습니다.', { type: 'info' })
+    },
+
+    onParentChanged({ row, parent, index }) {
+      showToast('드래그 앤 드롭: 노드의 계층(부모)이 변경되었습니다.', { type: 'success' })
     },
 
     // 새 노드 기본값 생성 (데이터셋별)
@@ -271,36 +287,46 @@ export default {
 
     removeNode() {
       const comp = this.$refs.treeComp
-      if (!comp) return
-      const current = comp.getCurrentNode()
-      if (!current) {
-        showToast('삭제할 노드를 먼저 선택하세요.', { type: 'warning' })
+      if (!comp || !comp.dataProvider) return
+
+      // 1. 체크박스 선택 목록과 셀 클릭(포커스) 노드를 모두 합침
+      const checkedRows = comp.getCheckedRows ? comp.getCheckedRows() : []
+      const focusedRow = comp.getCurrentDataRow ? comp.getCurrentDataRow() : -1
+
+      const targetRowsSet = new Set(checkedRows)
+      if (focusedRow >= 0) {
+        targetRowsSet.add(focusedRow)
+      }
+
+      // 2. 이미 소프트 삭제된 행은 재삭제 대상에서 제외
+      const provider = comp.dataProvider
+      const activeRowsToDelete = Array.from(targetRowsSet).filter(r => {
+        try {
+          return provider.getRowState(r) !== 'deleted'
+        } catch (e) {
+          return true
+        }
+      })
+
+      if (activeRowsToDelete.length === 0) {
+        showToast('삭제할 노드를 클릭하거나 체크박스로 선택해 주세요.', { type: 'warning' })
         return
       }
-      const label = this.dataset === 'dept' ? current.deptName : current.menuName
-      const childCount = comp.getChildren(comp.getCurrentItemIndex())?.length || 0
 
-      const msg = childCount > 0
-        ? `'${label}' 및 하위 ${childCount}개 노드를 삭제 표시합니다. 계속할까요?`
-        : `'${label}' 노드를 삭제 표시합니다. 계속할까요?`
-      if (!window.confirm(msg)) return
+      // 3. 일괄 삭제 실행 (하위 포함, recursive=true)
+      provider.removeRows(activeRowsToDelete, true)
+      if (comp.gridView && comp.gridView.clearCheckedItems) {
+        comp.gridView.clearCheckedItems()
+      }
 
-      const ok = comp.removeCurrent(true)
-      if (ok) {
-        showToast(`'${label}' 노드를 삭제 표시했습니다. (저장 시 반영)`, { type: 'warning' })
+      // 4. 알림 토스트 출력
+      if (activeRowsToDelete.length === 1 && focusedRow >= 0 && activeRowsToDelete.includes(focusedRow)) {
+        const current = comp.getCurrentNode()
+        const label = current ? (current.deptName || current.name || '선택 노드') : '선택 노드'
+        showToast(`'${label}' 노드가 삭제 표시되었습니다. (저장 시 반영)`, { type: 'warning' })
       } else {
-        showToast('노드 삭제에 실패했습니다.', { type: 'danger' })
+        showToast(`선택/체크된 ${activeRowsToDelete.length}건의 노드가 삭제 표시되었습니다. (하위 포함)`, { type: 'warning' })
       }
-    },
-
-    // 체크박스 다중선택 삭제 (피벗 A deleteChecked 와 동일 패턴, 공통 mixin)
-    deleteCheckedNodes() {
-      const count = this.$refs.treeComp ? this.$refs.treeComp.deleteChecked() : 0
-      if (count === 0) {
-        showToast('삭제할 노드를 왼쪽 체크박스로 선택해 주세요.', { type: 'warning' })
-        return
-      }
-      showToast(`${count}건이 삭제 표시되었습니다 (하위 포함, State: Deleted).`, { type: 'warning' })
     },
 
     expandAll() {
@@ -314,8 +340,7 @@ export default {
     },
 
     exportExcel() {
-      const name = this.dataset === 'dept' ? 'RealGrid_Org_Tree.xlsx' : 'RealGrid_Menu_Tree.xlsx'
-      this.$refs.treeComp?.exportToExcel(name)
+      this.$refs.treeComp?.exportToExcel('RealGrid_Org_Tree.xlsx')
     },
 
     // 컬럼 숨김/표시 (피벗 A와 동일 — 공통 mixin getColumnsInfo/setColumnVisible)

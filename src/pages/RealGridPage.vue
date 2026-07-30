@@ -52,6 +52,7 @@
           :columns="gridColumns"
           :rows="users"
           :useFooter="true"
+          :toast="gridToast"
           @init="onGridInit"
         />
       </div>
@@ -150,6 +151,11 @@ export default {
     this.loadUsers()
   },
   methods: {
+    // 자기완결 그리드 컴포넌트의 알림을 이 프로젝트 토스트로 연결
+    gridToast(message, opts = {}) {
+      showToast(message, opts)
+    },
+
     onGridInit({ gridView }) {
       gridView.setFixedOptions({
         colCount: 1,

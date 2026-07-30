@@ -113,6 +113,7 @@
       <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
+          :toast="gridToast"
           @init="onGridInit"
         />
       </div>
@@ -322,6 +323,10 @@ export default {
     }
   },
   methods: {
+    gridToast(message, opts = {}) {
+      showToast(message, opts)
+    },
+
     openPivotModal() {
       this.tempPivotOptions = { ...this.pivotOptions }
       this.isModalOpen = true
