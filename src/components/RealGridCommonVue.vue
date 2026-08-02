@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { RealGridVue } from 'realgrid-vue'
 import 'realgrid/dist/realgrid-white.css'
 import { showToast } from '@/utils/toastUtil.js'
@@ -46,6 +47,8 @@ export default {
   },
   data() {
     return {
+      gridView: null,
+      dataProvider: null,
       gridProps: {
         display: {
           fitStyle: 'evenFill',
@@ -59,6 +62,14 @@ export default {
   },
   created() {
     this.$tabStore = useTabStore()
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const realGridComp = this.$refs.realGridComp
+      if (realGridComp && realGridComp.gridView && !this.gridView) {
+        this.initGrid(realGridComp.gridView)
+      }
+    })
   },
   computed: {
     currentTheme() {
@@ -99,12 +110,18 @@ export default {
     }
   },
   methods: {
-    initGrid(gridView) {
-      this.gridView = gridView
-      this.dataProvider = gridView.getDataSource()
+    initGrid(arg) {
+      const realGridComp = this.$refs.realGridComp
+      const gv = (realGridComp && realGridComp.gridView) || arg
+      if (!gv) return
+
+      this.gridView = markRaw(gv)
+      this.dataProvider = markRaw((realGridComp && realGridComp.dataProvider) || (gv.getDataSource && gv.getDataSource()))
 
       // 1:1 완벽 동등한 옵션 바인딩
-      this.dataProvider.softDeleting = this.resolvedSoftDeletable
+      if (this.dataProvider) {
+        this.dataProvider.softDeleting = this.resolvedSoftDeletable
+      }
       this.gridView.hideDeletedRows = this.hideDeletedRows
 
       this.gridView.setEditOptions({
@@ -131,12 +148,13 @@ export default {
       this.applyFixContextMenu()
       this.applyColumnFilters()
 
-      this.$emit('init', { gridView, dataProvider: this.dataProvider })
-      // 초기 테마 적용 및 컨텍스트 메뉴 팝업 허용 보장
+      this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
+      // 초기 테마 적용
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
-      if (this.gridView && this.resolvedPinnable) {
-        this.gridView.onContextMenuPopup = () => true
-      }
+
+      this.$nextTick(() => {
+        this.applyFixContextMenu()
+      })
     },
 
     applyControlBars() {
@@ -176,6 +194,14 @@ export default {
       }
     },
 
+    onContextMenuPopup() {
+      return true
+    },
+
+    onContextMenuItemClicked(grid, item, clickData) {
+      this.handleDynamicFixing(item, clickData)
+    },
+
     applyFixContextMenu() {
       if (!this.gridView || !this.resolvedPinnable) return
       if (typeof this.gridView.setContextMenu !== 'function') return
@@ -187,9 +213,20 @@ export default {
           { label: '-' },
           { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
         ])
+        
+        // 바닐라 RealGrid2 direct 이벤트 설정
         this.gridView.onContextMenuPopup = () => true
         this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
           this.handleDynamicFixing(item, clickData)
+        }
+
+        // realgrid-vue 래퍼 컴포넌트 callback 등록
+        const realGridComp = this.$refs.realGridComp
+        if (realGridComp && typeof realGridComp.addCallback === 'function') {
+          realGridComp.addCallback('onContextMenuPopup', () => true)
+          realGridComp.addCallback('onContextMenuItemClicked', (grid, item, clickData) => {
+            this.handleDynamicFixing(item, clickData)
+          })
         }
       } catch (e) {
         console.warn('[RealGrid] applyFixContextMenu error:', e)
