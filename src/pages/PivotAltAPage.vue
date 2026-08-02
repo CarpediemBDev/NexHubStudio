@@ -300,10 +300,37 @@ export default {
       return '빠른 프리셋'
     }
   },
-  mounted() {
+  async mounted() {
     this.loadSavedViews()
+    await this.loadData()
   },
   methods: {
+    async loadData() {
+      try {
+        const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('db.json fetch 실패')
+        const data = await res.json()
+        const rows = Array.isArray(data) ? data : (data.users || [])
+        if (rows.length) {
+          const statuses = ['재직', '재직', '재직', '휴직', '퇴사']
+          this.mockData = rows.map((r, i) => ({
+            ...r,
+            status: r.status || statuses[i % statuses.length],
+            evalDate: r.evalDate || `2025-0${(i % 5) + 1}-15`,
+            activeYn: r.activeYn || (i % 7 === 0 ? 'N' : 'Y'),
+            sales: r.sales ?? Math.floor((r.salary || 6000) * 1.5 + (i * 37) % 5000),
+            bonus: r.bonus ?? Math.floor((r.salary || 6000) * 0.1 + (i * 13) % 800)
+          }))
+          if (this.$refs.realgridComp && this.$refs.realgridComp.setRows) {
+            this.$refs.realgridComp.setRows(this.mockData)
+          }
+        }
+      } catch (e) {
+        console.warn('[PivotAltA] db.json 로드 실패 → 폴백 데이터 사용:', e)
+      }
+    },
+
     gridToast(message, opts = {}) {
       showToast(message, opts)
     },
