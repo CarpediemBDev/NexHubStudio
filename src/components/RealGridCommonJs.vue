@@ -55,6 +55,15 @@ export default {
     showFooter: { type: Boolean, default: undefined },   // 푸터 표시 (fallback: useFooter)
     softDeletable: { type: Boolean, default: undefined },// 소프트 삭제 (fallback: softDeleting)
 
+    // ---- ⚙️ 페이지별 유연 옵션 Props (하드코딩 제거) ----
+    groupMergeable: { type: Boolean, default: true },
+    groupSummaryMode: { type: String, default: 'aggregate' },
+    hideGroupedColumn: { type: Boolean, default: false },
+    commitWhenLeave: { type: Boolean, default: true },
+    fitStyle: { type: String, default: 'evenFill' },
+    fixedColCount: { type: Number, default: 0 },
+    fixedRowCount: { type: Number, default: 0 },
+
     // ---- 이식성 의존성 주입 (선택) ----
     theme: { type: String, default: '' },                // '' 이면 <html data-theme>에서 자동 감지
     toast: { type: Function, default: null }             // (message, {type}) 알림 콜백
@@ -627,21 +636,33 @@ export default {
         editable: this.editable,
         insertable: this.editable,
         appendable: this.editable,
-        commitWhenLeave: true
+        commitWhenLeave: this.commitWhenLeave
       })
+
+      if (this.fixedColCount > 0 || this.fixedRowCount > 0) {
+        this.gridView.setFixedOptions({
+          colCount: this.fixedColCount,
+          rowCount: this.fixedRowCount,
+          resizable: true
+        })
+      }
 
       this.applyControlBars()
       this.gridView.setFooter({ visible: this.resolvedShowFooter })
 
       // 행 그룹핑 패널 지원 (피벗 A용)
       if (this.resolvedGroupable) {
-        this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: 'evenFill' })
+        this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: this.fitStyle })
         this.gridView.setGroupPanel({ visible: true })
         this.gridView.setGroupingOptions({ enabled: true })
         this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
-        this.gridView.setRowGroup({ summaryMode: 'aggregate', mergeMode: true })
+        this.gridView.setRowGroup({
+          summaryMode: this.groupSummaryMode,
+          mergeMode: this.groupMergeable,
+          hideGroupedColumn: this.hideGroupedColumn
+        })
       } else {
-        this.gridView.setDisplayOptions({ fitStyle: 'evenFill', rowHoverType: 'row' })
+        this.gridView.setDisplayOptions({ fitStyle: this.fitStyle, rowHoverType: 'row' })
         this.applySortingOptions()
       }
 
