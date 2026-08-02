@@ -43,11 +43,52 @@ export default {
     stateBarWidth: { type: Number, default: 6 },
     useFixContextMenu: { type: Boolean, default: true }, // 우클릭 행/열 고정 메뉴
     useColumnFilter: { type: Boolean, default: true },   // 헤더 컬럼 필터(자동 값목록) 활성화
+
+    // ---- ✨ 글로벌 표준 형용사형 Props (글로벌 UI 그리드 스탠다드) ----
+    sortable: { type: Boolean, default: true },          // 헤더 컬럼 정렬 기능 활성화
+    filterable: { type: Boolean, default: undefined },   // 헤더 컬럼 필터 활성화 (fallback: useColumnFilter)
+    checkable: { type: Boolean, default: undefined },    // 체크박스 선택열 (fallback: useCheckBar)
+    indicatable: { type: Boolean, default: undefined },  // 행번호 인디케이터열 (fallback: useIndicator)
+    stateBarVisible: { type: Boolean, default: undefined }, // 행상태 바 (fallback: useStateBar)
+    pinnable: { type: Boolean, default: undefined },     // 우클릭 고정 메뉴 (fallback: useFixContextMenu)
+    groupable: { type: Boolean, default: undefined },    // 행 그룹핑 패널 (fallback: useGroupPanel)
+    showFooter: { type: Boolean, default: undefined },   // 푸터 표시 (fallback: useFooter)
+    softDeletable: { type: Boolean, default: undefined },// 소프트 삭제 (fallback: softDeleting)
+
     // ---- 이식성 의존성 주입 (선택) ----
     theme: { type: String, default: '' },                // '' 이면 <html data-theme>에서 자동 감지
     toast: { type: Function, default: null }             // (message, {type}) 알림 콜백
   },
   emits: ['init', 'notify'],
+  computed: {
+    resolvedSortable() {
+      return this.sortable
+    },
+    resolvedFilterable() {
+      return this.filterable !== undefined ? this.filterable : this.useColumnFilter
+    },
+    resolvedCheckable() {
+      return this.checkable !== undefined ? this.checkable : this.useCheckBar
+    },
+    resolvedIndicatable() {
+      return this.indicatable !== undefined ? this.indicatable : this.useIndicator
+    },
+    resolvedStateBarVisible() {
+      return this.stateBarVisible !== undefined ? this.stateBarVisible : this.useStateBar
+    },
+    resolvedPinnable() {
+      return this.pinnable !== undefined ? this.pinnable : this.useFixContextMenu
+    },
+    resolvedGroupable() {
+      return this.groupable !== undefined ? this.groupable : this.useGroupPanel
+    },
+    resolvedShowFooter() {
+      return this.showFooter !== undefined ? this.showFooter : this.useFooter
+    },
+    resolvedSoftDeletable() {
+      return this.softDeletable !== undefined ? this.softDeletable : this.softDeleting
+    }
+  },
   watch: {
     theme() {
       this.applyGridTheme(this._resolveTheme())
@@ -171,12 +212,12 @@ export default {
 
       try {
         this.gridView.setIndicator({
-          visible: this.useIndicator,
+          visible: this.resolvedIndicatable,
           draggableSelectedRows: false // 일반 그리드는 행 DnD 미구현 (행 이동은 트리 전용)
         })
       } catch (e) { /* noop */ }
 
-      if (this.useStateBar) {
+      if (this.resolvedStateBarVisible) {
         this.gridView.setStateBar({
           visible: true,
           width: this.stateBarWidth,
@@ -191,7 +232,7 @@ export default {
         this.gridView.setStateBar({ visible: false })
       }
 
-      if (this.useCheckBar) {
+      if (this.resolvedCheckable) {
         this.gridView.setCheckBar({
           visible: true,
           width: this.checkBarWidth,
@@ -273,11 +314,11 @@ export default {
     },
 
     /**
-     * 우클릭 컨텍스트 메뉴(행/열 고정) 배선. useFixContextMenu prop(기본 true)일 때만.
+     * 우클릭 컨텍스트 메뉴(행/열 고정) 배선. resolvedPinnable prop(기본 true)일 때만.
      * emit('init') 직전에 호출 → 부모가 @init 에서 setContextMenu 재정의하면 그쪽 우선.
      */
     applyFixContextMenu() {
-      if (!this.gridView || !this.useFixContextMenu) return
+      if (!this.gridView || !this.resolvedPinnable) return
       if (typeof this.gridView.setContextMenu !== 'function') return
       try {
         this.gridView.setContextMenu([
@@ -298,18 +339,34 @@ export default {
     },
 
     /**
-     * 헤더 컬럼 필터 활성화. useColumnFilter(기본 true)면 filteringOptions 를 켜고
+     * 정렬 기능 활성화/비활성화 (sortable prop)
+     */
+    applySortingOptions() {
+      if (!this.gridView) return
+      try {
+        if (typeof this.gridView.setSortingOptions === 'function') {
+          this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
+        }
+      } catch (e) {
+        console.warn('[RealGrid] applySortingOptions error:', e)
+      }
+    },
+
+    /**
+     * 헤더 컬럼 필터 활성화. resolvedFilterable(기본 true)면 filteringOptions 를 켜고
      * 각 컬럼 autoFilter=true 로 설정 → 헤더 필터 아이콘 클릭 시 distinct 값 목록 자동 생성.
      * (RealGrid 공식: column.autoFilter + gridView.setFilteringOptions)
      */
     applyColumnFilters() {
-      if (!this.gridView || !this.useColumnFilter) return
+      if (!this.gridView) return
       try {
-        this.gridView.setFilteringOptions({ enabled: true })
-        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
-        cols.forEach(c => {
-          try { this.gridView.setColumnProperty(c.name, 'autoFilter', true) } catch (e) { /* noop */ }
-        })
+        this.gridView.setFilteringOptions({ enabled: this.resolvedFilterable })
+        if (this.resolvedFilterable) {
+          const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+          cols.forEach(c => {
+            try { this.gridView.setColumnProperty(c.name, 'autoFilter', true) } catch (e) { /* noop */ }
+          })
+        }
       } catch (e) {
         console.warn('[RealGrid] applyColumnFilters error:', e)
       }
@@ -563,7 +620,7 @@ export default {
       this.gridView = markRaw(new GridView(container))
       this.gridView.setDataSource(this.dataProvider)
 
-      this.dataProvider.softDeleting = this.softDeleting
+      this.dataProvider.softDeleting = this.resolvedSoftDeletable
       this.gridView.hideDeletedRows = this.hideDeletedRows
 
       this.gridView.setEditOptions({
@@ -574,17 +631,18 @@ export default {
       })
 
       this.applyControlBars()
-      this.gridView.setFooter({ visible: this.useFooter })
+      this.gridView.setFooter({ visible: this.resolvedShowFooter })
 
       // 행 그룹핑 패널 지원 (피벗 A용)
-      if (this.useGroupPanel) {
+      if (this.resolvedGroupable) {
         this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: 'evenFill' })
         this.gridView.setGroupPanel({ visible: true })
         this.gridView.setGroupingOptions({ enabled: true })
-        this.gridView.setSortingOptions({ enabled: true })
+        this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
         this.gridView.setRowGroup({ summaryMode: 'aggregate', mergeMode: true })
       } else {
         this.gridView.setDisplayOptions({ fitStyle: 'evenFill', rowHoverType: 'row' })
+        this.applySortingOptions()
       }
 
       if (this.fields && this.fields.length > 0) {
@@ -600,7 +658,7 @@ export default {
 
       // 우클릭 컨텍스트 메뉴(행/열 고정) 자동 배선 — emit('init') 직전(부모 @init 이 최종 우선)
       this.applyFixContextMenu()
-      // 헤더 컬럼 필터 활성화 (useColumnFilter)
+      // 헤더 컬럼 필터 활성화 (filterable / useColumnFilter)
       this.applyColumnFilters()
 
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })

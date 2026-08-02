@@ -55,11 +55,56 @@ export default {
     stateBarWidth: { type: Number, default: 6 },
     useFixContextMenu: { type: Boolean, default: true },   // 우클릭 컨텍스트 메뉴
     useColumnFilter: { type: Boolean, default: true },     // 헤더 컬럼 필터(자동 값목록) 활성화
+
+    // ---- ✨ 글로벌 표준 형용사형 Props (글로벌 UI 그리드 스탠다드) ----
+    sortable: { type: Boolean, default: true },             // 헤더 컬럼 정렬 기능 활성화
+    filterable: { type: Boolean, default: undefined },      // 헤더 컬럼 필터 활성화 (fallback: useColumnFilter)
+    checkable: { type: Boolean, default: undefined },       // 체크박스 선택열 (fallback: useCheckBar)
+    indicatable: { type: Boolean, default: undefined },     // 행번호 인디케이터열 (fallback: useIndicator)
+    stateBarVisible: { type: Boolean, default: undefined }, // 행상태 바 (fallback: useStateBar)
+    pinnable: { type: Boolean, default: undefined },        // 우클릭 고정 메뉴 (fallback: useFixContextMenu)
+    draggable: { type: Boolean, default: undefined },       // 트리 노드 드래그앤드롭 (fallback: enableDragAndDrop)
+    autoExpandAll: { type: Boolean, default: undefined },   // 로드 시 전체 자동 펼침 (fallback: expandAllOnLoad)
+    showTreeLines: { type: Boolean, default: undefined },   // 트리 가이드 라인 (fallback: treeLineVisible)
+    softDeletable: { type: Boolean, default: undefined },   // 소프트 삭제 (fallback: softDeleting)
+
     // ---- 이식성 의존성 주입 (선택) ----
     theme: { type: String, default: '' },                  // '' 이면 <html data-theme>에서 자동 감지
     toast: { type: Function, default: null }               // (message, {type}) 알림 콜백. 없으면 'notify' emit + console
   },
   emits: ['init', 'notify', 'node-moved', 'parent-changed'],
+  computed: {
+    resolvedSortable() {
+      return this.sortable
+    },
+    resolvedFilterable() {
+      return this.filterable !== undefined ? this.filterable : this.useColumnFilter
+    },
+    resolvedCheckable() {
+      return this.checkable !== undefined ? this.checkable : this.useCheckBar
+    },
+    resolvedIndicatable() {
+      return this.indicatable !== undefined ? this.indicatable : this.useIndicator
+    },
+    resolvedStateBarVisible() {
+      return this.stateBarVisible !== undefined ? this.stateBarVisible : this.useStateBar
+    },
+    resolvedPinnable() {
+      return this.pinnable !== undefined ? this.pinnable : this.useFixContextMenu
+    },
+    resolvedDraggable() {
+      return this.draggable !== undefined ? this.draggable : this.enableDragAndDrop
+    },
+    resolvedAutoExpandAll() {
+      return this.autoExpandAll !== undefined ? this.autoExpandAll : this.expandAllOnLoad
+    },
+    resolvedShowTreeLines() {
+      return this.showTreeLines !== undefined ? this.showTreeLines : this.treeLineVisible
+    },
+    resolvedSoftDeletable() {
+      return this.softDeletable !== undefined ? this.softDeletable : this.softDeleting
+    }
+  },
   watch: {
     theme() {
       this.applyGridTheme(this._resolveTheme())
@@ -190,12 +235,12 @@ export default {
 
       try {
         this.gridView.setIndicator({
-          visible: this.useIndicator,
-          draggableSelectedRows: this.enableDragAndDrop !== false
+          visible: this.resolvedIndicatable,
+          draggableSelectedRows: this.resolvedDraggable !== false
         })
       } catch (e) { /* noop */ }
 
-      if (this.useStateBar) {
+      if (this.resolvedStateBarVisible) {
         this.gridView.setStateBar({
           visible: true,
           width: this.stateBarWidth,
@@ -210,7 +255,7 @@ export default {
         this.gridView.setStateBar({ visible: false })
       }
 
-      if (this.useCheckBar) {
+      if (this.resolvedCheckable) {
         this.gridView.setCheckBar({
           visible: true,
           width: this.checkBarWidth,
@@ -566,7 +611,7 @@ export default {
       this.gridView = markRaw(new TreeView(container))
       this.gridView.setDataSource(this.dataProvider)
 
-      this.dataProvider.softDeleting = this.softDeleting
+      this.dataProvider.softDeleting = this.resolvedSoftDeletable
       this.gridView.hideDeletedRows = this.hideDeletedRows
 
       this.gridView.setEditOptions({
@@ -577,7 +622,8 @@ export default {
       })
 
       this.applyControlBars()
-      this.applyDragAndDropOptions(this.enableDragAndDrop)
+      this.applyDragAndDropOptions(this.resolvedDraggable)
+      this.applySortingOptions()
       this.bindTreeEvents()
 
       this.gridView.setDisplayOptions({
@@ -585,7 +631,7 @@ export default {
         rowHoverType: 'row'
       })
       try {
-        this.gridView.setTreeOptions({ lineVisible: this.treeLineVisible })
+        this.gridView.setTreeOptions({ lineVisible: this.resolvedShowTreeLines })
       } catch (e) {
         console.warn('[RealGridTree] setTreeOptions 실패:', e)
       }
@@ -605,7 +651,7 @@ export default {
 
       // 동적 우클릭 컨텍스트 메뉴(CRUD, 고정, 펼침, 이동) 자동 배선
       this.initTreeContextMenu()
-      // 헤더 컬럼 필터 활성화 (useColumnFilter, 트리는 조상 유지 includeParentItem)
+      // 헤더 컬럼 필터 활성화 (filterable/useColumnFilter, 트리는 조상 유지 includeParentItem)
       this.applyColumnFilters()
 
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
@@ -613,18 +659,34 @@ export default {
     },
 
     /**
-     * 헤더 컬럼 필터 활성화. useColumnFilter(기본 true)면 filteringOptions 를 켜고
+     * 정렬 기능 활성화/비활성화 (sortable prop)
+     */
+    applySortingOptions() {
+      if (!this.gridView) return
+      try {
+        if (typeof this.gridView.setSortingOptions === 'function') {
+          this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
+        }
+      } catch (e) {
+        console.warn('[RealGridTree] applySortingOptions error:', e)
+      }
+    },
+
+    /**
+     * 헤더 컬럼 필터 활성화. resolvedFilterable(기본 true)면 filteringOptions 를 켜고
      * (TreeView 는 includeParentItem:true 로 매칭 노드의 조상 경로를 유지) 각 컬럼
      * autoFilter=true 로 설정 → 필터 아이콘 클릭 시 distinct 값 목록 자동 생성.
      */
     applyColumnFilters() {
-      if (!this.gridView || !this.useColumnFilter) return
+      if (!this.gridView) return
       try {
-        this.gridView.setFilteringOptions({ enabled: true, includeParentItem: true })
-        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
-        cols.forEach(c => {
-          try { this.gridView.setColumnProperty(c.name, 'autoFilter', true) } catch (e) { /* noop */ }
-        })
+        this.gridView.setFilteringOptions({ enabled: this.resolvedFilterable, includeParentItem: true })
+        if (this.resolvedFilterable) {
+          const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+          cols.forEach(c => {
+            try { this.gridView.setColumnProperty(c.name, 'autoFilter', true) } catch (e) { /* noop */ }
+          })
+        }
       } catch (e) {
         console.warn('[RealGridTree] applyColumnFilters error:', e)
       }
@@ -664,7 +726,7 @@ export default {
           this.childrenField,
           this.iconField || undefined
         )
-        if (this.expandAllOnLoad && this.gridView) {
+        if (this.resolvedAutoExpandAll && this.gridView) {
           try { this.gridView.expandAll() } catch (e) { /* noop */ }
         }
       } catch (e) {
@@ -1000,7 +1062,7 @@ export default {
      * 데이터 스키마와 무관하게 어떤 필드가 들어오든 동적으로 탐색하여 CRUD/이동/고정/펼침 실행.
      */
     initTreeContextMenu() {
-      if (!this.gridView || this.useFixContextMenu === false) return
+      if (!this.gridView || this.resolvedPinnable === false) return
 
       this.gridView.setContextMenu([
         { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },

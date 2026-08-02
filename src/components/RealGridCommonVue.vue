@@ -31,7 +31,18 @@ export default {
     useFooter: { type: Boolean, default: false },
     softDeleting: { type: Boolean, default: true },
     hideDeletedRows: { type: Boolean, default: true },
-    editable: { type: Boolean, default: true }
+    editable: { type: Boolean, default: true },
+
+    // ---- ✨ 글로벌 표준 형용사형 Props ----
+    sortable: { type: Boolean, default: true },
+    filterable: { type: Boolean, default: true },
+    checkable: { type: Boolean, default: true },
+    indicatable: { type: Boolean, default: true },
+    stateBarVisible: { type: Boolean, default: true },
+    pinnable: { type: Boolean, default: true },
+    groupable: { type: Boolean, default: undefined },
+    showFooter: { type: Boolean, default: undefined },
+    softDeletable: { type: Boolean, default: undefined },
   },
   data() {
     return {
@@ -52,6 +63,15 @@ export default {
   computed: {
     currentTheme() {
       return this.$tabStore?.sidebarTheme || 'light'
+    },
+    resolvedGroupable() {
+      return this.groupable !== undefined ? this.groupable : this.useGroupPanel
+    },
+    resolvedShowFooter() {
+      return this.showFooter !== undefined ? this.showFooter : this.useFooter
+    },
+    resolvedSoftDeletable() {
+      return this.softDeletable !== undefined ? this.softDeletable : this.softDeleting
     }
   },
   watch: {
