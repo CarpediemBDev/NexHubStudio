@@ -132,8 +132,11 @@ export default {
       this.applyColumnFilters()
 
       this.$emit('init', { gridView, dataProvider: this.dataProvider })
-      // 초기 테마 적용
+      // 초기 테마 적용 및 컨텍스트 메뉴 팝업 허용 보장
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
+      if (this.gridView && this.resolvedPinnable) {
+        this.gridView.onContextMenuPopup = () => true
+      }
     },
 
     applyControlBars() {

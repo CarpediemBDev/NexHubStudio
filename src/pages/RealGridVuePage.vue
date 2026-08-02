@@ -184,15 +184,8 @@ export default {
         resizable: true
       })
 
-      // 마우스 우클릭 동적 행/열 고정 컨텍스트 메뉴 (1:1 완벽 동일)
-      gridView.setContextMenu([
-        { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
-        { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
-        { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
-        { label: '-' },
-        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
-      ])
-
+      // RealGrid 우클릭 컨텍스트 메뉴 팝업 허용 및 클릭 이벤트 연결
+      gridView.onContextMenuPopup = () => true
       gridView.onContextMenuItemClicked = (grid, item, clickData) => {
         if (this.$refs.realgridComp) {
           this.$refs.realgridComp.handleDynamicFixing(item, clickData)
