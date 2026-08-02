@@ -18,6 +18,7 @@ import WorkRequestFormPage from "../pages/WorkRequestFormPage.vue";
 import PivotAltAPage from "../pages/PivotAltAPage.vue";
 import PivotAltBPage from "../pages/PivotAltBPage.vue";
 import RealPivotPage from "../pages/RealPivotPage.vue";
+import RealPivotSdkPage from "../pages/RealPivotSdkPage.vue";
 import RealGridPage from "../pages/RealGridPage.vue";
 import RealGridVuePage from "../pages/RealGridVuePage.vue";
 import RealGridTreePage from "../pages/RealGridTreePage.vue";
@@ -80,7 +81,8 @@ const routes = [
           { path: "showcase", name: "RealGridShowcase", component: RealGridShowcasePage, meta: { title: "공통 컴포넌트 쇼케이스", icon: "bi-easel", keepAlive: true } },
           { path: "pivot-a", name: "PivotA", component: PivotAltAPage, meta: { title: "Pivot 분석 A", icon: "bi-pie-chart", keepAlive: true } },
           { path: "pivot-b", name: "PivotB", component: PivotAltBPage, meta: { title: "Pivot 분석 B", icon: "bi-pie-chart-fill", keepAlive: true } },
-          { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "Real Pivot Engine", icon: "bi-bar-chart-steps", keepAlive: true } }
+          { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "AI 스마트 피벗 (자체개발)", icon: "bi-bar-chart-steps", keepAlive: true } },
+          { path: "pivot-sdk", name: "RealPivotSdk", component: RealPivotSdkPage, meta: { title: "RealPivot 공식 SDK 가이드", icon: "bi-box-seam", keepAlive: true } }
         ]
       },
 

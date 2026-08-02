@@ -1,16 +1,16 @@
 <template>
   <div class="b2b-page-container">
-    <RealPivotStudio :height="height" />
+    <RealPivotOfficialSdk :height="height" />
   </div>
 </template>
 
 <script>
-import RealPivotStudio from '@/components/RealPivotStudio.vue'
+import RealPivotOfficialSdk from '@/components/RealPivotOfficialSdk.vue'
 
 export default {
-  name: 'RealPivotPage',
+  name: 'RealPivotSdkPage',
   components: {
-    RealPivotStudio
+    RealPivotOfficialSdk
   },
   props: {
     height: {
