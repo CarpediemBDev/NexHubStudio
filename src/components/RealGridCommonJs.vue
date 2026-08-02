@@ -38,7 +38,7 @@ export default {
     // 셀 수정 및 편집 허용 여부 (-able)
     editable: { type: Boolean, default: true },
     // 소프트 삭제된 행을 화면에서 즉시 숨길지 여부
-    hideDeletedRows: { type: Boolean, default: true },
+    hideDeletedRows: { type: Boolean, default: false },
 
     // -------------------------------------------------------------------------
     // ✨ [1. True / False 온-오프 전용] 글로벌 표준 형용사형 (-able / -ible) Props
@@ -80,7 +80,7 @@ export default {
     // 체크바 선택열 너비(px)
     checkBarWidth: { type: Number, default: 36 },
     // 상태바 열 너비(px)
-    stateBarWidth: { type: Number, default: 6 },
+    stateBarWidth: { type: Number, default: 20 },
     // 초기 좌측 고정 열 개수 (0이면 미고정)
     fixedColCount: { type: Number, default: 0 },
     // 초기 상단 고정 행 개수 (0이면 미고정)
@@ -314,10 +314,6 @@ export default {
     // =========================================================
     // 행/열 고정 + 우클릭 컨텍스트 메뉴
     // =========================================================
-    setFixedOptions(options) {
-      if (this.gridView) this.gridView.setFixedOptions(options)
-    },
-
     getColumnIndexByName(colName) {
       if (!this.gridView || !colName) return -1
       try {
@@ -495,24 +491,6 @@ export default {
     // =========================================================
     // 펼치기 / 접기 (그룹)
     // =========================================================
-    expandAll(...args) {
-      if (this.gridView && typeof this.gridView.expandAll === 'function') {
-        try { this.gridView.expandAll(...args) } catch (e) { /* noop */ }
-      }
-    },
-
-    collapseAll(...args) {
-      if (this.gridView && typeof this.gridView.collapseAll === 'function') {
-        try { this.gridView.collapseAll(...args) } catch (e) { /* noop */ }
-      }
-    },
-
-    expand(itemIndex, ...args) {
-      if (this.gridView && typeof this.gridView.expand === 'function') {
-        try { this.gridView.expand(itemIndex, ...args) } catch (e) { /* noop */ }
-      }
-    },
-
     /** 그룹 행 전체 펼치기 (RowGroup 그리드 전용, 멀티패스). */
     expandAllGroups(passes = 2) {
       if (!this.gridView) return
@@ -630,37 +608,6 @@ export default {
       }
     },
 
-    clearRowStates() {
-      if (this.dataProvider) this.dataProvider.clearRowStates()
-    },
-
-    // =========================================================
-    // 공통 데이터/편집 API
-    // =========================================================
-    setFields(fields) {
-      if (this.dataProvider) this.dataProvider.setFields(fields)
-    },
-
-    setColumns(columns) {
-      if (this.gridView) this.gridView.setColumns(columns)
-    },
-
-    deleteChecked() {
-      if (!this.gridView || !this.dataProvider) return 0
-      const checkedRows = (this.gridView.getCheckedRows ? this.gridView.getCheckedRows(false) : []) || []
-      if (checkedRows.length > 0) {
-        this.dataProvider.removeRows(checkedRows, true)
-        if (this.gridView.clearCheckedItems) this.gridView.clearCheckedItems()
-      }
-      return checkedRows.length
-    },
-
-    commit() {
-      if (this.gridView && typeof this.gridView.commit === 'function') {
-        try { this.gridView.commit(true) } catch (e) { /* noop */ }
-      }
-    },
-
     destroyGrid() {
       if (this.gridView) {
         try { this.gridView.destroy() } catch (e) { /* noop */ }
@@ -749,36 +696,6 @@ export default {
 
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
       this.applyGridTheme(this._resolveTheme())
-    },
-
-    // =========================================================
-    // 그리드 전용 Public API (그룹화는 GridView 전용 — 트리엔 없음)
-    // =========================================================
-    setRows(rows) {
-      if (this.dataProvider) this.dataProvider.setRows(rows || [])
-    },
-
-    groupBy(fieldNames) {
-      if (this.gridView) this.gridView.groupBy(fieldNames || [])
-    },
-
-    getGroupFieldNames() {
-      return this.gridView ? (this.gridView.getGroupFieldNames() || []) : []
-    },
-
-    insertRow(index = 0, rowData = {}) {
-      if (this.dataProvider) {
-        this.dataProvider.insertRow(index, rowData)
-        if (this.gridView) this.gridView.setCurrent({ itemIndex: index })
-      }
-    },
-
-    addRow(rowData) {
-      if (this.dataProvider) {
-        this.dataProvider.addRow(rowData)
-        const count = this.dataProvider.getRowCount()
-        if (this.gridView) this.gridView.setCurrent({ itemIndex: count - 1 })
-      }
     }
   }
 }

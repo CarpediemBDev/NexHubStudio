@@ -52,7 +52,7 @@ export default {
     useIndicator: { type: Boolean, default: true },        // 행번호 인디케이터 열
     checkBarExclusive: { type: Boolean, default: false },  // 체크박스 단일선택
     checkBarWidth: { type: Number, default: 36 },
-    stateBarWidth: { type: Number, default: 6 },
+    stateBarWidth: { type: Number, default: 20 },
     useFixContextMenu: { type: Boolean, default: true },   // 우클릭 컨텍스트 메뉴
     useColumnFilter: { type: Boolean, default: true },     // 헤더 컬럼 필터(자동 값목록) 활성화
 

@@ -4,7 +4,6 @@
       ref="realGridComp"
       :autoGenerateField="false"
       :rows="rows"
-      :gridProps="gridProps"
       style="width: 100%; height: 100%;"
       @onInitialized="initGrid"
     >
@@ -36,7 +35,7 @@ export default {
     // 셀 수정 및 편집 허용 여부 (-able)
     editable: { type: Boolean, default: true },
     // 소프트 삭제된 행을 화면에서 즉시 숨길지 여부
-    hideDeletedRows: { type: Boolean, default: true },
+    hideDeletedRows: { type: Boolean, default: false },
 
     // -------------------------------------------------------------------------
     // ✨ [1. True / False 온-오프 전용] 글로벌 표준 형용사형 (-able / -ible) Props
@@ -71,6 +70,10 @@ export default {
     // -------------------------------------------------------------------------
     // ⚙️ [2. 세부 모드 및 값 입력 전용] RealGrid 2 원본 명칭 그대로 유연 입력 Props
     // -------------------------------------------------------------------------
+    // 체크바 선택열 너비(px)
+    checkBarWidth: { type: Number, default: 36 },
+    // 상태바 열 너비(px)
+    stateBarWidth: { type: Number, default: 20 },
     // 그룹핑 소계 행 계산/표시 방식 ('aggregate' / 'none')
     groupSummaryMode: { type: String, default: 'aggregate' },
     // 컬럼 너비 화면 채움 방식 ('evenFill' / 'none' / 'fill')
@@ -235,7 +238,7 @@ export default {
       if (this.resolvedStateBarVisible) {
         this.gridView.setStateBar({
           visible: true,
-          width: 6,
+          width: customOpts.stateBar?.width || this.stateBarWidth || 20,
           stateStyles: {
             insert: { background: '#22c55e' },   // 추가 → 초록
             update: { background: '#3b82f6' },   // 수정 → 파랑
@@ -251,7 +254,7 @@ export default {
       if (this.resolvedCheckable) {
         this.gridView.setCheckBar({
           visible: true,
-          width: 36,
+          width: customOpts.checkBar?.width || this.checkBarWidth || 36,
           exclusive: this.exclusiveSelectable,
           head: 'check',
           headCheckCallback: null,
@@ -282,19 +285,10 @@ export default {
           { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
         ])
         
-        // 바닐라 RealGrid2 direct 이벤트 설정
+        // 바닐라 RealGrid2 direct 이벤트 설정 (100% 안전 바인딩)
         this.gridView.onContextMenuPopup = () => true
         this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
           this.handleDynamicFixing(item, clickData)
-        }
-
-        // realgrid-vue 래퍼 컴포넌트 callback 등록
-        const realGridComp = this.$refs.realGridComp
-        if (realGridComp && typeof realGridComp.addCallback === 'function') {
-          realGridComp.addCallback('onContextMenuPopup', () => true)
-          realGridComp.addCallback('onContextMenuItemClicked', (grid, item, clickData) => {
-            this.handleDynamicFixing(item, clickData)
-          })
         }
       } catch (e) {
         console.warn('[RealGrid] applyFixContextMenu error:', e)
@@ -371,12 +365,6 @@ export default {
     },
 
     // Public API Methods (RealGridCommonJs와 100% 동일)
-    setFixedOptions(options) {
-      if (this.gridView) {
-        this.gridView.setFixedOptions(options)
-      }
-    },
-
     getColumnIndexByName(colName) {
       if (!this.gridView || !colName) return -1
       try {
@@ -436,69 +424,6 @@ export default {
         return true
       }
       return false
-    },
-
-    setFields(fields) {
-      if (this.dataProvider) this.dataProvider.setFields(fields)
-    },
-    
-    setColumns(columns) {
-      if (this.gridView) this.gridView.setColumns(columns)
-    },
-
-    setRows(rows) {
-      if (this.dataProvider) this.dataProvider.setRows(rows || [])
-    },
-
-    groupBy(fieldNames) {
-      if (this.gridView) this.gridView.groupBy(fieldNames || [])
-    },
-
-    getGroupFieldNames() {
-      return this.gridView ? (this.gridView.getGroupFieldNames() || []) : []
-    },
-
-    insertRow(index = 0, rowData = {}) {
-      if (this.dataProvider) {
-        this.dataProvider.insertRow(index, rowData)
-        if (this.gridView) this.gridView.setCurrent({ itemIndex: index })
-      }
-    },
-
-    addRow(rowData) {
-      if (this.dataProvider) {
-        this.dataProvider.addRow(rowData)
-        const count = this.dataProvider.getRowCount()
-        if (this.gridView) this.gridView.setCurrent({ itemIndex: count - 1 })
-      }
-    },
-
-    deleteChecked() {
-      if (!this.gridView || !this.dataProvider) return 0
-      const checkedRows = this.gridView.getCheckedRows()
-      if (checkedRows.length > 0) {
-        this.dataProvider.removeRows(checkedRows)
-        this.gridView.clearCheckedItems()
-      }
-      return checkedRows.length
-    },
-
-    getChanges() {
-      if (!this.dataProvider) return { created: [], updated: [], deleted: [] }
-      
-      const createdIdx = this.dataProvider.getStateRows('created') || []
-      const updatedIdx = this.dataProvider.getStateRows('updated') || []
-      const deletedIdx = this.dataProvider.getStateRows('deleted') || []
-
-      const created = createdIdx.map(idx => this.dataProvider.getJsonRow(idx))
-      const updated = updatedIdx.map(idx => this.dataProvider.getJsonRow(idx))
-      const deleted = deletedIdx.map(idx => this.dataProvider.getJsonRow(idx))
-
-      return { created, updated, deleted }
-    },
-
-    clearRowStates() {
-      if (this.dataProvider) this.dataProvider.clearRowStates()
     },
 
     exportToExcel(fileName = 'RealGrid_Data.xlsx') {

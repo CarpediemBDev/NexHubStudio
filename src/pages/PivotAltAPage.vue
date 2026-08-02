@@ -136,6 +136,8 @@
           :checkable="true"
           :indicatable="true"
           :stateBarVisible="true"
+          :stateBarWidth="20"
+          :checkBarWidth="36"
           :pinnable="true"
           :groupable="true"
           :mergeable="true"
@@ -333,8 +335,8 @@ export default {
             sales: r.sales ?? Math.floor((r.salary || 6000) * 1.5 + (i * 37) % 5000),
             bonus: r.bonus ?? Math.floor((r.salary || 6000) * 0.1 + (i * 13) % 800)
           }))
-          if (this.$refs.realgridComp && this.$refs.realgridComp.setRows) {
-            this.$refs.realgridComp.setRows(this.mockData)
+          if (this.dataProvider) {
+            this.dataProvider.setRows(this.mockData)
           }
         }
       } catch (e) {
@@ -402,17 +404,15 @@ export default {
     clearGroupBy() {
       if (!this.gridView) return
       this.activeGroup = 'none'
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.groupBy([])
-      }
+      this.gridView.groupBy([])
       this.gridView.setEditOptions({ editable: true })
       showToast('원본 데이터(Flat Grid)로 전환되었습니다.', { type: 'info' })
     },
 
     applyView(view) {
-      if (!this.gridView || !this.$refs.realgridComp) return
+      if (!this.gridView) return
       this.activeGroup = view.id
-      this.$refs.realgridComp.groupBy(view.fields)
+      this.gridView.groupBy(view.fields)
       this.gridView.setEditOptions({ editable: false })
       showToast(`'${view.name}' 뷰가 적용되었습니다. (편집/추가/삭제 제한)`, { type: 'info' })
     },
@@ -459,7 +459,7 @@ export default {
 
     saveCurrentView() {
       if (!this.gridView) return
-      const fields = this.$refs.realgridComp ? this.$refs.realgridComp.getGroupFieldNames() : []
+      const fields = this.gridView.getGroupFieldNames() || []
       if (fields.length === 0) {
         showToast('현재 그룹핑된 컬럼이 없습니다. 컬럼을 그룹핑한 후 저장해주세요.', { type: 'warning' })
         return
@@ -498,18 +498,17 @@ export default {
       }
 
       const tempId = 'user_' + Math.random().toString(36).substring(2, 8)
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.insertRow(0, {
-          userId: tempId,
-          name: '신규 사용자',
-          dept: '개발 1팀',
-          role: '선임연구원',
-          region: '서울',
-          salary: 5000,
-          sales: 0,
-          bonus: 0
-        })
-      }
+      this.dataProvider.insertRow(0, {
+        userId: tempId,
+        name: '신규 사용자',
+        dept: '개발 1팀',
+        role: '선임연구원',
+        region: '서울',
+        salary: 5000,
+        sales: 0,
+        bonus: 0
+      })
+      this.gridView.setCurrent({ itemIndex: 0 })
       showToast('상단에 새 행이 추가되었습니다 (State: Created). 셀을 클릭해 수정해 보세요.', { type: 'info' })
     },
 
@@ -520,17 +519,19 @@ export default {
         return
       }
 
-      const count = this.$refs.realgridComp ? this.$refs.realgridComp.deleteChecked() : 0
-      if (count === 0) {
+      const checkedRows = this.gridView.getCheckedRows() || []
+      if (checkedRows.length === 0) {
         showToast('삭제할 행을 왼쪽 체크박스로 선택해 주세요.', { type: 'warning' })
         return
       }
-      showToast(`${count}건이 삭제 표시되었습니다 (State: Deleted).`, { type: 'warning' })
+      this.dataProvider.removeRows(checkedRows, false) // RealGrid2 소프트 삭제 (상태바 - 표시)
+      this.gridView.checkAll(false)
+      showToast(`${checkedRows.length}건이 삭제 표시되었습니다 (State: Deleted).`, { type: 'warning' })
     },
 
     saveData() {
-      if (!this.$refs.realgridComp) return
-      this.$refs.realgridComp.commit() // 공통 mixin
+      if (!this.gridView || !this.dataProvider) return
+      this.gridView.commit(true) // RealGrid2 표준 편집 커밋
 
       const changes = this.$refs.realgridComp ? this.$refs.realgridComp.getChanges() : { created: [], updated: [], deleted: [] }
       const totalChanges = changes.created.length + changes.updated.length + changes.deleted.length
@@ -550,28 +551,34 @@ export default {
         `개발자 도구 콘솔(F12)에 전송할 JSON 페이로드가 출력되었습니다.`
       )
 
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.clearRowStates()
-      }
+      this.dataProvider.clearRowStates()
       showToast('서버 저장 완료 및 행 상태(C,U,D)가 클리어되었습니다.', { type: 'success' })
     },
 
     exportExcel() {
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.exportToExcel('Pivot_AltA_Group_Export.xlsx')
-      }
+      if (!this.gridView) return
+      this.gridView.exportGrid({
+        type: 'excel',
+        target: 'local',
+        fileName: 'Pivot_AltA_Group_Export.xlsx',
+        showProgress: true
+      })
     },
 
     openColumnPicker() {
-      if (this.$refs.realgridComp) {
-        this.columnPickerCols = this.$refs.realgridComp.getColumnsInfo()
-        this.isColumnPickerOpen = true
-      }
+      if (!this.gridView) return
+      const cols = this.gridView.getColumns() || []
+      this.columnPickerCols = cols.map(c => ({
+        name: c.name,
+        header: c.header?.text || c.name,
+        visible: c.visible !== false
+      }))
+      this.isColumnPickerOpen = true
     },
 
     onToggleColumn({ name, visible }) {
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.setColumnVisible(name, visible)
+      if (this.gridView) {
+        this.gridView.setColumnProperty(name, 'visible', visible)
       }
     },
 

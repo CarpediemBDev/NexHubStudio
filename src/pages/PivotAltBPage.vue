@@ -118,6 +118,8 @@
           :checkable="true"
           :indicatable="true"
           :stateBarVisible="true"
+          :stateBarWidth="20"
+          :checkBarWidth="36"
           :pinnable="true"
           :groupable="true"
           :mergeable="true"
@@ -371,38 +373,23 @@ export default {
       showToast(message, opts)
     },
 
-    openPivotModal() {
-      this.tempPivotOptions = { ...this.pivotOptions }
-      this.isModalOpen = true
-    },
-
-    closePivotModal() {
-      this.isModalOpen = false
-    },
-
-    applyPivotFromModal() {
-      if (this.tempPivotOptions.rowField === this.tempPivotOptions.colField) {
-        showToast('행 축과 열 축은 서로 다른 필드를 선택해야 합니다.', { type: 'danger' })
-        return
-      }
-      this.pivotOptions = { ...this.tempPivotOptions }
-      this.closePivotModal()
-      this.applyPivot()
-    },
-
     onGridInit({ gridView, dataProvider }) {
       this.gridView = gridView
       this.dataProvider = dataProvider
 
-      // 마우스 우클릭 동적 행/열 고정 컨텍스트 메뉴 (1:1 완벽 통일)
-      this.gridView.setContextMenu([
+      gridView.setFixedOptions({
+        colCount: 1,
+        resizable: true
+      })
+
+      // RealGrid 우클릭 컨텍스트 메뉴 팝업 허용 및 클릭 이벤트 연결
+      gridView.setContextMenu([
         { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
         { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
         { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
         { label: '-' },
         { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
       ])
-
       this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
         if (this.$refs.realgridComp) {
           this.$refs.realgridComp.handleDynamicFixing(item, clickData)
@@ -413,7 +400,7 @@ export default {
     },
 
     applyPivot() {
-      if (!this.$refs.realgridComp) return
+      if (!this.gridView || !this.dataProvider) return
 
       if (this.pivotOptions.rowField === this.pivotOptions.colField) {
         showToast('행 축과 열 축은 서로 다른 필드를 선택해야 합니다.', { type: 'danger' })
@@ -423,10 +410,10 @@ export default {
       // pivotUtil을 사용해 Raw -> Matrix 피벗 변환
       const matrixResult = buildPivotMatrix(this.rawSalesData, this.pivotOptions)
 
-      // 공통 컴포넌트 API를 통해 동적 필드/컬럼/행 업데이트
-      this.$refs.realgridComp.setFields(matrixResult.fields)
-      this.$refs.realgridComp.setColumns(matrixResult.columns)
-      this.$refs.realgridComp.setRows(matrixResult.rows)
+      // RealGrid2 순수 API를 통한 동적 필드/컬럼/행 업데이트
+      this.dataProvider.setFields(matrixResult.fields)
+      this.gridView.setColumns(matrixResult.columns)
+      this.dataProvider.setRows(matrixResult.rows)
 
       // 요약 정보 갱신
       this.pivotSummaryText = `행: ${matrixResult.rows.length}개 그룹 | 피벗 열: ${matrixResult.colKeys.length}개`
@@ -434,21 +421,29 @@ export default {
     },
 
     exportExcel() {
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.exportToExcel('Pivot_AltB_Matrix_Export.xlsx')
-      }
+      if (!this.gridView) return
+      this.gridView.exportGrid({
+        type: 'excel',
+        target: 'local',
+        fileName: 'Pivot_AltB_Matrix_Export.xlsx',
+        showProgress: true
+      })
     },
 
     openColumnPicker() {
-      if (this.$refs.realgridComp) {
-        this.columnPickerCols = this.$refs.realgridComp.getColumnsInfo()
-        this.isColumnPickerOpen = true
-      }
+      if (!this.gridView) return
+      const cols = this.gridView.getColumns() || []
+      this.columnPickerCols = cols.map(c => ({
+        name: c.name,
+        header: c.header?.text || c.name,
+        visible: c.visible !== false
+      }))
+      this.isColumnPickerOpen = true
     },
 
     onToggleColumn({ name, visible }) {
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.setColumnVisible(name, visible)
+      if (this.gridView) {
+        this.gridView.setColumnProperty(name, 'visible', visible)
       }
     },
 
@@ -467,8 +462,8 @@ export default {
     },
 
     saveData() {
-      if (!this.$refs.realgridComp) return
-      this.$refs.realgridComp.commit() // 공통 mixin
+      if (!this.gridView) return
+      this.gridView.commit(true) // RealGrid2 표준 편집 커밋
       showToast('피벗 매트릭스 설정이 저장되었습니다.', { type: 'success' })
     }
   }

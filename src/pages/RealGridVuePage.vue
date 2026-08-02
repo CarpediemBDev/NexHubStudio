@@ -54,6 +54,8 @@
           :checkable="true"
           :indicatable="true"
           :stateBarVisible="true"
+          :stateBarWidth="20"
+          :checkBarWidth="36"
           :pinnable="true"
           :groupable="false"
           :mergeable="true"
@@ -74,7 +76,7 @@
           <RGDataField fieldName="dept" dataType="text" />
           <RGDataField fieldName="role" dataType="text" />
           <RGDataField fieldName="status" dataType="text" />
-          <RGDataField fieldName="joinDate" dataType="text" />
+          <RGDataField fieldName="joinDate" dataType="datetime" datetimeFormat="yyyyMMdd" />
           <RGDataField fieldName="activeYn" dataType="text" />
           <RGDataField fieldName="salary" dataType="number" />
           <RGDataField fieldName="sales" dataType="number" />
@@ -113,10 +115,11 @@
           <RGDataColumn
             name="status"
             fieldName="status"
-            width="100"
+            width="110"
             :header="{ text: '재직상태 (셀렉트)' }"
             :styles="{ textAlignment: 'center' }"
             :editor="{ type: 'dropdown', dropDownCount: 4, domainOnly: true, labels: ['재직', '휴직', '퇴사'], values: ['재직', '휴직', '퇴사'] }"
+            :displayCallback="(grid, index, value) => (!value ? '선택' : value)"
           />
           <RGDataColumn
             name="joinDate"
@@ -124,7 +127,8 @@
             width="110"
             :header="{ text: '입사일 (달력)' }"
             :styles="{ textAlignment: 'center' }"
-            :editor="{ type: 'date', datetimeFormat: 'yyyy-MM-dd' }"
+            datetimeFormat="yyyy-MM-dd"
+            :editor="{ type: 'date', datetimeFormat: 'yyyy-MM-dd', commitOnSelect: true }"
           />
           <RGDataColumn
             name="activeYn"
@@ -194,7 +198,10 @@ export default {
     this.loadUsers()
   },
   methods: {
-    onGridInit({ gridView }) {
+    onGridInit({ gridView, dataProvider }) {
+      this.gridView = gridView
+      this.dataProvider = dataProvider
+
       gridView.setFixedOptions({
         colCount: 1,
         resizable: true
@@ -226,7 +233,11 @@ export default {
         if (!res.ok) throw new Error('Fetch failed')
         const data = await res.json()
         const rows = Array.isArray(data) ? data : data.users || []
-        this.users = rows.length > 0 ? rows : defaultUsers
+        const rawUsers = rows.length > 0 ? rows : defaultUsers
+        this.users = rawUsers.map((u, i) => ({
+          ...u,
+          joinDate: u.joinDate ? u.joinDate.replace(/-/g, '') : `20240${(i % 9) + 1}15`
+        }))
       } catch (error) {
         console.warn('Using default mock users:', error)
         this.users = defaultUsers
@@ -234,8 +245,9 @@ export default {
     },
 
     addRow() {
+      if (!this.dataProvider) return
       const tempId = 'user_' + Math.random().toString(36).substring(2, 8)
-      this.$refs.realgridComp.insertRow(0, {
+      this.dataProvider.insertRow(0, {
         userId: tempId,
         name: '신규 사용자',
         dept: '개발 1팀',
@@ -243,21 +255,36 @@ export default {
         salary: 4500,
         sales: 0
       })
+      if (this.gridView) this.gridView.setCurrent({ itemIndex: 0 })
       showToast('상단에 새 행이 추가되었습니다 (State: Created).', { type: 'info' })
     },
 
     deleteChecked() {
-      const count = this.$refs.realgridComp.deleteChecked()
-      if (count === 0) {
+      if (!this.gridView || !this.dataProvider) return
+
+      const checkedRows = this.gridView.getCheckedRows() || []
+      if (checkedRows.length === 0) {
         showToast('선택된 사용자가 없습니다.', { type: 'warning' })
         return
       }
-      showToast(`${count}건이 삭제 표시되었습니다 (State: Deleted).`, { type: 'warning' })
+      this.dataProvider.removeRows(checkedRows, false) // RealGrid2 소프트 삭제 (상태바 - 표시)
+      this.gridView.checkAll(false)
+      showToast(`${checkedRows.length}건이 삭제 상태(-)로 설정되었습니다. [저장] 시 반영됩니다.`, { type: 'warning' })
     },
 
     async saveData() {
-      const changes = this.$refs.realgridComp.getChanges()
-      const totalChanges = changes.created.length + changes.updated.length + changes.deleted.length
+      if (!this.dataProvider) return
+
+      const createdIdx = this.dataProvider.getStateRows('created') || []
+      const updatedIdx = this.dataProvider.getStateRows('updated') || []
+      const deletedIdx = this.dataProvider.getStateRows('deleted') || []
+
+      const created = createdIdx.map(idx => this.dataProvider.getJsonRow(idx))
+      const updated = updatedIdx.map(idx => this.dataProvider.getJsonRow(idx))
+      const deleted = deletedIdx.map(idx => this.dataProvider.getJsonRow(idx))
+
+      const changes = { created, updated, deleted }
+      const totalChanges = created.length + updated.length + deleted.length
 
       if (totalChanges === 0) {
         showToast('변경사항이 없습니다.', { type: 'warning' })
@@ -273,25 +300,33 @@ export default {
         `• 삭제 (Deleted - D): ${changes.deleted.length}건`
       )
 
-      this.$refs.realgridComp.clearRowStates()
+      this.dataProvider.clearRowStates()
     },
 
     exportExcel() {
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.exportToExcel('RealGrid_Vue_List.xlsx')
-      }
+      if (!this.gridView) return
+      this.gridView.exportGrid({
+        type: 'excel',
+        target: 'local',
+        fileName: 'RealGrid_Vue_List.xlsx',
+        showProgress: true
+      })
     },
 
     openColumnPicker() {
-      if (this.$refs.realgridComp) {
-        this.columnPickerCols = this.$refs.realgridComp.getColumnsInfo()
-        this.isColumnPickerOpen = true
-      }
+      if (!this.gridView) return
+      const cols = this.gridView.getColumns() || []
+      this.columnPickerCols = cols.map(c => ({
+        name: c.name,
+        header: c.header?.text || c.name,
+        visible: c.visible !== false
+      }))
+      this.isColumnPickerOpen = true
     },
 
     onToggleColumn({ name, visible }) {
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.setColumnVisible(name, visible)
+      if (this.gridView) {
+        this.gridView.setColumnProperty(name, 'visible', visible)
       }
     },
 

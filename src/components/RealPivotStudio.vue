@@ -590,21 +590,23 @@
                   <div
                     v-for="f in valueFields"
                     :key="f.id"
-                    class="pivot-value-row"
+                    class="pivot-value-row shadow-2xs border"
                     draggable="true"
                     @dragstart="onDragStart(f, $event)"
                   >
-                    <span class="pivot-value-row__name text-truncate">{{ f.label }}</span>
-                    <select
-                      :value="f.agg || 'count'"
-                      class="form-select form-select-xs pivot-agg-select"
-                      @change="setAgg(f, $event.target.value)"
-                    >
-                      <option v-for="opt in aggOptions(f)" :key="opt.value" :value="opt.value">
-                        {{ opt.label }}
-                      </option>
-                    </select>
-                    <button class="btn-close btn-xs ms-1" @click="removeField(f)"></button>
+                    <span class="pivot-value-row__name text-truncate fw-semibold text-theme-primary me-1">{{ f.label }}</span>
+                    <div class="d-inline-flex align-items-center gap-1">
+                      <select
+                        :value="f.agg || 'count'"
+                        class="form-select form-select-xs pivot-agg-select border-theme"
+                        @change="setAgg(f, $event.target.value)"
+                      >
+                        <option v-for="opt in aggOptions(f)" :key="opt.value" :value="opt.value">
+                          {{ opt.label }}
+                        </option>
+                      </select>
+                      <button class="btn-close btn-xs ms-0.5" @click="removeField(f)"></button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1863,19 +1865,38 @@ forecast 는 미래 3개 기간을 포함한다.`
 .pivot-chip-active {
   display: flex;
   align-items: center;
-  padding: 3px 7px;
+  justify-content: space-between;
+  padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border-color);
   font-size: 11.5px;
   font-weight: 600;
   cursor: grab;
   user-select: none;
 }
 
-.pivot-drop-zone {
-  min-height: 90px;
-  border: 1px dashed var(--border-color) !important;
-  transition: all 0.15s ease;
+.pivot-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--bg-subcard);
+  border: 1px solid var(--border-color);
+  font-size: 11.5px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.pivot-agg-select {
+  width: 76px !important;
+  font-size: 11px !important;
+  padding: 2px 4px !important;
+  height: 24px !important;
+  border-radius: 4px;
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
 }
 .pivot-drop-zone.is-over {
   border-color: var(--b2b-color-primary) !important;

@@ -77,6 +77,8 @@
           :enableDragAndDrop="enableDnd"
           :expandAllOnLoad="true"
           :hideDeletedRows="false"
+          :stateBarWidth="20"
+          :checkBarWidth="36"
           :toast="treeToast"
           @node-moved="onNodeMoved"
           @parent-changed="onParentChanged"
