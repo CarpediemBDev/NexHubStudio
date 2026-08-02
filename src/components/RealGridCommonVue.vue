@@ -26,49 +26,82 @@ export default {
     RealGridVue
   },
   props: {
+    // -------------------------------------------------------------------------
+    // 📦 [기본 데이터 및 컨테이너 설정]
+    // -------------------------------------------------------------------------
+    // 그리드에 바인딩할 데이터 행 배열
     rows: { type: Array, default: () => [] },
+    // 그리드 컨테이너 높이 (예: '580px', '100%')
     height: { type: String, default: '580px' },
-    useGroupPanel: { type: Boolean, default: false },
-    useFooter: { type: Boolean, default: false },
-    softDeleting: { type: Boolean, default: true },
-    hideDeletedRows: { type: Boolean, default: true },
+    // 셀 수정 및 편집 허용 여부 (-able)
     editable: { type: Boolean, default: true },
+    // 소프트 삭제된 행을 화면에서 즉시 숨길지 여부
+    hideDeletedRows: { type: Boolean, default: true },
 
-    // ---- ✨ 글로벌 표준 형용사형 Props (글로벌 UI 그리드 스탠다드) ----
+    // -------------------------------------------------------------------------
+    // ✨ [1. True / False 온-오프 전용] 글로벌 표준 형용사형 (-able / -ible) Props
+    // -------------------------------------------------------------------------
+    // 컬럼 헤더 클릭 시 데이터 오름/내림차순 정렬 기능 (-able)
     sortable: { type: Boolean, default: true },
+    // 컬럼 헤더 자동 드롭다운 필터 기능 (-able)
     filterable: { type: Boolean, default: true },
+    // 좌측 체크박스 선택열(CheckBar) 표시 여부 (-able)
     checkable: { type: Boolean, default: true },
+    // 좌측 행번호(Indicator) 열 표시 여부 (-able)
     indicatable: { type: Boolean, default: true },
+    // 좌측 행 상태(StateBar: 추가/수정/삭제 상태색) 열 표시 여부 (-ible)
     stateBarVisible: { type: Boolean, default: true },
+    // 마우스 우클릭 행/열 동적 고정 메뉴 허용 여부 (-able)
     pinnable: { type: Boolean, default: true },
+    // 상단 행 그룹핑 드래그앤드롭 패널 표시 여부 (-able)
     groupable: { type: Boolean, default: undefined },
-    mergeable: { type: Boolean, default: true },          // ✨ 행 그룹핑 셀 상하 병합 (-able 형용사형)
+    // 행 그룹핑 시 그룹화된 셀의 상하 병합 여부 (-able)
+    mergeable: { type: Boolean, default: true },
+    // 행 그룹핑 시 본문 컬럼 숨김 허용 여부 (-able)
+    columnHideable: { type: Boolean, default: false },
+    // 체크바 단일 선택(Radio: true) / 다중 선택(Checkbox: false)
+    exclusiveSelectable: { type: Boolean, default: false },
+    // 셀 이탈 시 편집 내용 자동 커밋 가능 여부 (-able)
+    autoCommittable: { type: Boolean, default: true },
+    // 하단 합계/소계 푸터(Footer) 영역 표시 여부
     showFooter: { type: Boolean, default: undefined },
+    // 행 삭제 시 DB 즉시삭제 대신 삭제상태(Deleted) 표기 여부 (-able)
     softDeletable: { type: Boolean, default: undefined },
 
-    // ---- ⚙️ 페이지별 유연 옵션 Props (하드코딩 제거) ----
-    groupMergeable: { type: Boolean, default: true },
+    // -------------------------------------------------------------------------
+    // ⚙️ [2. 세부 모드 및 값 입력 전용] RealGrid 2 원본 명칭 그대로 유연 입력 Props
+    // -------------------------------------------------------------------------
+    // 그룹핑 소계 행 계산/표시 방식 ('aggregate' / 'none')
     groupSummaryMode: { type: String, default: 'aggregate' },
-    hideGroupedColumn: { type: Boolean, default: false },
-    checkBarExclusive: { type: Boolean, default: false },
-    commitWhenLeave: { type: Boolean, default: true },
+    // 컬럼 너비 화면 채움 방식 ('evenFill' / 'none' / 'fill')
     fitStyle: { type: String, default: 'evenFill' },
+    // 초기 좌측 고정 열 개수 (0이면 미고정)
     fixedColCount: { type: Number, default: 0 },
+    // 초기 상단 고정 행 개수 (0이면 미고정)
     fixedRowCount: { type: Number, default: 0 },
+
+    // -------------------------------------------------------------------------
+    // 🌐 [3. 하이브리드 통-객체 주입] 세부 RealGrid 옵션 오버라이드 객체 Props
+    // -------------------------------------------------------------------------
+    // 통-객체로 세부 RealGrid 옵션 일괄 넘기기 (Hybrid Pattern)
+    options: { type: Object, default: () => ({}) },
+    // options 와 동의어 (Hybrid Pattern)
+    gridOptions: { type: Object, default: () => ({}) },
+
+    // -------------------------------------------------------------------------
+    // 🔄 [4. 레거시 구버전 명칭 호환용] (Legacy Fallback Props)
+    // -------------------------------------------------------------------------
+    // groupable 의 구버전 호환 이름
+    useGroupPanel: { type: Boolean, default: false },
+    // showFooter 의 구버전 호환 이름
+    useFooter: { type: Boolean, default: false },
+    // softDeletable 의 구버전 호환 이름
+    softDeleting: { type: Boolean, default: true },
   },
   data() {
     return {
       gridView: null,
-      dataProvider: null,
-      gridProps: {
-        display: {
-          fitStyle: 'evenFill',
-          syncGridHeight: 'always',
-          rowHeight: 40,
-          headerHeight: 40,
-          rowHoverType: 'row'
-        }
-      }
+      dataProvider: null
     }
   },
   created() {
@@ -129,6 +162,9 @@ export default {
       this.gridView = markRaw(gv)
       this.dataProvider = markRaw((realGridComp && realGridComp.dataProvider) || (gv.getDataSource && gv.getDataSource()))
 
+      // 🏆 하이브리드 패턴: 낱개 Prop 기본값 + options/gridOptions 객체 오버라이드 병합
+      const customOpts = { ...(this.options || {}), ...(this.gridOptions || {}) }
+
       // 1:1 완벽 동등한 옵션 바인딩
       if (this.dataProvider) {
         this.dataProvider.softDeleting = this.resolvedSoftDeletable
@@ -139,32 +175,37 @@ export default {
         editable: this.editable,
         insertable: this.editable,
         appendable: this.editable,
-        commitWhenLeave: this.commitWhenLeave
+        commitWhenLeave: this.autoCommittable,
+        ...(customOpts.editOptions || {})
       })
 
-      if (this.fixedColCount > 0 || this.fixedRowCount > 0) {
+      if (this.fixedColCount > 0 || this.fixedRowCount > 0 || customOpts.fixedOptions) {
         this.gridView.setFixedOptions({
           colCount: this.fixedColCount,
           rowCount: this.fixedRowCount,
-          resizable: true
+          resizable: true,
+          ...(customOpts.fixedOptions || {})
         })
       }
 
-      this.applyControlBars()
-      this.gridView.setFooter({ visible: this.resolvedShowFooter })
+      const fitStyleVal = customOpts.fitStyle || this.fitStyle
+
+      this.applyControlBars(customOpts)
+      this.gridView.setFooter({ visible: this.resolvedShowFooter, ...(customOpts.footer || {}) })
 
       if (this.resolvedGroupable) {
-        this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: this.fitStyle })
-        this.gridView.setGroupPanel({ visible: true })
-        this.gridView.setGroupingOptions({ enabled: true })
-        this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
+        this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: fitStyleVal, ...(customOpts.displayOptions || {}) })
+        this.gridView.setGroupPanel({ visible: true, ...(customOpts.groupPanel || {}) })
+        this.gridView.setGroupingOptions({ enabled: true, ...(customOpts.groupingOptions || {}) })
+        this.gridView.setSortingOptions({ enabled: this.resolvedSortable, ...(customOpts.sortingOptions || {}) })
         this.gridView.setRowGroup({
           summaryMode: this.groupSummaryMode,
           mergeMode: this.mergeable,
-          hideGroupedColumn: this.hideGroupedColumn
+          hideGroupedColumn: this.columnHideable,
+          ...(customOpts.rowGroup || {})
         })
       } else {
-        this.gridView.setDisplayOptions({ fitStyle: this.fitStyle, rowHoverType: 'row' })
+        this.gridView.setDisplayOptions({ fitStyle: fitStyleVal, rowHoverType: 'row', ...(customOpts.displayOptions || {}) })
         this.applySortingOptions()
       }
 
@@ -180,13 +221,14 @@ export default {
       })
     },
 
-    applyControlBars() {
+    applyControlBars(customOpts = {}) {
       if (!this.gridView) return
 
       try {
         this.gridView.setIndicator({
           visible: this.resolvedIndicatable,
-          draggableSelectedRows: false
+          draggableSelectedRows: false,
+          ...(customOpts.indicator || {})
         })
       } catch (e) { /* noop */ }
 
@@ -199,7 +241,8 @@ export default {
             update: { background: '#3b82f6' },   // 수정 → 파랑
             delete: { background: '#ef4444' },   // 삭제 → 빨강
             read:   { background: 'transparent' } // 기본 → 투명
-          }
+          },
+          ...(customOpts.stateBar || {})
         })
       } else {
         this.gridView.setStateBar({ visible: false })
@@ -209,9 +252,10 @@ export default {
         this.gridView.setCheckBar({
           visible: true,
           width: 36,
-          exclusive: this.checkBarExclusive,
+          exclusive: this.exclusiveSelectable,
           head: 'check',
-          headCheckCallback: null
+          headCheckCallback: null,
+          ...(customOpts.checkBar || {})
         })
       } else {
         this.gridView.setCheckBar({ visible: false })
