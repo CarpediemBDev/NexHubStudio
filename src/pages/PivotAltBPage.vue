@@ -113,6 +113,21 @@
       <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
+          :sortable="true"
+          :filterable="true"
+          :checkable="true"
+          :indicatable="true"
+          :stateBarVisible="true"
+          :pinnable="true"
+          :groupable="true"
+          :mergeable="true"
+          :groupSummaryMode="'aggregate'"
+          :hideGroupedColumn="false"
+          :checkBarExclusive="false"
+          :showFooter="true"
+          :softDeletable="true"
+          :commitWhenLeave="true"
+          :fitStyle="'evenFill'"
           :toast="gridToast"
           @init="onGridInit"
         />

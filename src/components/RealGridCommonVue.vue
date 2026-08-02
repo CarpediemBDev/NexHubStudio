@@ -34,7 +34,7 @@ export default {
     hideDeletedRows: { type: Boolean, default: true },
     editable: { type: Boolean, default: true },
 
-    // ---- ✨ 글로벌 표준 형용사형 Props ----
+    // ---- ✨ 글로벌 표준 형용사형 Props (글로벌 UI 그리드 스탠다드) ----
     sortable: { type: Boolean, default: true },
     filterable: { type: Boolean, default: true },
     checkable: { type: Boolean, default: true },
@@ -42,6 +42,7 @@ export default {
     stateBarVisible: { type: Boolean, default: true },
     pinnable: { type: Boolean, default: true },
     groupable: { type: Boolean, default: undefined },
+    mergeable: { type: Boolean, default: true },          // ✨ 행 그룹핑 셀 상하 병합 (-able 형용사형)
     showFooter: { type: Boolean, default: undefined },
     softDeletable: { type: Boolean, default: undefined },
 
@@ -159,7 +160,7 @@ export default {
         this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
         this.gridView.setRowGroup({
           summaryMode: this.groupSummaryMode,
-          mergeMode: this.groupMergeable,
+          mergeMode: this.mergeable,
           hideGroupedColumn: this.hideGroupedColumn
         })
       } else {

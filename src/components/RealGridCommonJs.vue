@@ -52,6 +52,7 @@ export default {
     stateBarVisible: { type: Boolean, default: undefined }, // 행상태 바 (fallback: useStateBar)
     pinnable: { type: Boolean, default: undefined },     // 우클릭 고정 메뉴 (fallback: useFixContextMenu)
     groupable: { type: Boolean, default: undefined },    // 행 그룹핑 패널 (fallback: useGroupPanel)
+    mergeable: { type: Boolean, default: true },         // ✨ 행 그룹핑 셀 상하 병합 (-able 형용사형)
     showFooter: { type: Boolean, default: undefined },   // 푸터 표시 (fallback: useFooter)
     softDeletable: { type: Boolean, default: undefined },// 소프트 삭제 (fallback: softDeleting)
 
@@ -658,7 +659,7 @@ export default {
         this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
         this.gridView.setRowGroup({
           summaryMode: this.groupSummaryMode,
-          mergeMode: this.groupMergeable,
+          mergeMode: this.mergeable,
           hideGroupedColumn: this.hideGroupedColumn
         })
       } else {
