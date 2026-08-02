@@ -1,5 +1,7 @@
 // 목업 유저 생성기 (숫자 PK 제거, userId는 영문 given.surname[+번호])
-// 결과: { userId, name(한글), dept, role }
+// 결과: { userId, name(한글), dept, role, region(근무지), salary(연봉·만원), joinYear(입사연도) }
+//  - region/salary/joinYear 는 피벗 집계용 차원·측정값. 기존 소비처(그리드 등)는
+//    추가 키를 무시하므로 하위호환된다.
 export function generateMockUsers(count = 100, { seed = 1 } = {}) {
   let s = seed >>> 0 // LCG PRNG
   const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32
@@ -87,6 +89,8 @@ export function generateMockUsers(count = 100, { seed = 1 } = {}) {
     'PM',
   ]
 
+  const regions = ['서울', '판교', '부산', '대전', '광주']
+
   // userId 중복 방지 (base -> 카운트)
   const taken = new Map()
 
@@ -110,11 +114,19 @@ export function generateMockUsers(count = 100, { seed = 1 } = {}) {
       taken.set(base, 1)
     }
 
+    const role = roles[Math.floor(rnd() * roles.length)]
+    // 연봉(만원): 3,200 ~ 10,000 범위, 10만원 단위. PM/Security 등 일부 직군에 소폭 가산.
+    const rolePremium = role === 'PM' ? 1200 : role === 'Security' || role === 'Data' ? 700 : 0
+    const salary = Math.round((3200 + rolePremium + rnd() * 6000) / 10) * 10
+
     list.push({
       userId, // ✔ 영문 고유키
       name, // 한글 성명
       dept: depts[Math.floor(rnd() * depts.length)],
-      role: roles[Math.floor(rnd() * roles.length)],
+      role,
+      region: regions[Math.floor(rnd() * regions.length)], // 근무지
+      salary, // 연봉(만원)
+      joinYear: 2015 + Math.floor(rnd() * 11), // 입사연도 2015~2025
     })
   }
   return list

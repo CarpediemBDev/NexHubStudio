@@ -135,6 +135,7 @@
           :useFooter="true"
           :softDeleting="true"
           :hideDeletedRows="false"
+          :toast="gridToast"
           @init="onGridInit"
         />
       </div>
@@ -190,19 +191,59 @@ export default {
         { fieldName: 'dept', dataType: 'text' },
         { fieldName: 'role', dataType: 'text' },
         { fieldName: 'region', dataType: 'text' },
+        { fieldName: 'status', dataType: 'text' },
+        { fieldName: 'evalDate', dataType: 'text' },
+        { fieldName: 'activeYn', dataType: 'text' },
         { fieldName: 'salary', dataType: 'number' },
         { fieldName: 'sales', dataType: 'number' },
         { fieldName: 'bonus', dataType: 'number' }
       ],
       gridColumns: [
-        { name: 'region', fieldName: 'region', width: '100', header: { text: '지역' }, styles: { textAlignment: 'center' } },
-        { name: 'dept', fieldName: 'dept', width: '130', header: { text: '부서명' }, styles: { textAlignment: 'near' } },
-        { name: 'role', fieldName: 'role', width: '130', header: { text: '직급' }, styles: { textAlignment: 'near' } },
-        { name: 'name', fieldName: 'name', width: '120', header: { text: '이름' }, styles: { textAlignment: 'center' } },
+        { name: 'region', fieldName: 'region', width: '90', header: { text: '지역' }, styles: { textAlignment: 'center' } },
+        { name: 'dept', fieldName: 'dept', width: '110', header: { text: '부서명' }, styles: { textAlignment: 'near' } },
+        { name: 'role', fieldName: 'role', width: '110', header: { text: '직급' }, styles: { textAlignment: 'near' } },
+        { name: 'name', fieldName: 'name', width: '95', header: { text: '이름' }, styles: { textAlignment: 'center' } },
+        {
+          name: 'status',
+          fieldName: 'status',
+          width: '100',
+          header: { text: '상태 (셀렉트)' },
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'dropdown',
+            dropDownCount: 3,
+            domainOnly: true,
+            labels: ['재직', '휴직', '퇴사'],
+            values: ['재직', '휴직', '퇴사']
+          }
+        },
+        {
+          name: 'evalDate',
+          fieldName: 'evalDate',
+          width: '105',
+          header: { text: '평가일 (달력)' },
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'date',
+            datetimeFormat: 'yyyy-MM-dd'
+          }
+        },
+        {
+          name: 'activeYn',
+          fieldName: 'activeYn',
+          width: '85',
+          header: { text: '활성 (체크)' },
+          styles: { textAlignment: 'center' },
+          renderer: {
+            type: 'check',
+            trueValues: 'Y',
+            falseValues: 'N'
+          }
+        },
         {
           name: 'salary',
           fieldName: 'salary',
-          width: '130',
+          width: '110',
           header: { text: '기본급 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
@@ -212,7 +253,7 @@ export default {
         {
           name: 'sales',
           fieldName: 'sales',
-          width: '140',
+          width: '120',
           header: { text: '영업실적 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
@@ -222,7 +263,7 @@ export default {
         {
           name: 'bonus',
           fieldName: 'bonus',
-          width: '120',
+          width: '110',
           header: { text: '성과급 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
@@ -231,19 +272,19 @@ export default {
         }
       ],
       mockData: [
-        { userId: 'u001', name: '김철수', dept: '개발 1팀', role: '수석연구원', region: '서울', salary: 7200, sales: 12000, bonus: 500 },
-        { userId: 'u002', name: '이영희', dept: '개발 1팀', role: '책임연구원', region: '서울', salary: 6100, sales: 9800, bonus: 400 },
-        { userId: 'u003', name: '박민수', dept: '개발 1팀', role: '선임연구원', region: '서울', salary: 4800, sales: 7500, bonus: 300 },
-        { userId: 'u004', name: '정수진', dept: '개발 2팀', role: '수석연구원', region: '판교', salary: 7500, sales: 14500, bonus: 600 },
-        { userId: 'u005', name: '홍길동', dept: '개발 2팀', role: '책임연구원', region: '판교', salary: 6300, sales: 11000, bonus: 450 },
-        { userId: 'u006', name: '강지훈', dept: '개발 2팀', role: '선임연구원', region: '판교', salary: 4600, sales: 8200, bonus: 320 },
-        { userId: 'u007', name: '조유진', dept: '영업 1팀', role: '부장', region: '서울', salary: 8000, sales: 32000, bonus: 1200 },
-        { userId: 'u008', name: '윤상호', dept: '영업 1팀', role: '차장', region: '서울', salary: 6800, sales: 24000, bonus: 900 },
-        { userId: 'u009', name: '한지민', dept: '영업 1팀', role: '과장', region: '서울', salary: 5500, sales: 18000, bonus: 700 },
-        { userId: 'u100', name: '임재현', dept: '영업 2팀', role: '부장', region: '부산', salary: 8200, sales: 35000, bonus: 1500 },
-        { userId: 'u101', name: '서동현', dept: '영업 2팀', role: '차장', region: '부산', salary: 6900, sales: 26000, bonus: 950 },
-        { userId: 'u102', name: '송혜교', dept: '경영지원', role: '부장', region: '서울', salary: 7800, sales: 0, bonus: 800 },
-        { userId: 'u103', name: '현빈', dept: '경영지원', role: '과장', region: '서울', salary: 5600, sales: 0, bonus: 500 }
+        { userId: 'u001', name: '김철수', dept: '개발 1팀', role: '수석연구원', region: '서울', status: '재직', evalDate: '2025-01-10', activeYn: 'Y', salary: 7200, sales: 12000, bonus: 500 },
+        { userId: 'u002', name: '이영희', dept: '개발 1팀', role: '책임연구원', region: '서울', status: '재직', evalDate: '2025-01-12', activeYn: 'Y', salary: 6100, sales: 9800, bonus: 400 },
+        { userId: 'u003', name: '박민수', dept: '개발 1팀', role: '선임연구원', region: '서울', status: '휴직', evalDate: '2025-01-15', activeYn: 'N', salary: 4800, sales: 7500, bonus: 300 },
+        { userId: 'u004', name: '정수진', dept: '개발 2팀', role: '수석연구원', region: '판교', status: '재직', evalDate: '2025-02-01', activeYn: 'Y', salary: 7500, sales: 14500, bonus: 600 },
+        { userId: 'u005', name: '홍길동', dept: '개발 2팀', role: '책임연구원', region: '판교', status: '재직', evalDate: '2025-02-05', activeYn: 'Y', salary: 6300, sales: 11000, bonus: 450 },
+        { userId: 'u006', name: '강지훈', dept: '개발 2팀', role: '선임연구원', region: '판교', status: '재직', evalDate: '2025-02-10', activeYn: 'Y', salary: 4600, sales: 8200, bonus: 320 },
+        { userId: 'u007', name: '조유진', dept: '영업 1팀', role: '부장', region: '서울', status: '재직', evalDate: '2025-03-01', activeYn: 'Y', salary: 8000, sales: 32000, bonus: 1200 },
+        { userId: 'u008', name: '윤상호', dept: '영업 1팀', role: '차장', region: '서울', status: '퇴사', evalDate: '2025-03-05', activeYn: 'N', salary: 6800, sales: 24000, bonus: 900 },
+        { userId: 'u009', name: '한지민', dept: '영업 1팀', role: '과장', region: '서울', status: '재직', evalDate: '2025-03-10', activeYn: 'Y', salary: 5500, sales: 18000, bonus: 700 },
+        { userId: 'u100', name: '임재현', dept: '영업 2팀', role: '부장', region: '부산', status: '재직', evalDate: '2025-04-01', activeYn: 'Y', salary: 8200, sales: 35000, bonus: 1500 },
+        { userId: 'u101', name: '서동현', dept: '영업 2팀', role: '차장', region: '부산', status: '재직', evalDate: '2025-04-05', activeYn: 'Y', salary: 6900, sales: 26000, bonus: 950 },
+        { userId: 'u102', name: '송혜교', dept: '경영지원', role: '부장', region: '서울', status: '재직', evalDate: '2025-05-01', activeYn: 'Y', salary: 7800, sales: 0, bonus: 800 },
+        { userId: 'u103', name: '현빈', dept: '경영지원', role: '과장', region: '서울', status: '재직', evalDate: '2025-05-10', activeYn: 'Y', salary: 5600, sales: 0, bonus: 500 }
       ]
     }
   },
@@ -259,10 +300,41 @@ export default {
       return '빠른 프리셋'
     }
   },
-  mounted() {
+  async mounted() {
     this.loadSavedViews()
+    await this.loadData()
   },
   methods: {
+    async loadData() {
+      try {
+        const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('db.json fetch 실패')
+        const data = await res.json()
+        const rows = Array.isArray(data) ? data : (data.users || [])
+        if (rows.length) {
+          const statuses = ['재직', '재직', '재직', '휴직', '퇴사']
+          this.mockData = rows.map((r, i) => ({
+            ...r,
+            status: r.status || statuses[i % statuses.length],
+            evalDate: r.evalDate || `2025-0${(i % 5) + 1}-15`,
+            activeYn: r.activeYn || (i % 7 === 0 ? 'N' : 'Y'),
+            sales: r.sales ?? Math.floor((r.salary || 6000) * 1.5 + (i * 37) % 5000),
+            bonus: r.bonus ?? Math.floor((r.salary || 6000) * 0.1 + (i * 13) % 800)
+          }))
+          if (this.$refs.realgridComp && this.$refs.realgridComp.setRows) {
+            this.$refs.realgridComp.setRows(this.mockData)
+          }
+        }
+      } catch (e) {
+        console.warn('[PivotAltA] db.json 로드 실패 → 폴백 데이터 사용:', e)
+      }
+    },
+
+    gridToast(message, opts = {}) {
+      showToast(message, opts)
+    },
+
     onGridInit({ gridView, dataProvider }) {
       this.gridView = gridView
       this.dataProvider = dataProvider
@@ -335,23 +407,15 @@ export default {
     },
 
     expandAll() {
-      if (!this.gridView) return
-      // 2회 멀티패스 순회: 완전히 싹 접힌 상태에서도 1차/2차 모든 그룹을 100% 쫙 펼칩니다
-      for (let pass = 0; pass < 2; pass++) {
-        const count = this.gridView.getItemCount()
-        for (let i = 0; i < count; i++) {
-          try { this.gridView.expandGroup(i, true, true) } catch (e) {}
-        }
-      }
+      // 그룹 멀티패스 펼치기는 공통 mixin(expandAllGroups)에서 제공
+      if (!this.$refs.realgridComp) return
+      this.$refs.realgridComp.expandAllGroups()
       showToast('모든 부서 그룹 행이 쫙 펼쳐졌습니다.', { type: 'info' })
     },
 
     collapseAll() {
-      if (!this.gridView) return
-      const count = this.gridView.getItemCount()
-      for (let i = count - 1; i >= 0; i--) {
-        try { this.gridView.collapseGroup(i, true) } catch (e) {}
-      }
+      if (!this.$refs.realgridComp) return
+      this.$refs.realgridComp.collapseAllGroups()
       showToast('모든 그룹 행이 싹 접혔습니다 (소계 요약 보기).', { type: 'info' })
     },
 
@@ -454,8 +518,8 @@ export default {
     },
 
     saveData() {
-      if (!this.gridView || !this.dataProvider) return
-      this.gridView.commit()
+      if (!this.$refs.realgridComp) return
+      this.$refs.realgridComp.commit() // 공통 mixin
 
       const changes = this.$refs.realgridComp ? this.$refs.realgridComp.getChanges() : { created: [], updated: [], deleted: [] }
       const totalChanges = changes.created.length + changes.updated.length + changes.deleted.length

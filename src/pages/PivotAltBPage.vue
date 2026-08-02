@@ -113,6 +113,7 @@
       <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
+          :toast="gridToast"
           @init="onGridInit"
         />
       </div>
@@ -321,7 +322,40 @@ export default {
       ]
     }
   },
+  async mounted() {
+    await this.loadData()
+  },
   methods: {
+    async loadData() {
+      try {
+        const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('db.json fetch 실패')
+        const data = await res.json()
+        const rows = Array.isArray(data) ? data : (data.users || [])
+        if (rows.length) {
+          const quarters = ['1분기', '2분기', '3분기', '4분기']
+          const years = ['2024년', '2025년']
+          this.rawSalesData = rows.map((r, i) => ({
+            ...r,
+            year: years[i % 2],
+            quarter: quarters[i % 4],
+            sales: r.sales ?? Math.floor((r.salary || 6000) * 1.2 + (i * 17) % 3000),
+            bonus: r.bonus ?? Math.floor((r.salary || 6000) * 0.1 + (i * 7) % 500)
+          }))
+          if (this.gridView && this.dataProvider) {
+            this.applyPivot()
+          }
+        }
+      } catch (e) {
+        console.warn('[PivotAltB] db.json 로드 실패 → 폴백 데이터 사용:', e)
+      }
+    },
+
+    gridToast(message, opts = {}) {
+      showToast(message, opts)
+    },
+
     openPivotModal() {
       this.tempPivotOptions = { ...this.pivotOptions }
       this.isModalOpen = true
@@ -418,8 +452,8 @@ export default {
     },
 
     saveData() {
-      if (!this.gridView || !this.dataProvider) return
-      this.gridView.commit()
+      if (!this.$refs.realgridComp) return
+      this.$refs.realgridComp.commit() // 공통 mixin
       showToast('피벗 매트릭스 설정이 저장되었습니다.', { type: 'success' })
     }
   }

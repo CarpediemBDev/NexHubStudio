@@ -18,8 +18,11 @@ import WorkRequestFormPage from "../pages/WorkRequestFormPage.vue";
 import PivotAltAPage from "../pages/PivotAltAPage.vue";
 import PivotAltBPage from "../pages/PivotAltBPage.vue";
 import RealPivotPage from "../pages/RealPivotPage.vue";
+import RealPivotSdkPage from "../pages/RealPivotSdkPage.vue";
 import RealGridPage from "../pages/RealGridPage.vue";
 import RealGridVuePage from "../pages/RealGridVuePage.vue";
+import RealGridTreePage from "../pages/RealGridTreePage.vue";
+import RealGridShowcasePage from "../pages/RealGridShowcasePage.vue";
 
 const routes = [
   {
@@ -74,9 +77,12 @@ const routes = [
         children: [
           { path: "vue", name: "RealGridVueSample", component: RealGridVuePage, meta: { title: "RealGrid (Vue3)", icon: "bi-grid-3x3-gap", keepAlive: true } },
           { path: "js", name: "RealGridJsSample", component: RealGridPage, meta: { title: "RealGrid (JS)", icon: "bi-grid-3x3", keepAlive: true } },
+          { path: "tree", name: "RealGridTreeSample", component: RealGridTreePage, meta: { title: "RealGrid 트리", icon: "bi-diagram-3", keepAlive: true } },
+          { path: "showcase", name: "RealGridShowcase", component: RealGridShowcasePage, meta: { title: "공통 컴포넌트 쇼케이스", icon: "bi-easel", keepAlive: true } },
           { path: "pivot-a", name: "PivotA", component: PivotAltAPage, meta: { title: "Pivot 분석 A", icon: "bi-pie-chart", keepAlive: true } },
           { path: "pivot-b", name: "PivotB", component: PivotAltBPage, meta: { title: "Pivot 분석 B", icon: "bi-pie-chart-fill", keepAlive: true } },
-          { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "Real Pivot Engine", icon: "bi-bar-chart-steps", keepAlive: true } }
+          { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "AI 스마트 피벗 (자체개발)", icon: "bi-bar-chart-steps", keepAlive: true } },
+          { path: "pivot-sdk", name: "RealPivotSdk", component: RealPivotSdkPage, meta: { title: "RealPivot 공식 SDK 가이드", icon: "bi-box-seam", keepAlive: true } }
         ]
       },
 
@@ -115,6 +121,8 @@ const routes = [
       { path: "user-assignment-shared", component: UserAssignmentShared, meta: { hidden: true } },
       { path: "real-grid", component: RealGridPage, meta: { hidden: true } },
       { path: "real-grid-vue", component: RealGridVuePage, meta: { hidden: true } },
+      { path: "real-grid-tree", component: RealGridTreePage, meta: { hidden: true } },
+      { path: "real-grid-showcase", component: RealGridShowcasePage, meta: { hidden: true } },
       { path: "pivot-alt-a", component: PivotAltAPage, meta: { hidden: true } },
       { path: "pivot-alt-b", component: PivotAltBPage, meta: { hidden: true } },
       { path: "real-pivot", component: RealPivotPage, meta: { hidden: true } },
