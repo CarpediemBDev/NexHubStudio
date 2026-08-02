@@ -64,6 +64,24 @@ export default {
     currentTheme() {
       return this.$tabStore?.sidebarTheme || 'light'
     },
+    resolvedSortable() {
+      return this.sortable
+    },
+    resolvedFilterable() {
+      return this.filterable
+    },
+    resolvedCheckable() {
+      return this.checkable
+    },
+    resolvedIndicatable() {
+      return this.indicatable
+    },
+    resolvedStateBarVisible() {
+      return this.stateBarVisible
+    },
+    resolvedPinnable() {
+      return this.pinnable
+    },
     resolvedGroupable() {
       return this.groupable !== undefined ? this.groupable : this.useGroupPanel
     },
@@ -86,7 +104,7 @@ export default {
       this.dataProvider = gridView.getDataSource()
 
       // 1:1 완벽 동등한 옵션 바인딩
-      this.dataProvider.softDeleting = this.softDeleting
+      this.dataProvider.softDeleting = this.resolvedSoftDeletable
       this.gridView.hideDeletedRows = this.hideDeletedRows
 
       this.gridView.setEditOptions({
@@ -96,37 +114,109 @@ export default {
         commitWhenLeave: true
       })
 
-      // StateBar: 행 상태 컬러 뱃지 (추가=초록, 수정=파랑, 삭제=빨강)
-      this.gridView.setStateBar({
-        visible: true,
-        width: 6,
-        stateStyles: {
-          insert: { background: '#22c55e' },   // 추가 → 초록
-          update: { background: '#3b82f6' },   // 수정 → 파랑
-          delete: { background: '#ef4444' },   // 삭제 → 빨강
-          read:   { background: 'transparent' } // 기본 → 투명
-        }
-      })
-      // CheckBar: 전체선택 헤더 중앙 정렬
-      this.gridView.setCheckBar({
-        visible: true,
-        width: 36,
-        head: 'check',
-        headCheckCallback: null
-      })
-      this.gridView.setFooter({ visible: this.useFooter })
+      this.applyControlBars()
+      this.gridView.setFooter({ visible: this.resolvedShowFooter })
 
-      if (this.useGroupPanel) {
+      if (this.resolvedGroupable) {
         this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: 'evenFill' })
         this.gridView.setGroupPanel({ visible: true })
         this.gridView.setGroupingOptions({ enabled: true })
-        this.gridView.setSortingOptions({ enabled: true })
+        this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
         this.gridView.setRowGroup({ summaryMode: 'aggregate', mergeMode: true })
+      } else {
+        this.gridView.setDisplayOptions({ fitStyle: 'evenFill', rowHoverType: 'row' })
+        this.applySortingOptions()
       }
+
+      this.applyFixContextMenu()
+      this.applyColumnFilters()
 
       this.$emit('init', { gridView, dataProvider: this.dataProvider })
       // 초기 테마 적용
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
+    },
+
+    applyControlBars() {
+      if (!this.gridView) return
+
+      try {
+        this.gridView.setIndicator({
+          visible: this.resolvedIndicatable,
+          draggableSelectedRows: false
+        })
+      } catch (e) { /* noop */ }
+
+      if (this.resolvedStateBarVisible) {
+        this.gridView.setStateBar({
+          visible: true,
+          width: 6,
+          stateStyles: {
+            insert: { background: '#22c55e' },   // 추가 → 초록
+            update: { background: '#3b82f6' },   // 수정 → 파랑
+            delete: { background: '#ef4444' },   // 삭제 → 빨강
+            read:   { background: 'transparent' } // 기본 → 투명
+          }
+        })
+      } else {
+        this.gridView.setStateBar({ visible: false })
+      }
+
+      if (this.resolvedCheckable) {
+        this.gridView.setCheckBar({
+          visible: true,
+          width: 36,
+          head: 'check',
+          headCheckCallback: null
+        })
+      } else {
+        this.gridView.setCheckBar({ visible: false })
+      }
+    },
+
+    applyFixContextMenu() {
+      if (!this.gridView || !this.resolvedPinnable) return
+      if (typeof this.gridView.setContextMenu !== 'function') return
+      try {
+        this.gridView.setContextMenu([
+          { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
+          { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
+          { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
+          { label: '-' },
+          { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
+        ])
+        this.gridView.onContextMenuPopup = () => true
+        this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
+          this.handleDynamicFixing(item, clickData)
+        }
+      } catch (e) {
+        console.warn('[RealGrid] applyFixContextMenu error:', e)
+      }
+    },
+
+    applySortingOptions() {
+      if (!this.gridView) return
+      try {
+        if (typeof this.gridView.setSortingOptions === 'function') {
+          this.gridView.setSortingOptions({ enabled: this.resolvedSortable })
+        }
+      } catch (e) {
+        console.warn('[RealGrid] applySortingOptions error:', e)
+      }
+    },
+
+    applyColumnFilters() {
+      if (!this.gridView) return
+      try {
+        this.gridView.setFilteringOptions({ enabled: this.resolvedFilterable })
+        if (this.resolvedFilterable) {
+          const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+          cols.forEach(c => {
+            try { this.gridView.setColumnProperty(c.name, 'autoFilter', true) } catch (e) { /* noop */ }
+          })
+        }
+      } catch (e) {
+        console.warn('[RealGrid] applyColumnFilters error:', e)
+      }
     },
 
     // =========================================================
