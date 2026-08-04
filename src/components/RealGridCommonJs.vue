@@ -682,7 +682,7 @@ export default {
       const fitStyleVal = customOpts.fitStyle || this.fitStyle
 
       this.applyControlBars(customOpts)
-      this.gridView.setFooter({ visible: this.resolvedShowFooter, ...(customOpts.footer || {}) })
+      this.gridView.setFooter({ visible: this.resolvedUseFooter, ...(customOpts.footer || {}) })
 
       if (this.resolvedGroupPanelVisible) {
         this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })

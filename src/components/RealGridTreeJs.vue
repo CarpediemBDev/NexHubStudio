@@ -79,6 +79,7 @@ export default {
     pinnable: { type: Boolean, default: undefined },
     draggable: { type: Boolean, default: undefined },
     autoExpandAll: { type: Boolean, default: undefined },
+    autoCommittable: { type: Boolean, default: undefined },
     showTreeLines: { type: Boolean, default: undefined },
     softDeletable: { type: Boolean, default: undefined },
     softDeleting: { type: Boolean, default: true },
@@ -116,6 +117,7 @@ export default {
     },
     resolvedCommitWhenLeave() {
       if (this.commitWhenLeave !== undefined) return this.commitWhenLeave
+      if (this.autoCommittable !== undefined) return this.autoCommittable
       return true
     },
     resolvedInsertable() {
