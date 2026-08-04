@@ -889,6 +889,11 @@ export default {
           movable: enable,
           movableWhenFocusedOnly: false
         })
+        // 행을 미리 선택(클릭)하지 않아도, 아무 행이나 누른 그 제스처 그대로 끌어서
+        // 위치를 옮길 수 있게 한다. (누름=선택 후 즉시 drag&drop 모드로 전환)
+        if (typeof this.gridView.setDisplayOptions === 'function') {
+          this.gridView.setDisplayOptions({ selectAndImmediateDrag: enable })
+        }
         if (typeof this.gridView.setDataDropOptions === 'function') {
           this.gridView.setDataDropOptions({ dropMode: enable ? 'move' : 'none' })
         }
