@@ -8,16 +8,17 @@
 import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
+import { searchGrid as opsSearchGrid } from '@/utils/realgridOps'
 
 /**
  * RealGrid 트리 그리드 (계층형) — 자기완결 STANDALONE 버전
  * =========================================================
  * TreeView + LocalTreeDataProvider 기반 계층형 그리드.
  *
- * ⭐ 이식성(Portability): 이 컴포넌트는 프로젝트 전용 모듈에 의존하지 않는다.
- *    - 공통 로직(테마/제어열/엑셀/검색/변경추적/고정)을 mixin 대신 이 파일에 인라인.
- *      → 다른 프로젝트의 realgridCommon(mixin)과 이름 충돌 없음. 파일 1개만 복사하면 동작.
- *    - 외부 import 는 `realgrid`, `vue` 뿐. (@/stores, @/utils, @/mixins 미참조)
+ * ⭐ 대부분의 공통 로직(테마/제어열/엑셀/변경추적/고정)은 이 파일에 인라인.
+ *    - 단, 그리드 통합 검색(searchGrid)은 그리드 페이지들과 공유하는 프로젝트 내부 전용
+ *      로직이라 `@/utils/realgridOps` 에 위임한다(이 파일은 단독 이식 대상 아님).
+ *    - 그 외 외부 import 는 `realgrid`, `vue` 뿐.
  *    - 테마: `theme` prop 또는 <html data-theme> 속성에서 자동 감지(없으면 'light').
  *    - 토스트: `toast` 함수 prop 주입(없으면 'notify' 이벤트 emit + console 폴백).
  *
@@ -411,82 +412,9 @@ export default {
       }
     },
 
-    // =========================================================
-    // 트리 검색 (전수 검사 + 트리 자동 펼침)
-    // =========================================================
+    // 트리 검색 → 그리드 공용 유틸에 위임 (전 셀 검색 + 트리 자동 펼침)
     searchGrid(query, direction = 'next') {
-      if (!this.gridView || !this.dataProvider || !query || !query.trim()) {
-        return { count: 0, current: 0 }
-      }
-
-      try {
-        const keyword = query.trim().toLowerCase()
-        const rowCount = this.dataProvider.getRowCount()
-        const matches = []
-
-        for (let r = 0; r < rowCount; r++) {
-          const rowJson = this.dataProvider.getJsonRow(r) || {}
-
-          for (const [colKey, val] of Object.entries(rowJson)) {
-            if (val !== undefined && val !== null && String(val).toLowerCase().includes(keyword)) {
-              let itemIdx = typeof this.gridView.getItemIndexOfRow === 'function'
-                ? this.gridView.getItemIndexOfRow(r)
-                : r
-
-              // 트리가 접혀서 숨겨져 있으면 자동으로 펼쳐서 노출
-              if (itemIdx < 0) {
-                if (typeof this.gridView.expandAll === 'function') {
-                  try { this.gridView.expandAll() } catch (e) { /* noop */ }
-                }
-                itemIdx = typeof this.gridView.getItemIndexOfRow === 'function'
-                  ? this.gridView.getItemIndexOfRow(r)
-                  : r
-              }
-
-              if (itemIdx >= 0) {
-                matches.push({ itemIndex: itemIdx, dataRow: r, column: colKey })
-              }
-            }
-          }
-        }
-
-        if (matches.length === 0) {
-          this._notify(`'${query}' 검색 결과가 없습니다.`, { type: 'warning' })
-          return { count: 0, current: 0 }
-        }
-
-        const currentCell = this.gridView.getCurrent()
-        const startIndex = currentCell && currentCell.itemIndex >= 0 ? currentCell.itemIndex : -1
-        const startColumn = currentCell && currentCell.column ? currentCell.column : ''
-
-        let targetIdx = 0
-        if (direction === 'next') {
-          const found = matches.findIndex(m =>
-            m.itemIndex > startIndex || (m.itemIndex === startIndex && m.column > startColumn)
-          )
-          targetIdx = found >= 0 ? found : 0
-        } else if (direction === 'prev') {
-          const reversed = [...matches].reverse()
-          const found = reversed.findIndex(m =>
-            m.itemIndex < startIndex || (m.itemIndex === startIndex && m.column < startColumn)
-          )
-          targetIdx = found >= 0 ? matches.length - 1 - found : matches.length - 1
-        }
-
-        const target = matches[targetIdx]
-        if (target) {
-          this.gridView.setCurrent({ itemIndex: target.itemIndex, column: target.column })
-          if (typeof this.gridView.showCell === 'function') {
-            try { this.gridView.showCell(target.itemIndex, target.column) } catch (e) { /* noop */ }
-          }
-          this.gridView.setFocus()
-        }
-
-        return { count: matches.length, current: targetIdx + 1 }
-      } catch (e) {
-        console.error('searchGrid error:', e)
-        return { count: 0, current: 0 }
-      }
+      return opsSearchGrid(this.gridView, this.dataProvider, query, direction, (m, o) => this._notify(m, o))
     },
 
     // =========================================================
