@@ -176,6 +176,7 @@ import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import { RGDataField, RGDataColumn } from 'realgrid-vue'
 import { showToast } from '@/utils/toastUtil.js'
+import { searchGrid } from '@/utils/realgridOps'
 
 export default {
   name: 'RealGridVuePage',
@@ -207,13 +208,7 @@ export default {
         resizable: true
       })
 
-      // RealGrid 우클릭 컨텍스트 메뉴 팝업 허용 및 클릭 이벤트 연결
-      gridView.onContextMenuPopup = () => true
-      gridView.onContextMenuItemClicked = (grid, item, clickData) => {
-        if (this.$refs.realgridComp) {
-          this.$refs.realgridComp.handleDynamicFixing(item, clickData)
-        }
-      }
+      // 우클릭 행/열 고정 메뉴는 RealGridCommonVue 컴포넌트가 내부에서 처리(refs 불필요)
     },
 
     async loadUsers() {
@@ -331,8 +326,8 @@ export default {
     },
 
     onGridSearch({ query, direction }) {
-      if (this.$refs.realgridComp) {
-        this.searchResult = this.$refs.realgridComp.searchGrid(query, direction)
+      if (this.gridView) {
+        this.searchResult = searchGrid(this.gridView, this.dataProvider, query, direction, showToast)
       }
     }
   }

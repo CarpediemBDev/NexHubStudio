@@ -267,6 +267,7 @@ import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { buildPivotMatrix } from '@/utils/pivotUtil.js'
 import { showToast } from '@/utils/toastUtil.js'
+import { searchGrid } from '@/utils/realgridOps'
 
 export default {
   name: 'PivotAltBPage',
@@ -382,20 +383,7 @@ export default {
         resizable: true
       })
 
-      // RealGrid 우클릭 컨텍스트 메뉴 팝업 허용 및 클릭 이벤트 연결
-      gridView.setContextMenu([
-        { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
-        { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
-        { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
-        { label: '-' },
-        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
-      ])
-      this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
-        if (this.$refs.realgridComp) {
-          this.$refs.realgridComp.handleDynamicFixing(item, clickData)
-        }
-      }
-
+      // 우클릭 행/열 고정 메뉴는 RealGridCommonJs 컴포넌트가 내부에서 처리(refs 불필요)
       this.applyPivot()
     },
 
@@ -447,9 +435,9 @@ export default {
       }
     },
 
-    onGridSearch({ query, direction, isTyping }) {
-      if (this.$refs.realgridComp) {
-        this.searchResult = this.$refs.realgridComp.searchGrid(query, direction, isTyping)
+    onGridSearch({ query, direction }) {
+      if (this.gridView) {
+        this.searchResult = searchGrid(this.gridView, this.dataProvider, query, direction, showToast)
       }
     },
 

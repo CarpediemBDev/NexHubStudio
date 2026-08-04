@@ -170,6 +170,7 @@ import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { showToast } from '@/utils/toastUtil.js'
+import { searchGrid } from '@/utils/realgridOps'
 
 export default {
   name: 'PivotAltAPage',
@@ -371,8 +372,8 @@ export default {
       ])
 
       this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
-        // 공통 컴포넌트 동적 행/열 고정 헬퍼 먼저 처리
-        if (this.$refs.realgridComp && this.$refs.realgridComp.handleDynamicFixing(item, clickData)) {
+        // 행/열 동적 고정 먼저 처리 (this.gridView 직접)
+        if (this.handleFix(item, clickData)) {
           return
         }
 
@@ -417,16 +418,65 @@ export default {
       showToast(`'${view.name}' 뷰가 적용되었습니다. (편집/추가/삭제 제한)`, { type: 'info' })
     },
 
+    // 우클릭 행/열 동적 고정 (커스텀 컨텍스트 메뉴라 this.gridView 로 직접 처리)
+    handleFix(item, clickData) {
+      const gv = this.gridView
+      if (!gv) return false
+      const fixed = gv.getFixedOptions ? (gv.getFixedOptions() || {}) : {}
+      const colCount = fixed.colCount || 0
+      const rowCount = fixed.rowCount || 0
+      const colIndexOf = (name) => {
+        try {
+          if (typeof gv.getColumnIndex === 'function') return gv.getColumnIndex(name)
+          const c = gv.columnByName && gv.columnByName(name)
+          if (c && typeof c.displayIndex === 'number') return c.displayIndex
+        } catch (e) { /* noop */ }
+        return -1
+      }
+      if (item.tag === 'fixColumn' && clickData.column) {
+        const i = colIndexOf(clickData.column)
+        if (i >= 0) {
+          gv.setFixedOptions({ colCount: i + 1, rowCount, resizable: true })
+          showToast(`'${clickData.column}' 컬럼까지 열 고정이 적용되었습니다.`, { type: 'success' })
+          return true
+        }
+      } else if (item.tag === 'fixRow' && clickData.itemIndex !== undefined && clickData.itemIndex >= 0) {
+        gv.setFixedOptions({ colCount, rowCount: clickData.itemIndex + 1, resizable: true })
+        showToast(`${clickData.itemIndex + 1}번째 행까지 행 고정이 적용되었습니다.`, { type: 'success' })
+        return true
+      } else if (item.tag === 'fixBoth' && clickData.column && clickData.itemIndex !== undefined && clickData.itemIndex >= 0) {
+        const i = colIndexOf(clickData.column)
+        if (i >= 0) {
+          gv.setFixedOptions({ colCount: i + 1, rowCount: clickData.itemIndex + 1, resizable: true })
+          showToast(`${clickData.itemIndex + 1}행 x '${clickData.column}'열 동시 고정이 적용되었습니다.`, { type: 'success' })
+          return true
+        }
+      } else if (item.tag === 'clearFixing') {
+        gv.setFixedOptions({ colCount: 0, rowCount: 0 })
+        showToast('행/열 고정이 해제되었습니다.', { type: 'info' })
+        return true
+      }
+      return false
+    },
+
     expandAll() {
-      // 그룹 멀티패스 펼치기는 공통 mixin(expandAllGroups)에서 제공
-      if (!this.$refs.realgridComp) return
-      this.$refs.realgridComp.expandAllGroups()
+      // 그룹 멀티패스 펼치기 (this.gridView 직접)
+      if (!this.gridView) return
+      for (let pass = 0; pass < 2; pass++) {
+        const cnt = this.gridView.getItemCount()
+        for (let i = 0; i < cnt; i++) {
+          try { this.gridView.expandGroup(i, true, true) } catch (e) { /* noop */ }
+        }
+      }
       showToast('모든 부서 그룹 행이 쫙 펼쳐졌습니다.', { type: 'info' })
     },
 
     collapseAll() {
-      if (!this.$refs.realgridComp) return
-      this.$refs.realgridComp.collapseAllGroups()
+      if (!this.gridView) return
+      const cnt = this.gridView.getItemCount()
+      for (let i = cnt - 1; i >= 0; i--) {
+        try { this.gridView.collapseGroup(i, true) } catch (e) { /* noop */ }
+      }
       showToast('모든 그룹 행이 싹 접혔습니다 (소계 요약 보기).', { type: 'info' })
     },
 
@@ -533,7 +583,14 @@ export default {
       if (!this.gridView || !this.dataProvider) return
       this.gridView.commit(true) // RealGrid2 표준 편집 커밋
 
-      const changes = this.$refs.realgridComp ? this.$refs.realgridComp.getChanges() : { created: [], updated: [], deleted: [] }
+      const createdIdx = this.dataProvider.getStateRows('created') || []
+      const updatedIdx = this.dataProvider.getStateRows('updated') || []
+      const deletedIdx = this.dataProvider.getStateRows('deleted') || []
+      const changes = {
+        created: createdIdx.map(i => this.dataProvider.getJsonRow(i)),
+        updated: updatedIdx.map(i => this.dataProvider.getJsonRow(i)),
+        deleted: deletedIdx.map(i => this.dataProvider.getJsonRow(i))
+      }
       const totalChanges = changes.created.length + changes.updated.length + changes.deleted.length
 
       if (totalChanges === 0) {
@@ -582,9 +639,9 @@ export default {
       }
     },
 
-    onGridSearch({ query, direction, isTyping }) {
-      if (this.$refs.realgridComp) {
-        this.searchResult = this.$refs.realgridComp.searchGrid(query, direction, isTyping)
+    onGridSearch({ query, direction }) {
+      if (this.gridView) {
+        this.searchResult = searchGrid(this.gridView, this.dataProvider, query, direction, showToast)
       }
     }
   }

@@ -91,6 +91,7 @@ import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import { showToast } from '@/utils/toastUtil.js'
+import { searchGrid } from '@/utils/realgridOps'
 
 export default {
   name: 'RealGridPage',
@@ -229,20 +230,7 @@ export default {
         resizable: true
       })
 
-      // 마우스 우클릭 동적 행/열 고정 컨텍스트 메뉴
-      gridView.setContextMenu([
-        { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
-        { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
-        { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
-        { label: '-' },
-        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
-      ])
-
-      gridView.onContextMenuItemClicked = (grid, item, clickData) => {
-        if (this.$refs.realgridComp) {
-          this.$refs.realgridComp.handleDynamicFixing(item, clickData)
-        }
-      }
+      // 우클릭 행/열 고정 메뉴는 RealGridCommonJs 컴포넌트가 내부에서 처리(refs 불필요)
     },
 
     async loadUsers() {
@@ -359,8 +347,8 @@ export default {
     },
 
     onGridSearch({ query, direction }) {
-      if (this.$refs.realgridComp) {
-        this.searchResult = this.$refs.realgridComp.searchGrid(query, direction)
+      if (this.gridView) {
+        this.searchResult = searchGrid(this.gridView, this.dataProvider, query, direction, showToast)
       }
     }
   }
