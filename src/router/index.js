@@ -124,6 +124,20 @@ const routes = [
       { path: "pivot-alt-a", component: PivotAltAPage, meta: { hidden: true } },
       { path: "pivot-alt-b", component: PivotAltBPage, meta: { hidden: true } },
       { path: "real-pivot", component: RealPivotPage, meta: { hidden: true } },
+      // 업무 & 게시판 / 공통코드 / 샘플 단독 경로 (NavBar·대시보드 flat 링크 매칭용)
+      { path: "posts", component: PostListPage, meta: { hidden: true } },
+      { path: "posts/write", component: PostWritePage, meta: { hidden: true } },
+      { path: "posts/:id/edit", component: PostWritePage, meta: { hidden: true } },
+      { path: "posts/:id", name: "PostDetail", component: PostDetailPage, meta: { hidden: true } },
+      { path: "files", component: FileListPage, meta: { hidden: true } },
+      { path: "equipment-monitor", component: EquipmentMonitorPage, meta: { hidden: true } },
+      { path: "request-workflow", component: RequestWorkflowPage, meta: { hidden: true } },
+      { path: "work-request-form", component: WorkRequestFormPage, meta: { hidden: true } },
+      { path: "equipment-support-request", component: () => import("../pages/EquipmentSupportRequestPage.vue"), meta: { hidden: true } },
+      { path: "common-code-groups", component: CommonCodeGroupListPage, meta: { hidden: true } },
+      { path: "common-code-groups/:groupId", name: "CommonCodeGroupDetail", component: CommonCodeGroupDetailPage, meta: { hidden: true } },
+      { path: "jqx-grid", component: JqxGridPage, meta: { hidden: true } },
+      { path: "user-assignment-shared-new", component: () => import("../pages/UserAssignmentSharedNew.vue"), meta: { hidden: true } },
       // 샘플
       {
         path: "sample/barcode-equipment",
