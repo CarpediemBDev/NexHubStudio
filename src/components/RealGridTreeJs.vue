@@ -556,7 +556,9 @@ export default {
 
       this.gridView.setDisplayOptions({
         fitStyle: 'evenFill',
-        rowHoverType: 'row'
+        rowHoverType: 'row',
+        // 셀 블록 단위 선택(엑셀식 셀 범위 자유 선택/복사 유지). 'rows' 로 바꾸면 행 전체 단위 선택.
+        selectionStyle: 'block'
       })
       try {
         this.gridView.setTreeOptions({ lineVisible: this.resolvedShowTreeLines })
