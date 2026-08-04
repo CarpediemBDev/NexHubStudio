@@ -17,6 +17,10 @@
             @search="onGridSearch"
             @clear="searchResult = { count: 0, current: 0 }"
           />
+          <SavedViewsBar
+            :grid-view-getter="() => gridView"
+            storage-key="nexhub_realgrid_vue_saved_views"
+          />
         </div>
         <div class="d-flex align-items-center gap-1.5 ms-auto">
           <button class="btn-b2b-action" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
@@ -48,26 +52,27 @@
       <div class="b2b-grid-wrapper">
         <RealGridCommonVue
           ref="realgridComp"
+          grid-id="realgrid-vue-page"
           :rows="users"
           :sortable="true"
           :filterable="true"
           :checkable="true"
-          :indicatable="true"
-          :stateBarVisible="true"
-          :stateBarWidth="20"
-          :checkBarWidth="36"
+          :show-row-number="true"
+          :state-bar-visible="true"
+          :state-bar-width="20"
+          :check-bar-width="36"
           :pinnable="true"
-          :groupable="false"
-          :mergeable="true"
-          :columnHideable="false"
-          :exclusiveSelectable="false"
-          :autoCommittable="true"
-          :showFooter="true"
-          :softDeletable="true"
-          :groupSummaryMode="'aggregate'"
-          :fitStyle="'evenFill'"
-          :fixedColCount="1"
-          :fixedRowCount="0"
+          :group-panel-visible="true"
+          :merge-mode="true"
+          :column-hideable="false"
+          :exclusive-selectable="false"
+          :commit-when-leave="true"
+          :use-footer="true"
+          :soft-deletable="true"
+          :summary-mode="'aggregate'"
+          :fit-style="'evenFill'"
+          :fixed-col-count="1"
+          :fixed-row-count="0"
           @init="onGridInit"
         >
           <!-- Defining Data Fields dynamically inside slot -->
@@ -174,6 +179,7 @@
 import RealGridCommonVue from '@/components/RealGridCommonVue.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
+import SavedViewsBar from '@/components/SavedViewsBar.vue'
 import { RGDataField, RGDataColumn } from 'realgrid-vue'
 import { showToast } from '@/utils/toastUtil.js'
 import { searchGrid } from '@/utils/realgridOps'
@@ -184,6 +190,7 @@ export default {
     RealGridCommonVue,
     ColumnPickerModal,
     QuickSearchBar,
+    SavedViewsBar,
     RGDataField,
     RGDataColumn
   },

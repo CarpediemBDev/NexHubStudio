@@ -51,6 +51,11 @@
             @clear="searchResult = { count: 0, current: 0 }"
           />
 
+          <SavedViewsBar
+            :grid-view-getter="() => gridView"
+            storage-key="nexhub_pivotb_saved_views"
+          />
+
           <!-- Open Pivot Field Dialog Button -->
           <button class="btn-b2b-action" title="피벗 필드 상세 구성 대화상자 모달" @click="openPivotModal">
             <i class="bi bi-sliders text-primary me-0.5"></i>
@@ -113,23 +118,24 @@
       <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
+          grid-id="pivot-alt-b"
           :sortable="true"
           :filterable="true"
           :checkable="true"
-          :indicatable="true"
-          :stateBarVisible="true"
-          :stateBarWidth="20"
-          :checkBarWidth="36"
+          :show-row-number="true"
+          :state-bar-visible="true"
+          :state-bar-width="20"
+          :check-bar-width="36"
           :pinnable="true"
-          :groupable="true"
-          :mergeable="true"
-          :columnHideable="false"
-          :exclusiveSelectable="false"
-          :autoCommittable="true"
-          :showFooter="true"
-          :softDeletable="true"
-          :groupSummaryMode="'aggregate'"
-          :fitStyle="'evenFill'"
+          :group-panel-visible="true"
+          :merge-mode="true"
+          :column-hideable="false"
+          :exclusive-selectable="false"
+          :commit-when-leave="true"
+          :use-footer="true"
+          :soft-deletable="true"
+          :summary-mode="'aggregate'"
+          :fit-style="'evenFill'"
           :toast="gridToast"
           @init="onGridInit"
         />
@@ -264,6 +270,7 @@
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
+import SavedViewsBar from '@/components/SavedViewsBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { buildPivotMatrix } from '@/utils/pivotUtil.js'
 import { showToast } from '@/utils/toastUtil.js'
@@ -275,7 +282,8 @@ export default {
     PageHeader,
     RealGridCommonJs,
     ColumnPickerModal,
-    QuickSearchBar
+    QuickSearchBar,
+    SavedViewsBar
   },
   data() {
     return {

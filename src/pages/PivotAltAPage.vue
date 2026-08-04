@@ -128,26 +128,27 @@
       <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
+          grid-id="pivot-alt-a"
           :fields="gridFields"
           :columns="gridColumns"
           :rows="mockData"
           :sortable="true"
           :filterable="true"
           :checkable="true"
-          :indicatable="true"
-          :stateBarVisible="true"
-          :stateBarWidth="20"
-          :checkBarWidth="36"
+          :show-row-number="true"
+          :state-bar-visible="true"
+          :state-bar-width="20"
+          :check-bar-width="36"
           :pinnable="true"
-          :groupable="true"
-          :mergeable="true"
-          :columnHideable="false"
-          :exclusiveSelectable="false"
-          :autoCommittable="true"
-          :showFooter="true"
-          :softDeletable="true"
-          :groupSummaryMode="'aggregate'"
-          :fitStyle="'evenFill'"
+          :group-panel-visible="true"
+          :merge-mode="true"
+          :column-hideable="false"
+          :exclusive-selectable="false"
+          :commit-when-leave="true"
+          :use-footer="true"
+          :soft-deletable="true"
+          :summary-mode="'aggregate'"
+          :fit-style="'evenFill'"
           :toast="gridToast"
           @init="onGridInit"
         />
@@ -170,7 +171,7 @@ import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { showToast } from '@/utils/toastUtil.js'
-import { searchGrid } from '@/utils/realgridOps'
+import { searchGrid, captureViewState, applyViewState } from '@/utils/realgridOps'
 
 export default {
   name: 'PivotAltAPage',
@@ -192,6 +193,7 @@ export default {
       isColumnPickerOpen: false,
       columnPickerCols: [],
       activeGroup: 'none',
+      activeHasGroup: false, // 실제 행 그룹핑 적용 여부(편집/추가/삭제 잠금 기준). activeGroup(하이라이트)과 분리.
       quickPresets: [
         { id: 'preset_dept', name: '부서별', fields: ['dept'], icon: 'bi-building' },
         { id: 'preset_dept_role', name: '부서 ➔ 직급별', fields: ['dept', 'role'], icon: 'bi-diagram-3' },
@@ -304,7 +306,7 @@ export default {
   },
   computed: {
     isGrouped() {
-      return this.activeGroup !== 'none'
+      return this.activeHasGroup
     },
     activePresetName() {
       const found = this.quickPresets.find(p => p.id === this.activeGroup)
@@ -405,6 +407,7 @@ export default {
     clearGroupBy() {
       if (!this.gridView) return
       this.activeGroup = 'none'
+      this.activeHasGroup = false
       this.gridView.groupBy([])
       this.gridView.setEditOptions({ editable: true })
       showToast('원본 데이터(Flat Grid)로 전환되었습니다.', { type: 'info' })
@@ -412,10 +415,24 @@ export default {
 
     applyView(view) {
       if (!this.gridView) return
+
+      // 포괄 뷰(layout/fixed/sort 보유)면 레이아웃+그룹+고정+정렬 전체 복원,
+      // 프리셋/구버전 저장뷰(fields 만)면 기존처럼 그룹 필드만 적용.
+      const isComprehensive = Array.isArray(view.layout) || !!view.fixed || Array.isArray(view.sort)
+      let hasGroup
+      if (isComprehensive) {
+        applyViewState(this.gridView, view)
+        hasGroup = Array.isArray(view.group) && view.group.length > 0
+      } else {
+        this.gridView.groupBy(view.fields || [])
+        hasGroup = Array.isArray(view.fields) && view.fields.length > 0
+      }
+
       this.activeGroup = view.id
-      this.gridView.groupBy(view.fields)
-      this.gridView.setEditOptions({ editable: false })
-      showToast(`'${view.name}' 뷰가 적용되었습니다. (편집/추가/삭제 제한)`, { type: 'info' })
+      this.activeHasGroup = hasGroup
+      // 그룹핑(집계) 뷰일 때만 편집/추가/삭제 잠금. 순수 레이아웃 뷰는 편집 허용.
+      this.gridView.setEditOptions({ editable: !hasGroup })
+      showToast(`'${view.name}' 뷰가 적용되었습니다.${hasGroup ? ' (편집/추가/삭제 제한)' : ''}`, { type: 'info' })
     },
 
     // 우클릭 행/열 동적 고정 (커스텀 컨텍스트 메뉴라 this.gridView 로 직접 처리)
@@ -509,20 +526,20 @@ export default {
 
     saveCurrentView() {
       if (!this.gridView) return
-      const fields = this.gridView.getGroupFieldNames() || []
-      if (fields.length === 0) {
-        showToast('현재 그룹핑된 컬럼이 없습니다. 컬럼을 그룹핑한 후 저장해주세요.', { type: 'warning' })
-        return
-      }
+      // 그룹핑뿐 아니라 컬럼 배치(이동/너비/표시)·고정·정렬까지 포괄 캡처.
+      const state = captureViewState(this.gridView, { includeGroup: true })
+      const groupFields = (state && state.group) || []
 
-      const defaultName = this.getFieldLabelsText(fields) + ' 뷰'
-      const viewName = prompt('저장할 맞춤 그룹핑 뷰 이름을 입력하세요:', defaultName)
+      const defaultName = groupFields.length > 0
+        ? this.getFieldLabelsText(groupFields) + ' 뷰'
+        : '사용자 정의 뷰'
+      const viewName = prompt('저장할 뷰 이름을 입력하세요 (컬럼 배치·고정·정렬·그룹핑 포함):', defaultName)
       if (!viewName || !viewName.trim()) return
 
       const newView = {
         id: 'user_view_' + Date.now(),
         name: viewName.trim(),
-        fields: [...fields]
+        ...state
       }
 
       this.userSavedViews.push(newView)

@@ -15,6 +15,11 @@
             @search="onTreeSearch"
             @clear="searchResult = { count: 0, current: 0 }"
           />
+          <SavedViewsBar
+            :grid-view-getter="() => gridView"
+            :data-provider-getter="() => dataProvider"
+            storage-key="nexhub_realgrid_tree_saved_views"
+          />
         </div>
         <div class="d-flex align-items-center gap-1.5 ms-auto">
           <!-- 데이터 유틸: 컬럼 피커 / 엑셀 -->
@@ -70,16 +75,21 @@
       <div class="b2b-grid-wrapper">
         <RealGridTreeJs
           ref="treeComp"
+          grid-id="realgrid-tree-page"
           :fields="fields"
           :columns="columns"
           :rows="rows"
-          childrenField="children"
-          :enableDragAndDrop="enableDnd"
-          :expandAllOnLoad="true"
-          :hideDeletedRows="false"
-          :stateBarWidth="20"
-          :checkBarWidth="36"
+          children-field="children"
+          :draggable="enableDnd"
+          :auto-expand-all="true"
+          :show-row-number="true"
+          :state-bar-visible="true"
+          :checkable="true"
+          :hide-deleted-rows="false"
+          :state-bar-width="20"
+          :check-bar-width="36"
           :toast="treeToast"
+          @init="onGridInit"
           @node-moved="onNodeMoved"
           @parent-changed="onParentChanged"
         />
@@ -99,6 +109,7 @@
 <script>
 import RealGridTreeJs from '@/components/RealGridTreeJs.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
+import SavedViewsBar from '@/components/SavedViewsBar.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import { showToast } from '@/utils/toastUtil.js'
 import { departmentTree } from '@/data/treeData.js'
@@ -108,10 +119,13 @@ export default {
   components: {
     RealGridTreeJs,
     QuickSearchBar,
+    SavedViewsBar,
     ColumnPickerModal
   },
   data() {
     return {
+      gridView: null,
+      dataProvider: null,
       enableDnd: true,
       searchResult: { count: 0, current: 0 },
       isColumnPickerOpen: false,
@@ -181,6 +195,11 @@ export default {
     }
   },
   methods: {
+    onGridInit({ gridView, dataProvider }) {
+      this.gridView = gridView
+      this.dataProvider = dataProvider
+    },
+
     // 트리(자기완결 컴포넌트)의 내부 알림을 이 프로젝트 토스트로 연결
     treeToast(message, opts = {}) {
       showToast(message, opts)

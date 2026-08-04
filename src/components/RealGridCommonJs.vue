@@ -8,18 +8,12 @@
 import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
+import { captureViewState, applyViewState } from '@/utils/realgridOps'
 
 /**
  * RealGrid 일반 그리드 — 자기완결 STANDALONE 버전
  * =========================================================
  * GridView + LocalDataProvider 기반 그리드.
- *
- * ⭐ 이식성(Portability): 프로젝트 전용 모듈에 의존하지 않는다.
- *    - 공통 로직(테마/제어열/엑셀/검색/변경추적/고정)을 mixin 대신 이 파일에 인라인.
- *    - 외부 import 는 `realgrid`, `vue` 뿐. (@/stores, @/utils, @/mixins 미참조)
- *    - 테마: `theme` prop 또는 <html data-theme> 자동 감지(없으면 'light').
- *    - 토스트: `toast` 함수 prop 주입(없으면 'notify' 이벤트 emit + console 폴백).
- *    → 계층 트리(RealGridTreeJs)와 동일한 자기완결 규약. 파일 1개만 복사하면 동작.
  */
 export default {
   name: 'RealGridCommonJs',
@@ -27,134 +21,161 @@ export default {
     // -------------------------------------------------------------------------
     // 📦 [기본 데이터 및 컨테이너 설정]
     // -------------------------------------------------------------------------
-    // 그리드 데이터필드 정의 스키마 배열
     fields: { type: Array, default: () => [] },
-    // 그리드 visual 컬럼 정의 스키마 배열
     columns: { type: Array, default: () => [] },
-    // 바인딩할 데이터 행 배열
     rows: { type: Array, default: () => [] },
-    // 그리드 컨테이너 높이 (예: '580px', '100%')
+    gridId: { type: String, default: '' },
     height: { type: String, default: '580px' },
-    // 셀 수정 및 편집 허용 여부 (-able)
     editable: { type: Boolean, default: true },
-    // 소프트 삭제된 행을 화면에서 즉시 숨길지 여부
     hideDeletedRows: { type: Boolean, default: false },
 
     // -------------------------------------------------------------------------
-    // ✨ [1. True / False 온-오프 전용] 글로벌 표준 형용사형 (-able / -ible) Props
+    // 🔖 [뷰 저장 내장 캡슐화 Props]
     // -------------------------------------------------------------------------
-    // 컬럼 헤더 클릭 시 데이터 오름/내림차순 정렬 기능 (-able)
-    sortable: { type: Boolean, default: true },
-    // 컬럼 헤더 자동 드롭다운 필터 기능 (-able)
-    filterable: { type: Boolean, default: undefined },
-    // 좌측 체크박스 선택열(CheckBar) 표시 여부 (-able)
-    checkable: { type: Boolean, default: undefined },
-    // 좌측 행번호(Indicator) 열 표시 여부 (-able)
-    indicatable: { type: Boolean, default: undefined },
-    // 좌측 행 상태(StateBar: 추가/수정/삭제 상태색) 열 표시 여부 (-ible)
+    showSavedViews: { type: Boolean, default: true },
+    includeGroupInView: { type: Boolean, default: false },
+
+    // -------------------------------------------------------------------------
+    // ✨ [1. 타겟 표준 명칭 Props] (Target Project Standard Spec)
+    // -------------------------------------------------------------------------
+    showRowNumber: { type: Boolean, default: undefined },
     stateBarVisible: { type: Boolean, default: undefined },
-    // 마우스 우클릭 행/열 동적 고정 메뉴 허용 여부 (-able)
-    pinnable: { type: Boolean, default: undefined },
-    // 상단 행 그룹핑 드래그앤드롭 패널 표시 여부 (-able)
-    groupable: { type: Boolean, default: undefined },
-    // 행 그룹핑 시 그룹화된 셀의 상하 병합 여부 (-able)
-    mergeable: { type: Boolean, default: true },
-    // 행 그룹핑 시 본문 컬럼 숨김 허용 여부 (-able)
-    columnHideable: { type: Boolean, default: false },
-    // 체크바 단일 선택(Radio: true) / 다중 선택(Checkbox: false)
-    exclusiveSelectable: { type: Boolean, default: false },
-    // 셀 이탈 시 편집 내용 자동 커밋 가능 여부 (-able)
-    autoCommittable: { type: Boolean, default: true },
-    // 하단 합계/소계 푸터(Footer) 영역 표시 여부
-    showFooter: { type: Boolean, default: undefined },
-    // 행 삭제 시 DB 즉시삭제 대신 삭제상태(Deleted) 표기 여부 (-able)
-    softDeletable: { type: Boolean, default: undefined },
+    insertable: { type: Boolean, default: undefined },
+    sortable: { type: Boolean, default: true },
+    filterable: { type: Boolean, default: undefined },
+    checkable: { type: Boolean, default: undefined },
+    mergeMode: { type: Boolean, default: undefined },
+    useFooter: { type: Boolean, default: undefined },
+    commitWhenLeave: { type: Boolean, default: undefined },
+    rowResizable: { type: Boolean, default: undefined },
+    summaryMode: { type: String, default: undefined },
+    groupPanelVisible: { type: Boolean, default: undefined },
 
     // -------------------------------------------------------------------------
-    // ⚙️ [2. 세부 모드 및 값 입력 전용] RealGrid 2 원본 명칭 그대로 유연 입력 Props
+    // ⚙️ [2. 세부 모드 및 입력 전용 Props]
     // -------------------------------------------------------------------------
-    // 그룹핑 소계 행 계산/표시 방식 ('aggregate' / 'none')
-    groupSummaryMode: { type: String, default: 'aggregate' },
-    // 컬럼 너비 화면 채움 방식 ('evenFill' / 'none' / 'fill')
     fitStyle: { type: String, default: 'evenFill' },
-    // 체크바 선택열 너비(px)
     checkBarWidth: { type: Number, default: 36 },
-    // 상태바 열 너비(px)
     stateBarWidth: { type: Number, default: 20 },
-    // 초기 좌측 고정 열 개수 (0이면 미고정)
     fixedColCount: { type: Number, default: 0 },
-    // 초기 상단 고정 행 개수 (0이면 미고정)
     fixedRowCount: { type: Number, default: 0 },
+    columnHideable: { type: Boolean, default: false },
+    exclusiveSelectable: { type: Boolean, default: false },
+    pinnable: { type: Boolean, default: undefined },
 
     // -------------------------------------------------------------------------
-    // 🌐 [3. 하이브리드 통-객체 주입] 세부 RealGrid 옵션 오버라이드 객체 Props
+    // 🌐 [3. 하이브리드 통-객체 주입]
     // -------------------------------------------------------------------------
-    // 통-객체로 세부 RealGrid 옵션 일괄 넘기기 (Hybrid Pattern)
     options: { type: Object, default: () => ({}) },
-    // options 와 동의어 (Hybrid Pattern)
     gridOptions: { type: Object, default: () => ({}) },
 
     // -------------------------------------------------------------------------
-    // 🔄 [4. 레거시 구버전 명칭 호환용] (Legacy Fallback Props)
+    // 🔄 [4. 레거시/기존 호환 명칭 Fallback Props]
     // -------------------------------------------------------------------------
-    // groupable 의 구버전 호환 이름
-    useGroupPanel: { type: Boolean, default: false },
-    // showFooter 의 구버전 호환 이름
-    useFooter: { type: Boolean, default: false },
-    // softDeletable 의 구버전 호환 이름
-    softDeleting: { type: Boolean, default: true },
-    // stateBarVisible 의 구버전 호환 이름
-    useStateBar: { type: Boolean, default: true },
-    // checkable 의 구버전 호환 이름
-    useCheckBar: { type: Boolean, default: true },
-    // indicatable 의 구버전 호환 이름
-    useIndicator: { type: Boolean, default: true },
-    // pinnable 의 구버전 호환 이름
-    useFixContextMenu: { type: Boolean, default: true },
-    // filterable 의 구버전 호환 이름
-    useColumnFilter: { type: Boolean, default: true },
+    indicatable: { type: Boolean, default: undefined },
+    useIndicator: { type: Boolean, default: undefined },
+    autoCommittable: { type: Boolean, default: undefined },
+    groupable: { type: Boolean, default: undefined },
+    useGroupPanel: { type: Boolean, default: undefined },
+    groupSummaryMode: { type: String, default: undefined },
+    mergeable: { type: Boolean, default: undefined },
+    showFooter: { type: Boolean, default: undefined },
+    useStateBar: { type: Boolean, default: undefined },
+    useCheckBar: { type: Boolean, default: undefined },
+    useFixContextMenu: { type: Boolean, default: undefined },
+    useColumnFilter: { type: Boolean, default: undefined },
+    softDeletable: { type: Boolean, default: undefined },
+    softDeleting: { type: Boolean, default: undefined },
 
     // -------------------------------------------------------------------------
-    // 🔌 [5. 이식성 의존성 주입 (선택)]
+    // 🔌 [5. 이식성 의존성 주입]
     // -------------------------------------------------------------------------
-    // '' 이면 <html data-theme>에서 자동 감지
     theme: { type: String, default: '' },
-    // (message, {type}) 알림 콜백
     toast: { type: Function, default: null }
   },
   emits: ['init', 'notify'],
+  data() {
+    return {
+      savedViews: [],
+      activeViewId: null
+    }
+  },
   computed: {
+    resolvedShowRowNumber() {
+      if (this.showRowNumber !== undefined) return this.showRowNumber
+      if (this.indicatable !== undefined) return this.indicatable
+      if (this.useIndicator !== undefined) return this.useIndicator
+      return true
+    },
+    resolvedStateBarVisible() {
+      if (this.stateBarVisible !== undefined) return this.stateBarVisible
+      if (this.useStateBar !== undefined) return this.useStateBar
+      return true
+    },
+    resolvedCheckable() {
+      if (this.checkable !== undefined) return this.checkable
+      if (this.useCheckBar !== undefined) return this.useCheckBar
+      return true
+    },
+    resolvedFilterable() {
+      if (this.filterable !== undefined) return this.filterable
+      if (this.useColumnFilter !== undefined) return this.useColumnFilter
+      return true
+    },
+    resolvedUseFooter() {
+      if (this.useFooter !== undefined) return this.useFooter
+      if (this.showFooter !== undefined) return this.showFooter
+      return false
+    },
+    resolvedGroupPanelVisible() {
+      if (this.groupPanelVisible !== undefined) return this.groupPanelVisible
+      if (this.groupable !== undefined) return this.groupable
+      if (this.useGroupPanel !== undefined) return this.useGroupPanel
+      return true
+    },
+    resolvedMergeMode() {
+      if (this.mergeMode !== undefined) return this.mergeMode
+      if (this.mergeable !== undefined) return this.mergeable
+      return true
+    },
+    resolvedSummaryMode() {
+      if (this.summaryMode !== undefined) return this.summaryMode
+      if (this.groupSummaryMode !== undefined) return this.groupSummaryMode
+      return 'aggregate'
+    },
+    resolvedCommitWhenLeave() {
+      if (this.commitWhenLeave !== undefined) return this.commitWhenLeave
+      if (this.autoCommittable !== undefined) return this.autoCommittable
+      return true
+    },
+    resolvedInsertable() {
+      if (this.insertable !== undefined) return this.insertable
+      return true
+    },
+    resolvedRowResizable() {
+      if (this.rowResizable !== undefined) return this.rowResizable
+      return false
+    },
+    resolvedPinnable() {
+      if (this.pinnable !== undefined) return this.pinnable
+      if (this.useFixContextMenu !== undefined) return this.useFixContextMenu
+      return true
+    },
     resolvedSortable() {
       return this.sortable
     },
-    resolvedFilterable() {
-      return this.filterable !== undefined ? this.filterable : this.useColumnFilter
-    },
-    resolvedCheckable() {
-      return this.checkable !== undefined ? this.checkable : this.useCheckBar
-    },
-    resolvedIndicatable() {
-      return this.indicatable !== undefined ? this.indicatable : this.useIndicator
-    },
-    resolvedStateBarVisible() {
-      return this.stateBarVisible !== undefined ? this.stateBarVisible : this.useStateBar
-    },
-    resolvedPinnable() {
-      return this.pinnable !== undefined ? this.pinnable : this.useFixContextMenu
-    },
-    resolvedGroupable() {
-      return this.groupable !== undefined ? this.groupable : this.useGroupPanel
-    },
-    resolvedShowFooter() {
-      return this.showFooter !== undefined ? this.showFooter : this.useFooter
-    },
     resolvedSoftDeletable() {
-      return this.softDeletable !== undefined ? this.softDeletable : this.softDeleting
+      if (this.softDeletable !== undefined) return this.softDeletable
+      if (this.softDeleting !== undefined) return this.softDeleting
+      return true
     }
   },
   watch: {
     theme() {
       this.applyGridTheme(this._resolveTheme())
+    },
+    gridId() {
+      this.loadSavedViews()
     },
     rows: {
       deep: true,
@@ -181,12 +202,16 @@ export default {
   },
   mounted() {
     this.initGrid()
+    this.loadSavedViews()
     this.$nextTick(() => {
       this.applyGridTheme(this._resolveTheme())
     })
     this._watchTheme()
   },
   beforeUnmount() {
+    if (this.gridId) {
+      this.saveGridLayout()
+    }
     if (this._themeObserver) {
       try { this._themeObserver.disconnect() } catch (e) { /* noop */ }
       this._themeObserver = null
@@ -194,6 +219,107 @@ export default {
     this.destroyGrid()
   },
   methods: {
+    // =========================================================
+    // 🔖 뷰 저장 (Saved Views) 캡슐화 관리
+    // =========================================================
+    loadSavedViews() {
+      if (!this.gridId) return
+      try {
+        const stored = localStorage.getItem(`realgrid-saved-views-${this.gridId}`)
+        if (stored) {
+          this.savedViews = JSON.parse(stored) || []
+        }
+      } catch (e) {
+        console.warn('[RealGrid] loadSavedViews error:', e)
+      }
+    },
+
+    persistSavedViews() {
+      if (!this.gridId) return
+      try {
+        localStorage.setItem(`realgrid-saved-views-${this.gridId}`, JSON.stringify(this.savedViews))
+      } catch (e) {
+        console.warn('[RealGrid] persistSavedViews error:', e)
+      }
+    },
+
+    saveCurrentView() {
+      if (!this.gridView) {
+        this._notify('그리드가 아직 준비되지 않았습니다.', { type: 'warning' })
+        return
+      }
+
+      const state = captureViewState(this.gridView, { includeGroup: this.includeGroupInView || this.resolvedGroupPanelVisible, dataProvider: this.dataProvider })
+      const viewName = prompt('저장할 뷰 이름을 입력하세요 (컬럼 배치·고정·정렬·그룹핑 포함):', '사용자 정의 뷰')
+      if (!viewName || !viewName.trim()) return
+
+      const newView = { id: 'view_' + Date.now(), name: viewName.trim(), ...state }
+      this.savedViews.push(newView)
+      this.persistSavedViews()
+      this.applySavedView(newView)
+      this._notify(`'${newView.name}' 뷰가 저장되었습니다!`, { type: 'success' })
+    },
+
+    applySavedView(view) {
+      if (!this.gridView) return
+      applyViewState(this.gridView, view, { dataProvider: this.dataProvider })
+      this.activeViewId = view.id
+      this._notify(`'${view.name}' 뷰가 적용되었습니다.`, { type: 'info' })
+    },
+
+    deleteSavedView(viewId) {
+      this.savedViews = this.savedViews.filter(v => v.id !== viewId)
+      this.persistSavedViews()
+      if (this.activeViewId === viewId) this.activeViewId = null
+      this._notify('저장된 뷰가 삭제되었습니다.', { type: 'warning' })
+    },
+
+    // =========================================================
+    // 💾 로컬스토리지 레이아웃 상태 저장 및 복원 (gridId 설정 시)
+    // =========================================================
+    saveGridLayout() {
+      if (!this.gridId || !this.gridView) return
+      try {
+        const layout = typeof this.gridView.saveColumnLayout === 'function' ? this.gridView.saveColumnLayout() : null
+        const fixedOpts = typeof this.gridView.getFixedOptions === 'function' ? (this.gridView.getFixedOptions() || {}) : {}
+        const state = { layout, fixedOpts }
+        localStorage.setItem(`realgrid-layout-${this.gridId}`, JSON.stringify(state))
+      } catch (e) {
+        console.warn('[RealGrid] saveGridLayout error:', e)
+      }
+    },
+
+    restoreGridLayout() {
+      if (!this.gridId || !this.gridView) return
+      try {
+        const saved = localStorage.getItem(`realgrid-layout-${this.gridId}`)
+        if (saved) {
+          const state = JSON.parse(saved)
+          if (state.layout && typeof this.gridView.setColumnLayout === 'function') {
+            this.gridView.setColumnLayout(state.layout)
+          }
+          if (state.fixedOpts && typeof this.gridView.setFixedOptions === 'function') {
+            this.gridView.setFixedOptions(state.fixedOpts)
+          }
+        }
+      } catch (e) {
+        console.warn('[RealGrid] restoreGridLayout error:', e)
+      }
+    },
+
+    resetGridLayout() {
+      if (!this.gridId) return
+      try {
+        localStorage.removeItem(`realgrid-layout-${this.gridId}`)
+        if (this.columns && this.columns.length > 0) {
+          this.gridView.setColumns(this.columns)
+        }
+        this._notify('컬럼 레이아웃 설정이 초기화되었습니다.', { type: 'info' })
+      } catch (e) {
+        console.warn('[RealGrid] resetGridLayout error:', e)
+      }
+    },
+
     // =========================================================
     // 🔌 이식성 헬퍼: 테마 감지 / 알림 (프로젝트 의존성 제거)
     // =========================================================
@@ -275,7 +401,7 @@ export default {
 
       try {
         this.gridView.setIndicator({
-          visible: this.resolvedIndicatable,
+          visible: this.resolvedShowRowNumber,
           draggableSelectedRows: false,
           ...(customOpts.indicator || {})
         })
@@ -350,12 +476,14 @@ export default {
         if (colIdx >= 0) {
           colCount = colIdx + 1
           this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+          this.saveGridLayout()
           this._notify(`'${clickData.column}' 컬럼까지 열 고정이 적용되었습니다.`, { type: 'success' })
           return true
         }
       } else if (item.tag === 'fixRow' && clickData.itemIndex !== undefined && clickData.itemIndex >= 0) {
         rowCount = clickData.itemIndex + 1
         this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+        this.saveGridLayout()
         this._notify(`${rowCount}번째 행까지 행 고정이 적용되었습니다.`, { type: 'success' })
         return true
       } else if (item.tag === 'fixBoth' && clickData.column && clickData.itemIndex !== undefined) {
@@ -364,33 +492,41 @@ export default {
           colCount = colIdx + 1
           rowCount = clickData.itemIndex + 1
           this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+          this.saveGridLayout()
           this._notify(`${rowCount}행 x '${clickData.column}'열 동시 고정이 적용되었습니다.`, { type: 'success' })
           return true
         }
       } else if (item.tag === 'clearFixing') {
         this.gridView.setFixedOptions({ colCount: 0, rowCount: 0 })
+        this.saveGridLayout()
         this._notify('행/열 고정이 해제되었습니다.', { type: 'info' })
+        return true
+      } else if (item.tag === 'saveView') {
+        this.saveCurrentView()
+        return true
+      } else if (item.tag === 'resetLayout') {
+        this.resetGridLayout()
         return true
       }
       return false
     },
 
-    /**
-     * 우클릭 컨텍스트 메뉴(행/열 고정) 배선. resolvedPinnable prop(기본 true)일 때만.
-     * emit('init') 직전에 호출 → 부모가 @init 에서 setContextMenu 재정의하면 그쪽 우선.
-     */
     applyFixContextMenu() {
       if (!this.gridView || !this.resolvedPinnable) return
       if (typeof this.gridView.setContextMenu !== 'function') return
       try {
-        this.gridView.setContextMenu([
+        const menuItems = [
           { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
           { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
           { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
           { label: '-' },
           { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
-        ])
-        // RealGrid 2 우클릭 메뉴 팝업 허용 필수 이벤트 (트리와 동일)
+        ]
+        if (this.gridId) {
+          menuItems.push({ label: '🔖 현재 뷰 저장...', tag: 'saveView' })
+          menuItems.push({ label: '🔄 컬럼 레이아웃 저장값 초기화', tag: 'resetLayout' })
+        }
+        this.gridView.setContextMenu(menuItems)
         this.gridView.onContextMenuPopup = () => true
         this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
           this.handleDynamicFixing(item, clickData)
@@ -400,9 +536,6 @@ export default {
       }
     },
 
-    /**
-     * 정렬 기능 활성화/비활성화 (sortable prop)
-     */
     applySortingOptions() {
       if (!this.gridView) return
       try {
@@ -414,11 +547,6 @@ export default {
       }
     },
 
-    /**
-     * 헤더 컬럼 필터 활성화. resolvedFilterable(기본 true)면 filteringOptions 를 켜고
-     * 각 컬럼 autoFilter=true 로 설정 → 헤더 필터 아이콘 클릭 시 distinct 값 목록 자동 생성.
-     * (RealGrid 공식: column.autoFilter + gridView.setFilteringOptions)
-     */
     applyColumnFilters() {
       if (!this.gridView) return
       try {
@@ -447,67 +575,45 @@ export default {
             target: 'local',
             fileName: name,
             showConfirm: false,
-            showProgress: true,
-            indicator: 'visible',
-            header: 'visible',
-            footer: 'visible'
+            showProgress: true
           })
-          this._notify(`'${name}' 엑셀 내보내기를 실행했습니다.`, { type: 'success' })
-        } else {
-          this._notify('RealGrid exportGrid 내장 메서드를 호출할 수 없습니다.', { type: 'warning' })
         }
-      } catch (err) {
-        console.error('Excel export error:', err)
-        this._notify('엑셀 파일 내보내기에 실패했습니다.', { type: 'danger' })
-      }
-    },
-
-    // =========================================================
-    // 컬럼 정보 / 표시 제어
-    // =========================================================
-    getColumnsInfo() {
-      if (!this.gridView) return []
-      try {
-        const cols = this.gridView.getColumns() || []
-        return cols.map(c => ({
-          name: c.name,
-          headerText: c.header?.text || c.name,
-          visible: c.visible !== false
-        }))
       } catch (e) {
-        return []
-      }
-    },
-
-    setColumnVisible(colName, visible) {
-      if (!this.gridView) return
-      try {
-        this.gridView.setColumnProperty(colName, 'visible', visible)
-      } catch (e) {
-        console.warn('setColumnVisible failed:', e)
+        console.warn('[RealGrid] exportToExcel error:', e)
       }
     },
 
     // =========================================================
-    // 펼치기 / 접기 (그룹)
+    // 데이터 조작 API
     // =========================================================
-    /** 그룹 행 전체 펼치기 (RowGroup 그리드 전용, 멀티패스). */
-    expandAllGroups(passes = 2) {
-      if (!this.gridView) return
-      for (let pass = 0; pass < passes; pass++) {
-        const count = this.gridView.getItemCount()
-        for (let i = 0; i < count; i++) {
-          try { this.gridView.expandGroup(i, true, true) } catch (e) { /* noop */ }
+    addRow(defaultValues = {}) {
+      if (!this.dataProvider) return -1
+      const itemIndex = this.dataProvider.addRow(defaultValues)
+      if (this.gridView && itemIndex >= 0) {
+        this.gridView.setCurrent({ itemIndex, fieldIndex: 0 })
+      }
+      return itemIndex
+    },
+
+    deleteSelectedRows() {
+      if (!this.gridView || !this.dataProvider) return 0
+      const checkedRows = this.gridView.getCheckedRows()
+      if (checkedRows && checkedRows.length > 0) {
+        this.dataProvider.removeRows(checkedRows)
+        return checkedRows.length
+      } else {
+        const current = this.gridView.getCurrent()
+        if (current && current.dataRow !== undefined && current.dataRow >= 0) {
+          this.dataProvider.removeRow(current.dataRow)
+          return 1
         }
       }
+      return 0
     },
 
-    /** 그룹 행 전체 접기 (RowGroup 그리드 전용). */
-    collapseAllGroups() {
-      if (!this.gridView) return
-      const count = this.gridView.getItemCount()
-      for (let i = count - 1; i >= 0; i--) {
-        try { this.gridView.collapseGroup(i, true) } catch (e) { /* noop */ }
+    commit() {
+      if (this.gridView) {
+        this.gridView.commit()
       }
     },
 
@@ -551,7 +657,6 @@ export default {
       this.gridView = markRaw(new GridView(container))
       this.gridView.setDataSource(this.dataProvider)
 
-      // 🏆 하이브리드 패턴: 낱개 형용사 Prop 기본값 + options/gridOptions 객체 오버라이드 병합
       const customOpts = { ...(this.options || {}), ...(this.gridOptions || {}) }
 
       this.dataProvider.softDeleting = this.resolvedSoftDeletable
@@ -559,9 +664,9 @@ export default {
 
       this.gridView.setEditOptions({
         editable: this.editable,
-        insertable: this.editable,
-        appendable: this.editable,
-        commitWhenLeave: this.autoCommittable,
+        insertable: this.resolvedInsertable,
+        appendable: this.resolvedInsertable,
+        commitWhenLeave: this.resolvedCommitWhenLeave,
         ...(customOpts.editOptions || {})
       })
 
@@ -579,20 +684,19 @@ export default {
       this.applyControlBars(customOpts)
       this.gridView.setFooter({ visible: this.resolvedShowFooter, ...(customOpts.footer || {}) })
 
-      // 행 그룹핑 패널 지원 (피벗 A용)
-      if (this.resolvedGroupable) {
-        this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: fitStyleVal, ...(customOpts.displayOptions || {}) })
-        this.gridView.setGroupPanel({ visible: true, ...(customOpts.groupPanel || {}) })
-        this.gridView.setGroupingOptions({ enabled: true, ...(customOpts.groupingOptions || {}) })
+      if (this.resolvedGroupPanelVisible) {
+        this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setGroupPanel({ visible: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupPanel || {}) })
+        this.gridView.setGroupingOptions({ enabled: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupingOptions || {}) })
         this.gridView.setSortingOptions({ enabled: this.resolvedSortable, ...(customOpts.sortingOptions || {}) })
         this.gridView.setRowGroup({
-          summaryMode: this.groupSummaryMode,
-          mergeMode: this.mergeable,
+          summaryMode: this.resolvedSummaryMode,
+          mergeMode: this.resolvedMergeMode,
           hideGroupedColumn: this.columnHideable,
           ...(customOpts.rowGroup || {})
         })
       } else {
-        this.gridView.setDisplayOptions({ fitStyle: fitStyleVal, rowHoverType: 'row', ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
         this.applySortingOptions()
       }
 
@@ -607,9 +711,16 @@ export default {
         this.dataProvider.setRows(this.rows)
       }
 
-      // 우클릭 컨텍스트 메뉴(행/열 고정) 자동 배선 — emit('init') 직전(부모 @init 이 최종 우선)
+      if (this.gridId) {
+        this.restoreGridLayout()
+        try {
+          this.gridView.onColumnMoved = () => this.saveGridLayout()
+          this.gridView.onColumnResized = () => this.saveGridLayout()
+          this.gridView.onColumnVisibleChanged = () => this.saveGridLayout()
+        } catch (e) { /* noop */ }
+      }
+
       this.applyFixContextMenu()
-      // 헤더 컬럼 필터 활성화 (filterable / useColumnFilter)
       this.applyColumnFilters()
 
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
