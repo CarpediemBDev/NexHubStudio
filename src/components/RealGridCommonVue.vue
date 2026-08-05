@@ -159,7 +159,7 @@ export default {
     resolvedMergeMode() {
       if (this.mergeMode !== undefined) return this.mergeMode
       if (this.mergeable !== undefined) return this.mergeable
-      return true
+      return false
     },
     resolvedSummaryMode() {
       if (this.summaryMode !== undefined) return this.summaryMode
@@ -344,7 +344,9 @@ export default {
         this.gridView.setSortingOptions({ enabled: this.resolvedSortable, ...(customOpts.sortingOptions || {}) })
         this.gridView.setRowGroup({
           summaryMode: this.resolvedSummaryMode,
-          mergeMode: this.resolvedMergeMode,
+          // 그룹핑 시에는 merge-mode prop 과 무관하게 그룹 병합을 강제한다 (옵션 B).
+          // 평면 셀 병합만 merge-mode(기본 false)로 제어. customOpts.rowGroup 로는 여전히 override 가능.
+          mergeMode: true,
           hideGroupedColumn: this.columnHideable,
           ...(customOpts.rowGroup || {})
         })
@@ -364,6 +366,7 @@ export default {
 
       this.applyFixContextMenu()
       this.applyColumnFilters()
+      this.applyCellMerging()
 
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
@@ -533,6 +536,29 @@ export default {
         }
       } catch (e) {
         console.warn('[RealGrid] applyColumnFilters error:', e)
+      }
+    },
+
+    // =========================================================
+    // 셀 병합 (merge-mode): 그룹 유무와 무관하게 동일값 셀 병합
+    //  - merge-mode=true 이면 모든 컬럼에 mergeRule 자동 적용
+    //  - 컬럼 정의에서 직접 지정한 mergeRule 은 그대로 존중
+    // =========================================================
+    applyCellMerging() {
+      if (!this.gridView || !this.resolvedMergeMode) return
+      try {
+        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+        cols.forEach(col => {
+          if (!col || !col.name) return
+          const hasOwnRule = col.mergeRule && col.mergeRule.criteria
+          if (!hasOwnRule) {
+            try {
+              this.gridView.setColumnProperty(col.name, 'mergeRule', { criteria: 'value' })
+            } catch (e) { /* noop */ }
+          }
+        })
+      } catch (e) {
+        console.warn('[RealGrid] applyCellMerging error:', e)
       }
     },
 
