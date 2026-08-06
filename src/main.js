@@ -5,6 +5,7 @@ import router from './router'
 import vValidation from './directives/validation'
 import vValidatedForm from './directives/validatedForm'
 import { showToast } from './utils/toastUtil'
+import './utils/mdEditorLocale' // md-editor-v3 한국어 로케일 전역 등록
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
