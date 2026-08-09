@@ -104,13 +104,17 @@ const routes = [
         name: "SampleGroup",
         meta: { title: "UI 컴포넌트 & 샘플", icon: "bi-layers-fill" },
         children: [
+          { path: "autocomplete", name: "AutocompleteSample", component: () => import("../pages/sample/AutocompleteDemoPage.vue"), meta: { title: "Input 자동완성 샘플", icon: "bi-search", keepAlive: true } },
           { path: "jqx-grid", name: "JqxGridSample", component: JqxGridPage, meta: { title: "JqxGrid 샘플", icon: "bi-table", keepAlive: true } },
+          { path: "pivot-a-search", name: "PivotASearchSample", component: () => import("../pages/sample/PivotASearchGridPage.vue"), meta: { title: "Pivot 분석 A (SearchGrid형)", icon: "bi-pie-chart-fill", keepAlive: true } },
           { path: "component-guide", name: "ComponentGuide", component: ComponentGuidePage, meta: { title: "UI 컴포넌트 가이드", icon: "bi-book", keepAlive: true } },
           { path: "datepicker-gallery", name: "DatePickerGallery", component: () => import("../pages/sample/DatePickerGalleryPage.vue"), meta: { title: "DatePicker 갤러리", icon: "bi-calendar-week", keepAlive: true } },
           { path: "barcode-equipment", name: "BarcodeEquipment", component: () => import("../pages/sample/BarcodeEquipment.vue"), meta: { title: "설비 바코드 샘플", icon: "bi-upc-scan", keepAlive: true } },
           { path: "portal", name: "PortalSample", component: () => import("../pages/sample/PortalSample.vue"), meta: { title: "포털 메인 샘플", icon: "bi-layout-text-window", keepAlive: true } }
         ]
       },
+
+      { path: "sample/autocomplete", component: () => import("../pages/sample/AutocompleteDemoPage.vue"), meta: { hidden: true } },
 
       // 기존 호환성 단독 경로 유지 (hidden)
       { path: "users", component: UserPage, meta: { hidden: true } },
@@ -125,10 +129,10 @@ const routes = [
       { path: "pivot-alt-b", component: PivotAltBPage, meta: { hidden: true } },
       { path: "real-pivot", component: RealPivotPage, meta: { hidden: true } },
       // 업무 & 게시판 / 공통코드 / 샘플 단독 경로 (NavBar·대시보드 flat 링크 매칭용)
-      { path: "posts", component: PostListPage, meta: { hidden: true } },
-      { path: "posts/write", component: PostWritePage, meta: { hidden: true } },
-      { path: "posts/:id/edit", component: PostWritePage, meta: { hidden: true } },
-      { path: "posts/:id", name: "PostDetail", component: PostDetailPage, meta: { hidden: true } },
+      { path: "posts", component: PostListPage, meta: { title: "게시판 목록", hidden: true, activeMenu: "/work-group/posts" } },
+      { path: "posts/write", name: "PostWrite", component: PostWritePage, meta: { title: "게시글 작성", hidden: true, activeMenu: "/work-group/posts" } },
+      { path: "posts/:id/edit", name: "PostEdit", component: PostWritePage, meta: { title: "게시글 수정", hidden: true, activeMenu: "/work-group/posts" } },
+      { path: "posts/:id", name: "PostDetail", component: PostDetailPage, meta: { title: "게시글 상세", hidden: true, activeMenu: "/work-group/posts" } },
       { path: "files", component: FileListPage, meta: { hidden: true } },
       { path: "equipment-monitor", component: EquipmentMonitorPage, meta: { hidden: true } },
       { path: "request-workflow", component: RequestWorkflowPage, meta: { hidden: true } },

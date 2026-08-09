@@ -1,6 +1,75 @@
 <template>
-  <div class="realgrid-tree-wrapper w-100">
-    <div ref="treeElement" class="w-100" :style="{ height: height }"></div>
+  <div class="realgrid-tree-wrapper w-100 border rounded-2 overflow-hidden shadow-sm" :style="{ height: height }">
+    <!-- 1단: 상단 내장 서브 툴바 (컬럼 팝오버 + 뷰 저장 + 내 뷰 칩스) -->
+    <div v-if="showColumnPicker || showSavedViews" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
+      <!-- Left: Column Picker & Save View Buttons -->
+      <div class="d-flex align-items-center gap-2">
+        <!-- 1. [컬럼] 버튼 & Dropdown Popover -->
+        <div v-if="showColumnPicker" class="dropdown">
+          <button
+            class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2.5 b2b-text-xs shadow-2xs"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="컬럼 숨김/표시 설정"
+            @click="syncColumnItems"
+          >
+            <i class="bi bi-eye text-primary"></i>
+            <span>컬럼 설정</span>
+            <i class="bi bi-chevron-down opacity-50 ms-0.5"></i>
+          </button>
+          <div class="dropdown-menu p-2 shadow border-0 b2b-text-xs" style="min-width: 210px; max-height: 320px; overflow-y: auto;">
+            <div class="d-flex align-items-center justify-content-between pb-1.5 mb-1.5 border-bottom px-1">
+              <span class="fw-bold text-dark"><i class="bi bi-layout-three me-1 text-primary"></i>컬럼 표시 설정</span>
+              <button class="btn btn-link p-0 text-decoration-none b2b-text-xs text-primary" @click="resetColumnVisibility">전체표시</button>
+            </div>
+            <div v-for="col in columnItems" :key="col.name" class="form-check py-1 px-3 m-0">
+              <input
+                class="form-check-input cursor-pointer"
+                type="checkbox"
+                :id="'col_chk_tree_' + col.name"
+                :checked="col.visible"
+                @change="toggleColumnVisibility(col.name, $event.target.checked)"
+              />
+              <label class="form-check-label cursor-pointer text-dark text-truncate d-block" :for="'col_chk_tree_' + col.name" style="max-width: 150px;">
+                {{ col.header || col.name }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. [뷰 저장] 버튼 -->
+        <button
+          v-if="showSavedViews"
+          class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2.5 b2b-text-xs shadow-2xs"
+          title="현재 컬럼 순서·너비·고정 상태 뷰 저장"
+          @click="saveCurrentView"
+        >
+          <i class="bi bi-bookmark-plus text-warning"></i>
+          <span>뷰 저장</span>
+        </button>
+      </div>
+
+      <!-- Right: Dynamic [내 뷰] Chips -->
+      <div v-if="showSavedViews && savedViews.length > 0" class="d-flex align-items-center gap-1.5 ms-auto flex-wrap">
+        <span v-if="savedViews.length > 0" class="b2b-text-xs text-muted fw-semibold me-1">
+          <i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:
+        </span>
+        <div
+          v-for="view in savedViews"
+          :key="view.id"
+          class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal b2b-text-xs"
+          :class="activeViewId === view.id ? 'bg-primary text-white shadow-sm' : 'bg-theme-card text-theme-primary border-theme'"
+          @click="applySavedView(view)"
+        >
+          <span>{{ view.name }}</span>
+          <i class="bi bi-x ms-1 text-danger opacity-75 hover-opacity-100" @click.stop="deleteSavedView(view.id)" title="뷰 삭제"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tree Canvas Element -->
+    <div ref="treeElement" class="w-100" :style="{ height: (showColumnPicker || showSavedViews) ? 'calc(100% - 38px)' : '100%' }"></div>
   </div>
 </template>
 
@@ -64,6 +133,9 @@ export default {
     enableDragAndDrop: { type: Boolean, default: true },
     hideDeletedRows: { type: Boolean, default: true },
 
+    showColumnPicker: { type: Boolean, default: true },
+    showSavedViews: { type: Boolean, default: true },
+
     // ---- 제어열/옵션 ----
     checkBarExclusive: { type: Boolean, default: false },
     checkBarWidth: { type: Number, default: 36 },
@@ -84,11 +156,20 @@ export default {
     softDeletable: { type: Boolean, default: undefined },
     softDeleting: { type: Boolean, default: true },
 
+    showInternalToolbar: { type: Boolean, default: true },
+
     // ---- 이식성 의존성 주입 ----
     theme: { type: String, default: '' },
     toast: { type: Function, default: null }
   },
   emits: ['init', 'notify', 'node-moved', 'parent-changed'],
+  data() {
+    return {
+      savedViews: [],
+      activeViewId: null,
+      columnItems: []
+    }
+  },
   computed: {
     resolvedShowRowNumber() {
       if (this.showRowNumber !== undefined) return this.showRowNumber
@@ -209,6 +290,47 @@ export default {
     this.destroyGrid()
   },
   methods: {
+    // =========================================================
+    // 👁️ 컬럼 숨김/표시 관리 (Column Picker)
+    // =========================================================
+    syncColumnItems() {
+      if (!this.gridView) return
+      try {
+        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+        this.columnItems = cols.map(c => ({
+          name: c.name,
+          header: (c.header && c.header.text) || c.name,
+          visible: c.visible !== false
+        }))
+      } catch (e) {
+        console.warn('[RealGridTree] syncColumnItems error:', e)
+      }
+    },
+
+    toggleColumnVisibility(colName, visible) {
+      if (!this.gridView || !colName) return
+      try {
+        this.gridView.setColumnProperty(colName, 'visible', visible)
+        this.syncColumnItems()
+      } catch (e) {
+        console.warn('[RealGridTree] toggleColumnVisibility error:', e)
+      }
+    },
+
+    resetColumnVisibility() {
+      if (!this.gridView) return
+      try {
+        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+        cols.forEach(c => {
+          this.gridView.setColumnProperty(c.name, 'visible', true)
+        })
+        this.syncColumnItems()
+        this._notify('모든 컬럼이 표시되도록 설정되었습니다.', { type: 'info' })
+      } catch (e) {
+        console.warn('[RealGridTree] resetColumnVisibility error:', e)
+      }
+    },
+
     // =========================================================
     // 🔖 뷰 저장 (Saved Views) 캡슐화 관리
     // =========================================================

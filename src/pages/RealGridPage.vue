@@ -17,16 +17,8 @@
             @search="onGridSearch"
             @clear="searchResult = { count: 0, current: 0 }"
           />
-          <SavedViewsBar
-            :grid-view-getter="() => gridView"
-            storage-key="nexhub_realgrid_js_saved_views"
-          />
         </div>
         <div class="d-flex align-items-center gap-1.5 ms-auto">
-          <button class="btn-b2b-action" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
-            <i class="bi bi-eye text-primary me-0.5"></i>
-            <span>컬럼</span>
-          </button>
           <button class="btn-b2b-action" title="엑셀 파일 내보내기" @click="exportExcel">
             <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
             <span>엑셀</span>

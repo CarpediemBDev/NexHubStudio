@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container mt-4">
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border" role="status"></div>
@@ -65,7 +65,8 @@
             </li>
           </ul>
         </div>
-        <Markdown v-model="post.content" language="ko-KR" readonly preview-class="post-content" />
+        <!-- 딱 이 1줄만 수정: show-catalog (또는 :show-catalog="true") 추가 -->
+        <Markdown v-model="post.content" language="ko-KR" readonly show-catalog preview-class="post-content" />
       </div>
 
       <!-- 댓글 섹션 -->
