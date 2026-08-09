@@ -1,0 +1,10 @@
+# Gradle
+.gradle/
+build/
+
+# H2 file DB (런타임 데이터)
+data/
+
+# 로그
+logs/
+*.log

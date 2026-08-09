@@ -8,4 +8,4 @@ spring:
     parameters:
       liquibase.schema: public
       app.name: NexHubStudio-backend
-    clear-checksums: true # 개발 환경: true로 changeset 자유롭게 수정 가능
+    clear-checksums: false # 최초/프레시 DB 기동 시 DATABASECHANGELOG 미생성 상태에서 clearChecksums UPDATE가 실패하므로 false (changeset 수정 시엔 drop-first 또는 data/ 삭제로 재생성)
