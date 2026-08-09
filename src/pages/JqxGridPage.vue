@@ -23,7 +23,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="d-flex align-items-center gap-1.5">
+        <div class="d-flex align-items-center gap-2">
           <button class="btn-b2b-action" title="엑셀 파일 내보내기" @click="exportExcel">
             <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
             <span>엑셀</span>
@@ -36,7 +36,7 @@
             <i class="bi bi-dash-lg text-danger me-0.5"></i>
             <span>삭제</span>
           </button>
-          <button class="btn-b2b-primary ms-1" title="변경사항 저장" @click="saveData">
+          <button class="btn-b2b-primary" title="변경사항 저장" @click="saveData">
             <i class="bi bi-check2 me-0.5"></i>
             <span>저장</span>
           </button>
@@ -54,6 +54,7 @@
           :show-row-number="true"
           :show-row-status="true"
           :show-toolbar="false"
+          :groupable="true"
           height="550px"
         />
       </div>

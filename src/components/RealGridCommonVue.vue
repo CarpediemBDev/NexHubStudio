@@ -107,6 +107,7 @@ export default {
     includeGroupInView: { type: Boolean, default: false },
     showRowNumber: { type: Boolean, default: undefined },
     stateBarVisible: { type: Boolean, default: undefined },
+    showRowStatus: { type: Boolean, default: undefined },
     insertable: { type: Boolean, default: undefined },
     sortable: { type: Boolean, default: true },
     filterable: { type: Boolean, default: undefined },
@@ -164,6 +165,7 @@ export default {
     },
     resolvedStateBarVisible() {
       if (this.stateBarVisible !== undefined) return this.stateBarVisible
+      if (this.showRowStatus !== undefined) return this.showRowStatus
       return true
     },
     resolvedCheckable() {
@@ -254,7 +256,7 @@ export default {
           this.gridView.setColumnProperty(c.name, 'visible', true)
         })
         this.syncColumnItems()
-        showToast('모든 컬럼이 표시되도록 설정되었습니다.', 'info')
+        showToast('모든 컬럼이 표시되도록 설정되었습니다.', { type: 'info' })
       } catch (e) {
         console.warn('[RealGrid] resetColumnVisibility error:', e)
       }
@@ -283,7 +285,7 @@ export default {
 
     saveCurrentView() {
       if (!this.gridView) {
-        showToast('그리드가 아직 준비되지 않았습니다.', 'warning')
+        showToast('그리드가 아직 준비되지 않았습니다.', { type: 'warning' })
         return
       }
 
@@ -296,21 +298,21 @@ export default {
       this.savedViews.push(newView)
       this.persistSavedViews()
       this.applySavedView(newView)
-      showToast(`'${newView.name}' 칩이 생성되었습니다!`, 'success')
+      showToast(`'${newView.name}' 칩이 생성되었습니다!`, { type: 'success' })
     },
 
     applySavedView(view) {
       if (!this.gridView) return
       applyViewState(this.gridView, view, { dataProvider: this.dataProvider })
       this.activeViewId = view.id
-      showToast(`'${view.name}' 뷰가 적용되었습니다.`, 'info')
+      showToast(`'${view.name}' 뷰가 적용되었습니다.`, { type: 'info' })
     },
 
     deleteSavedView(viewId) {
       this.savedViews = this.savedViews.filter(v => v.id !== viewId)
       this.persistSavedViews()
       if (this.activeViewId === viewId) this.activeViewId = null
-      showToast('저장된 뷰 칩이 삭제되었습니다.', 'warning')
+      showToast('저장된 뷰 칩이 삭제되었습니다.', { type: 'warning' })
     },
 
     saveGridLayout() {
@@ -340,6 +342,243 @@ export default {
         }
       } catch (e) {
         console.warn('[RealGrid] restoreGridLayout error:', e)
+      }
+    },
+
+    applyControlBars(customOpts = {}) {
+      if (!this.gridView) return
+
+      try {
+        this.gridView.setIndicator({
+          visible: this.resolvedShowRowNumber,
+          draggableSelectedRows: false,
+          ...(customOpts.indicator || {})
+        })
+      } catch (e) { /* noop */ }
+
+      if (this.resolvedStateBarVisible) {
+        this.gridView.setStateBar({
+          visible: true,
+          width: this.stateBarWidth,
+          stateStyles: {
+            insert: { background: '#22c55e' },
+            update: { background: '#3b82f6' },
+            delete: { background: '#ef4444' },
+            read:   { background: 'transparent' }
+          },
+          ...(customOpts.stateBar || {})
+        })
+      } else {
+        this.gridView.setStateBar({ visible: false })
+      }
+
+      if (this.resolvedCheckable) {
+        this.gridView.setCheckBar({
+          visible: true,
+          width: this.checkBarWidth,
+          exclusive: this.exclusiveSelectable,
+          head: 'check',
+          headCheckCallback: null,
+          ...(customOpts.checkBar || {})
+        })
+      } else {
+        this.gridView.setCheckBar({ visible: false })
+      }
+    },
+
+    // =========================================================
+    // 🎨 동적 테마 연동 (제어열 indicator / checkBar / stateBar)
+    //   ⚠ RealGrid 2.10.0 GridView에는 setStyles 가 없음 → typeof 가드로 안전 처리.
+    //     헤더/바디 셀 색상은 grid-theme.css 의 .rg-* 클래스(styleName)로 적용됨.
+    //     (RealGridTreeJs 와 동일 구현으로 통일)
+    // =========================================================
+    getGridThemeStyles(theme) {
+      const isDark = theme === 'dark' || theme === 'dark-navy'
+      if (isDark) {
+        const bg = '#1E293B'
+        const headBg = theme === 'dark-navy' ? '#0F172A' : '#111827'
+        const border = '1px solid #334155'
+        const color = '#F8FAFC'
+        const cell = { background: bg, color, borderRight: border }
+        const head = { background: headBg, color, borderBottom: border }
+        return {
+          indicator: { ...cell, head },
+          checkBar: { ...cell, head },
+          stateBar: { background: bg, borderRight: border }
+        }
+      }
+      const cell = { background: '#FFFFFF', color: '#1E293B', borderRight: '1px solid #E2E8F0' }
+      const head = { background: '#F1F5F9', color: '#1E293B', borderBottom: '1px solid #E2E8F0' }
+      return {
+        indicator: { ...cell, head },
+        checkBar: { ...cell, head },
+        stateBar: { background: '#FFFFFF', borderRight: '1px solid #E2E8F0' }
+      }
+    },
+
+    applyGridTheme(theme) {
+      if (!this.gridView) return
+      try {
+        const styles = this.getGridThemeStyles(theme)
+        if (typeof this.gridView.setStyles === 'function') {
+          this.gridView.setStyles(styles)
+        }
+      } catch (e) {
+        console.warn('[RealGrid] applyGridTheme error:', e)
+      }
+    },
+
+    exportToExcel(fileName = 'RealGrid_Data.xlsx') {
+      if (!this.gridView) return
+      try {
+        const name = fileName.endsWith('.xlsx') ? fileName : `${fileName}.xlsx`
+        if (typeof this.gridView.exportGrid === 'function') {
+          this.gridView.exportGrid({
+            type: 'excel',
+            target: 'local',
+            fileName: name,
+            showConfirm: false,
+            showProgress: true
+          })
+        }
+      } catch (e) {
+        console.warn('[RealGrid] exportToExcel error:', e)
+      }
+    },
+
+    addRow(defaultValues = {}) {
+      if (!this.dataProvider) return -1
+      const itemIndex = this.dataProvider.addRow(defaultValues)
+      if (this.gridView && itemIndex >= 0) {
+        this.gridView.setCurrent({ itemIndex, fieldIndex: 0 })
+      }
+      return itemIndex
+    },
+
+    deleteSelectedRows() {
+      if (!this.gridView || !this.dataProvider) return 0
+      const checkedRows = this.gridView.getCheckedRows()
+      if (checkedRows && checkedRows.length > 0) {
+        this.dataProvider.removeRows(checkedRows)
+        return checkedRows.length
+      } else {
+        const current = this.gridView.getCurrent()
+        if (current && current.dataRow !== undefined && current.dataRow >= 0) {
+          this.dataProvider.removeRow(current.dataRow)
+          return 1
+        }
+      }
+      return 0
+    },
+
+    commit() {
+      if (this.gridView) {
+        this.gridView.commit()
+      }
+    },
+
+    getChanges() {
+      if (!this.dataProvider) return { created: [], updated: [], deleted: [] }
+      const createdIdx = this.dataProvider.getStateRows('created') || []
+      const updatedIdx = this.dataProvider.getStateRows('updated') || []
+      const deletedIdx = this.dataProvider.getStateRows('deleted') || []
+      return {
+        created: createdIdx.map(idx => this.dataProvider.getJsonRow(idx)),
+        updated: updatedIdx.map(idx => this.dataProvider.getJsonRow(idx)),
+        deleted: deletedIdx.map(idx => this.dataProvider.getJsonRow(idx))
+      }
+    },
+
+    // -------------------------------------------------------------------------
+    // 🌐 Alias Methods for Cross-Grid Standard Parity
+    // -------------------------------------------------------------------------
+    add(initialObj = {}) {
+      return this.addRow(initialObj)
+    },
+    deleteSelected() {
+      return this.deleteSelectedRows()
+    },
+    exportExcel(fileName = 'RealGrid_Data.xlsx') {
+      return this.exportToExcel(fileName)
+    },
+
+    // -------------------------------------------------------------------------
+    // 📌 Right-Click Row/Column Fixing Context Menu
+    // -------------------------------------------------------------------------
+    getColumnIndexByName(colName) {
+      if (!this.gridView || !colName) return -1
+      try {
+        if (typeof this.gridView.getColumnIndex === 'function') {
+          return this.gridView.getColumnIndex(colName)
+        }
+        if (typeof this.gridView.columnByName === 'function') {
+          const col = this.gridView.columnByName(colName)
+          if (col) {
+            if (typeof col.displayIndex === 'number' && col.displayIndex >= 0) return col.displayIndex
+            if (typeof col.index === 'number' && col.index >= 0) return col.index
+          }
+        }
+      } catch (e) {
+        console.warn('getColumnIndexByName error:', e)
+      }
+      return -1
+    },
+
+    handleDynamicFixing(item, clickData) {
+      if (!this.gridView) return false
+      const currentFixed = this.gridView.getFixedOptions ? (this.gridView.getFixedOptions() || {}) : {}
+      let colCount = currentFixed.colCount || 0
+      let rowCount = currentFixed.rowCount || 0
+
+      if (item.tag === 'fixColumn' && clickData.column) {
+        const colIdx = this.getColumnIndexByName(clickData.column)
+        if (colIdx >= 0) {
+          colCount = colIdx + 1
+          this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+          showToast(`'${clickData.column}' 컬럼까지 열 고정이 적용되었습니다.`, { type: 'success' })
+          return true
+        }
+      } else if (item.tag === 'fixRow' && clickData.itemIndex !== undefined && clickData.itemIndex >= 0) {
+        rowCount = clickData.itemIndex + 1
+        this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+        showToast(`${rowCount}번째 행까지 행 고정이 적용되었습니다.`, { type: 'success' })
+        return true
+      } else if (item.tag === 'fixBoth' && clickData.column && clickData.itemIndex !== undefined) {
+        const colIdx = this.getColumnIndexByName(clickData.column)
+        if (colIdx >= 0 && clickData.itemIndex >= 0) {
+          colCount = colIdx + 1
+          rowCount = clickData.itemIndex + 1
+          this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+          showToast(`${rowCount}행 x '${clickData.column}'열 동시 고정이 적용되었습니다.`, { type: 'success' })
+          return true
+        }
+      } else if (item.tag === 'clearFixing') {
+        this.gridView.setFixedOptions({ colCount: 0, rowCount: 0 })
+        showToast('행/열 고정이 해제되었습니다.', { type: 'info' })
+        return true
+      } else if (item.tag === 'saveView') {
+        this.saveCurrentView()
+        return true
+      }
+      return false
+    },
+
+    initContextMenu() {
+      if (!this.gridView || this.resolvedPinnable === false) return
+      const menuItems = [
+        { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
+        { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
+        { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
+        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
+      ]
+      if (this.showSavedViews) {
+        menuItems.push({ label: '-' })
+        menuItems.push({ label: '💾 현재 뷰 상태 저장', tag: 'saveView' })
+      }
+      this.gridView.setContextMenu(menuItems)
+      this.gridView.onContextMenuPopup = () => true
+      this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
+        this.handleDynamicFixing(item, clickData)
       }
     },
 
@@ -400,6 +639,7 @@ export default {
         this.restoreGridLayout()
       }
 
+      this.initContextMenu()
       this.syncColumnItems()
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')

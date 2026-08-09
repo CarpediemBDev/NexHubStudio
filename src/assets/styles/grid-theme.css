@@ -44,6 +44,28 @@
 }
 
 /* ==========================================================================
+   ROW BAR (No./stateBar/checkBar) 기본 배경 통일
+   RealGrid 2.10.0 기본 규칙 `.rg-rowbarcontainer .rg-table tr td { background:#F1F7FF }`
+   이 제어열 전체에 연한 파랑 틴트를 깔아 데이터 셀(흰색)과 달라 보임 → JqxGrid 톤에 맞춰 흰색으로.
+   RealGrid는 이 CSS 클래스 색을 읽어 캔버스에 칠하므로 오버라이드가 반영됨.
+   ⚠ RealGrid base 규칙과 동일 specificity((0,2,2))로 두고, grid-theme.css 가 RealGrid 주입
+     스타일보다 늦게 로드되는 점을 이용해 base 틴트만 덮는다. 상태 마커(created/updated/
+     deleted)·focus·select 규칙은 (0,3,2) 로 더 높아 그대로 유지된다. !important 는 쓰지 않는다. */
+.rg-rowbarcontainer .rg-table tr td {
+  background-color: var(--bg-card);
+  /* No.(rowindicator) 숫자색 — RealGrid 기본 네이비(#002D62) → JqxGrid 톤의 회색으로 */
+  color: var(--text-secondary);
+}
+
+/* 행 높이 — RealGrid 기본(~21px)이 JqxGrid(~33px)보다 촘촘 → line-height 로 여유있게 통일.
+   RealGrid 2.10.0 은 바디/행바를 HTML <table> 로 렌더하므로 셀 line-height 가 곧 행 높이가 됨.
+   데이터 셀과 제어열(No./state/check) 모두 동일 높이로 맞춰 정렬 유지. */
+.rg-data-cell,
+.rg-rowbarcontainer .rg-table tr td {
+  line-height: 32px !important;
+}
+
+/* ==========================================================================
    STATE BAR — 행 상태 컬러 뱃지 (추가=초록, 수정=파랑, 삭제=빨강)
    RealGrid가 state cell에 부여하는 data-rowstate 속성 기반 CSS
    ========================================================================== */
