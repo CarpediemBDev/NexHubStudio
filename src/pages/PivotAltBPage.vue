@@ -43,7 +43,7 @@
           </div>
         </div>
 
-        <div class="d-flex align-items-center gap-1.5 ms-auto">
+        <div class="d-flex align-items-center gap-2 ms-auto">
           <!-- Smart Expandable Search Bar -->
           <QuickSearchBar
             :searchResult="searchResult"

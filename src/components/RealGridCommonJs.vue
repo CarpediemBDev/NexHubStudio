@@ -94,6 +94,7 @@ export default {
     includeGroupInView: { type: Boolean, default: false },
     showRowNumber: { type: Boolean, default: undefined },
     stateBarVisible: { type: Boolean, default: undefined },
+    showRowStatus: { type: Boolean, default: undefined },
     insertable: { type: Boolean, default: undefined },
     sortable: { type: Boolean, default: true },
     filterable: { type: Boolean, default: undefined },
@@ -132,6 +133,7 @@ export default {
     },
     resolvedStateBarVisible() {
       if (this.stateBarVisible !== undefined) return this.stateBarVisible
+      if (this.showRowStatus !== undefined) return this.showRowStatus
       return true
     },
     resolvedCheckable() {
@@ -352,6 +354,44 @@ export default {
       return 'light'
     },
 
+    // 🎨 동적 테마 연동 — RealGrid 2.10.0엔 setStyles가 없어 typeof 가드 처리.
+    //    헤더/바디 색상은 grid-theme.css 의 .rg-* 클래스로 적용됨. (RealGridTreeJs와 동일)
+    getGridThemeStyles(theme) {
+      const isDark = theme === 'dark' || theme === 'dark-navy'
+      if (isDark) {
+        const bg = '#1E293B'
+        const headBg = theme === 'dark-navy' ? '#0F172A' : '#111827'
+        const border = '1px solid #334155'
+        const color = '#F8FAFC'
+        const cell = { background: bg, color, borderRight: border }
+        const head = { background: headBg, color, borderBottom: border }
+        return {
+          indicator: { ...cell, head },
+          checkBar: { ...cell, head },
+          stateBar: { background: bg, borderRight: border }
+        }
+      }
+      const cell = { background: '#FFFFFF', color: '#1E293B', borderRight: '1px solid #E2E8F0' }
+      const head = { background: '#F1F5F9', color: '#1E293B', borderBottom: '1px solid #E2E8F0' }
+      return {
+        indicator: { ...cell, head },
+        checkBar: { ...cell, head },
+        stateBar: { background: '#FFFFFF', borderRight: '1px solid #E2E8F0' }
+      }
+    },
+
+    applyGridTheme(theme) {
+      if (!this.gridView) return
+      try {
+        const styles = this.getGridThemeStyles(theme)
+        if (typeof this.gridView.setStyles === 'function') {
+          this.gridView.setStyles(styles)
+        }
+      } catch (e) {
+        console.warn('[RealGrid] applyGridTheme error:', e)
+      }
+    },
+
     _notify(message, opts = {}) {
       const type = opts.type || 'info'
       if (typeof this.toast === 'function') {
@@ -463,6 +503,99 @@ export default {
       }
     },
 
+    // -------------------------------------------------------------------------
+    // 🌐 Alias Methods for Cross-Grid Standard Parity
+    // -------------------------------------------------------------------------
+    add(initialObj = {}) {
+      return this.addRow(initialObj)
+    },
+    deleteSelected() {
+      return this.deleteSelectedRows()
+    },
+    exportExcel(fileName = 'RealGrid_Data.xlsx') {
+      return this.exportToExcel(fileName)
+    },
+
+    // -------------------------------------------------------------------------
+    // 📌 Right-Click Row/Column Fixing Context Menu
+    // -------------------------------------------------------------------------
+    getColumnIndexByName(colName) {
+      if (!this.gridView || !colName) return -1
+      try {
+        if (typeof this.gridView.getColumnIndex === 'function') {
+          return this.gridView.getColumnIndex(colName)
+        }
+        if (typeof this.gridView.columnByName === 'function') {
+          const col = this.gridView.columnByName(colName)
+          if (col) {
+            if (typeof col.displayIndex === 'number' && col.displayIndex >= 0) return col.displayIndex
+            if (typeof col.index === 'number' && col.index >= 0) return col.index
+          }
+        }
+      } catch (e) {
+        console.warn('getColumnIndexByName error:', e)
+      }
+      return -1
+    },
+
+    handleDynamicFixing(item, clickData) {
+      if (!this.gridView) return false
+      const currentFixed = this.gridView.getFixedOptions ? (this.gridView.getFixedOptions() || {}) : {}
+      let colCount = currentFixed.colCount || 0
+      let rowCount = currentFixed.rowCount || 0
+
+      if (item.tag === 'fixColumn' && clickData.column) {
+        const colIdx = this.getColumnIndexByName(clickData.column)
+        if (colIdx >= 0) {
+          colCount = colIdx + 1
+          this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+          this._notify(`'${clickData.column}' 컬럼까지 열 고정이 적용되었습니다.`, { type: 'success' })
+          return true
+        }
+      } else if (item.tag === 'fixRow' && clickData.itemIndex !== undefined && clickData.itemIndex >= 0) {
+        rowCount = clickData.itemIndex + 1
+        this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+        this._notify(`${rowCount}번째 행까지 행 고정이 적용되었습니다.`, { type: 'success' })
+        return true
+      } else if (item.tag === 'fixBoth' && clickData.column && clickData.itemIndex !== undefined) {
+        const colIdx = this.getColumnIndexByName(clickData.column)
+        if (colIdx >= 0 && clickData.itemIndex >= 0) {
+          colCount = colIdx + 1
+          rowCount = clickData.itemIndex + 1
+          this.gridView.setFixedOptions({ colCount, rowCount, resizable: true })
+          this._notify(`${rowCount}행 x '${clickData.column}'열 동시 고정이 적용되었습니다.`, { type: 'success' })
+          return true
+        }
+      } else if (item.tag === 'clearFixing') {
+        this.gridView.setFixedOptions({ colCount: 0, rowCount: 0 })
+        this._notify('행/열 고정이 해제되었습니다.', { type: 'info' })
+        return true
+      } else if (item.tag === 'saveView') {
+        this.saveCurrentView()
+        return true
+      }
+      return false
+    },
+
+    initContextMenu() {
+      if (!this.gridView || this.resolvedPinnable === false) return
+      const menuItems = [
+        { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
+        { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
+        { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
+        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
+      ]
+      if (this.showSavedViews) {
+        menuItems.push({ label: '-' })
+        menuItems.push({ label: '💾 현재 뷰 상태 저장', tag: 'saveView' })
+      }
+      this.gridView.setContextMenu(menuItems)
+      this.gridView.onContextMenuPopup = () => true
+      this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
+        this.handleDynamicFixing(item, clickData)
+      }
+    },
+
     destroyGrid() {
       if (this.gridView) {
         try { this.gridView.destroy() } catch (e) { /* noop */ }
@@ -542,6 +675,7 @@ export default {
         this.restoreGridLayout()
       }
 
+      this.initContextMenu()
       this.syncColumnItems()
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
     }

@@ -1,43 +1,68 @@
 <template>
-  <div class="jqx-custom-grid-wrapper w-100" :style="{ height: containerHeight }">
-    <!-- Built-in B2B Toolbar -->
-    <div v-if="showToolbar" class="jqx-grid-toolbar d-flex justify-content-between align-items-center mb-2 gap-2 flex-wrap">
-      <div class="d-flex align-items-center gap-1">
-        <slot name="toolbar-left">
-          <button v-if="editable" type="button" class="btn btn-sm btn-outline-primary b2b-text-xs" @click="add()">
-            <i class="bi bi-plus-lg me-1"></i> 행 추가
+  <div class="jqx-custom-grid-wrapper w-100 border rounded-2 overflow-hidden shadow-sm" :style="{ height: containerHeight }">
+    <!-- 1단: 상단 내장 서브 툴바 (컬럼 팝오버 + 뷰 저장 + 내 뷰 칩스) -->
+    <div v-if="showColumnPicker || showSavedViews" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
+      <!-- Left: Column Picker & Save View Buttons -->
+      <div class="d-flex align-items-center gap-2">
+        <!-- 1. [컬럼] 버튼 & Dropdown Popover -->
+        <div v-if="showColumnPicker" class="dropdown">
+          <button
+            class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2.5 b2b-text-xs shadow-2xs"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="컬럼 숨김/표시 설정"
+            @click="syncColumnItems"
+          >
+            <i class="bi bi-eye text-primary"></i>
+            <span>컬럼 설정</span>
+            <i class="bi bi-chevron-down opacity-50 ms-0.5"></i>
           </button>
-          <button v-if="editable" type="button" class="btn btn-sm btn-outline-danger b2b-text-xs" @click="deleteSelected()">
-            <i class="bi bi-dash-lg me-1"></i> 선택 삭제
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-success b2b-text-xs" @click="exportExcel()">
-            <i class="bi bi-file-earmark-excel me-1"></i> 엑셀
-          </button>
-          <button v-if="showSaveButton" type="button" class="btn btn-sm btn-primary b2b-text-xs" @click="$emit('save', getChanges())">
-            <i class="bi bi-floppy me-1"></i> 저장
-          </button>
-        </slot>
+          <div class="dropdown-menu p-2 shadow border-0 b2b-text-xs" style="min-width: 210px; max-height: 320px; overflow-y: auto;">
+            <div class="d-flex align-items-center justify-content-between pb-1.5 mb-1.5 border-bottom px-1">
+              <span class="fw-bold text-dark"><i class="bi bi-layout-three me-1 text-primary"></i>컬럼 표시 설정</span>
+              <button class="btn btn-link p-0 text-decoration-none b2b-text-xs text-primary" @click="resetColumnVisibility">전체표시</button>
+            </div>
+            <div v-for="col in columnItems" :key="col.datafield" class="form-check py-1 px-3 m-0">
+              <input
+                class="form-check-input cursor-pointer"
+                type="checkbox"
+                :id="'col_chk_jqx_' + col.datafield"
+                :checked="!col.hidden"
+                @change="toggleColumnVisibility(col.datafield, $event.target.checked)"
+              />
+              <label class="form-check-label cursor-pointer text-dark text-truncate d-block" :for="'col_chk_jqx_' + col.datafield" style="max-width: 150px;">
+                {{ col.text || col.datafield }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. [뷰 저장] 버튼 -->
+        <button
+          v-if="showSavedViews"
+          class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2.5 b2b-text-xs shadow-2xs"
+          title="현재 뷰 상태 저장"
+          @click="saveCurrentView"
+        >
+          <i class="bi bi-bookmark-plus text-warning"></i>
+          <span>뷰 저장</span>
+        </button>
       </div>
 
-      <div class="d-flex align-items-center gap-2">
-        <slot name="toolbar-right">
-          <!-- Quick Search Filter -->
-          <div v-if="showQuickSearch" class="input-group input-group-sm" style="width: 220px;">
-            <span class="input-group-text bg-theme-subcard text-muted">
-              <i class="bi bi-search"></i>
-            </span>
-            <input
-              type="text"
-              class="form-control b2b-text-xs"
-              v-model="quickSearchQuery"
-              placeholder="그리드 빠른 검색..."
-              @input="onQuickSearch"
-            />
-            <button v-if="quickSearchQuery" class="btn btn-outline-secondary border-0 text-muted" type="button" @click="clearQuickSearch">
-              <i class="bi bi-x"></i>
-            </button>
-          </div>
-        </slot>
+      <!-- Right: Dynamic [내 뷰] Chips -->
+      <div v-if="showSavedViews && savedViews.length > 0" class="d-flex align-items-center gap-1.5 ms-auto flex-wrap">
+        <span class="b2b-text-xs text-muted fw-semibold me-1"><i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:</span>
+        <div
+          v-for="view in savedViews"
+          :key="view.id"
+          class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal b2b-text-xs"
+          :class="activeViewId === view.id ? 'bg-primary text-white shadow-sm' : 'bg-theme-card text-theme-primary border-theme'"
+          @click="applySavedView(view)"
+        >
+          <span>{{ view.name }}</span>
+          <i class="bi bi-x ms-1 text-danger opacity-75" @click.stop="deleteSavedView(view.id)" title="뷰 삭제"></i>
+        </div>
       </div>
     </div>
 
@@ -58,6 +83,8 @@
         :pagesizeoptions="pagesizeoptions"
         :sortable="sortable"
         :filterable="filterable"
+        :groupable="resolvedGroupable"
+        :localization="localizationObj"
         :columnsresize="columnsresize"
         :columnsreorder="columnsreorder"
         :autoheight="autoheight"
@@ -87,9 +114,13 @@ export default {
     editable: { type: Boolean, default: true },
     selectionmode: { type: String, default: 'singlerow' },
     checkable: { type: Boolean, default: false },
+    gridId: { type: String, default: '' },
     showRowNumber: { type: Boolean, default: true },
     showRowStatus: { type: Boolean, default: true },
-    showToolbar: { type: Boolean, default: false },
+    stateBarVisible: { type: Boolean, default: undefined },
+    showToolbar: { type: Boolean, default: true },
+    showColumnPicker: { type: Boolean, default: true },
+    showSavedViews: { type: Boolean, default: true },
     showSaveButton: { type: Boolean, default: true },
     showQuickSearch: { type: Boolean, default: true },
     pageable: { type: Boolean, default: true },
@@ -97,6 +128,8 @@ export default {
     pagesizeoptions: { type: Array, default: () => [10, 20, 50, 100] },
     sortable: { type: Boolean, default: true },
     filterable: { type: Boolean, default: true },
+    groupable: { type: Boolean, default: undefined },
+    groupPanelVisible: { type: Boolean, default: undefined },
     columnsresize: { type: Boolean, default: true },
     columnsreorder: { type: Boolean, default: true },
     autoheight: { type: Boolean, default: false },
@@ -111,7 +144,15 @@ export default {
       source: null,
       internalData: [],
       quickSearchQuery: '',
-      resizeObserver: null
+      resizeObserver: null,
+      savedViews: [],
+      activeViewId: null,
+      columnItems: [],
+      hiddenColumnSet: new Set(),
+      // 그룹 패널 안내문 한글화 (RealGrid 문구와 통일)
+      localizationObj: {
+        groupsheaderstring: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.'
+      }
     }
   },
 
@@ -121,14 +162,18 @@ export default {
       return this.height
     },
     gridHeight() {
-      if (this.showToolbar) {
-        return 'calc(100% - 42px)'
-      }
+      // jqxGrid의 height 속성은 calc() 를 파싱하지 못하므로 '100%' 로 전달하고,
+      // 툴바를 제외한 남은 높이는 .jqx-custom-grid 의 flex:1 이 담당한다.
       return '100%'
     },
     effectiveSelectionMode() {
       if (this.checkable) return 'checkbox'
       return this.selectionmode
+    },
+    resolvedGroupable() {
+      if (this.groupable !== undefined) return this.groupable
+      if (this.groupPanelVisible !== undefined) return this.groupPanelVisible
+      return false
     },
     augmentedDatafields() {
       let fields = [...this.datafields]
@@ -182,7 +227,8 @@ export default {
       }
 
       // 2. 행 상태 컬럼 (StateBar - RealGrid 1:1 컴팩트 24px)
-      if (this.showRowStatus && !cols.some((c) => c.datafield === 'rowStatus')) {
+      const shouldShowStatus = this.stateBarVisible !== undefined ? this.stateBarVisible : this.showRowStatus
+      if (shouldShowStatus && !cols.some((c) => c.datafield === 'rowStatus')) {
         const statusCol = {
           text: ' ',
           datafield: 'rowStatus',
@@ -223,6 +269,8 @@ export default {
   },
 
   mounted() {
+    this.loadSavedViews()
+    this.syncColumnItems()
     // Auto-Resize Observer
     if (window.ResizeObserver && this.$refs.gridContainerRef) {
       this.resizeObserver = new ResizeObserver(() => {
@@ -243,6 +291,86 @@ export default {
   },
 
   methods: {
+    syncColumnItems() {
+      if (!this.columns) return
+      this.columnItems = this.columns.map((c) => ({
+        datafield: c.datafield,
+        text: c.text || c.datafield,
+        hidden: c.hidden === true || this.hiddenColumnSet.has(c.datafield)
+      }))
+    },
+
+    toggleColumnVisibility(datafield, visible) {
+      if (visible) {
+        this.hiddenColumnSet.delete(datafield)
+        this.$refs.grid?.showcolumn(datafield)
+      } else {
+        this.hiddenColumnSet.add(datafield)
+        this.$refs.grid?.hidecolumn(datafield)
+      }
+      this.syncColumnItems()
+    },
+
+    resetColumnVisibility() {
+      this.hiddenColumnSet.clear()
+      this.columns.forEach((c) => {
+        if (c.datafield) this.$refs.grid?.showcolumn(c.datafield)
+      })
+      this.syncColumnItems()
+      showToast('모든 컬럼이 표시되도록 설정되었습니다.', { type: 'info' })
+    },
+
+    loadSavedViews() {
+      const key = this.gridId ? `jqxgrid-saved-views-${this.gridId}` : 'jqxgrid-saved-views-default'
+      try {
+        const stored = localStorage.getItem(key)
+        if (stored) this.savedViews = JSON.parse(stored) || []
+      } catch (e) {}
+    },
+
+    persistSavedViews() {
+      const key = this.gridId ? `jqxgrid-saved-views-${this.gridId}` : 'jqxgrid-saved-views-default'
+      try {
+        localStorage.setItem(key, JSON.stringify(this.savedViews))
+      } catch (e) {}
+    },
+
+    saveCurrentView() {
+      const defaultName = `내 뷰 ${this.savedViews.length + 1}`
+      const name = prompt('저장할 뷰 이름을 입력하세요:', defaultName)
+      if (!name || !name.trim()) return
+
+      const hidden = Array.from(this.hiddenColumnSet)
+      const newView = { id: 'view_' + Date.now(), name: name.trim(), hidden }
+      this.savedViews.push(newView)
+      this.persistSavedViews()
+      this.applySavedView(newView)
+      showToast(`'${newView.name}' 뷰가 저장되었습니다!`, { type: 'success' })
+    },
+
+    applySavedView(view) {
+      this.hiddenColumnSet = new Set(view.hidden || [])
+      this.columns.forEach((c) => {
+        if (c.datafield) {
+          if (this.hiddenColumnSet.has(c.datafield)) {
+            this.$refs.grid?.hidecolumn(c.datafield)
+          } else {
+            this.$refs.grid?.showcolumn(c.datafield)
+          }
+        }
+      })
+      this.activeViewId = view.id
+      this.syncColumnItems()
+      showToast(`'${view.name}' 뷰가 적용되었습니다.`, { type: 'info' })
+    },
+
+    deleteSavedView(id) {
+      this.savedViews = this.savedViews.filter((v) => v.id !== id)
+      this.persistSavedViews()
+      if (this.activeViewId === id) this.activeViewId = null
+      showToast('저장된 뷰가 삭제되었습니다.', { type: 'warning' })
+    },
+
     initInternalData(val) {
       const arr = Array.isArray(val) ? val : []
       this.internalData = arr.map((item, idx) => ({
@@ -390,9 +518,25 @@ export default {
         this.$refs.grid?.exportdata('xlsx', fileName)
         showToast('엑셀 파일이 다운로드되었습니다.', { type: 'success' })
       } catch (err) {
-        // Fallback to csv if xlsx export module is not present
-        this.$refs.grid?.exportdata('csv', fileName)
+        console.warn('[JqxCustomGrid] xlsx export failed, trying csv fallback:', err)
+        try {
+          this.$refs.grid?.exportdata('csv', fileName)
+          showToast('CSV 파일로 내보내졌습니다.', { type: 'info' })
+        } catch (e) {
+          showToast('엑셀 내보내기에 실패했습니다.', { type: 'danger' })
+        }
       }
+    },
+
+    // 🌐 Cross-Grid Standard Parity Aliases
+    exportToExcel(fileName = 'grid_export') {
+      return this.exportExcel(fileName)
+    },
+    addRow(initialObj = {}, position = 'first') {
+      return this.add(initialObj, position)
+    },
+    deleteSelectedRows() {
+      return this.deleteSelected()
     },
 
     // 퀵 검색
@@ -433,42 +577,59 @@ export default {
   flex-direction: column;
 }
 
-.jqx-grid-toolbar {
-  padding: 4px 8px;
-  background-color: var(--bs-tertiary-bg, #f8f9fa);
-  border: 1px solid #e9ecef;
-  border-radius: 0.375rem;
+/* 상단 내장 툴바 — RealGrid와 동일 서브카드 톤 */
+.b2b-grid-inner-toolbar {
+  background-color: var(--b2b-color-bg-subcard, #f8fafc);
 }
 
-/* Header Gradient & B2B styling */
+/* 그리드 컨테이너 — 테두리/라운드/그림자는 wrapper의 부트스트랩 유틸이 담당.
+   wrapper(flex column)에서 툴바를 제외한 남은 높이를 flex로 채워, jqxGrid가
+   height='100%'로 전체 높이를 정확히 잡도록 한다(페이저 아래 빈 공간 제거). */
+.jqx-custom-grid {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* jqx 기본 보더/배경 초기화 → 앱 디자인 토큰으로 통일 */
+.jqx-custom-grid :deep(.jqx-grid),
+.jqx-custom-grid :deep(.jqx-border-bootstrap),
+.jqx-custom-grid :deep(.jqx-widget-content) {
+  border-width: 0 !important;
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 컬럼 헤더 — 회색 그라데이션 제거, RealGrid 헤더 톤(--bg-header) 적용 */
 .jqx-custom-grid :deep(.jqx-grid-column-header) {
-  background: linear-gradient(180deg, #f8f9fa, #f1f3f5);
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--bg-header) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  border-right: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
   font-weight: 600;
   font-size: 0.8125rem;
 }
 
-/* Hover & Selected styles */
+/* 데이터 셀 */
+.jqx-custom-grid :deep(.jqx-grid-cell) {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Hover & Selected — 토큰 기반(라이트/다크 자동 대응) */
 .jqx-custom-grid :deep(.jqx-grid-cell-hover) {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
+  background-color: var(--b2b-color-hover-bg) !important;
+  color: var(--text-primary) !important;
 }
 
 .jqx-custom-grid :deep(.jqx-grid-cell-selected) {
-  background-color: #e0f2fe !important;
-  color: #0284c7 !important;
+  background-color: var(--b2b-color-primary-subtle) !important;
+  color: var(--b2b-color-primary) !important;
 }
 
-/* Row Numbering */
-.jqx-custom-grid :deep(.jqs-rownum-cell) {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Row Status Icons */
+/* Row Number / State 셀 중앙 정렬 */
+.jqx-custom-grid :deep(.jqs-rownum-cell),
 .jqx-custom-grid :deep(.jqs-state-cell) {
   width: 100%;
   height: 100%;
@@ -477,83 +638,29 @@ export default {
   justify-content: center;
 }
 
-.jqx-custom-grid :deep(.jqs-row-a) {
-  background-color: #f0fdf4 !important;
-}
-.jqx-custom-grid :deep(.jqs-row-u) {
-  background-color: #fffbe6 !important;
-}
+/* ==========================================================================
+   ROW STATUS — 추가=초록 / 수정=파랑 / 삭제=빨강
+   RealGrid state bar와 동일 컨벤션. rgba 오버레이라 라이트/다크 양쪽 자연스러움
+   ========================================================================== */
+.jqx-custom-grid :deep(.jqs-row-a) { background-color: rgba(34, 197, 94, 0.12) !important; }   /* green-500 */
+.jqx-custom-grid :deep(.jqs-row-u) { background-color: rgba(59, 130, 246, 0.12) !important; }  /* blue-500 */
 .jqx-custom-grid :deep(.jqs-row-d) {
-  background-color: #fef2f2 !important;
+  background-color: rgba(239, 68, 68, 0.12) !important;                                          /* red-500 */
   text-decoration: line-through;
   opacity: 0.7;
 }
 
 .jqx-custom-grid :deep(.jqs-state-cell) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
   font-size: 11px;
   font-weight: bold;
 }
 
-.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell) {
-  background-color: #dbeafe !important;
-}
-.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell::after) {
-  content: '+';
-  color: #1d4ed8;
-  font-weight: bold;
-}
+.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell) { background-color: #22c55e !important; }
+.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell::after) { content: '+'; color: #fff; font-weight: bold; }
 
-.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell) {
-  background-color: #fef3c7 !important;
-}
-.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell::after) {
-  content: '✏';
-  color: #d97706;
-  font-size: 10px;
-}
+.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell) { background-color: #3b82f6 !important; }
+.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell::after) { content: '✏'; color: #fff; font-size: 10px; }
 
-.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell) {
-  background-color: #fee2e2 !important;
-}
-.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell::after) {
-  content: '-';
-  color: #dc2626;
-  font-weight: bold;
-}
-
-/* Dark theme styling */
-[data-bs-theme="dark"] .jqx-grid-toolbar {
-  background-color: #212529;
-  border-color: #343a40;
-}
-
-[data-bs-theme="dark"] .jqx-custom-grid :deep(.jqx-grid-column-header) {
-  background: #2b3035;
-  border-color: #373b3e;
-  color: #e9ecef;
-}
-
-[data-bs-theme="dark"] .jqx-custom-grid :deep(.jqx-grid-cell) {
-  background-color: #212529;
-  color: #f8f9fa;
-  border-color: #343a40;
-}
-
-/* Container Border fix */
-.jqx-custom-grid {
-  width: 100%;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  overflow: hidden;
-}
-
-.jqx-custom-grid :deep(.jqx-grid),
-.jqx-custom-grid :deep(.jqx-border-bootstrap),
-.jqx-custom-grid :deep(.jqx-widget-content) {
-  border-width: 0px !important;
-}
+.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell) { background-color: #ef4444 !important; }
+.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell::after) { content: '−'; color: #fff; font-weight: bold; }
 </style>

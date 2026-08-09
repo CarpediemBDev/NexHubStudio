@@ -362,7 +362,8 @@ export default {
       }
 
       const state = captureViewState(this.gridView, { includeGroup: this.includeGroupInView, dataProvider: this.dataProvider })
-      const viewName = prompt('저장할 뷰 이름을 입력하세요 (컬럼 배치·고정·정렬·노드순서 포함):', '사용자 정의 뷰')
+      const defaultName = `내 뷰 ${this.savedViews.length + 1}`
+      const viewName = prompt('저장할 뷰 이름을 입력하세요 (컬럼 배치·고정·정렬·노드순서 포함):', defaultName)
       if (!viewName || !viewName.trim()) return
 
       const newView = { id: 'view_' + Date.now(), name: viewName.trim(), ...state }
@@ -647,6 +648,22 @@ export default {
         console.error('Excel export error:', err)
         this._notify('엑셀 파일 내보내기에 실패했습니다.', { type: 'danger' })
       }
+    },
+
+    exportExcel(fileName = 'RealGrid_Tree.xlsx') {
+      return this.exportToExcel(fileName)
+    },
+    addRow(values = {}) {
+      return this.addRootRow(values)
+    },
+    add(values = {}) {
+      return this.addRootRow(values)
+    },
+    deleteSelectedRows() {
+      return this.deleteChecked()
+    },
+    deleteSelected() {
+      return this.deleteChecked()
     },
 
     // =========================================================

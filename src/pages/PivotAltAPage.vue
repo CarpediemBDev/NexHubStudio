@@ -71,7 +71,7 @@
         <!-- GROUP 2 & 3: Data Utilities & Right-Aligned CUD Actions -->
         <div class="d-flex align-items-center gap-2 ms-auto">
           <!-- GROUP 2: Data Utilities (Search, Column, Excel) -->
-          <div class="d-flex align-items-center gap-1.5">
+          <div class="d-flex align-items-center gap-2">
             <QuickSearchBar
               :searchResult="searchResult"
               @search="onGridSearch"
@@ -93,7 +93,7 @@
           <div class="border-end h-75 my-auto" style="height: 20px !important;"></div>
 
           <!-- GROUP 3: CUD Row Operations (Right-Aligned Accent) -->
-          <div class="d-flex align-items-center gap-1.5 ms-1">
+          <div class="d-flex align-items-center gap-2">
             <button
               class="btn-b2b-action"
               :disabled="isGrouped"

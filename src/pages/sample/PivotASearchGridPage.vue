@@ -59,7 +59,7 @@
         </div>
 
         <!-- Right: Action Buttons (Save View & Excel Export) -->
-        <div class="d-flex align-items-center gap-1.5 ms-auto">
+        <div class="d-flex align-items-center gap-2 ms-auto">
           <button class="btn-b2b-action" title="현재 피벗 뷰 저장" @click="saveCurrentView">
             <i class="bi bi-bookmark-plus text-warning me-0.5"></i>
             <span>뷰 저장</span>
