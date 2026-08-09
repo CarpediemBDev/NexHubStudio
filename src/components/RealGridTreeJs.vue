@@ -1,6 +1,75 @@
 <template>
-  <div class="realgrid-tree-wrapper w-100">
-    <div ref="treeElement" class="w-100" :style="{ height: height }"></div>
+  <div class="realgrid-tree-wrapper w-100 border rounded-2 overflow-hidden shadow-sm" :style="{ height: height }">
+    <!-- 1단: 상단 내장 서브 툴바 (컬럼 팝오버 + 뷰 저장 + 내 뷰 칩스) -->
+    <div v-if="showColumnPicker || showSavedViews" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
+      <!-- Left: Column Picker & Save View Buttons -->
+      <div class="d-flex align-items-center gap-2">
+        <!-- 1. [컬럼] 버튼 & Dropdown Popover -->
+        <div v-if="showColumnPicker" class="dropdown">
+          <button
+            class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2.5 b2b-text-xs shadow-2xs"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="컬럼 숨김/표시 설정"
+            @click="syncColumnItems"
+          >
+            <i class="bi bi-eye text-primary"></i>
+            <span>컬럼 설정</span>
+            <i class="bi bi-chevron-down opacity-50 ms-0.5"></i>
+          </button>
+          <div class="dropdown-menu p-2 shadow border-0 b2b-text-xs" style="min-width: 210px; max-height: 320px; overflow-y: auto;">
+            <div class="d-flex align-items-center justify-content-between pb-1.5 mb-1.5 border-bottom px-1">
+              <span class="fw-bold text-dark"><i class="bi bi-layout-three me-1 text-primary"></i>컬럼 표시 설정</span>
+              <button class="btn btn-link p-0 text-decoration-none b2b-text-xs text-primary" @click="resetColumnVisibility">전체표시</button>
+            </div>
+            <div v-for="col in columnItems" :key="col.name" class="form-check py-1 px-3 m-0">
+              <input
+                class="form-check-input cursor-pointer"
+                type="checkbox"
+                :id="'col_chk_tree_' + col.name"
+                :checked="col.visible"
+                @change="toggleColumnVisibility(col.name, $event.target.checked)"
+              />
+              <label class="form-check-label cursor-pointer text-dark text-truncate d-block" :for="'col_chk_tree_' + col.name" style="max-width: 150px;">
+                {{ col.header || col.name }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. [뷰 저장] 버튼 -->
+        <button
+          v-if="showSavedViews"
+          class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2.5 b2b-text-xs shadow-2xs"
+          title="현재 컬럼 순서·너비·고정 상태 뷰 저장"
+          @click="saveCurrentView"
+        >
+          <i class="bi bi-bookmark-plus text-warning"></i>
+          <span>뷰 저장</span>
+        </button>
+      </div>
+
+      <!-- Right: Dynamic [내 뷰] Chips -->
+      <div v-if="showSavedViews && savedViews.length > 0" class="d-flex align-items-center gap-1.5 ms-auto flex-wrap">
+        <span v-if="savedViews.length > 0" class="b2b-text-xs text-muted fw-semibold me-1">
+          <i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:
+        </span>
+        <div
+          v-for="view in savedViews"
+          :key="view.id"
+          class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal b2b-text-xs"
+          :class="activeViewId === view.id ? 'bg-primary text-white shadow-sm' : 'bg-theme-card text-theme-primary border-theme'"
+          @click="applySavedView(view)"
+        >
+          <span>{{ view.name }}</span>
+          <i class="bi bi-x ms-1 text-danger opacity-75 hover-opacity-100" @click.stop="deleteSavedView(view.id)" title="뷰 삭제"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tree Canvas Element -->
+    <div ref="treeElement" class="w-100" :style="{ height: (showColumnPicker || showSavedViews) ? 'calc(100% - 38px)' : '100%' }"></div>
   </div>
 </template>
 
@@ -8,16 +77,17 @@
 import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
+import { searchGrid as opsSearchGrid, captureViewState, applyViewState } from '@/utils/realgridOps'
 
 /**
  * RealGrid 트리 그리드 (계층형) — 자기완결 STANDALONE 버전
  * =========================================================
  * TreeView + LocalTreeDataProvider 기반 계층형 그리드.
  *
- * ⭐ 이식성(Portability): 이 컴포넌트는 프로젝트 전용 모듈에 의존하지 않는다.
- *    - 공통 로직(테마/제어열/엑셀/검색/변경추적/고정)을 mixin 대신 이 파일에 인라인.
- *      → 다른 프로젝트의 realgridCommon(mixin)과 이름 충돌 없음. 파일 1개만 복사하면 동작.
- *    - 외부 import 는 `realgrid`, `vue` 뿐. (@/stores, @/utils, @/mixins 미참조)
+ * ⭐ 대부분의 공통 로직(테마/제어열/엑셀/변경추적/고정)은 이 파일에 인라인.
+ *    - 단, 그리드 통합 검색(searchGrid)은 그리드 페이지들과 공유하는 프로젝트 내부 전용
+ *      로직이라 `@/utils/realgridOps` 에 위임한다(이 파일은 단독 이식 대상 아님).
+ *    - 그 외 외부 import 는 `realgrid`, `vue` 뿐.
  *    - 테마: `theme` prop 또는 <html data-theme> 속성에서 자동 감지(없으면 'light').
  *    - 토스트: `toast` 함수 prop 주입(없으면 'notify' 이벤트 emit + console 폴백).
  *
@@ -36,61 +106,116 @@ export default {
     fields: { type: Array, default: () => [] },
     columns: { type: Array, default: () => [] },
     rows: { type: Array, default: () => [] },
+    gridId: { type: String, default: '' },
     height: { type: String, default: '580px' },
+
+    // ---- 🔖 [뷰 저장 내장 캡슐화 Props] ----
+    showSavedViews: { type: Boolean, default: true },
+    includeGroupInView: { type: Boolean, default: false },
+
+    // ---- 타겟 표준 명칭 Props ----
+    showRowNumber: { type: Boolean, default: undefined },
+    stateBarVisible: { type: Boolean, default: undefined },
+    insertable: { type: Boolean, default: undefined },
+    sortable: { type: Boolean, default: true },
+    filterable: { type: Boolean, default: undefined },
+    checkable: { type: Boolean, default: undefined },
+    editable: { type: Boolean, default: true },
+    useFooter: { type: Boolean, default: undefined },
+    commitWhenLeave: { type: Boolean, default: undefined },
+    rowResizable: { type: Boolean, default: undefined },
+
     // ---- 트리 계층 매핑 ----
-    childrenField: { type: String, default: 'children' }, // 자식 배열이 담긴 속성명(중첩 모델)
-    iconField: { type: String, default: '' },             // 아이콘 경로 필드명(선택)
+    childrenField: { type: String, default: 'children' },
+    iconField: { type: String, default: '' },
     treeLineVisible: { type: Boolean, default: true },
     expandAllOnLoad: { type: Boolean, default: true },
-    enableDragAndDrop: { type: Boolean, default: true },   // 드래그 노드 이동
-    // ---- 공통 제어열/편집 옵션 (기존 mixin에서 인라인) ----
-    editable: { type: Boolean, default: true },            // 셀 편집/행 추가 가능
-    softDeleting: { type: Boolean, default: true },        // 소프트 삭제(삭제표시)
-    hideDeletedRows: { type: Boolean, default: true },     // 삭제표시 행 숨김
-    useStateBar: { type: Boolean, default: true },         // 행 상태 컬러 바
-    useCheckBar: { type: Boolean, default: true },         // 좌측 체크박스 열
-    useIndicator: { type: Boolean, default: true },        // 행번호 인디케이터 열
-    checkBarExclusive: { type: Boolean, default: false },  // 체크박스 단일선택
+    enableDragAndDrop: { type: Boolean, default: true },
+    hideDeletedRows: { type: Boolean, default: true },
+
+    showColumnPicker: { type: Boolean, default: true },
+    showSavedViews: { type: Boolean, default: true },
+
+    // ---- 제어열/옵션 ----
+    checkBarExclusive: { type: Boolean, default: false },
     checkBarWidth: { type: Number, default: 36 },
-    stateBarWidth: { type: Number, default: 6 },
-    useFixContextMenu: { type: Boolean, default: true },   // 우클릭 컨텍스트 메뉴
-    useColumnFilter: { type: Boolean, default: true },     // 헤더 컬럼 필터(자동 값목록) 활성화
+    stateBarWidth: { type: Number, default: 20 },
 
-    // ---- ✨ 글로벌 표준 형용사형 Props (글로벌 UI 그리드 스탠다드) ----
-    sortable: { type: Boolean, default: true },             // 헤더 컬럼 정렬 기능 활성화
-    filterable: { type: Boolean, default: undefined },      // 헤더 컬럼 필터 활성화 (fallback: useColumnFilter)
-    checkable: { type: Boolean, default: undefined },       // 체크박스 선택열 (fallback: useCheckBar)
-    indicatable: { type: Boolean, default: undefined },     // 행번호 인디케이터열 (fallback: useIndicator)
-    stateBarVisible: { type: Boolean, default: undefined }, // 행상태 바 (fallback: useStateBar)
-    pinnable: { type: Boolean, default: undefined },        // 우클릭 고정 메뉴 (fallback: useFixContextMenu)
-    draggable: { type: Boolean, default: undefined },       // 트리 노드 드래그앤드롭 (fallback: enableDragAndDrop)
-    autoExpandAll: { type: Boolean, default: undefined },   // 로드 시 전체 자동 펼침 (fallback: expandAllOnLoad)
-    showTreeLines: { type: Boolean, default: undefined },   // 트리 가이드 라인 (fallback: treeLineVisible)
-    softDeletable: { type: Boolean, default: undefined },   // 소프트 삭제 (fallback: softDeleting)
+    // ---- 레거시 및 호환 Props ----
+    indicatable: { type: Boolean, default: undefined },
+    useIndicator: { type: Boolean, default: undefined },
+    useStateBar: { type: Boolean, default: undefined },
+    useCheckBar: { type: Boolean, default: undefined },
+    useFixContextMenu: { type: Boolean, default: undefined },
+    useColumnFilter: { type: Boolean, default: undefined },
+    pinnable: { type: Boolean, default: undefined },
+    draggable: { type: Boolean, default: undefined },
+    autoExpandAll: { type: Boolean, default: undefined },
+    autoCommittable: { type: Boolean, default: undefined },
+    showTreeLines: { type: Boolean, default: undefined },
+    softDeletable: { type: Boolean, default: undefined },
+    softDeleting: { type: Boolean, default: true },
 
-    // ---- 이식성 의존성 주입 (선택) ----
-    theme: { type: String, default: '' },                  // '' 이면 <html data-theme>에서 자동 감지
-    toast: { type: Function, default: null }               // (message, {type}) 알림 콜백. 없으면 'notify' emit + console
+    showInternalToolbar: { type: Boolean, default: true },
+
+    // ---- 이식성 의존성 주입 ----
+    theme: { type: String, default: '' },
+    toast: { type: Function, default: null }
   },
   emits: ['init', 'notify', 'node-moved', 'parent-changed'],
+  data() {
+    return {
+      savedViews: [],
+      activeViewId: null,
+      columnItems: []
+    }
+  },
   computed: {
-    resolvedSortable() {
-      return this.sortable
-    },
-    resolvedFilterable() {
-      return this.filterable !== undefined ? this.filterable : this.useColumnFilter
-    },
-    resolvedCheckable() {
-      return this.checkable !== undefined ? this.checkable : this.useCheckBar
-    },
-    resolvedIndicatable() {
-      return this.indicatable !== undefined ? this.indicatable : this.useIndicator
+    resolvedShowRowNumber() {
+      if (this.showRowNumber !== undefined) return this.showRowNumber
+      if (this.indicatable !== undefined) return this.indicatable
+      if (this.useIndicator !== undefined) return this.useIndicator
+      return true
     },
     resolvedStateBarVisible() {
-      return this.stateBarVisible !== undefined ? this.stateBarVisible : this.useStateBar
+      if (this.stateBarVisible !== undefined) return this.stateBarVisible
+      if (this.useStateBar !== undefined) return this.useStateBar
+      return true
+    },
+    resolvedCheckable() {
+      if (this.checkable !== undefined) return this.checkable
+      if (this.useCheckBar !== undefined) return this.useCheckBar
+      return true
+    },
+    resolvedFilterable() {
+      if (this.filterable !== undefined) return this.filterable
+      if (this.useColumnFilter !== undefined) return this.useColumnFilter
+      return true
+    },
+    resolvedUseFooter() {
+      if (this.useFooter !== undefined) return this.useFooter
+      return false
+    },
+    resolvedCommitWhenLeave() {
+      if (this.commitWhenLeave !== undefined) return this.commitWhenLeave
+      if (this.autoCommittable !== undefined) return this.autoCommittable
+      return true
+    },
+    resolvedInsertable() {
+      if (this.insertable !== undefined) return this.insertable
+      return true
+    },
+    resolvedRowResizable() {
+      if (this.rowResizable !== undefined) return this.rowResizable
+      return false
     },
     resolvedPinnable() {
-      return this.pinnable !== undefined ? this.pinnable : this.useFixContextMenu
+      if (this.pinnable !== undefined) return this.pinnable
+      if (this.useFixContextMenu !== undefined) return this.useFixContextMenu
+      return true
+    },
+    resolvedSortable() {
+      return this.sortable
     },
     resolvedDraggable() {
       return this.draggable !== undefined ? this.draggable : this.enableDragAndDrop
@@ -102,7 +227,9 @@ export default {
       return this.showTreeLines !== undefined ? this.showTreeLines : this.treeLineVisible
     },
     resolvedSoftDeletable() {
-      return this.softDeletable !== undefined ? this.softDeletable : this.softDeleting
+      if (this.softDeletable !== undefined) return this.softDeletable
+      if (this.softDeleting !== undefined) return this.softDeleting
+      return true
     }
   },
   watch: {
@@ -133,16 +260,29 @@ export default {
           this.gridView.setColumns(newColumns)
         }
       }
+    },
+    gridId() {
+      this.loadSavedViews()
+    }
+  },
+  data() {
+    return {
+      savedViews: [],
+      activeViewId: null
     }
   },
   mounted() {
     this.initGrid()
+    this.loadSavedViews()
     this.$nextTick(() => {
       this.applyGridTheme(this._resolveTheme())
     })
     this._watchTheme()
   },
   beforeUnmount() {
+    if (this.gridId) {
+      this.saveGridLayout()
+    }
     if (this._themeObserver) {
       try { this._themeObserver.disconnect() } catch (e) { /* noop */ }
       this._themeObserver = null
@@ -151,9 +291,150 @@ export default {
   },
   methods: {
     // =========================================================
+    // 👁️ 컬럼 숨김/표시 관리 (Column Picker)
+    // =========================================================
+    syncColumnItems() {
+      if (!this.gridView) return
+      try {
+        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+        this.columnItems = cols.map(c => ({
+          name: c.name,
+          header: (c.header && c.header.text) || c.name,
+          visible: c.visible !== false
+        }))
+      } catch (e) {
+        console.warn('[RealGridTree] syncColumnItems error:', e)
+      }
+    },
+
+    toggleColumnVisibility(colName, visible) {
+      if (!this.gridView || !colName) return
+      try {
+        this.gridView.setColumnProperty(colName, 'visible', visible)
+        this.syncColumnItems()
+      } catch (e) {
+        console.warn('[RealGridTree] toggleColumnVisibility error:', e)
+      }
+    },
+
+    resetColumnVisibility() {
+      if (!this.gridView) return
+      try {
+        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+        cols.forEach(c => {
+          this.gridView.setColumnProperty(c.name, 'visible', true)
+        })
+        this.syncColumnItems()
+        this._notify('모든 컬럼이 표시되도록 설정되었습니다.', { type: 'info' })
+      } catch (e) {
+        console.warn('[RealGridTree] resetColumnVisibility error:', e)
+      }
+    },
+
+    // =========================================================
+    // 🔖 뷰 저장 (Saved Views) 캡슐화 관리
+    // =========================================================
+    loadSavedViews() {
+      if (!this.gridId) return
+      try {
+        const stored = localStorage.getItem(`realgrid-saved-views-${this.gridId}`)
+        if (stored) {
+          this.savedViews = JSON.parse(stored) || []
+        }
+      } catch (e) {
+        console.warn('[RealGridTree] loadSavedViews error:', e)
+      }
+    },
+
+    persistSavedViews() {
+      if (!this.gridId) return
+      try {
+        localStorage.setItem(`realgrid-saved-views-${this.gridId}`, JSON.stringify(this.savedViews))
+      } catch (e) {
+        console.warn('[RealGridTree] persistSavedViews error:', e)
+      }
+    },
+
+    saveCurrentView() {
+      if (!this.gridView) {
+        this._notify('그리드가 아직 준비되지 않았습니다.', { type: 'warning' })
+        return
+      }
+
+      const state = captureViewState(this.gridView, { includeGroup: this.includeGroupInView, dataProvider: this.dataProvider })
+      const viewName = prompt('저장할 뷰 이름을 입력하세요 (컬럼 배치·고정·정렬·노드순서 포함):', '사용자 정의 뷰')
+      if (!viewName || !viewName.trim()) return
+
+      const newView = { id: 'view_' + Date.now(), name: viewName.trim(), ...state }
+      this.savedViews.push(newView)
+      this.persistSavedViews()
+      this.applySavedView(newView)
+      this._notify(`'${newView.name}' 뷰가 저장되었습니다!`, { type: 'success' })
+    },
+
+    applySavedView(view) {
+      if (!this.gridView) return
+      applyViewState(this.gridView, view, { dataProvider: this.dataProvider })
+      this.activeViewId = view.id
+      this._notify(`'${view.name}' 뷰가 적용되었습니다.`, { type: 'info' })
+    },
+
+    deleteSavedView(viewId) {
+      this.savedViews = this.savedViews.filter(v => v.id !== viewId)
+      this.persistSavedViews()
+      if (this.activeViewId === viewId) this.activeViewId = null
+      this._notify('저장된 뷰가 삭제되었습니다.', { type: 'warning' })
+    },
+
+    // =========================================================
+    // 💾 로컬스토리지 레이아웃 상태 저장 및 복원 (gridId 설정 시)
+    // =========================================================
+    saveGridLayout() {
+      if (!this.gridId || !this.gridView) return
+      try {
+        const layout = typeof this.gridView.saveColumnLayout === 'function' ? this.gridView.saveColumnLayout() : null
+        const fixedOpts = typeof this.gridView.getFixedOptions === 'function' ? (this.gridView.getFixedOptions() || {}) : {}
+        const state = { layout, fixedOpts }
+        localStorage.setItem(`realgrid-layout-${this.gridId}`, JSON.stringify(state))
+      } catch (e) {
+        console.warn('[RealGridTree] saveGridLayout error:', e)
+      }
+    },
+
+    restoreGridLayout() {
+      if (!this.gridId || !this.gridView) return
+      try {
+        const saved = localStorage.getItem(`realgrid-layout-${this.gridId}`)
+        if (saved) {
+          const state = JSON.parse(saved)
+          if (state.layout && typeof this.gridView.setColumnLayout === 'function') {
+            this.gridView.setColumnLayout(state.layout)
+          }
+          if (state.fixedOpts && typeof this.gridView.setFixedOptions === 'function') {
+            this.gridView.setFixedOptions(state.fixedOpts)
+          }
+        }
+      } catch (e) {
+        console.warn('[RealGridTree] restoreGridLayout error:', e)
+      }
+    },
+
+    resetGridLayout() {
+      if (!this.gridId) return
+      try {
+        localStorage.removeItem(`realgrid-layout-${this.gridId}`)
+        if (this.columns && this.columns.length > 0) {
+          this.gridView.setColumns(this.columns)
+        }
+        this._notify('컬럼 레이아웃 설정이 초기화되었습니다.', { type: 'info' })
+      } catch (e) {
+        console.warn('[RealGridTree] resetGridLayout error:', e)
+      }
+    },
+
+    // =========================================================
     // 🔌 이식성 헬퍼: 테마 감지 / 알림 (프로젝트 의존성 제거)
     // =========================================================
-    /** theme prop → <html data-theme> → 'light' 순으로 현재 테마 해석 */
     _resolveTheme() {
       if (this.theme) return this.theme
       if (typeof document !== 'undefined') {
@@ -162,7 +443,6 @@ export default {
       return 'light'
     },
 
-    /** <html data-theme> 변경 감지 → 제어열 테마 재적용 (Pinia 불필요) */
     _watchTheme() {
       if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') return
       this._themeObserver = new MutationObserver(() => {
@@ -174,7 +454,6 @@ export default {
       })
     },
 
-    /** 알림: toast prop 우선 → 없으면 'notify' 이벤트 emit + console 폴백 */
     _notify(message, opts = {}) {
       const type = opts.type || 'info'
       if (typeof this.toast === 'function') {
@@ -235,7 +514,7 @@ export default {
 
       try {
         this.gridView.setIndicator({
-          visible: this.resolvedIndicatable,
+          visible: this.resolvedShowRowNumber,
           draggableSelectedRows: this.resolvedDraggable !== false
         })
       } catch (e) { /* noop */ }
@@ -332,6 +611,12 @@ export default {
         this.gridView.setFixedOptions({ colCount: 0, rowCount: 0 })
         this._notify('행/열 고정이 해제되었습니다.', { type: 'info' })
         return true
+      } else if (item.tag === 'saveView') {
+        this.saveCurrentView()
+        return true
+      } else if (item.tag === 'resetLayout') {
+        this.resetGridLayout()
+        return true
       }
       return false
     },
@@ -411,82 +696,9 @@ export default {
       }
     },
 
-    // =========================================================
-    // 트리 검색 (전수 검사 + 트리 자동 펼침)
-    // =========================================================
+    // 트리 검색 → 그리드 공용 유틸에 위임 (전 셀 검색 + 트리 자동 펼침)
     searchGrid(query, direction = 'next') {
-      if (!this.gridView || !this.dataProvider || !query || !query.trim()) {
-        return { count: 0, current: 0 }
-      }
-
-      try {
-        const keyword = query.trim().toLowerCase()
-        const rowCount = this.dataProvider.getRowCount()
-        const matches = []
-
-        for (let r = 0; r < rowCount; r++) {
-          const rowJson = this.dataProvider.getJsonRow(r) || {}
-
-          for (const [colKey, val] of Object.entries(rowJson)) {
-            if (val !== undefined && val !== null && String(val).toLowerCase().includes(keyword)) {
-              let itemIdx = typeof this.gridView.getItemIndexOfRow === 'function'
-                ? this.gridView.getItemIndexOfRow(r)
-                : r
-
-              // 트리가 접혀서 숨겨져 있으면 자동으로 펼쳐서 노출
-              if (itemIdx < 0) {
-                if (typeof this.gridView.expandAll === 'function') {
-                  try { this.gridView.expandAll() } catch (e) { /* noop */ }
-                }
-                itemIdx = typeof this.gridView.getItemIndexOfRow === 'function'
-                  ? this.gridView.getItemIndexOfRow(r)
-                  : r
-              }
-
-              if (itemIdx >= 0) {
-                matches.push({ itemIndex: itemIdx, dataRow: r, column: colKey })
-              }
-            }
-          }
-        }
-
-        if (matches.length === 0) {
-          this._notify(`'${query}' 검색 결과가 없습니다.`, { type: 'warning' })
-          return { count: 0, current: 0 }
-        }
-
-        const currentCell = this.gridView.getCurrent()
-        const startIndex = currentCell && currentCell.itemIndex >= 0 ? currentCell.itemIndex : -1
-        const startColumn = currentCell && currentCell.column ? currentCell.column : ''
-
-        let targetIdx = 0
-        if (direction === 'next') {
-          const found = matches.findIndex(m =>
-            m.itemIndex > startIndex || (m.itemIndex === startIndex && m.column > startColumn)
-          )
-          targetIdx = found >= 0 ? found : 0
-        } else if (direction === 'prev') {
-          const reversed = [...matches].reverse()
-          const found = reversed.findIndex(m =>
-            m.itemIndex < startIndex || (m.itemIndex === startIndex && m.column < startColumn)
-          )
-          targetIdx = found >= 0 ? matches.length - 1 - found : matches.length - 1
-        }
-
-        const target = matches[targetIdx]
-        if (target) {
-          this.gridView.setCurrent({ itemIndex: target.itemIndex, column: target.column })
-          if (typeof this.gridView.showCell === 'function') {
-            try { this.gridView.showCell(target.itemIndex, target.column) } catch (e) { /* noop */ }
-          }
-          this.gridView.setFocus()
-        }
-
-        return { count: matches.length, current: targetIdx + 1 }
-      } catch (e) {
-        console.error('searchGrid error:', e)
-        return { count: 0, current: 0 }
-      }
+      return opsSearchGrid(this.gridView, this.dataProvider, query, direction, (m, o) => this._notify(m, o))
     },
 
     // =========================================================
@@ -616,19 +828,22 @@ export default {
 
       this.gridView.setEditOptions({
         editable: this.editable,
-        insertable: this.editable,
-        appendable: this.editable,
-        commitWhenLeave: true
+        insertable: this.resolvedInsertable,
+        appendable: this.resolvedInsertable,
+        commitWhenLeave: this.resolvedCommitWhenLeave
       })
 
       this.applyControlBars()
       this.applyDragAndDropOptions(this.resolvedDraggable)
       this.applySortingOptions()
       this.bindTreeEvents()
+      this.gridView.setFooter({ visible: this.resolvedUseFooter })
 
       this.gridView.setDisplayOptions({
         fitStyle: 'evenFill',
-        rowHoverType: 'row'
+        rowHoverType: 'row',
+        rowResizable: this.resolvedRowResizable,
+        selectionStyle: 'block'
       })
       try {
         this.gridView.setTreeOptions({ lineVisible: this.resolvedShowTreeLines })
@@ -647,6 +862,15 @@ export default {
 
       if (this.rows && this.rows.length > 0) {
         this.setTreeRows(this.rows)
+      }
+
+      if (this.gridId) {
+        this.restoreGridLayout()
+        try {
+          this.gridView.onColumnMoved = () => this.saveGridLayout()
+          this.gridView.onColumnResized = () => this.saveGridLayout()
+          this.gridView.onColumnVisibleChanged = () => this.saveGridLayout()
+        } catch (e) { /* noop */ }
       }
 
       // 동적 우클릭 컨텍스트 메뉴(CRUD, 고정, 펼침, 이동) 자동 배선
@@ -961,6 +1185,11 @@ export default {
           movable: enable,
           movableWhenFocusedOnly: false
         })
+        // 행을 미리 선택(클릭)하지 않아도, 아무 행이나 누른 그 제스처 그대로 끌어서
+        // 위치를 옮길 수 있게 한다. (누름=선택 후 즉시 drag&drop 모드로 전환)
+        if (typeof this.gridView.setDisplayOptions === 'function') {
+          this.gridView.setDisplayOptions({ selectAndImmediateDrag: enable })
+        }
         if (typeof this.gridView.setDataDropOptions === 'function') {
           this.gridView.setDataDropOptions({ dropMode: enable ? 'move' : 'none' })
         }
@@ -1064,11 +1293,17 @@ export default {
     initTreeContextMenu() {
       if (!this.gridView || this.resolvedPinnable === false) return
 
-      this.gridView.setContextMenu([
+      const menuItems = [
         { label: '📌 선택한 열까지 고정', tag: 'fixColumn' },
         { label: '📌 선택한 행까지 고정', tag: 'fixRow' },
         { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
-        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' },
+        { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
+      ]
+      if (this.gridId) {
+        menuItems.push({ label: '🔖 현재 뷰 저장...', tag: 'saveView' })
+        menuItems.push({ label: '🔄 컬럼 레이아웃 저장값 초기화', tag: 'resetLayout' })
+      }
+      menuItems.push(
         { label: '-' },
         { label: '➕ 하위 자식 노드 추가', tag: 'addChild' },
         { label: '➕ 동일 레벨(형제) 노드 추가', tag: 'addSibling' },
@@ -1076,7 +1311,8 @@ export default {
         { label: '-' },
         { label: '➕ 모든 노드 전체 펼치기', tag: 'expandAll' },
         { label: '➖ 모든 노드 접기', tag: 'collapseAll' }
-      ])
+      )
+      this.gridView.setContextMenu(menuItems)
 
       // RealGrid 2 우클릭 메뉴 팝업 허용 필수 이벤트
       this.gridView.onContextMenuPopup = () => true

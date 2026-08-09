@@ -115,7 +115,7 @@ export default {
           icon: 'bi-gear',
           children: [
             { label: '공통코드 그룹 관리', to: '/common-code-groups' },
-            { label: '공통 컴포넌트 가이드', to: '/component-guide' },
+            { label: '공통 컴포넌트 가이드', to: '/sample-group/component-guide' },
             { label: '설비 바코드 샘플', to: '/sample/barcode-equipment' },
             { label: '포털 메인 샘플', to: '/sample/portal' },
           ],

@@ -63,7 +63,8 @@ const menus = computed(() => {
 const isActive = (path) => {
   if (!path && route.path === '/') return true;
   if (!path) return false;
-  return route.path === `/${path}` || route.path.endsWith(path);
+  const currentPath = route.meta?.activeMenu || route.path;
+  return currentPath === `/${path}` || currentPath.endsWith(path);
 };
 
 const isExpanded = (path) => {

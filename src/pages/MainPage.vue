@@ -246,7 +246,7 @@ export default {
         { title: '사용자 관리', to: '/users', icon: 'bi-people-fill', color: '#0d6efd' },
         { title: '공통 코드', to: '/common-code-groups', icon: 'bi-code-square', color: '#6610f2' },
         { title: '게시글 작성', to: '/posts/write', icon: 'bi-pencil-square', color: '#198754' },
-        { title: '컴포넌트 가이드', to: '/component-guide', icon: 'bi-book-half', color: '#fd7e14' },
+        { title: '컴포넌트 가이드', to: '/sample-group/component-guide', icon: 'bi-book-half', color: '#fd7e14' },
       ],
       equipmentStatus: [
         { name: 'CNC Milling #01', code: 'EQ-2023-001', status: 'Normal' },

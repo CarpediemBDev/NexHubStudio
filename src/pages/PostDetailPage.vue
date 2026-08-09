@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container mt-4">
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border" role="status"></div>
@@ -65,7 +65,8 @@
             </li>
           </ul>
         </div>
-        <div class="post-content" v-html="formatContent(post.content)"></div>
+        <!-- 딱 이 1줄만 수정: show-catalog (또는 :show-catalog="true") 추가 -->
+        <Markdown v-model="post.content" language="ko-KR" readonly show-catalog preview-class="post-content" />
       </div>
 
       <!-- 댓글 섹션 -->
@@ -158,11 +159,13 @@ import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
 import { formatDate } from '@/utils/dateUtil'
 import Radio from '@/components/Radio.vue'
+import Markdown from '@/components/common/Markdown.vue'
 
 export default {
   name: 'PostDetailPage',
   components: {
     Radio,
+    Markdown,
   },
   data() {
     return {
@@ -343,9 +346,6 @@ export default {
     },
     goToList() {
       this.$router.push('/posts')
-    },
-    formatContent(content) {
-      return content.replace(/\n/g, '<br>')
     },
   },
 }

@@ -32,7 +32,7 @@
             <div class="d-flex justify-content-between align-items-start">
               <div class="flex-grow-1">
                 <h5 class="mb-1">{{ post.title }}</h5>
-                <p class="mb-1 text-muted small">{{ truncate(post.content, 100) }}</p>
+                <p class="mb-1 text-muted small">{{ truncate(stripMarkdown(post.content), 100) }}</p>
                 <small class="text-muted">
                   <i class="bi bi-person me-1"></i>{{ post.authorId }}
                   <i class="bi bi-calendar3 ms-3 me-1"></i>{{ formatDate(post.createdAt) }}
@@ -52,7 +52,7 @@
 import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
 import { formatDate } from '@/utils/dateUtil'
-import { truncate } from '@/utils/stringUtil'
+import { truncate, stripMarkdown } from '@/utils/stringUtil'
 
 export default {
   name: 'PostListPage',
@@ -80,6 +80,7 @@ export default {
   methods: {
     formatDate,
     truncate,
+    stripMarkdown,
     fetchPosts() {
       this.loading = true
       http

@@ -59,15 +59,15 @@
                 <label for="content" class="form-label fw-bold">
                   내용 <span class="text-danger">*</span>
                 </label>
-                <textarea
+                <Markdown
                   v-model="form.content"
-                  class="form-control content-textarea"
-                  id="content"
-                  rows="18"
-                  placeholder="게시글 내용을 입력하세요&#10;&#10;Markdown 문법을 지원합니다:&#10;# 제목&#10;**굵게**&#10;*기울임*&#10;- 목록"
-                ></textarea>
+                  language="ko-KR"
+                  :height="480"
+                  :on-upload-img="onUploadImg"
+                  placeholder="게시글 내용을 Markdown으로 작성하세요 (이미지는 붙여넣기/드래그로 업로드)"
+                />
                 <div class="form-text d-flex justify-content-between">
-                  <span><i class="bi bi-info-circle me-1"></i>Enter로 줄바꿈</span>
+                  <span><i class="bi bi-info-circle me-1"></i>Markdown 지원 · 툴바로 서식 적용</span>
                   <span class="text-muted">{{ form.content.length }} 자</span>
                 </div>
               </div>
@@ -156,12 +156,14 @@ import http from '@/utils/http'
 import { showToast } from '@/utils/toastUtil'
 import Radio from '@/components/Radio.vue'
 import FileUpload from '@/components/FileUpload.vue'
+import Markdown from '@/components/common/Markdown.vue'
 
 export default {
   name: 'PostWritePage',
   components: {
     Radio,
     FileUpload,
+    Markdown,
   },
   data() {
     return {
@@ -302,22 +304,36 @@ export default {
         showToast('파일 제거 완료', { type: 'info' })
       }
     },
+    // md-editor-v3 이미지 붙여넣기/드래그/업로드 훅
+    // files: 드롭·붙여넣기·선택된 File 목록, callback: 삽입할 이미지 URL 배열 반환
+    async onUploadImg(files, callback) {
+      try {
+        const formData = new FormData()
+        files.forEach((file) => formData.append('files', file))
+
+        const res = await http.post('/files/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-User-Id': this.currentUserId,
+          },
+        })
+
+        // http 인터셉터가 ApiResponse({ code, message, data })를 반환하므로 res.data가 파일 목록
+        const uploaded = res.data || []
+        // 본문 첨부와 동일하게 목록에도 추가하여 저장 시 attachmentIds에 포함되도록 함
+        this.uploadedFiles.push(...uploaded)
+        callback(uploaded.map((f) => `/api/files/${f.id}/download`))
+      } catch (error) {
+        console.error('이미지 업로드 실패:', error)
+        showToast('이미지 업로드 실패', { type: 'error' })
+        callback([])
+      }
+    },
   },
 }
 </script>
 
 <style scoped>
-.content-textarea {
-  font-size: 1rem;
-  line-height: 1.8;
-  resize: vertical;
-  min-height: 400px;
-}
-
-.content-textarea::placeholder {
-  color: #adb5bd;
-}
-
 .btn-check:checked + .btn-outline-success {
   background-color: #198754;
   color: white;

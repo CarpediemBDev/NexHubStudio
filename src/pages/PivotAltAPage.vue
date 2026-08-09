@@ -128,13 +128,27 @@
       <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
+          grid-id="pivot-alt-a"
           :fields="gridFields"
           :columns="gridColumns"
           :rows="mockData"
-          :useGroupPanel="true"
-          :useFooter="true"
-          :softDeleting="true"
-          :hideDeletedRows="false"
+          :sortable="true"
+          :filterable="true"
+          :checkable="true"
+          :show-row-number="true"
+          :state-bar-visible="true"
+          :state-bar-width="20"
+          :check-bar-width="36"
+          :pinnable="true"
+          :group-panel-visible="true"
+          :merge-mode="true"
+          :column-hideable="false"
+          :exclusive-selectable="false"
+          :commit-when-leave="true"
+          :use-footer="true"
+          :soft-deletable="true"
+          :summary-mode="'aggregate'"
+          :fit-style="'evenFill'"
           :toast="gridToast"
           @init="onGridInit"
         />
@@ -157,6 +171,7 @@ import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { showToast } from '@/utils/toastUtil.js'
+import { searchGrid, captureViewState, applyViewState } from '@/utils/realgridOps'
 
 export default {
   name: 'PivotAltAPage',
@@ -178,6 +193,7 @@ export default {
       isColumnPickerOpen: false,
       columnPickerCols: [],
       activeGroup: 'none',
+      activeHasGroup: false, // 실제 행 그룹핑 적용 여부(편집/추가/삭제 잠금 기준). activeGroup(하이라이트)과 분리.
       quickPresets: [
         { id: 'preset_dept', name: '부서별', fields: ['dept'], icon: 'bi-building' },
         { id: 'preset_dept_role', name: '부서 ➔ 직급별', fields: ['dept', 'role'], icon: 'bi-diagram-3' },
@@ -290,7 +306,7 @@ export default {
   },
   computed: {
     isGrouped() {
-      return this.activeGroup !== 'none'
+      return this.activeHasGroup
     },
     activePresetName() {
       const found = this.quickPresets.find(p => p.id === this.activeGroup)
@@ -322,8 +338,8 @@ export default {
             sales: r.sales ?? Math.floor((r.salary || 6000) * 1.5 + (i * 37) % 5000),
             bonus: r.bonus ?? Math.floor((r.salary || 6000) * 0.1 + (i * 13) % 800)
           }))
-          if (this.$refs.realgridComp && this.$refs.realgridComp.setRows) {
-            this.$refs.realgridComp.setRows(this.mockData)
+          if (this.dataProvider) {
+            this.dataProvider.setRows(this.mockData)
           }
         }
       } catch (e) {
@@ -358,8 +374,8 @@ export default {
       ])
 
       this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
-        // 공통 컴포넌트 동적 행/열 고정 헬퍼 먼저 처리
-        if (this.$refs.realgridComp && this.$refs.realgridComp.handleDynamicFixing(item, clickData)) {
+        // 행/열 동적 고정 먼저 처리 (this.gridView 직접)
+        if (this.handleFix(item, clickData)) {
           return
         }
 
@@ -391,31 +407,93 @@ export default {
     clearGroupBy() {
       if (!this.gridView) return
       this.activeGroup = 'none'
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.groupBy([])
-      }
+      this.activeHasGroup = false
+      this.gridView.groupBy([])
       this.gridView.setEditOptions({ editable: true })
       showToast('원본 데이터(Flat Grid)로 전환되었습니다.', { type: 'info' })
     },
 
     applyView(view) {
-      if (!this.gridView || !this.$refs.realgridComp) return
+      if (!this.gridView) return
+
+      // 포괄 뷰(layout/fixed/sort 보유)면 레이아웃+그룹+고정+정렬 전체 복원,
+      // 프리셋/구버전 저장뷰(fields 만)면 기존처럼 그룹 필드만 적용.
+      const isComprehensive = Array.isArray(view.layout) || !!view.fixed || Array.isArray(view.sort)
+      let hasGroup
+      if (isComprehensive) {
+        applyViewState(this.gridView, view)
+        hasGroup = Array.isArray(view.group) && view.group.length > 0
+      } else {
+        this.gridView.groupBy(view.fields || [])
+        hasGroup = Array.isArray(view.fields) && view.fields.length > 0
+      }
+
       this.activeGroup = view.id
-      this.$refs.realgridComp.groupBy(view.fields)
-      this.gridView.setEditOptions({ editable: false })
-      showToast(`'${view.name}' 뷰가 적용되었습니다. (편집/추가/삭제 제한)`, { type: 'info' })
+      this.activeHasGroup = hasGroup
+      // 그룹핑(집계) 뷰일 때만 편집/추가/삭제 잠금. 순수 레이아웃 뷰는 편집 허용.
+      this.gridView.setEditOptions({ editable: !hasGroup })
+      showToast(`'${view.name}' 뷰가 적용되었습니다.${hasGroup ? ' (편집/추가/삭제 제한)' : ''}`, { type: 'info' })
+    },
+
+    // 우클릭 행/열 동적 고정 (커스텀 컨텍스트 메뉴라 this.gridView 로 직접 처리)
+    handleFix(item, clickData) {
+      const gv = this.gridView
+      if (!gv) return false
+      const fixed = gv.getFixedOptions ? (gv.getFixedOptions() || {}) : {}
+      const colCount = fixed.colCount || 0
+      const rowCount = fixed.rowCount || 0
+      const colIndexOf = (name) => {
+        try {
+          if (typeof gv.getColumnIndex === 'function') return gv.getColumnIndex(name)
+          const c = gv.columnByName && gv.columnByName(name)
+          if (c && typeof c.displayIndex === 'number') return c.displayIndex
+        } catch (e) { /* noop */ }
+        return -1
+      }
+      if (item.tag === 'fixColumn' && clickData.column) {
+        const i = colIndexOf(clickData.column)
+        if (i >= 0) {
+          gv.setFixedOptions({ colCount: i + 1, rowCount, resizable: true })
+          showToast(`'${clickData.column}' 컬럼까지 열 고정이 적용되었습니다.`, { type: 'success' })
+          return true
+        }
+      } else if (item.tag === 'fixRow' && clickData.itemIndex !== undefined && clickData.itemIndex >= 0) {
+        gv.setFixedOptions({ colCount, rowCount: clickData.itemIndex + 1, resizable: true })
+        showToast(`${clickData.itemIndex + 1}번째 행까지 행 고정이 적용되었습니다.`, { type: 'success' })
+        return true
+      } else if (item.tag === 'fixBoth' && clickData.column && clickData.itemIndex !== undefined && clickData.itemIndex >= 0) {
+        const i = colIndexOf(clickData.column)
+        if (i >= 0) {
+          gv.setFixedOptions({ colCount: i + 1, rowCount: clickData.itemIndex + 1, resizable: true })
+          showToast(`${clickData.itemIndex + 1}행 x '${clickData.column}'열 동시 고정이 적용되었습니다.`, { type: 'success' })
+          return true
+        }
+      } else if (item.tag === 'clearFixing') {
+        gv.setFixedOptions({ colCount: 0, rowCount: 0 })
+        showToast('행/열 고정이 해제되었습니다.', { type: 'info' })
+        return true
+      }
+      return false
     },
 
     expandAll() {
-      // 그룹 멀티패스 펼치기는 공통 mixin(expandAllGroups)에서 제공
-      if (!this.$refs.realgridComp) return
-      this.$refs.realgridComp.expandAllGroups()
+      // 그룹 멀티패스 펼치기 (this.gridView 직접)
+      if (!this.gridView) return
+      for (let pass = 0; pass < 2; pass++) {
+        const cnt = this.gridView.getItemCount()
+        for (let i = 0; i < cnt; i++) {
+          try { this.gridView.expandGroup(i, true, true) } catch (e) { /* noop */ }
+        }
+      }
       showToast('모든 부서 그룹 행이 쫙 펼쳐졌습니다.', { type: 'info' })
     },
 
     collapseAll() {
-      if (!this.$refs.realgridComp) return
-      this.$refs.realgridComp.collapseAllGroups()
+      if (!this.gridView) return
+      const cnt = this.gridView.getItemCount()
+      for (let i = cnt - 1; i >= 0; i--) {
+        try { this.gridView.collapseGroup(i, true) } catch (e) { /* noop */ }
+      }
       showToast('모든 그룹 행이 싹 접혔습니다 (소계 요약 보기).', { type: 'info' })
     },
 
@@ -448,20 +526,20 @@ export default {
 
     saveCurrentView() {
       if (!this.gridView) return
-      const fields = this.$refs.realgridComp ? this.$refs.realgridComp.getGroupFieldNames() : []
-      if (fields.length === 0) {
-        showToast('현재 그룹핑된 컬럼이 없습니다. 컬럼을 그룹핑한 후 저장해주세요.', { type: 'warning' })
-        return
-      }
+      // 그룹핑뿐 아니라 컬럼 배치(이동/너비/표시)·고정·정렬까지 포괄 캡처.
+      const state = captureViewState(this.gridView, { includeGroup: true })
+      const groupFields = (state && state.group) || []
 
-      const defaultName = this.getFieldLabelsText(fields) + ' 뷰'
-      const viewName = prompt('저장할 맞춤 그룹핑 뷰 이름을 입력하세요:', defaultName)
+      const defaultName = groupFields.length > 0
+        ? this.getFieldLabelsText(groupFields) + ' 뷰'
+        : '사용자 정의 뷰'
+      const viewName = prompt('저장할 뷰 이름을 입력하세요 (컬럼 배치·고정·정렬·그룹핑 포함):', defaultName)
       if (!viewName || !viewName.trim()) return
 
       const newView = {
         id: 'user_view_' + Date.now(),
         name: viewName.trim(),
-        fields: [...fields]
+        ...state
       }
 
       this.userSavedViews.push(newView)
@@ -487,18 +565,17 @@ export default {
       }
 
       const tempId = 'user_' + Math.random().toString(36).substring(2, 8)
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.insertRow(0, {
-          userId: tempId,
-          name: '신규 사용자',
-          dept: '개발 1팀',
-          role: '선임연구원',
-          region: '서울',
-          salary: 5000,
-          sales: 0,
-          bonus: 0
-        })
-      }
+      this.dataProvider.insertRow(0, {
+        userId: tempId,
+        name: '신규 사용자',
+        dept: '개발 1팀',
+        role: '선임연구원',
+        region: '서울',
+        salary: 5000,
+        sales: 0,
+        bonus: 0
+      })
+      this.gridView.setCurrent({ itemIndex: 0 })
       showToast('상단에 새 행이 추가되었습니다 (State: Created). 셀을 클릭해 수정해 보세요.', { type: 'info' })
     },
 
@@ -509,19 +586,28 @@ export default {
         return
       }
 
-      const count = this.$refs.realgridComp ? this.$refs.realgridComp.deleteChecked() : 0
-      if (count === 0) {
+      const checkedRows = this.gridView.getCheckedRows() || []
+      if (checkedRows.length === 0) {
         showToast('삭제할 행을 왼쪽 체크박스로 선택해 주세요.', { type: 'warning' })
         return
       }
-      showToast(`${count}건이 삭제 표시되었습니다 (State: Deleted).`, { type: 'warning' })
+      this.dataProvider.removeRows(checkedRows, false) // RealGrid2 소프트 삭제 (상태바 - 표시)
+      this.gridView.checkAll(false)
+      showToast(`${checkedRows.length}건이 삭제 표시되었습니다 (State: Deleted).`, { type: 'warning' })
     },
 
     saveData() {
-      if (!this.$refs.realgridComp) return
-      this.$refs.realgridComp.commit() // 공통 mixin
+      if (!this.gridView || !this.dataProvider) return
+      this.gridView.commit(true) // RealGrid2 표준 편집 커밋
 
-      const changes = this.$refs.realgridComp ? this.$refs.realgridComp.getChanges() : { created: [], updated: [], deleted: [] }
+      const createdIdx = this.dataProvider.getStateRows('created') || []
+      const updatedIdx = this.dataProvider.getStateRows('updated') || []
+      const deletedIdx = this.dataProvider.getStateRows('deleted') || []
+      const changes = {
+        created: createdIdx.map(i => this.dataProvider.getJsonRow(i)),
+        updated: updatedIdx.map(i => this.dataProvider.getJsonRow(i)),
+        deleted: deletedIdx.map(i => this.dataProvider.getJsonRow(i))
+      }
       const totalChanges = changes.created.length + changes.updated.length + changes.deleted.length
 
       if (totalChanges === 0) {
@@ -539,34 +625,40 @@ export default {
         `개발자 도구 콘솔(F12)에 전송할 JSON 페이로드가 출력되었습니다.`
       )
 
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.clearRowStates()
-      }
+      this.dataProvider.clearRowStates()
       showToast('서버 저장 완료 및 행 상태(C,U,D)가 클리어되었습니다.', { type: 'success' })
     },
 
     exportExcel() {
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.exportToExcel('Pivot_AltA_Group_Export.xlsx')
-      }
+      if (!this.gridView) return
+      this.gridView.exportGrid({
+        type: 'excel',
+        target: 'local',
+        fileName: 'Pivot_AltA_Group_Export.xlsx',
+        showProgress: true
+      })
     },
 
     openColumnPicker() {
-      if (this.$refs.realgridComp) {
-        this.columnPickerCols = this.$refs.realgridComp.getColumnsInfo()
-        this.isColumnPickerOpen = true
-      }
+      if (!this.gridView) return
+      const cols = this.gridView.getColumns() || []
+      this.columnPickerCols = cols.map(c => ({
+        name: c.name,
+        header: c.header?.text || c.name,
+        visible: c.visible !== false
+      }))
+      this.isColumnPickerOpen = true
     },
 
     onToggleColumn({ name, visible }) {
-      if (this.$refs.realgridComp) {
-        this.$refs.realgridComp.setColumnVisible(name, visible)
+      if (this.gridView) {
+        this.gridView.setColumnProperty(name, 'visible', visible)
       }
     },
 
-    onGridSearch({ query, direction, isTyping }) {
-      if (this.$refs.realgridComp) {
-        this.searchResult = this.$refs.realgridComp.searchGrid(query, direction, isTyping)
+    onGridSearch({ query, direction }) {
+      if (this.gridView) {
+        this.searchResult = searchGrid(this.gridView, this.dataProvider, query, direction, showToast)
       }
     }
   }

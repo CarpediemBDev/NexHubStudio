@@ -17,11 +17,6 @@
           />
         </div>
         <div class="d-flex align-items-center gap-1.5 ms-auto">
-          <!-- 데이터 유틸: 컬럼 피커 / 엑셀 -->
-          <button class="btn-b2b-action" title="컬럼 숨김/표시 설정" @click="openColumnPicker">
-            <i class="bi bi-eye text-primary me-0.5"></i>
-            <span>컬럼</span>
-          </button>
           <button class="btn-b2b-action" title="엑셀 파일 내보내기" @click="exportExcel">
             <i class="bi bi-file-earmark-excel text-success me-0.5"></i>
             <span>엑셀</span>
@@ -54,30 +49,28 @@
       </div>
     </div>
 
-    <!-- 요약 badge -->
-    <div class="d-flex align-items-center gap-2 mb-2">
-      <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-        부서 조직도
-      </span>
-      <span class="text-muted small">총 {{ nodeCount }}개 노드</span>
-      <span class="text-muted small ms-2">
-        <i class="bi bi-info-circle me-1"></i>맨 왼쪽 <b>[행번호]</b> 영역을 마우스로 드래그하면 노드 순서 및 상위 부모 변경 가능 · 툴바 <b>[위로/아래로]</b> 버튼 · <b>우클릭</b> 메뉴
-      </span>
-    </div>
+
 
     <!-- Tree Grid -->
     <div class="b2b-grid-card mb-4">
       <div class="b2b-grid-wrapper">
         <RealGridTreeJs
           ref="treeComp"
+          grid-id="realgrid-tree-page"
           :fields="fields"
           :columns="columns"
           :rows="rows"
-          childrenField="children"
-          :enableDragAndDrop="enableDnd"
-          :expandAllOnLoad="true"
-          :hideDeletedRows="false"
+          children-field="children"
+          :draggable="enableDnd"
+          :auto-expand-all="true"
+          :show-row-number="true"
+          :state-bar-visible="true"
+          :checkable="true"
+          :hide-deleted-rows="false"
+          :state-bar-width="20"
+          :check-bar-width="36"
           :toast="treeToast"
+          @init="onGridInit"
           @node-moved="onNodeMoved"
           @parent-changed="onParentChanged"
         />
@@ -97,6 +90,7 @@
 <script>
 import RealGridTreeJs from '@/components/RealGridTreeJs.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
+import SavedViewsBar from '@/components/SavedViewsBar.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import { showToast } from '@/utils/toastUtil.js'
 import { departmentTree } from '@/data/treeData.js'
@@ -106,10 +100,13 @@ export default {
   components: {
     RealGridTreeJs,
     QuickSearchBar,
+    SavedViewsBar,
     ColumnPickerModal
   },
   data() {
     return {
+      gridView: null,
+      dataProvider: null,
       enableDnd: true,
       searchResult: { count: 0, current: 0 },
       isColumnPickerOpen: false,
@@ -179,6 +176,11 @@ export default {
     }
   },
   methods: {
+    onGridInit({ gridView, dataProvider }) {
+      this.gridView = gridView
+      this.dataProvider = dataProvider
+    },
+
     // 트리(자기완결 컴포넌트)의 내부 알림을 이 프로젝트 토스트로 연결
     treeToast(message, opts = {}) {
       showToast(message, opts)
