@@ -4,39 +4,17 @@
     <div v-if="showColumnPicker || showSavedViews" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
       <!-- Left: Column Picker & Save View Buttons -->
       <div class="d-flex align-items-center gap-2">
-        <!-- 1. [컬럼] 버튼 & Dropdown Popover -->
-        <div v-if="showColumnPicker" class="dropdown">
-          <button
-            class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2.5 b2b-text-xs shadow-2xs"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            title="컬럼 숨김/표시 설정"
-            @click="syncColumnItems"
-          >
-            <i class="bi bi-eye text-primary"></i>
-            <span>컬럼 설정</span>
-            <i class="bi bi-chevron-down opacity-50 ms-0.5"></i>
-          </button>
-          <div class="dropdown-menu p-2 shadow border-0 b2b-text-xs" style="min-width: 210px; max-height: 320px; overflow-y: auto;">
-            <div class="d-flex align-items-center justify-content-between pb-1.5 mb-1.5 border-bottom px-1">
-              <span class="fw-bold text-dark"><i class="bi bi-layout-three me-1 text-primary"></i>컬럼 표시 설정</span>
-              <button class="btn btn-link p-0 text-decoration-none b2b-text-xs text-primary" @click="resetColumnVisibility">전체표시</button>
-            </div>
-            <div v-for="col in columnItems" :key="col.datafield" class="form-check py-1 px-3 m-0">
-              <input
-                class="form-check-input cursor-pointer"
-                type="checkbox"
-                :id="'col_chk_jqx_' + col.datafield"
-                :checked="!col.hidden"
-                @change="toggleColumnVisibility(col.datafield, $event.target.checked)"
-              />
-              <label class="form-check-label cursor-pointer text-dark text-truncate d-block" :for="'col_chk_jqx_' + col.datafield" style="max-width: 150px;">
-                {{ col.text || col.datafield }}
-              </label>
-            </div>
-          </div>
-        </div>
+        <!-- 1. [컬럼 설정] 버튼 → 팝업(ColumnPickerModal) -->
+        <button
+          v-if="showColumnPicker"
+          class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2.5 b2b-text-xs shadow-2xs"
+          type="button"
+          title="컬럼 숨김/표시 설정"
+          @click="openColumnModal"
+        >
+          <i class="bi bi-eye text-primary"></i>
+          <span>컬럼 설정</span>
+        </button>
 
         <!-- 2. [뷰 저장] 버튼 -->
         <button
@@ -92,6 +70,14 @@
         @rowselect="onRowSelect"
       />
     </div>
+
+    <!-- 컬럼 표시/숨기기 설정 팝업 -->
+    <ColumnPickerModal
+      :isOpen="showColumnModal"
+      :columns="columnPickerCols"
+      @close="showColumnModal = false"
+      @toggle-column="onColumnToggle"
+    />
   </div>
 </template>
 
@@ -100,10 +86,11 @@ import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue3/vue_jqxgrid.vue'
 import 'jqwidgets-scripts/jqwidgets/styles/jqx.base.css'
 import 'jqwidgets-scripts/jqwidgets/styles/jqx.bootstrap.css'
 import { showToast } from '@/utils/toastUtil.js'
+import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
 export default {
   name: 'JqxCustomGrid',
-  components: { JqxGrid },
+  components: { JqxGrid, ColumnPickerModal },
   props: {
     localdata: { type: Array, default: () => [] },
     datafields: { type: Array, required: true },
@@ -148,6 +135,7 @@ export default {
       savedViews: [],
       activeViewId: null,
       columnItems: [],
+      showColumnModal: false,
       hiddenColumnSet: new Set(),
       // 그룹 패널 안내문 한글화 (RealGrid 문구와 통일)
       localizationObj: {
@@ -157,6 +145,13 @@ export default {
   },
 
   computed: {
+    columnPickerCols() {
+      return this.columnItems.map(c => ({
+        name: c.datafield,
+        headerText: c.text || c.datafield,
+        visible: !c.hidden
+      }))
+    },
     containerHeight() {
       if (typeof this.height === 'number') return `${this.height}px`
       return this.height
@@ -291,6 +286,15 @@ export default {
   },
 
   methods: {
+    openColumnModal() {
+      this.syncColumnItems()
+      this.showColumnModal = true
+    },
+
+    onColumnToggle({ name, visible }) {
+      this.toggleColumnVisibility(name, visible)
+    },
+
     syncColumnItems() {
       if (!this.columns) return
       this.columnItems = this.columns.map((c) => ({
