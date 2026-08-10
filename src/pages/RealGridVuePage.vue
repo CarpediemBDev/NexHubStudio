@@ -67,91 +67,107 @@
           :fixed-row-count="0"
           @init="onGridInit"
         >
-          <!-- Defining Data Fields dynamically inside slot -->
+          <!-- Defining Data Fields dynamically inside slot (db.json 11필드 정합) -->
           <RGDataField fieldName="userId" dataType="text" />
           <RGDataField fieldName="name" dataType="text" />
           <RGDataField fieldName="dept" dataType="text" />
           <RGDataField fieldName="role" dataType="text" />
-          <RGDataField fieldName="status" dataType="text" />
-          <RGDataField fieldName="joinDate" dataType="datetime" datetimeFormat="yyyyMMdd" />
-          <RGDataField fieldName="activeYn" dataType="text" />
+          <RGDataField fieldName="workStatus" dataType="text" />
+          <RGDataField fieldName="employmentType" dataType="text" />
+          <RGDataField fieldName="evalGrade" dataType="text" />
+          <RGDataField fieldName="skillScore" dataType="number" />
+          <RGDataField fieldName="region" dataType="text" />
           <RGDataField fieldName="salary" dataType="number" />
-          <RGDataField fieldName="sales" dataType="number" />
+          <RGDataField fieldName="joinDate" dataType="datetime" datetimeFormat="yyyy-MM-dd" />
 
-          <!-- Defining Visual Columns dynamically inside slot (1:1 완벽 통일) -->
+          <!-- Defining Visual Columns dynamically inside slot -->
           <RGDataColumn
             name="userId"
             fieldName="userId"
-            width="90"
+            width="120"
             :header="{ text: 'ID' }"
             :editable="false"
             :styles="{ textAlignment: 'center' }"
           />
           <RGDataColumn
-            name="dept"
-            fieldName="dept"
-            width="110"
-            :header="{ text: '부서명' }"
-            :styles="{ textAlignment: 'near' }"
-            :mergeRule="{ criteria: 'value' }"
-          />
-          <RGDataColumn
             name="name"
             fieldName="name"
-            width="100"
-            :header="{ text: '이름' }"
+            width="110"
+            :header="{ text: '성명' }"
             :styles="{ textAlignment: 'center' }"
+          />
+          <RGDataColumn
+            name="dept"
+            fieldName="dept"
+            width="130"
+            :header="{ text: '부서' }"
+            :styles="{ textAlignment: 'near' }"
           />
           <RGDataColumn
             name="role"
             fieldName="role"
-            width="120"
-            :header="{ text: '역할/직급' }"
+            width="110"
+            :header="{ text: '직무/역할' }"
             :styles="{ textAlignment: 'near' }"
           />
           <RGDataColumn
-            name="status"
-            fieldName="status"
-            width="110"
-            :header="{ text: '재직상태 (셀렉트)' }"
+            name="workStatus"
+            fieldName="workStatus"
+            width="100"
+            :header="{ text: '근무상태 (선택)' }"
             :styles="{ textAlignment: 'center' }"
-            :editor="{ type: 'dropdown', dropDownCount: 4, domainOnly: true, labels: ['재직', '휴직', '퇴사'], values: ['재직', '휴직', '퇴사'] }"
-            :displayCallback="(grid, index, value) => (!value ? '선택' : value)"
+            :editor="{ type: 'dropdown', dropDownCount: 3, domainOnly: true, labels: ['재직', '휴직', '퇴사'], values: ['재직', '휴직', '퇴사'] }"
           />
           <RGDataColumn
-            name="joinDate"
-            fieldName="joinDate"
+            name="employmentType"
+            fieldName="employmentType"
             width="110"
-            :header="{ text: '입사일 (달력)' }"
+            :header="{ text: '고용형태 (선택)' }"
             :styles="{ textAlignment: 'center' }"
-            datetimeFormat="yyyy-MM-dd"
-            :editor="{ type: 'date', datetimeFormat: 'yyyy-MM-dd', commitOnSelect: true }"
+            :editor="{ type: 'dropdown', dropDownCount: 3, domainOnly: true, labels: ['정규직', '계약직', '파트타임'], values: ['정규직', '계약직', '파트타임'] }"
           />
           <RGDataColumn
-            name="activeYn"
-            fieldName="activeYn"
-            width="85"
-            :header="{ text: '활성 (체크)' }"
+            name="evalGrade"
+            fieldName="evalGrade"
+            width="80"
+            :header="{ text: '평가등급 (선택)' }"
+            :styles="{ textAlignment: 'center', fontWeight: 'bold' }"
+            :editor="{ type: 'dropdown', dropDownCount: 5, domainOnly: true, labels: ['S', 'A', 'B', 'C', 'D'], values: ['S', 'A', 'B', 'C', 'D'] }"
+            :renderer="evalGradeRenderer"
+          />
+          <RGDataColumn
+            name="skillScore"
+            fieldName="skillScore"
+            width="130"
+            :header="{ text: '역량 점수 (바)' }"
+            :styles="{ textAlignment: 'far' }"
+            :renderer="{ type: 'bar', minimum: 0, maximum: 100, showLabel: true }"
+            :footer="{ expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }"
+          />
+          <RGDataColumn
+            name="region"
+            fieldName="region"
+            width="90"
+            :header="{ text: '근무지역' }"
             :styles="{ textAlignment: 'center' }"
-            :renderer="{ type: 'check', trueValues: 'Y', falseValues: 'N' }"
           />
           <RGDataColumn
             name="salary"
             fieldName="salary"
             width="110"
-            :header="{ text: '기본급 (만원)' }"
+            :header="{ text: '급여 (만원)' }"
             numberFormat="#,##0"
             :styles="{ textAlignment: 'far' }"
             :footer="{ expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }"
           />
           <RGDataColumn
-            name="sales"
-            fieldName="sales"
-            width="120"
-            :header="{ text: '영업실적 (만원)' }"
-            numberFormat="#,##0"
-            :styles="{ textAlignment: 'far' }"
-            :footer="{ expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }"
+            name="joinDate"
+            fieldName="joinDate"
+            width="115"
+            :header="{ text: '입사일자 (달력)' }"
+            datetimeFormat="yyyy-MM-dd"
+            :styles="{ textAlignment: 'center' }"
+            :editor="{ type: 'date', datetimeFormat: 'yyyy-MM-dd', commitBySelect: true }"
           />
         </RealGridCommonVue>
       </div>
@@ -194,6 +210,19 @@ export default {
       users: []
     }
   },
+  computed: {
+    evalGradeRenderer() {
+      return {
+        type: 'html',
+        callback: function (grid, model) {
+          const v = model && model.value ? String(model.value) : 'B'
+          const map = { S: ['#dc3545', '#fff'], A: ['#0d6efd', '#fff'], B: ['#198754', '#fff'], C: ['#ffc107', '#212529'], D: ['#6c757d', '#fff'] }
+          const c = map[v] || ['#6c757d', '#fff']
+          return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:${c[0]};color:${c[1]};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;line-height:1.5;">${v}</span></div>`
+        }
+      }
+    }
+  },
   mounted() {
     this.loadUsers()
   },
@@ -212,14 +241,10 @@ export default {
 
     async loadUsers() {
       const defaultUsers = [
-        { userId: 'u001', name: '김철수', dept: '개발 1팀', role: '수석연구원', status: '재직', joinDate: '2021-03-01', activeYn: 'Y', salary: 7200, sales: 12000 },
-        { userId: 'u002', name: '이영희', dept: '개발 1팀', role: '책임연구원', status: '재직', joinDate: '2022-05-15', activeYn: 'Y', salary: 6100, sales: 9800 },
-        { userId: 'u003', name: '박민수', dept: '개발 1팀', role: '선임연구원', status: '휴직', joinDate: '2023-01-10', activeYn: 'N', salary: 4800, sales: 7500 },
-        { userId: 'u004', name: '정수진', dept: '개발 2팀', role: '수석연구원', status: '재직', joinDate: '2020-11-01', activeYn: 'Y', salary: 7500, sales: 14500 },
-        { userId: 'u005', name: '홍길동', dept: '개발 2팀', role: '책임연구원', status: '재직', joinDate: '2022-08-20', activeYn: 'Y', salary: 6300, sales: 11000 },
-        { userId: 'u006', name: '강지훈', dept: '개발 2팀', role: '선임연구원', status: '재직', joinDate: '2023-04-12', activeYn: 'Y', salary: 4600, sales: 8200 },
-        { userId: 'u007', name: '조유진', dept: '영업 1팀', role: '부장', status: '재직', joinDate: '2019-07-01', activeYn: 'Y', salary: 8000, sales: 32000 },
-        { userId: 'u008', name: '윤상호', dept: '영업 1팀', role: '차장', status: '퇴사', joinDate: '2021-02-15', activeYn: 'N', salary: 6800, sales: 24000 }
+        { userId: 'minjun.park', name: '박민준', dept: '경영지원', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 88, region: '서울', salary: 5240, joinDate: '2019-04-12' },
+        { userId: 'suhyun.lee', name: '이수현', dept: '경영지원', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 95, region: '대전', salary: 9520, joinDate: '2024-01-15' },
+        { userId: 'minjun.han', name: '한민준', dept: '디자인팀', role: 'DevOps', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 72, region: '광주', salary: 8900, joinDate: '2021-08-20' },
+        { userId: 'jihoon.kim', name: '김지훈', dept: '개발팀', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 84, region: '서울', salary: 7200, joinDate: '2020-03-09' }
       ]
       try {
         const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
@@ -227,11 +252,7 @@ export default {
         if (!res.ok) throw new Error('Fetch failed')
         const data = await res.json()
         const rows = Array.isArray(data) ? data : data.users || []
-        const rawUsers = rows.length > 0 ? rows : defaultUsers
-        this.users = rawUsers.map((u, i) => ({
-          ...u,
-          joinDate: u.joinDate ? u.joinDate.replace(/-/g, '') : `20240${(i % 9) + 1}15`
-        }))
+        this.users = rows.length > 0 ? rows : defaultUsers
       } catch (error) {
         console.warn('Using default mock users:', error)
         this.users = defaultUsers
@@ -244,10 +265,15 @@ export default {
       this.dataProvider.insertRow(0, {
         userId: tempId,
         name: '신규 사용자',
-        dept: '개발 1팀',
-        role: '연구원',
+        dept: '개발팀',
+        role: 'PM',
+        workStatus: '재직',
+        employmentType: '정규직',
+        evalGrade: 'B',
+        skillScore: 75,
+        region: '서울',
         salary: 4500,
-        sales: 0
+        joinDate: new Date().toISOString().slice(0, 10)
       })
       if (this.gridView) this.gridView.setCurrent({ itemIndex: 0 })
       showToast('상단에 새 행이 추가되었습니다 (State: Created).', { type: 'info' })

@@ -134,14 +134,14 @@
 import * as RealGrid from 'realgrid'
 
 const SAMPLE_ROWS = [
-  { dept: '플랫폼개발팀', role: 'Backend', region: '서울', salary: 6200, joinYear: 2019 },
-  { dept: '플랫폼개발팀', role: 'Frontend', region: '판교', salary: 5400, joinYear: 2021 },
-  { dept: '데이터팀', role: 'Data', region: '서울', salary: 7100, joinYear: 2018 },
-  { dept: '보안팀', role: 'Security', region: '부산', salary: 6800, joinYear: 2020 },
-  { dept: '인프라팀', role: 'DevOps', region: '대전', salary: 5900, joinYear: 2022 },
-  { dept: '플랫폼개발팀', role: 'Frontend', region: '서울', salary: 6100, joinYear: 2020 },
-  { dept: '데이터팀', role: 'Data', region: '판교', salary: 7500, joinYear: 2017 },
-  { dept: '보안팀', role: 'Security', region: '서울', salary: 6400, joinYear: 2021 },
+  { dept: '플랫폼개발팀', role: 'Backend', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 92, region: '서울', salary: 6200, joinDate: '2019-03-11' },
+  { dept: '플랫폼개발팀', role: 'Frontend', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 85, region: '판교', salary: 5400, joinDate: '2021-05-22' },
+  { dept: '데이터팀', role: 'Data', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 74, region: '서울', salary: 7100, joinDate: '2018-09-03' },
+  { dept: '보안팀', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 96, region: '부산', salary: 6800, joinDate: '2020-02-17' },
+  { dept: '인프라팀', role: 'DevOps', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 82, region: '대전', salary: 5900, joinDate: '2022-07-08' },
+  { dept: '플랫폼개발팀', role: 'Frontend', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 89, region: '서울', salary: 6100, joinDate: '2020-11-30' },
+  { dept: '데이터팀', role: 'Data', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 94, region: '판교', salary: 7500, joinDate: '2017-04-19' },
+  { dept: '보안팀', role: 'Security', workStatus: '퇴사', employmentType: '파트타임', evalGrade: 'C', skillScore: 62, region: '서울', salary: 6400, joinDate: '2021-12-01' },
 ]
 
 export default {
@@ -202,11 +202,17 @@ export default {
         if (typeof RealGrid.LocalDataProvider === 'function') {
           this.dataProvider = new RealGrid.LocalDataProvider(false)
           this.dataProvider.setFields([
+            { fieldName: 'userId', dataType: 'text' },
+            { fieldName: 'name', dataType: 'text' },
             { fieldName: 'dept', dataType: 'text' },
             { fieldName: 'role', dataType: 'text' },
             { fieldName: 'region', dataType: 'text' },
+            { fieldName: 'workStatus', dataType: 'text' },
+            { fieldName: 'employmentType', dataType: 'text' },
+            { fieldName: 'evalGrade', dataType: 'text' },
+            { fieldName: 'skillScore', dataType: 'number' },
             { fieldName: 'salary', dataType: 'number' },
-            { fieldName: 'joinYear', dataType: 'number' },
+            { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' },
           ])
         }
         await this.loadSampleData()

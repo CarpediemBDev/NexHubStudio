@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="mb-3">
       <h4 class="fw-bold text-dark m-0">RealGrid 트리 (계층형 그리드)</h4>
-      <p class="text-muted small mb-0">TreeView + LocalTreeDataProvider 기반 계층형 조직도 관리. 우클릭 메뉴 및 마우스 드래그 앤 드롭을 통한 노드 변경을 지원합니다.</p>
+      <p class="text-muted small mb-0">db.json 마스터 데이터셋(100명)을 부서 ➔ 직무/사용자 계층 구조로 실시간 동적 변환하여 연동한 트리 그리드입니다. 노드 순서 이동, 엑셀 출력, CUD 저장을 지원합니다.</p>
     </div>
 
     <!-- Toolbar -->
@@ -49,8 +49,6 @@
       </div>
     </div>
 
-
-
     <!-- Tree Grid -->
     <div class="b2b-grid-card mb-4">
       <div class="b2b-grid-wrapper">
@@ -77,7 +75,7 @@
       </div>
     </div>
 
-    <!-- Column Picker Modal (피벗 A와 동일 공통 컴포넌트) -->
+    <!-- Column Picker Modal -->
     <ColumnPickerModal
       :isOpen="isColumnPickerOpen"
       :columns="columnPickerCols"
@@ -93,7 +91,63 @@ import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import SavedViewsBar from '@/components/SavedViewsBar.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import { showToast } from '@/utils/toastUtil.js'
-import { departmentTree } from '@/data/treeData.js'
+
+function buildDeptTreeFromUsers(users) {
+  if (!Array.isArray(users) || users.length === 0) return []
+
+  const deptMap = new Map()
+  users.forEach((user) => {
+    const deptName = user.dept || '미지정'
+    if (!deptMap.has(deptName)) {
+      deptMap.set(deptName, [])
+    }
+    deptMap.get(deptName).push(user)
+  })
+
+  const treeRows = []
+  let deptIdx = 1
+
+  deptMap.forEach((userList, deptName) => {
+    const deptCode = `DEPT-0${deptIdx++}`
+    const headcount = userList.length
+    const pmUser = userList.find(u => u.role === 'PM' || u.role === 'Manager') || userList[0]
+    const managerName = pmUser ? `${pmUser.name} (${pmUser.role})` : '미정'
+
+    const children = userList.map((u) => ({
+      deptName: u.name,
+      deptCode: u.userId,
+      manager: u.name,
+      rank: u.role,
+      workStatus: u.workStatus || '재직',
+      employmentType: u.employmentType || '정규직',
+      evalGrade: u.evalGrade || 'B',
+      skillScore: Number(u.skillScore) || 75,
+      headcount: 1,
+      region: u.region || '서울',
+      salary: u.salary,
+      joinDate: u.joinDate,
+      children: []
+    }))
+
+    treeRows.push({
+      deptName: deptName,
+      deptCode: deptCode,
+      manager: managerName,
+      rank: '부서',
+      workStatus: '조직',
+      employmentType: '소속',
+      evalGrade: 'A',
+      skillScore: null,
+      headcount: headcount,
+      region: '본사',
+      salary: null,
+      joinDate: '2020-01-01',
+      children: children
+    })
+  })
+
+  return treeRows
+}
 
 export default {
   name: 'RealGridTreePage',
@@ -112,62 +166,107 @@ export default {
       isColumnPickerOpen: false,
       columnPickerCols: [],
 
-      // 부서 조직도 데이터
       fields: [
         { fieldName: 'deptCode', dataType: 'text' },
         { fieldName: 'deptName', dataType: 'text' },
         { fieldName: 'manager', dataType: 'text' },
         { fieldName: 'rank', dataType: 'text' },
+        { fieldName: 'workStatus', dataType: 'text' },
+        { fieldName: 'employmentType', dataType: 'text' },
+        { fieldName: 'evalGrade', dataType: 'text' },
+        { fieldName: 'skillScore', dataType: 'number' },
         { fieldName: 'headcount', dataType: 'number' },
-        { fieldName: 'status', dataType: 'text' },
-        { fieldName: 'createdAt', dataType: 'text' },
-        { fieldName: 'useYn', dataType: 'text' }
+        { fieldName: 'region', dataType: 'text' },
+        { fieldName: 'salary', dataType: 'number' },
+        { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' }
       ],
       columns: [
-        { name: 'deptName', fieldName: 'deptName', width: '220', header: { text: '조직명' }, styles: { textAlignment: 'near' } },
-        { name: 'deptCode', fieldName: 'deptCode', width: '90', header: { text: '조직코드' }, editable: false, styles: { textAlignment: 'center' } },
-        { name: 'manager', fieldName: 'manager', width: '85', header: { text: '책임자' }, styles: { textAlignment: 'center' } },
-        { name: 'rank', fieldName: 'rank', width: '80', header: { text: '직책' }, styles: { textAlignment: 'center' } },
-        { name: 'headcount', fieldName: 'headcount', width: '75', header: { text: '인원' }, numberFormat: '#,##0', styles: { textAlignment: 'far' } },
+        { name: 'deptName', fieldName: 'deptName', width: '200', header: { text: '조직명 / 성명' }, styles: { textAlignment: 'near' } },
+        { name: 'deptCode', fieldName: 'deptCode', width: '110', header: { text: '코드 / ID' }, editable: false, styles: { textAlignment: 'center' } },
+        { name: 'manager', fieldName: 'manager', width: '120', header: { text: '책임자' }, styles: { textAlignment: 'center' } },
+        { name: 'rank', fieldName: 'rank', width: '90', header: { text: '직무 / 구분' }, styles: { textAlignment: 'center' } },
         {
-          name: 'status',
-          fieldName: 'status',
-          width: '105',
-          header: { text: '상태 (셀렉트)' },
+          name: 'workStatus',
+          fieldName: 'workStatus',
+          width: '95',
+          header: { text: '근무상태' },
           styles: { textAlignment: 'center' },
           editor: {
             type: 'dropdown',
-            dropDownCount: 4,
+            dropDownCount: 3,
             domainOnly: true,
-            labels: ['운영', '신설', '한시조직', '폐쇄'],
-            values: ['운영', '신설', '한시조직', '폐쇄']
+            labels: ['재직', '휴직', '퇴사'],
+            values: ['재직', '휴직', '퇴사']
           }
         },
         {
-          name: 'createdAt',
-          fieldName: 'createdAt',
-          width: '110',
-          header: { text: '설립일 (달력)' },
+          name: 'employmentType',
+          fieldName: 'employmentType',
+          width: '100',
+          header: { text: '고용형태' },
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'dropdown',
+            dropDownCount: 3,
+            domainOnly: true,
+            labels: ['정규직', '계약직', '파트타임'],
+            values: ['정규직', '계약직', '파트타임']
+          }
+        },
+        {
+          name: 'evalGrade',
+          fieldName: 'evalGrade',
+          width: '75',
+          header: { text: '평가 (선택)' },
+          styles: { textAlignment: 'center', fontWeight: 'bold' },
+          editor: {
+            type: 'dropdown',
+            dropDownCount: 5,
+            domainOnly: true,
+            labels: ['S', 'A', 'B', 'C', 'D'],
+            values: ['S', 'A', 'B', 'C', 'D']
+          },
+          renderer: {
+            type: 'html',
+            callback: function (grid, model) {
+              const v = model && model.value ? String(model.value) : 'B'
+              const map = { S: ['#dc3545', '#fff'], A: ['#0d6efd', '#fff'], B: ['#198754', '#fff'], C: ['#ffc107', '#212529'], D: ['#6c757d', '#fff'] }
+              const c = map[v] || ['#6c757d', '#fff']
+              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:${c[0]};color:${c[1]};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;line-height:1.5;">${v}</span></div>`
+            }
+          }
+        },
+        {
+          name: 'skillScore',
+          fieldName: 'skillScore',
+          width: '120',
+          header: { text: '역량점수 (바)' },
+          styles: { textAlignment: 'far' },
+          renderer: {
+            type: 'bar',
+            minimum: 0,
+            maximum: 100,
+            showLabel: true
+          }
+        },
+        { name: 'headcount', fieldName: 'headcount', width: '65', header: { text: '인원' }, numberFormat: '#,##0', styles: { textAlignment: 'far' } },
+        { name: 'region', fieldName: 'region', width: '80', header: { text: '근무지' }, styles: { textAlignment: 'center' } },
+        { name: 'salary', fieldName: 'salary', width: '100', header: { text: '연봉(만원)' }, numberFormat: '#,##0', styles: { textAlignment: 'far' } },
+        {
+          name: 'joinDate',
+          fieldName: 'joinDate',
+          width: '115',
+          header: { text: '입사/설립일자 (달력)' },
+          datetimeFormat: 'yyyy-MM-dd',
           styles: { textAlignment: 'center' },
           editor: {
             type: 'date',
-            datetimeFormat: 'yyyy-MM-dd'
-          }
-        },
-        {
-          name: 'useYn',
-          fieldName: 'useYn',
-          width: '90',
-          header: { text: '사용 (체크)' },
-          styles: { textAlignment: 'center' },
-          renderer: {
-            type: 'check',
-            trueValues: 'Y',
-            falseValues: 'N'
+            datetimeFormat: 'yyyy-MM-dd',
+            commitBySelect: true
           }
         }
       ],
-      rows: departmentTree
+      rows: []
     }
   },
   computed: {
@@ -175,13 +274,37 @@ export default {
       return this.countNodes(this.rows)
     }
   },
+  async created() {
+    await this.fetchUsersAndBuildTree()
+  },
   methods: {
+    async fetchUsersAndBuildTree() {
+      const defaultUsers = [
+        { userId: 'minjun.park', name: '박민준', dept: '경영지원', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 88, region: '서울', salary: 5240, joinDate: '2019-04-12' },
+        { userId: 'suhyun.lee', name: '이수현', dept: '경영지원', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 95, region: '대전', salary: 9520, joinDate: '2024-01-15' },
+        { userId: 'minjun.han', name: '한민준', dept: '디자인팀', role: 'DevOps', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 72, region: '광주', salary: 8900, joinDate: '2021-08-20' },
+        { userId: 'jihoon.kim', name: '김지훈', dept: '플랫폼개발팀', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 84, region: '서울', salary: 7200, joinDate: '2020-03-09' },
+        { userId: 'seoyeon.kim', name: '김서연', dept: '플랫폼개발팀', role: 'Backend', workStatus: '재직', employmentType: '정규직', evalGrade: 'B', skillScore: 78, region: '서울', salary: 5400, joinDate: '2019-07-01' }
+      ]
+      try {
+        const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('db.json fetch failed')
+        const data = await res.json()
+        const users = Array.isArray(data) ? data : data.users || []
+        const userList = users.length > 0 ? users : defaultUsers
+        this.rows = buildDeptTreeFromUsers(userList)
+      } catch (error) {
+        console.warn('[RealGridTreePage] Using fallback mock users for tree:', error)
+        this.rows = buildDeptTreeFromUsers(defaultUsers)
+      }
+    },
+
     onGridInit({ gridView, dataProvider }) {
       this.gridView = gridView
       this.dataProvider = dataProvider
     },
 
-    // 트리(자기완결 컴포넌트)의 내부 알림을 이 프로젝트 토스트로 연결
     treeToast(message, opts = {}) {
       showToast(message, opts)
     },
@@ -200,55 +323,74 @@ export default {
       const rnd = Math.random().toString(36).substring(2, 6).toUpperCase()
       return {
         deptCode: 'NEW-' + rnd,
-        deptName: '신규 부서',
+        deptName: '신규 부서/노드',
         manager: '',
-        rank: '팀장',
-        headcount: 0,
-        status: '신설'
+        rank: '팀원',
+        workStatus: '재직',
+        employmentType: '정규직',
+        evalGrade: 'B',
+        skillScore: 75,
+        headcount: 1,
+        region: '서울',
+        salary: 4500,
+        joinDate: new Date().toISOString().slice(0, 10)
       }
     },
 
     addChild() {
       const comp = this.$refs.treeComp
       if (!comp) return
-      const values = this.makeNewNodeValues()
-      const newRow = comp.addChildToCurrent(values, { editColumn: 'deptName' })
-      if (newRow >= 0) {
-        showToast('하위 자식 노드로 새 부서가 추가되었습니다.', { type: 'success' })
-      } else {
-        const rootRow = comp.addRootRow(values)
-        if (rootRow >= 0) {
-          showToast('최상위(루트)에 새 부서가 추가되었습니다.', { type: 'success' })
-        }
-      }
-    },
-
-    addSibling() {
-      const comp = this.$refs.treeComp
-      if (!comp) return
-      const editCol = this.dataset === 'dept' ? 'deptName' : 'menuName'
-      const values = this.makeNewNodeValues()
-      const newRow = comp.addSiblingToCurrent(values, { editColumn: editCol })
-      if (newRow >= 0) {
-        showToast('동일한 계층(형제 노드)으로 새 행을 추가했습니다.', { type: 'success' })
-      }
-    },
-
-    duplicateNode() {
-      const comp = this.$refs.treeComp
-      if (!comp) return
       const current = comp.getCurrentNode()
+      const values = this.makeNewNodeValues()
+
+      let newRow
       if (!current) {
-        showToast('복제할 노드를 먼저 선택해 주세요.', { type: 'warning' })
+        newRow = comp.addRootRow(values)
+        showToast('선택된 노드가 없어 최상위(루트)에 추가했습니다.', { type: 'info' })
+      } else {
+        newRow = comp.addChildToCurrent(values, { editColumn: 'deptName' })
+      }
+
+      if (newRow >= 0) {
+        const label = current ? current.deptName : '최상위'
+        showToast(`'${label}' 하위에 새 노드를 추가했습니다. (저장 시 반영)`, { type: 'success' })
+      } else {
+        showToast('노드 추가에 실패했습니다.', { type: 'danger' })
+      }
+    },
+
+    removeNode() {
+      const comp = this.$refs.treeComp
+      if (!comp || !comp.dataProvider) return
+
+      const checkedRows = comp.getCheckedRows ? comp.getCheckedRows() : []
+      const focusedRow = comp.getCurrentDataRow ? comp.getCurrentDataRow() : -1
+
+      const targetRowsSet = new Set(checkedRows)
+      if (focusedRow >= 0) {
+        targetRowsSet.add(focusedRow)
+      }
+
+      const provider = comp.dataProvider
+      const activeRowsToDelete = Array.from(targetRowsSet).filter(r => {
+        try {
+          return provider.getRowState(r) !== 'deleted'
+        } catch (e) {
+          return true
+        }
+      })
+
+      if (activeRowsToDelete.length === 0) {
+        showToast('삭제할 노드를 클릭하거나 체크박스로 선택해 주세요.', { type: 'warning' })
         return
       }
-      const label = this.dataset === 'dept' ? current.deptName : current.menuName
-      const newRow = comp.duplicateCurrentNode()
-      if (newRow >= 0) {
-        showToast(`'${label}' 노드를 성공적으로 복제했습니다.`, { type: 'success' })
-      } else {
-        showToast('노드 복제에 실패했습니다.', { type: 'danger' })
+
+      provider.removeRows(activeRowsToDelete, true)
+      if (comp.gridView && comp.gridView.clearCheckedItems) {
+        comp.gridView.clearCheckedItems()
       }
+
+      showToast(`선택/체크된 ${activeRowsToDelete.length}건의 노드가 삭제 표시되었습니다. (하위 포함)`, { type: 'warning' })
     },
 
     moveNodeUp() {
@@ -277,98 +419,6 @@ export default {
       showToast('드래그 앤 드롭: 노드의 계층(부모)이 변경되었습니다.', { type: 'success' })
     },
 
-    // 새 노드 기본값 생성 (데이터셋별)
-    makeNewNodeValues() {
-      const rnd = Math.random().toString(36).substring(2, 6).toUpperCase()
-      if (this.dataset === 'dept') {
-        return {
-          deptCode: 'NEW-' + rnd,
-          deptName: '신규 부서',
-          manager: '',
-          rank: '팀',
-          headcount: 0,
-          status: '신설'
-        }
-      }
-      return {
-        menuName: '신규 메뉴',
-        path: '/new-' + rnd.toLowerCase(),
-        icon: 'bi-dot',
-        cache: 'N',
-        visible: '표시'
-      }
-    },
-
-    addChild() {
-      const comp = this.$refs.treeComp
-      if (!comp) return
-      const current = comp.getCurrentNode()
-      const editCol = this.dataset === 'dept' ? 'deptName' : 'menuName'
-      const values = this.makeNewNodeValues()
-
-      let newRow
-      if (!current) {
-        // 선택 노드가 없으면 루트에 추가
-        newRow = comp.addRootRow(values)
-        showToast('선택된 노드가 없어 루트에 추가했습니다.', { type: 'info' })
-      } else {
-        newRow = comp.addChildToCurrent(values, { editColumn: editCol })
-      }
-
-      if (newRow >= 0) {
-        const label = this.dataset === 'dept' ? current?.deptName : current?.menuName
-        if (current) {
-          showToast(`'${label}' 하위에 새 노드를 추가했습니다. (편집 후 저장)`, { type: 'success' })
-        }
-      } else {
-        showToast('노드 추가에 실패했습니다.', { type: 'danger' })
-      }
-    },
-
-    removeNode() {
-      const comp = this.$refs.treeComp
-      if (!comp || !comp.dataProvider) return
-
-      // 1. 체크박스 선택 목록과 셀 클릭(포커스) 노드를 모두 합침
-      const checkedRows = comp.getCheckedRows ? comp.getCheckedRows() : []
-      const focusedRow = comp.getCurrentDataRow ? comp.getCurrentDataRow() : -1
-
-      const targetRowsSet = new Set(checkedRows)
-      if (focusedRow >= 0) {
-        targetRowsSet.add(focusedRow)
-      }
-
-      // 2. 이미 소프트 삭제된 행은 재삭제 대상에서 제외
-      const provider = comp.dataProvider
-      const activeRowsToDelete = Array.from(targetRowsSet).filter(r => {
-        try {
-          return provider.getRowState(r) !== 'deleted'
-        } catch (e) {
-          return true
-        }
-      })
-
-      if (activeRowsToDelete.length === 0) {
-        showToast('삭제할 노드를 클릭하거나 체크박스로 선택해 주세요.', { type: 'warning' })
-        return
-      }
-
-      // 3. 일괄 삭제 실행 (하위 포함, recursive=true)
-      provider.removeRows(activeRowsToDelete, true)
-      if (comp.gridView && comp.gridView.clearCheckedItems) {
-        comp.gridView.clearCheckedItems()
-      }
-
-      // 4. 알림 토스트 출력
-      if (activeRowsToDelete.length === 1 && focusedRow >= 0 && activeRowsToDelete.includes(focusedRow)) {
-        const current = comp.getCurrentNode()
-        const label = current ? (current.deptName || current.name || '선택 노드') : '선택 노드'
-        showToast(`'${label}' 노드가 삭제 표시되었습니다. (저장 시 반영)`, { type: 'warning' })
-      } else {
-        showToast(`선택/체크된 ${activeRowsToDelete.length}건의 노드가 삭제 표시되었습니다. (하위 포함)`, { type: 'warning' })
-      }
-    },
-
     expandAll() {
       this.$refs.treeComp?.expandAll()
       showToast('모든 노드가 펼쳐졌습니다.', { type: 'info' })
@@ -383,7 +433,6 @@ export default {
       this.$refs.treeComp?.exportToExcel('RealGrid_Org_Tree.xlsx')
     },
 
-    // 컬럼 숨김/표시 (피벗 A와 동일 — 공통 mixin getColumnsInfo/setColumnVisible)
     openColumnPicker() {
       if (this.$refs.treeComp) {
         this.columnPickerCols = this.$refs.treeComp.getColumnsInfo()
@@ -398,7 +447,7 @@ export default {
     },
 
     saveData() {
-      this.$refs.treeComp?.commit() // 편집 중인 셀 확정
+      this.$refs.treeComp?.commit()
       const changes = this.$refs.treeComp?.getChanges()
       const total = (changes?.created.length || 0) + (changes?.updated.length || 0)
         + (changes?.deleted.length || 0) + (changes?.moved.length || 0)
@@ -425,3 +474,4 @@ export default {
 
 <style scoped>
 </style>
+

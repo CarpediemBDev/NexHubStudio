@@ -193,12 +193,13 @@ export default {
       isColumnPickerOpen: false,
       columnPickerCols: [],
       activeGroup: 'none',
-      activeHasGroup: false, // 실제 행 그룹핑 적용 여부(편집/추가/삭제 잠금 기준). activeGroup(하이라이트)과 분리.
+      activeHasGroup: false,
       quickPresets: [
         { id: 'preset_dept', name: '부서별', fields: ['dept'], icon: 'bi-building' },
         { id: 'preset_dept_role', name: '부서 ➔ 직급별', fields: ['dept', 'role'], icon: 'bi-diagram-3' },
+        { id: 'preset_work_status', name: '근무상태 ➔ 부서별', fields: ['workStatus', 'dept'], icon: 'bi-person-badge' },
         { id: 'preset_region_dept', name: '지역 ➔ 부서별', fields: ['region', 'dept'], icon: 'bi-geo-alt' },
-        { id: 'preset_region_dept_role', name: '지역 ➔ 부서 ➔ 직급별', fields: ['region', 'dept', 'role'], icon: 'bi-layers' }
+        { id: 'preset_eval_grade', name: '평가등급 ➔ 부서별', fields: ['evalGrade', 'dept'], icon: 'bi-award' }
       ],
       userSavedViews: [],
       gridFields: [
@@ -206,24 +207,24 @@ export default {
         { fieldName: 'name', dataType: 'text' },
         { fieldName: 'dept', dataType: 'text' },
         { fieldName: 'role', dataType: 'text' },
+        { fieldName: 'workStatus', dataType: 'text' },
+        { fieldName: 'employmentType', dataType: 'text' },
+        { fieldName: 'evalGrade', dataType: 'text' },
+        { fieldName: 'skillScore', dataType: 'number' },
         { fieldName: 'region', dataType: 'text' },
-        { fieldName: 'status', dataType: 'text' },
-        { fieldName: 'evalDate', dataType: 'text' },
-        { fieldName: 'activeYn', dataType: 'text' },
         { fieldName: 'salary', dataType: 'number' },
-        { fieldName: 'sales', dataType: 'number' },
-        { fieldName: 'bonus', dataType: 'number' }
+        { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' }
       ],
       gridColumns: [
-        { name: 'region', fieldName: 'region', width: '90', header: { text: '지역' }, styles: { textAlignment: 'center' } },
+        { name: 'region', fieldName: 'region', width: '85', header: { text: '지역' }, styles: { textAlignment: 'center' } },
         { name: 'dept', fieldName: 'dept', width: '110', header: { text: '부서명' }, styles: { textAlignment: 'near' } },
-        { name: 'role', fieldName: 'role', width: '110', header: { text: '직급' }, styles: { textAlignment: 'near' } },
-        { name: 'name', fieldName: 'name', width: '95', header: { text: '이름' }, styles: { textAlignment: 'center' } },
+        { name: 'role', fieldName: 'role', width: '100', header: { text: '직급' }, styles: { textAlignment: 'near' } },
+        { name: 'name', fieldName: 'name', width: '90', header: { text: '이름' }, styles: { textAlignment: 'center' } },
         {
-          name: 'status',
-          fieldName: 'status',
-          width: '100',
-          header: { text: '상태 (셀렉트)' },
+          name: 'workStatus',
+          fieldName: 'workStatus',
+          width: '95',
+          header: { text: '근무상태 (선택)' },
           styles: { textAlignment: 'center' },
           editor: {
             type: 'dropdown',
@@ -234,32 +235,61 @@ export default {
           }
         },
         {
-          name: 'evalDate',
-          fieldName: 'evalDate',
-          width: '105',
-          header: { text: '평가일 (달력)' },
+          name: 'employmentType',
+          fieldName: 'employmentType',
+          width: '100',
+          header: { text: '고용형태 (선택)' },
           styles: { textAlignment: 'center' },
           editor: {
-            type: 'date',
-            datetimeFormat: 'yyyy-MM-dd'
+            type: 'dropdown',
+            dropDownCount: 3,
+            domainOnly: true,
+            labels: ['정규직', '계약직', '파트타임'],
+            values: ['정규직', '계약직', '파트타임']
           }
         },
         {
-          name: 'activeYn',
-          fieldName: 'activeYn',
-          width: '85',
-          header: { text: '활성 (체크)' },
-          styles: { textAlignment: 'center' },
+          name: 'evalGrade',
+          fieldName: 'evalGrade',
+          width: '75',
+          header: { text: '평가 (선택)' },
+          styles: { textAlignment: 'center', fontWeight: 'bold' },
+          editor: {
+            type: 'dropdown',
+            dropDownCount: 5,
+            domainOnly: true,
+            labels: ['S', 'A', 'B', 'C', 'D'],
+            values: ['S', 'A', 'B', 'C', 'D']
+          },
           renderer: {
-            type: 'check',
-            trueValues: 'Y',
-            falseValues: 'N'
+            type: 'html',
+            callback: function (grid, model) {
+              const v = model && model.value ? String(model.value) : 'B'
+              const map = { S: ['#dc3545', '#fff'], A: ['#0d6efd', '#fff'], B: ['#198754', '#fff'], C: ['#ffc107', '#212529'], D: ['#6c757d', '#fff'] }
+              const c = map[v] || ['#6c757d', '#fff']
+              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:${c[0]};color:${c[1]};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;line-height:1.5;">${v}</span></div>`
+            }
           }
+        },
+        {
+          name: 'skillScore',
+          fieldName: 'skillScore',
+          width: '120',
+          header: { text: '역량점수 (바)' },
+          styles: { textAlignment: 'far' },
+          renderer: {
+            type: 'bar',
+            minimum: 0,
+            maximum: 100,
+            showLabel: true
+          },
+          footer: { expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } },
+          groupFooter: { expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
         },
         {
           name: 'salary',
           fieldName: 'salary',
-          width: '110',
+          width: '105',
           header: { text: '기본급 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
@@ -267,40 +297,25 @@ export default {
           groupFooter: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
         },
         {
-          name: 'sales',
-          fieldName: 'sales',
-          width: '120',
-          header: { text: '영업실적 (만원)' },
-          numberFormat: '#,##0',
-          styles: { textAlignment: 'far' },
-          footer: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } },
-          groupFooter: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
-        },
-        {
-          name: 'bonus',
-          fieldName: 'bonus',
-          width: '110',
-          header: { text: '성과급 (만원)' },
-          numberFormat: '#,##0',
-          styles: { textAlignment: 'far' },
-          footer: { expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far' } },
-          groupFooter: { expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far' } }
+          name: 'joinDate',
+          fieldName: 'joinDate',
+          width: '115',
+          header: { text: '입사일자 (달력)' },
+          datetimeFormat: 'yyyy-MM-dd',
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'date',
+            datetimeFormat: 'yyyy-MM-dd',
+            commitBySelect: true
+          }
         }
       ],
       mockData: [
-        { userId: 'u001', name: '김철수', dept: '개발 1팀', role: '수석연구원', region: '서울', status: '재직', evalDate: '2025-01-10', activeYn: 'Y', salary: 7200, sales: 12000, bonus: 500 },
-        { userId: 'u002', name: '이영희', dept: '개발 1팀', role: '책임연구원', region: '서울', status: '재직', evalDate: '2025-01-12', activeYn: 'Y', salary: 6100, sales: 9800, bonus: 400 },
-        { userId: 'u003', name: '박민수', dept: '개발 1팀', role: '선임연구원', region: '서울', status: '휴직', evalDate: '2025-01-15', activeYn: 'N', salary: 4800, sales: 7500, bonus: 300 },
-        { userId: 'u004', name: '정수진', dept: '개발 2팀', role: '수석연구원', region: '판교', status: '재직', evalDate: '2025-02-01', activeYn: 'Y', salary: 7500, sales: 14500, bonus: 600 },
-        { userId: 'u005', name: '홍길동', dept: '개발 2팀', role: '책임연구원', region: '판교', status: '재직', evalDate: '2025-02-05', activeYn: 'Y', salary: 6300, sales: 11000, bonus: 450 },
-        { userId: 'u006', name: '강지훈', dept: '개발 2팀', role: '선임연구원', region: '판교', status: '재직', evalDate: '2025-02-10', activeYn: 'Y', salary: 4600, sales: 8200, bonus: 320 },
-        { userId: 'u007', name: '조유진', dept: '영업 1팀', role: '부장', region: '서울', status: '재직', evalDate: '2025-03-01', activeYn: 'Y', salary: 8000, sales: 32000, bonus: 1200 },
-        { userId: 'u008', name: '윤상호', dept: '영업 1팀', role: '차장', region: '서울', status: '퇴사', evalDate: '2025-03-05', activeYn: 'N', salary: 6800, sales: 24000, bonus: 900 },
-        { userId: 'u009', name: '한지민', dept: '영업 1팀', role: '과장', region: '서울', status: '재직', evalDate: '2025-03-10', activeYn: 'Y', salary: 5500, sales: 18000, bonus: 700 },
-        { userId: 'u100', name: '임재현', dept: '영업 2팀', role: '부장', region: '부산', status: '재직', evalDate: '2025-04-01', activeYn: 'Y', salary: 8200, sales: 35000, bonus: 1500 },
-        { userId: 'u101', name: '서동현', dept: '영업 2팀', role: '차장', region: '부산', status: '재직', evalDate: '2025-04-05', activeYn: 'Y', salary: 6900, sales: 26000, bonus: 950 },
-        { userId: 'u102', name: '송혜교', dept: '경영지원', role: '부장', region: '서울', status: '재직', evalDate: '2025-05-01', activeYn: 'Y', salary: 7800, sales: 0, bonus: 800 },
-        { userId: 'u103', name: '현빈', dept: '경영지원', role: '과장', region: '서울', status: '재직', evalDate: '2025-05-10', activeYn: 'Y', salary: 5600, sales: 0, bonus: 500 }
+        { userId: 'u009', name: '한지민', dept: '영업 1팀', role: '과장', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 86, region: '서울', salary: 5500, joinDate: '2021-03-15' },
+        { userId: 'u100', name: '임재현', dept: '영업 2팀', role: '부장', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 94, region: '부산', salary: 8200, joinDate: '2018-06-20' },
+        { userId: 'u101', name: '서동현', dept: '영업 2팀', role: '차장', workStatus: '재직', employmentType: '정규직', evalGrade: 'B', skillScore: 78, region: '부산', salary: 6900, joinDate: '2020-11-05' },
+        { userId: 'u102', name: '송혜교', dept: '경영지원', role: '부장', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 89, region: '서울', salary: 7800, joinDate: '2019-01-10' },
+        { userId: 'u103', name: '현빈', dept: '경영지원', role: '과장', workStatus: '휴직', employmentType: '계약직', evalGrade: 'C', skillScore: 65, region: '서울', salary: 5600, joinDate: '2022-08-14' }
       ]
     }
   },
@@ -329,15 +344,7 @@ export default {
         const data = await res.json()
         const rows = Array.isArray(data) ? data : (data.users || [])
         if (rows.length) {
-          const statuses = ['재직', '재직', '재직', '휴직', '퇴사']
-          this.mockData = rows.map((r, i) => ({
-            ...r,
-            status: r.status || statuses[i % statuses.length],
-            evalDate: r.evalDate || `2025-0${(i % 5) + 1}-15`,
-            activeYn: r.activeYn || (i % 7 === 0 ? 'N' : 'Y'),
-            sales: r.sales ?? Math.floor((r.salary || 6000) * 1.5 + (i * 37) % 5000),
-            bonus: r.bonus ?? Math.floor((r.salary || 6000) * 0.1 + (i * 13) % 800)
-          }))
+          this.mockData = rows
           if (this.dataProvider) {
             this.dataProvider.setRows(this.mockData)
           }
@@ -570,10 +577,13 @@ export default {
         name: '신규 사용자',
         dept: '개발 1팀',
         role: '선임연구원',
+        workStatus: '재직',
+        employmentType: '정규직',
+        evalGrade: 'B',
+        skillScore: 75,
         region: '서울',
         salary: 5000,
-        sales: 0,
-        bonus: 0
+        joinDate: new Date().toISOString().slice(0, 10)
       })
       this.gridView.setCurrent({ itemIndex: 0 })
       showToast('상단에 새 행이 추가되었습니다 (State: Created). 셀을 클릭해 수정해 보세요.', { type: 'info' })

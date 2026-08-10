@@ -88,18 +88,22 @@ export default {
         { name: 'name', type: 'string' },
         { name: 'dept', type: 'string' },
         { name: 'role', type: 'string' },
+        { name: 'workStatus', type: 'string' },
+        { name: 'employmentType', type: 'string' },
+        { name: 'evalGrade', type: 'string' },
+        { name: 'skillScore', type: 'number' },
         { name: 'region', type: 'string' },
         { name: 'salary', type: 'number' },
-        { name: 'joinYear', type: 'number' }
+        { name: 'joinDate', type: 'string' }
       ],
       columns: [
         { text: 'ID', datafield: 'userId', width: 120, editable: false },
-        { text: '성명', datafield: 'name', width: 110, editable: true },
-        { text: '부서', datafield: 'dept', width: 140, editable: true },
+        { text: '성명', datafield: 'name', width: 100, editable: true },
+        { text: '부서', datafield: 'dept', width: 120, editable: true },
         {
           text: '직무/역할',
           datafield: 'role',
-          width: 130,
+          width: 110,
           editable: true,
           columntype: 'dropdownlist',
           createeditor: (row, value, editor) => {
@@ -111,21 +115,90 @@ export default {
             })
           }
         },
-        { text: '근무지역', datafield: 'region', width: 100, editable: true },
+        {
+          text: '근무상태 (선택)',
+          datafield: 'workStatus',
+          width: 105,
+          editable: true,
+          columntype: 'dropdownlist',
+          createeditor: (row, value, editor) => {
+            editor.jqxDropDownList({
+              source: ['재직', '휴직', '퇴사'],
+              autoDropDownHeight: true
+            })
+          }
+        },
+        {
+          text: '고용형태 (선택)',
+          datafield: 'employmentType',
+          width: 110,
+          editable: true,
+          columntype: 'dropdownlist',
+          createeditor: (row, value, editor) => {
+            editor.jqxDropDownList({
+              source: ['정규직', '계약직', '파트타임'],
+              autoDropDownHeight: true
+            })
+          }
+        },
+        {
+          text: '평가등급',
+          datafield: 'evalGrade',
+          width: 80,
+          editable: true,
+          columntype: 'dropdownlist',
+          createeditor: (row, value, editor) => {
+            editor.jqxDropDownList({
+              source: ['S', 'A', 'B', 'C', 'D'],
+              autoDropDownHeight: true
+            })
+          },
+          cellsrenderer: (row, columnfield, value) => {
+            const v = value || 'B'
+            const badgeClass =
+              v === 'S' ? 'bg-danger' :
+              v === 'A' ? 'bg-primary' :
+              v === 'B' ? 'bg-success' :
+              v === 'C' ? 'bg-warning text-dark' : 'bg-secondary'
+            return `<div class="d-flex align-items-center justify-content-center h-100"><span class="badge ${badgeClass} fs-8 px-2 py-1">${v}</span></div>`
+          }
+        },
+        {
+          text: '역량 점수 (바)',
+          datafield: 'skillScore',
+          width: 130,
+          editable: true,
+          cellsrenderer: (row, columnfield, value) => {
+            const num = Number(value) || 0
+            const barClass =
+              num >= 85 ? 'bg-success' :
+              num >= 70 ? 'bg-primary' :
+              num >= 60 ? 'bg-warning' : 'bg-danger'
+            return `<div class="d-flex align-items-center gap-2 px-2 h-100" style="font-size: 11px;">
+              <div class="progress flex-grow-1" style="height: 10px; background-color: rgba(0,0,0,0.08); border-radius: 5px; overflow: hidden;">
+                <div class="progress-bar ${barClass}" style="width: ${num}%; height: 100%; transition: width 0.3s;"></div>
+              </div>
+              <span class="fw-bold text-nowrap" style="min-width: 28px; text-align: right;">${num}%</span>
+            </div>`
+          }
+        },
+        { text: '근무지역', datafield: 'region', width: 90, editable: true },
         {
           text: '급여 (만원)',
           datafield: 'salary',
-          width: 120,
+          width: 110,
           editable: true,
           cellsalign: 'right',
           align: 'right',
           cellsformat: 'n'
         },
         {
-          text: '입사년도',
-          datafield: 'joinYear',
-          width: 100,
+          text: '입사일자 (달력)',
+          datafield: 'joinDate',
+          width: 130,
           editable: true,
+          columntype: 'datetimeinput',
+          cellsformat: 'yyyy-MM-dd',
           cellsalign: 'center',
           align: 'center'
         }
@@ -137,18 +210,14 @@ export default {
   },
   methods: {
     async loadUsers() {
-      // 1. Try fetching from HTTP backend
       try {
         const res = await http.get('/users')
         if (Array.isArray(res.data) && res.data.length > 0) {
           this.rows = res.data
           return
         }
-      } catch (e) {
-        // Ignore API offline error and fallback to db.json
-      }
+      } catch (e) {}
 
-      // 2. Fetch from public/db.json master dataset
       try {
         const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
         const res = await fetch(url)
@@ -164,16 +233,28 @@ export default {
 
     getDefaultUsers() {
       return [
-        { userId: 'park.mj', name: '박민준', dept: '경영지원', role: 'Security', region: '서울', salary: 5240, joinYear: 2019 },
-        { userId: 'lee.sh', name: '이수현', dept: '경영지원', role: 'PM', region: '대전', salary: 9520, joinYear: 2024 },
-        { userId: 'han.mj', name: '한민준', dept: '디자인팀', role: 'DevOps', region: '광주', salary: 8900, joinYear: 2021 },
-        { userId: 'lee.yb', name: '이예빈', dept: '모바일팀', role: 'QA', region: '서울', salary: 8860, joinYear: 2024 }
+        { userId: 'park.mj', name: '박민준', dept: '경영지원', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 88, region: '서울', salary: 5240, joinDate: '2019-04-12' },
+        { userId: 'lee.sh', name: '이수현', dept: '경영지원', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 95, region: '대전', salary: 9520, joinDate: '2024-01-15' },
+        { userId: 'han.mj', name: '한민준', dept: '디자인팀', role: 'DevOps', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 72, region: '광주', salary: 8900, joinDate: '2021-08-20' },
+        { userId: 'lee.yb', name: '이예빈', dept: '모바일팀', role: 'QA', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 84, region: '서울', salary: 8860, joinDate: '2024-05-10' }
       ]
     },
 
     add() {
       const newId = 'user.' + Math.random().toString(36).substring(2, 7)
-      this.$refs.grd?.add({ userId: newId, name: '신규사원', dept: '개발 1팀', role: 'Backend', region: '서울', salary: 5000, joinYear: 2026 })
+      this.$refs.grd?.add({
+        userId: newId,
+        name: '신규사원',
+        dept: '개발 1팀',
+        role: 'Backend',
+        workStatus: '재직',
+        employmentType: '정규직',
+        evalGrade: 'B',
+        skillScore: 75,
+        region: '서울',
+        salary: 5000,
+        joinDate: new Date().toISOString().slice(0, 10)
+      })
     },
 
     deleteSelected() {

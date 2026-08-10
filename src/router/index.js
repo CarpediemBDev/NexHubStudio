@@ -16,7 +16,6 @@ import EquipmentMonitorPage from "../pages/EquipmentMonitorPage.vue";
 import RequestWorkflowPage from "../pages/RequestWorkflowPage.vue";
 import WorkRequestFormPage from "../pages/WorkRequestFormPage.vue";
 import PivotAltAPage from "../pages/PivotAltAPage.vue";
-import PivotAltBPage from "../pages/PivotAltBPage.vue";
 import RealPivotPage from "../pages/RealPivotPage.vue";
 import RealPivotSdkPage from "../pages/RealPivotSdkPage.vue";
 import RealGridPage from "../pages/RealGridPage.vue";
@@ -78,7 +77,6 @@ const routes = [
           { path: "js", name: "RealGridJsSample", component: RealGridPage, meta: { title: "RealGrid (JS)", icon: "bi-grid-3x3", keepAlive: true } },
           { path: "tree", name: "RealGridTreeSample", component: RealGridTreePage, meta: { title: "RealGrid 트리", icon: "bi-diagram-3", keepAlive: true } },
           { path: "pivot-a", name: "PivotA", component: PivotAltAPage, meta: { title: "Pivot 분석 A", icon: "bi-pie-chart", keepAlive: true } },
-          { path: "pivot-b", name: "PivotB", component: PivotAltBPage, meta: { title: "Pivot 분석 B", icon: "bi-pie-chart-fill", keepAlive: true } },
           { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "AI 스마트 피벗 (자체개발)", icon: "bi-bar-chart-steps", keepAlive: true } },
           { path: "pivot-sdk", name: "RealPivotSdk", component: RealPivotSdkPage, meta: { title: "RealPivot 공식 SDK 가이드", icon: "bi-box-seam", keepAlive: true } }
         ]
@@ -126,7 +124,6 @@ const routes = [
       { path: "real-grid-tree", component: RealGridTreePage, meta: { hidden: true } },
       { path: "component-guide", component: ComponentGuidePage, meta: { hidden: true } },
       { path: "pivot-alt-a", component: PivotAltAPage, meta: { hidden: true } },
-      { path: "pivot-alt-b", component: PivotAltBPage, meta: { hidden: true } },
       { path: "real-pivot", component: RealPivotPage, meta: { hidden: true } },
       // 업무 & 게시판 / 공통코드 / 샘플 단독 경로 (NavBar·대시보드 flat 링크 매칭용)
       { path: "posts", component: PostListPage, meta: { title: "게시판 목록", hidden: true, activeMenu: "/work-group/posts" } },

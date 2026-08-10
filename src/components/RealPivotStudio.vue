@@ -702,15 +702,15 @@
 const AGG_LABELS = { sum: '합계', avg: '평균', min: '최소', max: '최대', count: '건수' }
 
 const FALLBACK_ROWS = [
-  { userId: 'u1', name: '김철수', dept: '플랫폼개발팀', role: 'Backend', region: '서울', salary: 6200, joinYear: 2019 },
-  { userId: 'u2', name: '이영희', dept: '플랫폼개발팀', role: 'Frontend', region: '판교', salary: 5400, joinYear: 2021 },
-  { userId: 'u3', name: '박민수', dept: '데이터팀', role: 'Data', region: '서울', salary: 7100, joinYear: 2018 },
-  { userId: 'u4', name: '정수진', dept: '보안팀', role: 'Security', region: '부산', salary: 6800, joinYear: 2020 },
-  { userId: 'u5', name: '홍길동', dept: '인프라팀', role: 'DevOps', region: '대전', salary: 5900, joinYear: 2022 },
-  { userId: 'u6', name: '강지훈', dept: 'QA팀', role: 'QA', region: '판교', salary: 4800, joinYear: 2023 },
-  { userId: 'u7', name: '윤아름', dept: '플랫폼개발팀', role: 'Frontend', region: '서울', salary: 6100, joinYear: 2020 },
-  { userId: 'u8', name: '조현우', dept: '데이터팀', role: 'Data', region: '판교', salary: 7500, joinYear: 2017 },
-  { userId: 'u9', name: '최동현', dept: '보안팀', role: 'Security', region: '서울', salary: 6400, joinYear: 2021 },
+  { userId: 'u1', name: '김철수', dept: '플랫폼개발팀', role: 'Backend', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 92, region: '서울', salary: 6200, joinDate: '2019-03-11' },
+  { userId: 'u2', name: '이영희', dept: '플랫폼개발팀', role: 'Frontend', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 85, region: '판교', salary: 5400, joinDate: '2021-05-22' },
+  { userId: 'u3', name: '박민수', dept: '데이터팀', role: 'Data', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 74, region: '서울', salary: 7100, joinDate: '2018-09-03' },
+  { userId: 'u4', name: '정수진', dept: '보안팀', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 96, region: '부산', salary: 6800, joinDate: '2020-02-17' },
+  { userId: 'u5', name: '홍길동', dept: '인프라팀', role: 'DevOps', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 82, region: '대전', salary: 5900, joinDate: '2022-07-08' },
+  { userId: 'u6', name: '강지훈', dept: 'QA팀', role: 'QA', workStatus: '재직', employmentType: '정규직', evalGrade: 'B', skillScore: 78, region: '판교', salary: 4800, joinDate: '2023-06-14' },
+  { userId: 'u7', name: '윤아름', dept: '플랫폼개발팀', role: 'Frontend', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 89, region: '서울', salary: 6100, joinDate: '2020-11-30' },
+  { userId: 'u8', name: '조현우', dept: '데이터팀', role: 'Data', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 94, region: '판교', salary: 7500, joinDate: '2017-04-19' },
+  { userId: 'u9', name: '최동현', dept: '보안팀', role: 'Security', workStatus: '퇴사', employmentType: '파트타임', evalGrade: 'C', skillScore: 62, region: '서울', salary: 6400, joinDate: '2021-12-01' },
 ]
 
 const AI_PRESETS = [
@@ -726,7 +726,7 @@ const AI_PRESETS = [
   {
     title: '⚡ 입사연도별 평균 연봉',
     prompt: '입사연도별 인원수와 평균 연봉을 계산해줘',
-    rowIds: ['joinYear'],
+    rowIds: ['joinDate'],
     colIds: [],
     valConfigs: [{ id: 'headcount', agg: 'count' }, { id: 'salary', agg: 'avg' }],
     filterConfigs: {},
@@ -830,13 +830,18 @@ export default {
       activeFilters: {},
 
       fields: [
+        { id: 'userId', label: '사용자ID', kind: 'dim', numeric: false, zone: 'none' },
         { id: 'dept', label: '부서', kind: 'dim', numeric: false, zone: 'row' },
         { id: 'region', label: '근무지', kind: 'dim', numeric: false, zone: 'col' },
         { id: 'role', label: '직군', kind: 'dim', numeric: false, zone: 'none' },
-        { id: 'joinYear', label: '입사연도', kind: 'dim', numeric: true, zone: 'none' },
+        { id: 'workStatus', label: '근무상태', kind: 'dim', numeric: false, zone: 'none' },
+        { id: 'employmentType', label: '고용형태', kind: 'dim', numeric: false, zone: 'none' },
+        { id: 'evalGrade', label: '평가등급', kind: 'dim', numeric: false, zone: 'none' },
+        { id: 'joinDate', label: '입사일자', kind: 'dim', numeric: false, zone: 'none' },
         { id: 'name', label: '사원이름', kind: 'dim', numeric: false, zone: 'none' },
         { id: 'headcount', label: '인원수', kind: 'measure', numeric: false, zone: 'value', agg: 'count' },
         { id: 'salary', label: '연봉(만원)', kind: 'measure', numeric: true, zone: 'value', agg: 'sum' },
+        { id: 'skillScore', label: '역량점수', kind: 'measure', numeric: true, zone: 'none', agg: 'avg' },
       ],
     }
   },
@@ -1302,7 +1307,7 @@ export default {
       if (lower.includes('부서')) detectedDims.push('dept')
       if (lower.includes('근무지') || lower.includes('지역')) detectedDims.push('region')
       if (lower.includes('직군') || lower.includes('직급') || lower.includes('역할')) detectedDims.push('role')
-      if (lower.includes('입사') || lower.includes('연도') || lower.includes('년도')) detectedDims.push('joinYear')
+      if (lower.includes('입사') || lower.includes('연도') || lower.includes('년도')) detectedDims.push('joinDate')
       if (lower.includes('사원') || lower.includes('이름')) detectedDims.push('name')
       let agg = 'sum'
       if (lower.includes('평균')) agg = 'avg'

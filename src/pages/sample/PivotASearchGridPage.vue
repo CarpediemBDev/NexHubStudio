@@ -115,15 +115,23 @@ export default {
         { name: 'name', type: 'string' },
         { name: 'dept', type: 'string' },
         { name: 'role', type: 'string' },
+        { name: 'workStatus', type: 'string' },
+        { name: 'employmentType', type: 'string' },
+        { name: 'evalGrade', type: 'string' },
+        { name: 'skillScore', type: 'number' },
         { name: 'region', type: 'string' },
         { name: 'salary', type: 'number' },
-        { name: 'joinYear', type: 'number' }
+        { name: 'joinDate', type: 'string' }
       ],
       columns: [
         { text: 'ID', datafield: 'userId', width: 110, editable: false },
         { text: '성명', datafield: 'name', width: 100, editable: false },
         { text: '부서', datafield: 'dept', width: 130, editable: false },
         { text: '직무/역할', datafield: 'role', width: 120, editable: false },
+        { text: '근무상태', datafield: 'workStatus', width: 95, editable: false, cellsalign: 'center', align: 'center' },
+        { text: '고용형태', datafield: 'employmentType', width: 100, editable: false, cellsalign: 'center', align: 'center' },
+        { text: '평가등급', datafield: 'evalGrade', width: 80, editable: false, cellsalign: 'center', align: 'center' },
+        { text: '역량점수', datafield: 'skillScore', width: 100, editable: false, cellsalign: 'right', align: 'right' },
         { text: '근무지역', datafield: 'region', width: 100, editable: false },
         {
           text: '급여 (만원)',
@@ -135,9 +143,9 @@ export default {
           cellsformat: 'n'
         },
         {
-          text: '입사년도',
-          datafield: 'joinYear',
-          width: 100,
+          text: '입사일자',
+          datafield: 'joinDate',
+          width: 110,
           editable: false,
           cellsalign: 'center',
           align: 'center'
@@ -165,10 +173,10 @@ export default {
 
     getDefaultUsers() {
       return [
-        { userId: 'park.mj', name: '박민준', dept: '경영지원', role: 'Security', region: '서울', salary: 5240, joinYear: 2019 },
-        { userId: 'lee.sh', name: '이수현', dept: '경영지원', role: 'PM', region: '대전', salary: 9520, joinYear: 2024 },
-        { userId: 'han.mj', name: '한민준', dept: '디자인팀', role: 'DevOps', region: '광주', salary: 8900, joinYear: 2021 },
-        { userId: 'lee.yb', name: '이예빈', dept: '모바일팀', role: 'QA', region: '서울', salary: 8860, joinYear: 2024 }
+        { userId: 'minjun.park', name: '박민준', dept: '경영지원', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 88, region: '서울', salary: 5240, joinDate: '2019-04-12' },
+        { userId: 'suhyeon.lee', name: '이수현', dept: '경영지원', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 95, region: '대전', salary: 9520, joinDate: '2024-01-15' },
+        { userId: 'minjun.han', name: '한민준', dept: '디자인팀', role: 'DevOps', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 72, region: '광주', salary: 8900, joinDate: '2021-08-20' },
+        { userId: 'yebin.lee', name: '이예빈', dept: '모바일팀', role: 'QA', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 84, region: '서울', salary: 8860, joinDate: '2024-05-10' }
       ]
     },
 

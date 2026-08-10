@@ -1,6 +1,6 @@
 // 목업 유저 생성기 (숫자 PK 제거, userId는 영문 given.surname[+번호])
-// 결과: { userId, name(한글), dept, role, region(근무지), salary(연봉·만원), joinYear(입사연도) }
-//  - region/salary/joinYear 는 피벗 집계용 차원·측정값. 기존 소비처(그리드 등)는
+// 결과: { userId, name(한글), dept, role, region(근무지), salary(연봉·만원), joinDate(입사일자) }
+//  - region/salary/joinDate 는 피벗 집계용 차원·측정값. 기존 소비처(그리드 등)는
 //    추가 키를 무시하므로 하위호환된다.
 export function generateMockUsers(count = 100, { seed = 1 } = {}) {
   let s = seed >>> 0 // LCG PRNG
@@ -94,6 +94,10 @@ export function generateMockUsers(count = 100, { seed = 1 } = {}) {
   // userId 중복 방지 (base -> 카운트)
   const taken = new Map()
 
+  const workStatuses = ['재직', '휴직', '퇴사']
+  const employmentTypes = ['정규직', '계약직', '파트타임']
+  const evalGrades = ['S', 'A', 'B', 'C', 'D']
+
   const list = []
   for (let i = 0; i < count; i++) {
     const surKo = SURNAMES_KO[Math.floor(rnd() * SURNAMES_KO.length)]
@@ -118,6 +122,11 @@ export function generateMockUsers(count = 100, { seed = 1 } = {}) {
     // 연봉(만원): 3,200 ~ 10,000 범위, 10만원 단위. PM/Security 등 일부 직군에 소폭 가산.
     const rolePremium = role === 'PM' ? 1200 : role === 'Security' || role === 'Data' ? 700 : 0
     const salary = Math.round((3200 + rolePremium + rnd() * 6000) / 10) * 10
+    const skillScore = Math.floor(55 + rnd() * 44) // 55 ~ 98 점수
+    const year = 2015 + Math.floor(rnd() * 11)
+    const month = String(1 + Math.floor(rnd() * 12)).padStart(2, '0')
+    const day = String(1 + Math.floor(rnd() * 28)).padStart(2, '0')
+    const joinDate = `${year}-${month}-${day}`
 
     list.push({
       userId, // ✔ 영문 고유키
@@ -126,8 +135,13 @@ export function generateMockUsers(count = 100, { seed = 1 } = {}) {
       role,
       region: regions[Math.floor(rnd() * regions.length)], // 근무지
       salary, // 연봉(만원)
-      joinYear: 2015 + Math.floor(rnd() * 11), // 입사연도 2015~2025
+      joinDate, // 입사일자 (YYYY-MM-DD)
+      workStatus: workStatuses[Math.floor(rnd() * workStatuses.length)], // SelectBox (재직/휴직/퇴사)
+      employmentType: employmentTypes[Math.floor(rnd() * employmentTypes.length)], // SelectBox (정규직/계약직/파트타임)
+      evalGrade: evalGrades[Math.floor(rnd() * evalGrades.length)], // Badge (S/A/B/C/D)
+      skillScore, // Energy Bar / Progress Bar (55~98)
     })
   }
   return list
 }
+
