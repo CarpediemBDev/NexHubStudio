@@ -266,11 +266,12 @@ export default {
   mounted() {
     this.loadSavedViews()
     this.syncColumnItems()
-    // Auto-Resize Observer
     if (window.ResizeObserver && this.$refs.gridContainerRef) {
       this.resizeObserver = new ResizeObserver(() => {
         window.requestAnimationFrame(() => {
-          if (this.$refs.grid) {
+          // 그리드가 화면에 붙어있을 때만 refresh. 페이지 이탈(keepAlive)·HMR 로 DOM 이
+          // 분리되면 isConnected 가 false → 파괴된 그리드에 refresh 호출을 막아 jqx 셀렉터 에러 방지.
+          if (this.$refs.grid && this.$refs.gridContainerRef?.isConnected) {
             this.$refs.grid.refresh()
           }
         })
