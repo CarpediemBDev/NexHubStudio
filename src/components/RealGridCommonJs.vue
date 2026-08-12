@@ -410,9 +410,8 @@ export default {
       if (!this.gridView) return
 
       try {
-        this.gridView.setIndicator({
+        this.gridView.setRowIndicator({
           visible: this.resolvedShowRowNumber,
-          draggableSelectedRows: false,
           ...(customOpts.indicator || {})
         })
       } catch (e) { /* noop */ }
