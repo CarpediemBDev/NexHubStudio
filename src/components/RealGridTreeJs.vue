@@ -1383,7 +1383,6 @@ export default {
         { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
       ]
       if (this.gridId) {
-        menuItems.push({ label: '🔖 현재 뷰 저장...', tag: 'saveView' })
         menuItems.push({ label: '🔄 컬럼 레이아웃 저장값 초기화', tag: 'resetLayout' })
       }
       menuItems.push(

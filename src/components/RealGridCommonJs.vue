@@ -589,10 +589,6 @@ export default {
         { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
         { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
       ]
-      if (this.showSavedViews) {
-        menuItems.push({ label: '-' })
-        menuItems.push({ label: '💾 현재 뷰 상태 저장', tag: 'saveView' })
-      }
       this.gridView.setContextMenu(menuItems)
       this.gridView.onContextMenuPopup = () => true
       this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
