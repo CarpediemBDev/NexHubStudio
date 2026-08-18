@@ -246,6 +246,15 @@ export default {
             domainOnly: true,
             labels: ['정규직', '계약직', '파트타임'],
             values: ['정규직', '계약직', '파트타임']
+          },
+          styleCallback: function (grid, dataCell) {
+            const v = dataCell.value
+            if (v === '정규직') return 'rg-emp-regular'
+            if (v === '계약직') return 'rg-emp-contract'
+            if (v === '파트타임') return 'rg-emp-parttime'
+            if (v === '인턴') return 'rg-emp-intern'
+            if (v === '소속') return 'rg-emp-dept'
+            return ''
           }
         },
         {
@@ -293,6 +302,11 @@ export default {
           header: { text: '기본급 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
+          styleCallback: function (grid, dataCell) {
+            const val = Number(dataCell.value)
+            if (val >= 7000) return 'rg-salary-high'
+            return ''
+          },
           footer: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } },
           groupFooter: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
         },
@@ -682,4 +696,14 @@ export default {
 .transition-all {
   transition: all 0.2s ease;
 }
+</style>
+
+<style>
+/* RealGrid 동적 셀 스타일 (styleCallback 전용) */
+.rg-data-cell.rg-emp-regular { color: #0d6efd !important; }
+.rg-data-cell.rg-emp-contract { color: #ea580c !important; }
+.rg-data-cell.rg-emp-parttime { color: #7c3aed !important; }
+.rg-data-cell.rg-emp-intern { color: #0891b2 !important; }
+.rg-data-cell.rg-emp-dept { color: #64748b !important; }
+.rg-data-cell.rg-salary-high { color: #dc2626 !important; }
 </style>
