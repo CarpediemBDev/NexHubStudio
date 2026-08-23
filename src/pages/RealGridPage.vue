@@ -2,7 +2,7 @@
   <div class="b2b-page-container">
     <!-- Header Page Title -->
     <div class="mb-3">
-      <h4 class="fw-bold text-dark m-0">RealGrid 샘플 (공통 컴포넌트형)</h4>
+      <h4 class="b2b-text-h1 fw-bold text-dark m-0">RealGrid 샘플 (공통 컴포넌트형)</h4>
       <p class="text-muted small mb-0">공통 컴포넌트인 RealGridCommonJs를 활용하여 간결하게 작성된 고성능 그리드 샘플입니다.</p>
     </div>
 

@@ -357,7 +357,7 @@ export default {
 }
 
 .group-title {
-  font-size: 1.5rem;
+  font-size: var(--b2b-font-size-h1);
   font-weight: 600;
   color: #24292f;
   margin: 0;

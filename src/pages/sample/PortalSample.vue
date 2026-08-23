@@ -12,7 +12,7 @@
           <div class="carousel-item active" data-bs-interval="5000">
              <div class="slide-content bg-dark">
                 <div class="slide-text">
-                    <h2>스마트 팩토리 모니터링</h2>
+                    <h2 class="b2b-text-display">스마트 팩토리 모니터링</h2>
                     <p>실시간 설비 현황과 생산성을 한눈에 확인하세요.</p>
                 </div>
             </div>
@@ -20,7 +20,7 @@
           <div class="carousel-item" data-bs-interval="5000">
              <div class="slide-content bg-primary">
                 <div class="slide-text">
-                    <h2>안전한 작업 환경</h2>
+                    <h2 class="b2b-text-display">안전한 작업 환경</h2>
                     <p>작업자 안전을 위한 가이드라인과 수칙을 준수합니다.</p>
                 </div>
             </div>
@@ -28,7 +28,7 @@
           <div class="carousel-item" data-bs-interval="5000">
              <div class="slide-content bg-success">
                 <div class="slide-text">
-                    <h2>지속 가능한 성장</h2>
+                    <h2 class="b2b-text-display">지속 가능한 성장</h2>
                     <p>혁신적인 기술로 미래를 선도하는 기업.</p>
                 </div>
             </div>
@@ -195,7 +195,7 @@ export default {
   font-weight: bold;
   opacity: 0.6;
   text-transform: uppercase;
-  font-size: 0.9rem;
+  font-size: var(--b2b-font-size-sm);
 }
 
 .flex-row {
@@ -212,7 +212,7 @@ export default {
 .link-card {
   display: block;
   text-decoration: none;
-  background: white;
+  background: var(--b2b-color-bg-card);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   transition: transform 0.2s, box-shadow 0.2s;
@@ -241,7 +241,7 @@ export default {
   justify-content: center;
   margin-bottom: 1rem;
   color: white;
-  font-size: 1.25rem;
+  font-size: var(--b2b-font-size-h2);
 }
 
 /* 3. 대시보드 분할 레이아웃 */
@@ -266,26 +266,26 @@ export default {
   align-items: flex-end;           
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--b2b-color-border);
 }
 .group-title {
   margin: 0;
-  font-weight: bold;
-  font-size: 1.25rem;
+  font-weight: 600;
+  font-size: var(--b2b-font-size-h2);
   display: flex;
   align-items: center;
 }
-.icon-primary { color: #0d6efd; margin-right: 0.5rem; }
-.icon-success { color: #198754; margin-right: 0.5rem; }
+.icon-primary { color: var(--b2b-color-primary); margin-right: 0.5rem; }
+.icon-success { color: var(--b2b-color-success); margin-right: 0.5rem; }
 
 .btn-more {
   text-decoration: none;
-  color: #6c757d;
-  font-size: 0.875rem;
+  color: var(--b2b-color-text-muted);
+  font-size: var(--b2b-font-size-body);
 }
 .btn-more:hover {
   text-decoration: underline;
-  color: #000;
+  color: var(--b2b-color-text-main);
 }
 
 /* 내부 카드 그리드 */
@@ -308,11 +308,11 @@ export default {
 
 /* 카드 스타일 */
 .content-card {
-  background: white;
+  background: var(--b2b-color-bg-card);
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.05);
   transition: all 0.3s;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--b2b-color-border);
   overflow: hidden;
   min-height: 380px;        /* 기존 trump-shape 스타일 병합 */
   height: 100%;
@@ -340,8 +340,8 @@ export default {
 
 .card-desc {
   margin: 0;
-  font-size: 1.1rem;
-  color: #333;
+  font-size: var(--b2b-font-size-body);
+  color: var(--b2b-color-text-main);
   line-height: 1.6;
   font-weight: 500;
   
@@ -354,21 +354,21 @@ export default {
 }
 
 .card-title-text {
-  font-size: 1.25rem;
+  font-size: var(--b2b-font-size-h2);
   font-weight: bold;
 }
 
 .card-bottom {
   margin-top: 1rem;
   text-align: center;
-  border-top: 1px solid #f8f8f8;
+  border-top: 1px solid var(--b2b-color-border);
   padding-top: 1rem;
 }
 
 .card-date {
   display: block;
-  font-size: 0.85rem;
-  color: #888;
+  font-size: var(--b2b-font-size-sm);
+  color: var(--b2b-color-text-muted);
 }
 
 /* 반응형 처리 */
@@ -388,11 +388,4 @@ export default {
 }
 
 /* 유틸리티 (필요 시 부트스트랩 클래스로 대체 가능) */
-.bg-success { background-color: #198754 !important; }
-.bg-primary { background-color: #0d6efd !important; }
-.bg-danger { background-color: #dc3545 !important; }
-.bg-info { background-color: #0dcaf0 !important; }
-.bg-warning { background-color: #ffc107 !important; }
-.bg-secondary { background-color: #6c757d !important; }
-.bg-dark { background-color: #212529 !important; }
 </style>

@@ -181,7 +181,7 @@ const openTabMenu = (event) => {
 /* ── 공통 탭 베이스 ───────────────────────────── */
 .vben-tab {
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: var(--b2b-font-size-body);
   line-height: 1;
   user-select: none;
   color: var(--b2b-color-text-muted, #64748b);
@@ -190,7 +190,7 @@ const openTabMenu = (event) => {
 }
 
 .tab-icon {
-  font-size: 0.85rem;
+  font-size: var(--b2b-font-size-body);
   margin-right: 6px;
   opacity: 0.85;
 }
@@ -213,7 +213,7 @@ const openTabMenu = (event) => {
   border-radius: 50%;
   background: transparent;
   color: inherit;
-  font-size: 0.8rem;
+  font-size: var(--b2b-font-size-sm);
   line-height: 1;
   opacity: 0;
   transition: opacity 0.15s, background-color 0.15s;
@@ -299,7 +299,7 @@ const openTabMenu = (event) => {
   border: none;
   background: transparent;
   color: var(--b2b-color-text-muted, #64748b);
-  font-size: 0.72rem;
+  font-size: var(--b2b-font-size-xs);
   padding: 2px 8px;
   cursor: pointer;
   transition: all 0.15s;
@@ -334,7 +334,7 @@ const openTabMenu = (event) => {
   align-items: center;
   padding: 6px 10px;
   border-radius: 5px;
-  font-size: 0.8rem;
+  font-size: var(--b2b-font-size-sm);
   color: var(--b2b-color-text-main, #1e293b);
   cursor: pointer;
   transition: background-color 0.12s;

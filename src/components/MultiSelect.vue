@@ -268,6 +268,7 @@ export default {
 }
 
 .selected-badge {
+  font-size: var(--b2b-font-size-sm);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -275,7 +276,6 @@ export default {
   background-color: #0d6efd;
   color: white;
   border-radius: 12px;
-  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -285,7 +285,7 @@ export default {
 }
 
 .selected-badge i {
-  font-size: 0.75rem;
+  font-size: var(--b2b-font-size-sm);
 }
 
 .selected-text {

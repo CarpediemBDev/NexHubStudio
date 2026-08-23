@@ -4,7 +4,7 @@
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between mb-3 gap-2">
       <div>
         <div class="d-flex align-items-center gap-2">
-          <h4 class="fw-bold m-0" style="color: var(--b2b-color-text-main)">
+          <h4 class="b2b-text-h1 fw-bold m-0" style="color: var(--b2b-color-text-main)">
             RealGrid ↔ DIV 스마트 D&amp;D 스튜디오 <span class="badge bg-gradient-pro text-white fs-6 ms-1 px-2.5 py-1 rounded-pill">Antigravity Pro</span>
           </h4>
         </div>

@@ -10,7 +10,6 @@ import './utils/mdEditorLocale' // md-editor-v3 한국어 로케일 전역 등�
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-import './assets/styles/premium-theme.css'
 import './assets/styles/tokens.css'
 import './assets/styles/layout.css'
 import './assets/styles/buttons.css'

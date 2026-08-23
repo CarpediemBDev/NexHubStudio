@@ -3,7 +3,7 @@
     <!-- Top Page Header -->
     <div class="b2b-toolbar mb-3">
       <div class="d-flex align-items-center gap-2">
-        <h4 class="m-0 fw-bold">메뉴 및 권한 관리</h4>
+        <h4 class="b2b-text-h1 m-0 fw-bold">메뉴 및 권한 관리</h4>
         <span class="badge b2b-badge-live ms-2">RBAC System</span>
       </div>
     </div>

@@ -1,7 +1,7 @@
 ﻿<template>
   <div class="code-group-list-page">
     <div class="toolbar mb-3">
-      <h3 class="mb-0">공통코드 그룹 관리</h3>
+      <h3 class="b2b-text-h1 mb-0">공통코드 그룹 관리</h3>
       <div class="d-flex gap-2">
         <input
           type="text"

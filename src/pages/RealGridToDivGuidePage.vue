@@ -3,7 +3,7 @@
     <!-- Header Page Title -->
     <div class="mb-3">
       <div class="d-flex align-items-center gap-2">
-        <h4 class="fw-bold m-0" style="color: var(--b2b-color-text-main)">RealGrid 모델 그룹화 스튜디오 (Grid ➔ DIV)</h4>
+        <h4 class="b2b-text-h1 fw-bold m-0" style="color: var(--b2b-color-text-main)">RealGrid 모델 그룹화 스튜디오 (Grid ➔ DIV)</h4>
         <span class="badge bg-primary px-2.5 py-1">전용 핸들(`⋮⋮`) 다중 D&amp;D</span>
         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
           <i class="bi bi-layers-half me-1"></i>다중 &amp; 단일 D&amp;D 겸용

@@ -2,7 +2,7 @@
   <div :class="['vben-sidebar border-end', { 'collapsed': collapsed }]">
     <div class="sidebar-logo d-flex align-items-center justify-content-center border-bottom py-3">
       <i class="bi bi-box-seam fs-4 text-primary"></i>
-      <span v-if="!collapsed" class="ms-2 fw-bold fs-5 logo-text">NexHub</span>
+      <span v-if="!collapsed" class="ms-2 fw-bold logo-text">NexHub</span>
     </div>
     
     <div class="sidebar-menu overflow-auto p-2 custom-scrollbar">
@@ -111,7 +111,10 @@ const navigate = (path) => {
   background-color: var(--b2b-sidebar-logo-bg);
   border-color: var(--b2b-sidebar-border) !important;
 }
-.logo-text { color: var(--b2b-color-text-main); }
+.logo-text {
+  color: var(--b2b-color-text-main);
+  font-size: var(--b2b-font-size-h1); /* 브랜드 마크 - 스케일 최상단 */
+}
 .title-text { color: var(--b2b-sidebar-text); }
 .cursor-pointer { cursor: pointer; }
 

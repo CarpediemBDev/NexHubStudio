@@ -1,12 +1,12 @@
 ﻿<template>
   <div class="test-page" style="padding: 20px;">
-    <h2>JqxGrid Width Test</h2>
+    <h2 class="b2b-text-h1">JqxGrid Width Test</h2>
     
     <div style="display: flex; gap: 30px; flex-direction: column;">
       
       <!-- Case 1: Fixed (Attempt with No Width) -->
       <div class="grid-container">
-        <h3>1. Previous Attempt (Your Screenshot)</h3>
+        <h3 class="b2b-text-h2">1. Previous Attempt (Your Screenshot)</h3>
         <p>Removing <code>width</code> from one column helps, but borders/padding might still cause 1-2px overflow.</p>
         <JqxCustomGrid
           ref="grid2"
@@ -21,7 +21,7 @@
 
       <!-- Case 2: Grid Width Adjustment -->
       <div class="grid-container highlight">
-        <h3>2. Real Solution: <code>width="99.8%"</code> or <code>calc(100% - 2px)</code></h3>
+        <h3 class="b2b-text-h2">2. Real Solution: <code>width="99.8%"</code> or <code>calc(100% - 2px)</code></h3>
         <p>If the scrollbar is very small (1-2px), it's a border calculation issue. Reducing the grid width slightly fixes it entirely.</p>
         <JqxCustomGrid
           ref="grid3"
@@ -36,7 +36,7 @@
 
        <!-- Case 3: No Width Column + Explicit Width Adjustment -->
        <div class="grid-container">
-        <h3>3. Alternative: <code>calc(100% - 2px)</code></h3>
+        <h3 class="b2b-text-h2">3. Alternative: <code>calc(100% - 2px)</code></h3>
         <p>Using CSS calc to subtract the exact border width (usually 2px).</p>
         <JqxCustomGrid
           ref="grid4"

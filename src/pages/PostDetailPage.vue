@@ -8,7 +8,7 @@
       <!-- 게시글 헤더 -->
       <div class="card-header bg-light">
         <div class="d-flex justify-content-between align-items-center">
-          <h3 class="mb-0">{{ post.title }}</h3>
+          <h3 class="b2b-text-h1 mb-0">{{ post.title }}</h3>
           <div v-if="isAuthor" class="btn-group">
             <button class="btn btn-sm btn-outline-primary" @click="goToEdit">
               <i class="bi bi-pencil"></i> 수정
@@ -44,7 +44,7 @@
         </div>
 
         <div v-if="post.attachments && post.attachments.length" class="mb-3">
-          <h6 class="mb-2"><i class="bi bi-paperclip me-1"></i>첨부파일</h6>
+          <h6 class="b2b-text-h2 mb-2"><i class="bi bi-paperclip me-1"></i>첨부파일</h6>
           <ul class="list-unstyled">
             <li
               v-for="file in post.attachments"
@@ -71,7 +71,7 @@
 
       <!-- 댓글 섹션 -->
       <div class="card-footer">
-        <h5><i class="bi bi-chat-dots me-2"></i>댓글 {{ comments.length }}</h5>
+        <h5 class="b2b-text-h2"><i class="bi bi-chat-dots me-2"></i>댓글 {{ comments.length }}</h5>
 
         <!-- 댓글 작성 -->
         <div class="mb-3">

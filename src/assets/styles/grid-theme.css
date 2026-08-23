@@ -226,7 +226,7 @@ canvas.rg-canvas ~ .rg-state-insert {
   color: var(--text-primary) !important;
   font-weight: 600 !important;
   border-bottom: 2px solid var(--border-color) !important;
-  padding: 10px 12px !important;
+  padding: 10px var(--b2b-space-3) !important;
   font-size: 0.8125rem !important; /* 13px */
   white-space: nowrap !important;
 }
@@ -254,7 +254,7 @@ canvas.rg-canvas ~ .rg-state-insert {
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  padding: 32px 16px;
+  padding: var(--b2b-space-6) var(--b2b-space-4);
   text-align: center;
 }
 

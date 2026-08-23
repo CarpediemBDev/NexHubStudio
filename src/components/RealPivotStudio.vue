@@ -29,7 +29,7 @@
             <span>⚙️ 뷰 옵션</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-lg p-2 view-options-menu b2b-text-sm" style="min-width: 240px;">
-            <li><h6 class="dropdown-header text-theme-secondary fw-bold px-2 py-1">🎨 서식 &amp; 패널 표시</h6></li>
+            <li><h6 class="b2b-text-xs dropdown-header text-theme-secondary fw-bold px-2 py-1">🎨 서식 &amp; 패널 표시</h6></li>
             <li>
               <button class="dropdown-item d-flex align-items-center justify-content-between rounded py-1.5 px-2" @click="showAiSection = !showAiSection">
                 <span><i class="bi bi-magic text-primary me-2"></i>AI 피벗 도우미</span>
@@ -56,7 +56,7 @@
             </li>
 
             <li><hr class="dropdown-divider my-1.5"></li>
-            <li><h6 class="dropdown-header text-theme-secondary fw-bold px-2 py-1">📐 레이아웃 모드</h6></li>
+            <li><h6 class="b2b-text-xs dropdown-header text-theme-secondary fw-bold px-2 py-1">📐 레이아웃 모드</h6></li>
             <li class="d-flex gap-1 px-2 py-1">
               <button
                 class="btn btn-xs flex-fill"
@@ -82,7 +82,7 @@
             </li>
 
             <li><hr class="dropdown-divider my-1.5"></li>
-            <li><h6 class="dropdown-header text-theme-secondary fw-bold px-2 py-1">🎨 테마 스타일</h6></li>
+            <li><h6 class="b2b-text-xs dropdown-header text-theme-secondary fw-bold px-2 py-1">🎨 테마 스타일</h6></li>
             <li class="d-flex gap-1 px-2 py-1">
               <button
                 class="btn btn-xs flex-fill"

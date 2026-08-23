@@ -2,7 +2,7 @@
   <div class="b2b-page-container">
     <!-- Header -->
     <div class="mb-3">
-      <h4 class="fw-bold text-dark m-0">RealGrid 트리 (계층형 그리드)</h4>
+      <h4 class="b2b-text-h1 fw-bold text-dark m-0">RealGrid 트리 (계층형 그리드)</h4>
       <p class="text-muted small mb-0">db.json 마스터 데이터셋(100명)을 부서 ➔ 직무/사용자 계층 구조로 실시간 동적 변환하여 연동한 트리 그리드입니다. 노드 순서 이동, 엑셀 출력, CUD 저장을 지원합니다.</p>
     </div>
 

@@ -1,7 +1,7 @@
 ﻿<template>
   <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2><i class="bi bi-file-text me-2"></i>게시판</h2>
+      <h2 class="b2b-text-h1"><i class="bi bi-file-text me-2"></i>게시판</h2>
       <button class="btn btn-primary" @click="goToWrite">
         <i class="bi bi-pencil-square me-1"></i>글쓰기
       </button>
@@ -31,7 +31,7 @@
           >
             <div class="d-flex justify-content-between align-items-start">
               <div class="flex-grow-1">
-                <h5 class="mb-1">{{ post.title }}</h5>
+                <h5 class="b2b-text-body mb-1">{{ post.title }}</h5>
                 <p class="mb-1 text-muted small">{{ truncate(stripMarkdown(post.content), 100) }}</p>
                 <small class="text-muted">
                   <i class="bi bi-person me-1"></i>{{ post.authorId }}

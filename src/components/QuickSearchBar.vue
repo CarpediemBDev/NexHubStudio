@@ -124,29 +124,6 @@ export default {
     transform: scaleX(1);
   }
 }
-.btn-compact {
-  height: 30px;
-  padding: 0 10px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.15s ease-in-out;
-  cursor: pointer;
-  line-height: 1;
-}
-.btn-compact-secondary {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-}
-.btn-compact-secondary:hover {
-  background-color: var(--bg-subcard);
-  border-color: var(--text-secondary);
-  color: var(--text-primary);
-}
 .btn-theme-action {
   background-color: var(--bg-subcard);
   color: var(--text-primary);

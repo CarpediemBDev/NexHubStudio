@@ -4,7 +4,7 @@
       <button class="btn btn-sm btn-action me-3" @click="$emit('toggle-sidebar')" title="사이드바 토글">
         <i class="bi bi-list fs-5"></i>
       </button>
-      <h5 class="m-0 text-primary fw-bold">NexHubStudio</h5>
+      <h5 class="b2b-text-h1 m-0 text-primary fw-bold">NexHubStudio</h5>
     </div>
     
     <div class="vben-header-actions d-flex align-items-center gap-2 flex-shrink-0">

@@ -28,7 +28,7 @@
               <span>{{ activePresetName }}</span>
             </button>
             <ul class="dropdown-menu shadow-sm fs-7">
-              <li><h6 class="dropdown-header py-1">⚡ 빠른 프리셋 선택</h6></li>
+              <li><h6 class="b2b-text-xs dropdown-header py-1">⚡ 빠른 프리셋 선택</h6></li>
               <li v-for="preset in quickPresets" :key="preset.id">
                 <button
                   class="dropdown-item d-flex align-items-center justify-content-between py-1.5"

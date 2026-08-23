@@ -1,29 +1,33 @@
 :root, [data-theme="light"] {
   /* Corporate Slate/Indigo Accent */
   --b2b-color-primary: #2563EB;
+  --b2b-color-primary-rgb: 37, 99, 235;
   --b2b-color-primary-hover: #1D4ED8;
   --b2b-color-primary-subtle: #EFF6FF;
   --b2b-color-slate: #1E293B;
 
-  /* Standard Design Tokens (CSS Variables) - Light Mode */
-  --bg-main: #F8FAFC;        /* slate-50 */
-  --bg-card: #FFFFFF;        /* white */
-  --bg-subcard: #F1F5F9;     /* slate-100 */
-  --bg-header: #F1F5F9;      /* slate-100 */
-  --text-primary: #1E293B;   /* slate-800 */
-  --text-secondary: #64748B; /* slate-500 */
-  --text-muted: #94A3B8;     /* slate-400 */
-  --border-color: #E2E8F0;   /* slate-200 */
-  
-  /* Legacy/B2B Tokens Mapping */
-  --b2b-color-bg-body: var(--bg-main);
-  --b2b-color-bg-card: var(--bg-card);
-  --b2b-color-border: var(--border-color);
-  --b2b-color-text-main: var(--text-primary);
-  --b2b-color-text-muted: var(--text-secondary);
-  --b2b-color-header-bg: #FFFFFF;
+  /* ---- Single Source of Truth: --b2b-* (Light Mode) ---- */
+  --b2b-color-bg-body: #F8FAFC;     /* slate-50  */
+  --b2b-color-bg-card: #FFFFFF;     /* white     */
+  --b2b-color-bg-subcard: #F1F5F9;  /* slate-100 */
+  --b2b-color-bg-header: #F1F5F9;   /* slate-100 - 그리드/테이블 헤더 */
+  --b2b-color-header-bg: #FFFFFF;   /* 앱 상단 헤더 (bg-header 와 다름) */
   --b2b-color-tab-bg: #F1F5F9;
   --b2b-color-hover-bg: #F1F5F9;
+  --b2b-color-border: #E2E8F0;      /* slate-200 */
+  --b2b-color-text-main: #1E293B;   /* slate-800 */
+  --b2b-color-text-muted: #64748B;  /* slate-500 */
+  --b2b-color-text-faint: #94A3B8;  /* slate-400 */
+
+  /* ---- Deprecated aliases (기존 코드 호환용) : 신규 코드는 --b2b-* 사용 ---- */
+  --bg-main: var(--b2b-color-bg-body);
+  --bg-card: var(--b2b-color-bg-card);
+  --bg-subcard: var(--b2b-color-bg-subcard);
+  --bg-header: var(--b2b-color-bg-header);
+  --text-primary: var(--b2b-color-text-main);
+  --text-secondary: var(--b2b-color-text-muted);
+  --text-muted: var(--b2b-color-text-faint);
+  --border-color: var(--b2b-color-border);
   
   /* Sidebar Tokens - Light Mode */
   --b2b-sidebar-bg: #FFFFFF;
@@ -43,41 +47,89 @@
   --b2b-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --b2b-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --b2b-font-size-base: 13px;
+
+  /* Type Scale - .b2b-text-* 유틸리티와 1:1 대응.
+     scoped CSS 에서는 px 하드코딩 대신 이 토큰을 참조한다. */
+  --b2b-font-size-display: 1.5rem;    /* 24px */
+  --b2b-font-size-h1: 1.1875rem;      /* 19px */
+  --b2b-font-size-h2: 0.9375rem;      /* 15px */
+  --b2b-font-size-body: 0.8125rem;    /* 13px - 표준 */
+  --b2b-font-size-sm: 0.75rem;        /* 12px */
+  --b2b-font-size-xs: 0.6875rem;      /* 11px */
+  --b2b-font-size-2xs: 0.625rem;      /* 10px */
   
   /* Radii & Sizes */
   --b2b-radius-sm: 2px;
   --b2b-radius-md: 3px;
+  --b2b-radius-lg: 6px;
+  --b2b-radius-pill: 9999px;
   --b2b-height-compact: 28px;
   --b2b-height-normal: 32px;
+
+  /* --------------------------------------------------------------------
+     Spacing Scale (4px base) - 모든 padding/margin/gap 은 이 토큰만 사용
+     -------------------------------------------------------------------- */
+  --b2b-space-0: 0;
+  --b2b-space-1: 4px;
+  --b2b-space-2: 8px;
+  --b2b-space-3: 12px;
+  --b2b-space-4: 16px;
+  --b2b-space-5: 24px;
+  --b2b-space-6: 32px;
+  --b2b-space-7: 48px;
+
+  /* Elevation (Shadow) Scale */
+  --b2b-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --b2b-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --b2b-shadow-md: 0 2px 6px rgba(15, 23, 42, 0.08);
+  --b2b-shadow-lg: 0 8px 20px rgba(15, 23, 42, 0.12);
+
+  /* Z-Index Scale */
+  --b2b-z-base: 1;
+  --b2b-z-sticky: 100;
+  --b2b-z-dropdown: 1000;
+  --b2b-z-overlay: 1040;
+  --b2b-z-modal: 1050;
+  --b2b-z-toast: 1080;
 }
 
 /* --- Dark / Navy Global Theme Mode --- */
 [data-theme="dark"],
 [data-theme="dark-navy"] {
   --b2b-color-primary: #3B82F6;
+  --b2b-color-primary-rgb: 59, 130, 246;
   --b2b-color-primary-hover: #60A5FA;
   --b2b-color-primary-subtle: rgba(59, 130, 246, 0.15);
   --b2b-color-slate: #0F172A;
   
-  /* Standard Design Tokens (CSS Variables) - Dark Navy Mode */
-  --bg-main: #0F172A;        /* slate-900 (더 깊은 네이비) */
-  --bg-card: #1E293B;        /* slate-800 (카드 네이비) */
-  --bg-subcard: rgba(30, 41, 59, 0.85); /* slate-800/85 */
-  --bg-header: #334155;      /* slate-700 */
-  --text-primary: #F8FAFC;   /* slate-100 (밝은 폰트) */
-  --text-secondary: #94A3B8; /* slate-400 (차분한 서브 폰트) */
-  --text-muted: #64748B;     /* slate-500 */
-  --border-color: #334155;   /* slate-700 (어두운 구분선) */
-
-  /* Legacy/B2B Tokens Mapping */
-  --b2b-color-bg-body: var(--bg-main);
-  --b2b-color-bg-card: var(--bg-card);
-  --b2b-color-border: var(--border-color);
-  --b2b-color-text-main: var(--text-primary);
-  --b2b-color-text-muted: var(--text-secondary);
-  --b2b-color-header-bg: var(--bg-card);
-  --b2b-color-tab-bg: var(--bg-main);
+  /* ---- Single Source of Truth: --b2b-* (Dark Navy Mode) ---- */
+  --b2b-color-bg-body: #0F172A;                 /* slate-900 */
+  --b2b-color-bg-card: #1E293B;                 /* slate-800 */
+  --b2b-color-bg-subcard: rgba(30, 41, 59, 0.85);
+  --b2b-color-bg-header: #334155;               /* slate-700 */
+  --b2b-color-header-bg: #1E293B;               /* 앱 상단 헤더 */
+  --b2b-color-tab-bg: #0F172A;
   --b2b-color-hover-bg: #334155;
+  --b2b-color-border: #334155;                  /* slate-700 */
+  --b2b-color-text-main: #F8FAFC;               /* slate-100 */
+  --b2b-color-text-muted: #94A3B8;              /* slate-400 */
+  --b2b-color-text-faint: #64748B;              /* slate-500 */
+
+  /* ---- Elevation: 어두운 배경에서는 그림자를 더 깊게 ---- */
+  --b2b-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --b2b-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --b2b-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.5);
+  --b2b-shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.55);
+
+  /* ---- Deprecated aliases (기존 코드 호환용) ---- */
+  --bg-main: var(--b2b-color-bg-body);
+  --bg-card: var(--b2b-color-bg-card);
+  --bg-subcard: var(--b2b-color-bg-subcard);
+  --bg-header: var(--b2b-color-bg-header);
+  --text-primary: var(--b2b-color-text-main);
+  --text-secondary: var(--b2b-color-text-muted);
+  --text-muted: var(--b2b-color-text-faint);
+  --border-color: var(--b2b-color-border);
 
   /* Sidebar Tokens - Dark Navy Mode */
   --b2b-sidebar-bg: #1E293B;
@@ -87,6 +139,65 @@
   --b2b-sidebar-hover: #334155;
   --b2b-sidebar-active-bg: rgba(59, 130, 246, 0.15);
   --b2b-sidebar-active-text: #60A5FA;
+}
+
+/* ==========================================================================
+   BASE INTERACTION (premium-theme.css 에서 이관)
+   ========================================================================== */
+::selection {
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.18);
+  color: var(--b2b-color-text-main);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--b2b-color-text-faint);
+  border-radius: var(--b2b-radius-pill);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--b2b-color-text-muted);
+}
+
+/* ==========================================================================
+   STATUS DOT (실시간 상태 표시용 - 모니터링 화면 전용)
+   ========================================================================== */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: relative;
+  --status-dot-color: var(--b2b-color-text-faint);
+  background-color: var(--status-dot-color);
+}
+.status-dot-success { --status-dot-color: var(--b2b-color-success); }
+.status-dot-danger  { --status-dot-color: var(--b2b-color-danger); }
+
+.status-dot-success::after,
+.status-dot-danger::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1px solid var(--status-dot-color);
+  animation: b2b-pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes b2b-pulse-dot {
+  0%   { transform: scale(0.9); opacity: 1; }
+  70%  { transform: scale(1.25); opacity: 0; }
+  100% { transform: scale(0.9); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-dot-success::after,
+  .status-dot-danger::after { animation: none; }
 }
 
 /* Tabular Nums for tables and numbers */
@@ -137,6 +248,132 @@
 [data-theme="dark-navy"] .list-group-item {
   background-color: var(--bg-card) !important;
   color: var(--text-primary) !important;
+}
+
+/* 1-A. 나머지 Bootstrap 컴포넌트 (밝은 배경이 고정값인 것들) */
+[data-theme="dark"] .progress,
+[data-theme="dark-navy"] .progress,
+[data-theme="dark"] .breadcrumb,
+[data-theme="dark-navy"] .breadcrumb,
+[data-theme="dark"] .offcanvas,
+[data-theme="dark-navy"] .offcanvas {
+  background-color: var(--b2b-color-bg-subcard) !important;
+  color: var(--b2b-color-text-main) !important;
+}
+[data-theme="dark"] .offcanvas,
+[data-theme="dark-navy"] .offcanvas {
+  border-color: var(--b2b-color-border) !important;
+}
+
+/* 1-B. Bootstrap 의 -subtle / alert / accordion 계열
+   밝은 파스텔 배경이 고정값이라 다크에서 그대로 뜬다.
+   시맨틱 색은 유지하되 배경만 반투명 틴트로 바꿔 어두운 바탕에 얹는다. */
+[data-theme="dark"] .bg-primary-subtle,
+[data-theme="dark-navy"] .bg-primary-subtle {
+  background-color: rgba(59, 130, 246, 0.18) !important;
+  color: #93C5FD !important;
+}
+[data-theme="dark"] .bg-success-subtle,
+[data-theme="dark-navy"] .bg-success-subtle {
+  background-color: rgba(34, 197, 94, 0.18) !important;
+  color: #86EFAC !important;
+}
+[data-theme="dark"] .bg-warning-subtle,
+[data-theme="dark-navy"] .bg-warning-subtle {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  color: #FCD34D !important;
+}
+[data-theme="dark"] .bg-danger-subtle,
+[data-theme="dark-navy"] .bg-danger-subtle {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  color: #FCA5A5 !important;
+}
+[data-theme="dark"] .bg-info-subtle,
+[data-theme="dark-navy"] .bg-info-subtle {
+  background-color: rgba(6, 182, 212, 0.18) !important;
+  color: #67E8F9 !important;
+}
+[data-theme="dark"] .bg-secondary-subtle,
+[data-theme="dark-navy"] .bg-secondary-subtle {
+  background-color: var(--b2b-color-hover-bg) !important;
+  color: var(--b2b-color-text-muted) !important;
+}
+
+/* -subtle 배지 안의 text-*-* 유틸이 다시 어두운 색으로 덮는 것을 막는다 */
+[data-theme="dark"] [class*="bg-primary-subtle"].text-primary,
+[data-theme="dark-navy"] [class*="bg-primary-subtle"].text-primary { color: #93C5FD !important; }
+[data-theme="dark"] [class*="bg-success-subtle"].text-success,
+[data-theme="dark-navy"] [class*="bg-success-subtle"].text-success { color: #86EFAC !important; }
+[data-theme="dark"] [class*="bg-warning-subtle"].text-warning,
+[data-theme="dark-navy"] [class*="bg-warning-subtle"].text-warning { color: #FCD34D !important; }
+[data-theme="dark"] [class*="bg-danger-subtle"].text-danger,
+[data-theme="dark-navy"] [class*="bg-danger-subtle"].text-danger { color: #FCA5A5 !important; }
+[data-theme="dark"] [class*="-subtle"].text-dark,
+[data-theme="dark-navy"] [class*="-subtle"].text-dark { color: var(--b2b-color-text-main) !important; }
+
+/* text-*-emphasis 는 라이트 전용 진한 색이라 다크에서 대비가 사라진다 */
+[data-theme="dark"] .text-primary-emphasis,
+[data-theme="dark-navy"] .text-primary-emphasis { color: #93C5FD !important; }
+[data-theme="dark"] .text-info-emphasis,
+[data-theme="dark-navy"] .text-info-emphasis { color: #67E8F9 !important; }
+[data-theme="dark"] .text-warning-emphasis,
+[data-theme="dark-navy"] .text-warning-emphasis { color: #FCD34D !important; }
+
+/* Alert */
+[data-theme="dark"] .alert,
+[data-theme="dark-navy"] .alert {
+  background-color: var(--b2b-color-bg-subcard) !important;
+  border-color: var(--b2b-color-border) !important;
+  color: var(--b2b-color-text-main) !important;
+}
+[data-theme="dark"] .alert-info,
+[data-theme="dark-navy"] .alert-info {
+  background-color: rgba(6, 182, 212, 0.12) !important;
+  border-color: rgba(6, 182, 212, 0.35) !important;
+}
+[data-theme="dark"] .alert-warning,
+[data-theme="dark-navy"] .alert-warning {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+[data-theme="dark"] .alert-danger,
+[data-theme="dark-navy"] .alert-danger {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+[data-theme="dark"] .alert-heading,
+[data-theme="dark-navy"] .alert-heading,
+[data-theme="dark"] .alert .alert-link,
+[data-theme="dark-navy"] .alert .alert-link {
+  color: var(--b2b-color-text-main) !important;
+}
+
+/* Accordion (Bootstrap 은 --bs-accordion-* 로 색을 고정한다) */
+[data-theme="dark"] .accordion,
+[data-theme="dark-navy"] .accordion {
+  --bs-accordion-bg: var(--b2b-color-bg-card);
+  --bs-accordion-color: var(--b2b-color-text-main);
+  --bs-accordion-border-color: var(--b2b-color-border);
+  --bs-accordion-btn-bg: var(--b2b-color-bg-card);
+  --bs-accordion-btn-color: var(--b2b-color-text-main);
+  --bs-accordion-active-bg: var(--b2b-color-primary-subtle);
+  --bs-accordion-active-color: var(--b2b-color-primary);
+  --bs-accordion-btn-icon-transform: rotate(-180deg);
+}
+[data-theme="dark"] .accordion-item,
+[data-theme="dark-navy"] .accordion-item,
+[data-theme="dark"] .accordion-button,
+[data-theme="dark-navy"] .accordion-button,
+[data-theme="dark"] .accordion-body,
+[data-theme="dark-navy"] .accordion-body {
+  background-color: var(--b2b-color-bg-card) !important;
+  color: var(--b2b-color-text-main) !important;
+  border-color: var(--b2b-color-border) !important;
+}
+/* 접힘 화살표 아이콘이 검정 SVG 라 어두운 배경에서 안 보인다 */
+[data-theme="dark"] .accordion-button::after,
+[data-theme="dark-navy"] .accordion-button::after {
+  filter: invert(1) grayscale(1) brightness(2);
 }
 
 /* 2. Sub-containers, Subcards & Table Headers */
@@ -327,43 +564,109 @@
 /* ==========================================================================
    B2B TYPOGRAPHY SYSTEM
    ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   [0] Bootstrap 의 em 기반 폰트 클래스 중화
+   .small / small / .badge / .form-text 는 Bootstrap 에서 em(부모 대비 배수)로
+   정의되어 중첩될수록 복리로 작아진다.
+       13px -> .small 11.375 -> .small 9.95 -> <code> 8.71px
+   고정 rem 으로 못박아 스케일 이탈과 소수점 폰트를 원천 차단한다.
+   ※ 아래 .b2b-text-* 가 항상 이기도록 이 블록은 반드시 먼저 선언한다.
+   -------------------------------------------------------------------------- */
+.small,
+small {
+  font-size: var(--b2b-font-size-sm);   /* 12px */
+}
+
+.badge {
+  font-size: var(--b2b-font-size-xs); /* 11px */
+}
+
+.form-text {
+  font-size: var(--b2b-font-size-xs);
+}
+
+/* Bootstrap 은 code/kbd/samp 도 0.875em 으로 준다 (중첩 시 복리) */
+code,
+kbd,
+samp {
+  font-size: var(--b2b-font-size-sm); /* 12px */
+}
+
+/* 네이티브 select 드롭다운 항목은 브라우저 기본 16px 로 열린다 */
+option {
+  font-size: var(--b2b-font-size-body); /* 13px */
+}
+
+/* --------------------------------------------------------------------------
+   [0-2] 제목 태그 안전망
+   클래스를 지정하지 않은 h1~h6 이 Bootstrap 기본값(32px/28px/24px...)으로
+   튀는 것을 막는다. 요소 선택자(0,0,1)라 .b2b-text-* 지정 시 항상 양보한다.
+   -------------------------------------------------------------------------- */
+h1 { font-size: var(--b2b-font-size-h1); font-weight: 600; }
+h2,
+h3 { font-size: var(--b2b-font-size-h2); font-weight: 600; }
+h4,
+h5,
+h6 { font-size: var(--b2b-font-size-body); font-weight: 600; }
+
+/* Bootstrap 의 .h1~.h6 유틸리티 클래스도 동일 규격으로 */
+.h1 { font-size: var(--b2b-font-size-h1); }
+.h2,
+.h3 { font-size: var(--b2b-font-size-h2); }
+.h4,
+.h5,
+.h6 { font-size: var(--b2b-font-size-body); }
+
+/* Bootstrap 컴포넌트 기본 폰트 정규화 */
+.lead { font-size: var(--b2b-font-size-h2); }        /* 1.25rem -> 15px */
+.modal-title { font-size: var(--b2b-font-size-h2); } /* h5 상속 20px -> 15px */
+.accordion-button { font-size: var(--b2b-font-size-body); } /* 1rem -> 13px */
+
 .b2b-text-display {
-  font-size: 1.5rem !important; /* 24px */
-  font-weight: 700 !important;
-  line-height: 1.2 !important;
+  font-size: var(--b2b-font-size-display);
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .b2b-text-h1,
 .page-title {
-  font-size: 1.1875rem !important; /* 19px */
-  font-weight: 600 !important;
-  line-height: 1.3 !important;
+  font-size: var(--b2b-font-size-h1);
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .b2b-text-h2,
 .section-title {
-  font-size: 0.9375rem !important; /* 15px */
-  font-weight: 600 !important;
-  line-height: 1.4 !important;
+  font-size: var(--b2b-font-size-h2);
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .b2b-text-body {
-  font-size: 0.8125rem !important; /* 13px - B2B Standard */
-  font-weight: 400 !important;
-  line-height: 1.5 !important;
+  font-size: var(--b2b-font-size-body);
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 .b2b-text-sm {
-  font-size: 0.75rem !important; /* 12px */
-  font-weight: 400 !important;
-  line-height: 1.4 !important;
+  font-size: var(--b2b-font-size-sm);
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .b2b-text-xs,
 .caption {
-  font-size: 0.6875rem !important; /* 11px */
-  font-weight: 400 !important;
-  line-height: 1.3 !important;
+  font-size: var(--b2b-font-size-xs);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* 배지/타임스탬프 등 최소 단위 (기존 마크업에서 사용 중이나 정의가 없던 클래스) */
+.b2b-text-2xs {
+  font-size: var(--b2b-font-size-2xs);
+  font-weight: 400;
+  line-height: 1.3;
 }
 
 /* ==========================================================================
@@ -373,9 +676,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: var(--b2b-space-1);
   padding: 0.25rem 0.55rem;
-  font-size: 0.6875rem; /* 11px */
+  font-size: var(--b2b-font-size-xs);
   font-weight: 600;
   border-radius: 9999px;
   line-height: 1;
@@ -454,14 +757,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 10px var(--b2b-space-4);
   min-height: 42px;
   background-color: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
 }
 
 .b2b-card-body {
-  padding: 16px;
+  padding: var(--b2b-space-4);
 }
 
 /* ==========================================================================
@@ -471,13 +774,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: var(--b2b-space-3) var(--b2b-space-4);
   background-color: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
 }
 
 .b2b-modal-title {
-  font-size: 0.9375rem; /* 15px */
+  font-size: var(--b2b-font-size-h2);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -487,8 +790,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: var(--b2b-space-2);
+  padding: var(--b2b-space-3) var(--b2b-space-4);
   background-color: var(--bg-card);
   border-top: 1px solid var(--border-color);
 }

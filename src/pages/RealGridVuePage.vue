@@ -2,7 +2,7 @@
   <div class="b2b-page-container">
     <!-- Header Page Title -->
     <div class="mb-3">
-      <h4 class="fw-bold m-0" style="color: var(--b2b-color-text-main)">RealGrid-Vue 샘플 (공통 슬롯 컴포넌트형)</h4>
+      <h4 class="b2b-text-h1 fw-bold m-0" style="color: var(--b2b-color-text-main)">RealGrid-Vue 샘플 (공통 슬롯 컴포넌트형)</h4>
       <p class="small mb-0" style="color: var(--b2b-color-text-muted)">공식 <span class="badge bg-primary-soft text-primary font-monospace">realgrid-vue</span> 래퍼를 캡슐화한 RealGridCommonVue를 적용한 그리드 샘플입니다.</p>
     </div>
 

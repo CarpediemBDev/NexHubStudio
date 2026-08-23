@@ -2,7 +2,7 @@
   <div class="b2b-page-container">
     <!-- Header Page Title -->
     <div class="mb-3">
-      <h4 class="fw-bold m-0" style="color: var(--b2b-color-text-main)">RealGrid Drag &amp; Drop 샘플 (그리드 ↔ 그리드)</h4>
+      <h4 class="b2b-text-h1 fw-bold m-0" style="color: var(--b2b-color-text-main)">RealGrid Drag &amp; Drop 샘플 (그리드 ↔ 그리드)</h4>
       <p class="small mb-0" style="color: var(--b2b-color-text-muted)">
         모두 <span class="badge bg-success-subtle text-success border border-success-subtle">RealGridCommonJs</span> 공통 컴포넌트 그리드입니다(드래그 기능은 <code>:draggable-rows</code> prop 하나로 on/off).
         <b>이동</b>: 맨 왼쪽 <span class="rg-grip-inline">⠿</span> 그립을 잡고 다른 그리드로 드래그(체크·범위선택 시 일괄, 팀↔팀·팀→풀 가능) 또는 아래 배정 버튼.

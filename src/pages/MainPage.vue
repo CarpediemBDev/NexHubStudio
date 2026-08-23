@@ -6,7 +6,7 @@
         <div class="card border-0 shadow-sm bg-primary text-white overflow-hidden hero-card">
           <div class="card-body p-5 position-relative">
             <div class="position-relative z-1">
-              <h1 class="display-5 fw-bold mb-3">Welcome to NexHubStudio</h1>
+              <h1 class="b2b-text-display fw-bold mb-3">Welcome to NexHubStudio</h1>
               <p class="lead mb-4 opacity-75" style="max-width: 600px">
                 관리자님, 환영합니다. 오늘도 효율적인 업무 관리를 도와드리겠습니다.<br />
                 진행 중인 업무 의뢰 현황과 설비 상태를 확인하세요.
@@ -38,8 +38,8 @@
                 <i class="bi bi-file-earmark-text fs-4"></i>
               </div>
               <div>
-                <h6 class="text-theme-secondary mb-1 text-uppercase small fw-bold">오늘 요청된 업무</h6>
-                <h3 class="mb-0 fw-bold text-theme-primary">12 <span class="fs-6 text-success fw-normal">(+3)</span></h3>
+                <h6 class="b2b-text-xs text-theme-secondary mb-1 text-uppercase fw-bold">오늘 요청된 업무</h6>
+                <h3 class="b2b-text-display mb-0 fw-bold text-theme-primary">12 <span class="b2b-text-sm text-success fw-normal">(+3)</span></h3>
               </div>
             </div>
             <div class="progress" style="height: 6px">
@@ -58,8 +58,8 @@
                 <i class="bi bi-hourglass-split fs-4"></i>
               </div>
               <div>
-                <h6 class="text-theme-secondary mb-1 text-uppercase small fw-bold">승인 대기</h6>
-                <h3 class="mb-0 fw-bold text-theme-primary">5</h3>
+                <h6 class="b2b-text-xs text-theme-secondary mb-1 text-uppercase fw-bold">승인 대기</h6>
+                <h3 class="b2b-text-display mb-0 fw-bold text-theme-primary">5</h3>
               </div>
             </div>
             <div class="progress" style="height: 6px">
@@ -78,8 +78,8 @@
                 <i class="bi bi-exclamation-triangle fs-4"></i>
               </div>
               <div>
-                <h6 class="text-theme-secondary mb-1 text-uppercase small fw-bold">설비 알림</h6>
-                <h3 class="mb-0 fw-bold text-theme-primary">2</h3>
+                <h6 class="b2b-text-xs text-theme-secondary mb-1 text-uppercase fw-bold">설비 알림</h6>
+                <h3 class="b2b-text-display mb-0 fw-bold text-theme-primary">2</h3>
               </div>
             </div>
             <div class="progress" style="height: 6px">
@@ -98,8 +98,8 @@
                 <i class="bi bi-people fs-4"></i>
               </div>
               <div>
-                <h6 class="text-theme-secondary mb-1 text-uppercase small fw-bold">접속 사용자</h6>
-                <h3 class="mb-0 fw-bold text-theme-primary">48</h3>
+                <h6 class="b2b-text-xs text-theme-secondary mb-1 text-uppercase fw-bold">접속 사용자</h6>
+                <h3 class="b2b-text-display mb-0 fw-bold text-theme-primary">48</h3>
               </div>
             </div>
             <div class="progress" style="height: 6px">
@@ -153,7 +153,7 @@
                 <tr v-for="workflow in workflows" :key="workflow.id" class="border-bottom border-theme">
                   <td class="ps-4">
                     <div class="d-flex align-items-center">
-                      <div class="avatar rounded-circle bg-secondary bg-opacity-25 text-theme-primary me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem">
+                      <div class="avatar rounded-circle bg-secondary bg-opacity-25 text-theme-primary me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: var(--b2b-font-size-sm)">
                         {{ workflow.type[0] }}
                       </div>
                       <span class="fw-medium text-theme-primary">{{ workflow.title }}</span>
@@ -212,7 +212,7 @@
                 </div>
               </div>
               <div class="flex-grow-1">
-                <h6 class="mb-0 fw-semibold text-theme-primary">{{ eq.name }}</h6>
+                <h6 class="b2b-text-body mb-0 fw-semibold text-theme-primary">{{ eq.name }}</h6>
                 <small class="text-theme-secondary">{{ eq.code }}</small>
               </div>
               <span class="badge" :class="eq.status === 'Normal' ? 'bg-success' : 'bg-danger'">

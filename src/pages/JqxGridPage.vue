@@ -2,7 +2,7 @@
   <div class="b2b-page-container py-3">
     <!-- Header Page Title -->
     <div class="mb-3">
-      <h4 class="fw-bold text-dark m-0">JQWidgets 그리드 샘플</h4>
+      <h4 class="b2b-text-h1 fw-bold text-dark m-0">JQWidgets 그리드 샘플</h4>
       <p class="text-muted small mb-0 mt-1">db.json 목업 데이터셋 기반 100여 건의 사용자 정보 조회 및 편집/추가/삭제 엔터프라이즈 예제입니다.</p>
     </div>
 

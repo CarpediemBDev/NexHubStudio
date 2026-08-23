@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="mb-1 text-theme-primary fw-bold">
+        <h2 class="b2b-text-h1 mb-1 text-theme-primary fw-bold">
           <i class="bi bi-search me-2 text-primary"></i>AutoCompleteInput 미리보기 & 데모 갤러리
         </h2>
         <p class="text-theme-secondary b2b-text-xs mb-0">
@@ -49,7 +49,7 @@
                   {{ demo1Value.length }} 자
                 </span>
               </div>
-              <div class="h5 mb-0 text-primary fw-bold font-monospace">
+              <div class="b2b-text-h2 mb-0 text-primary fw-bold font-monospace">
                 {{ demo1Value || '(입력값이 없습니다)' }}
               </div>
             </div>
@@ -90,7 +90,7 @@
                   <i :class="['bi', selectedUserObj.icon || 'bi-person']"></i>
                 </div>
                 <div>
-                  <h6 class="mb-0 fw-bold text-theme-primary">{{ selectedUserObj.name }}</h6>
+                  <h6 class="b2b-text-body mb-0 fw-bold text-theme-primary">{{ selectedUserObj.name }}</h6>
                   <small class="text-muted b2b-text-xs">{{ selectedUserObj.badge }} · {{ selectedUserObj.description }}</small>
                 </div>
               </div>
@@ -112,7 +112,7 @@
         <div class="row g-4">
           <div class="col-md-3">
             <div class="p-3 border rounded h-100 bg-theme-subcard">
-              <h6 class="fw-bold text-primary mb-2"><i class="bi bi-keyboard me-1"></i>키보드 내비게이션</h6>
+              <h6 class="b2b-text-h2 fw-bold text-primary mb-2"><i class="bi bi-keyboard me-1"></i>키보드 내비게이션</h6>
               <ul class="b2b-text-xs ps-3 mb-0 text-theme-secondary">
                 <li><code>↓ (Down)</code>: 다음 항목으로 이동</li>
                 <li><code>↑ (Up)</code>: 이전 항목으로 이동</li>
@@ -124,7 +124,7 @@
 
           <div class="col-md-3">
             <div class="p-3 border rounded h-100 bg-theme-subcard">
-              <h6 class="fw-bold text-success mb-2"><i class="bi bi-highlighter me-1"></i>텍스트 하이라이트</h6>
+              <h6 class="b2b-text-h2 fw-bold text-success mb-2"><i class="bi bi-highlighter me-1"></i>텍스트 하이라이트</h6>
               <p class="b2b-text-xs mb-0 text-theme-secondary">
                 사용자가 입력한 키워드와 일치하는 문자를 <mark class="bg-warning-subtle text-dark p-0 rounded-1 fw-bold">노란색 하이라이트</mark>로 자동 강조합니다.
               </p>
@@ -133,7 +133,7 @@
 
           <div class="col-md-3">
             <div class="p-3 border rounded h-100 bg-theme-subcard">
-              <h6 class="fw-bold text-info mb-2"><i class="bi bi-mouse me-1"></i>외곽 클릭 자동 Close</h6>
+              <h6 class="b2b-text-h2 fw-bold text-info mb-2"><i class="bi bi-mouse me-1"></i>외곽 클릭 자동 Close</h6>
               <p class="b2b-text-xs mb-0 text-theme-secondary">
                 입력창 외부 영역 클릭 감지 기능이 내장되어 있어 드롭다운 팝업이 자동으로 깔끔하게 닫힙니다.
               </p>
@@ -142,7 +142,7 @@
 
           <div class="col-md-3">
             <div class="p-3 border rounded h-100 bg-theme-subcard">
-              <h6 class="fw-bold text-warning mb-2"><i class="bi bi-x-circle me-1"></i>원클릭 초기화</h6>
+              <h6 class="b2b-text-h2 fw-bold text-warning mb-2"><i class="bi bi-x-circle me-1"></i>원클릭 초기화</h6>
               <p class="b2b-text-xs mb-0 text-theme-secondary">
                 입력값이 있을 때 우측에 <code>X</code> 버튼이 표시되며, 클릭 시 즉시 텍스트를 지우고 포커스를 유지합니다.
               </p>

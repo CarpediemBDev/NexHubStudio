@@ -3,7 +3,7 @@
     <!-- Header Title -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="mb-1 text-theme-primary fw-bold">
+        <h2 class="b2b-text-h1 mb-1 text-theme-primary fw-bold">
           <i class="bi bi-book me-2 text-primary"></i>공통 컴포넌트 & 디자인 시스템 가이드
         </h2>
         <p class="text-theme-secondary b2b-text-xs mb-0">

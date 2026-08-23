@@ -3,7 +3,7 @@
     <!-- 페이지 헤더 -->
     <div class="mb-3 d-flex justify-content-between align-items-center">
       <div>
-        <h4 class="fw-bold m-0" style="color: var(--b2b-color-text-main)">사용자 관리</h4>
+        <h4 class="b2b-text-h1 fw-bold m-0" style="color: var(--b2b-color-text-main)">사용자 관리</h4>
         <p class="small mb-0 mt-1" style="color: var(--b2b-color-text-muted)">시스템 사용자 목록을 조회하고 관리합니다</p>
       </div>
       <div>
