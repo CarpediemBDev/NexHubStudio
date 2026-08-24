@@ -347,6 +347,43 @@
       </main>
     </div>
 
+    <!-- ================= MODAL: 신규 템플릿 생성 팝업 ================= -->
+    <div v-if="showNewModal" class="modal-backdrop fade show"></div>
+    <div v-if="showNewModal" class="modal fade show d-block" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border shadow">
+          <div class="modal-header py-2.5 px-3 bg-light border-bottom">
+            <h6 class="modal-title fw-bold mb-0">신규 메일 템플릿 등록</h6>
+            <button type="button" class="btn-close" @click="showNewModal = false"></button>
+          </div>
+          <div class="modal-body p-3">
+            <div class="mb-3">
+              <label class="form-label small text-muted mb-1">템플릿 명칭 <span class="text-danger">*</span></label>
+              <input
+                v-model="newTemplateName"
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="예: 설비 점검 알림 메일"
+                @keydown.enter="confirmCreateTemplate"
+              />
+            </div>
+            <div>
+              <label class="form-label small text-muted mb-1">엔진 타입</label>
+              <select v-model="newTemplateEngine" class="form-select form-select-sm">
+                <option value="VELOCITY">Velocity (.vm)</option>
+                <option value="THYMELEAF">Thymeleaf</option>
+                <option value="PLAIN">Plain HTML</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer py-2 px-3 bg-light border-top">
+            <button type="button" class="btn btn-outline-secondary btn-sm" @click="showNewModal = false">취소</button>
+            <button type="button" class="btn btn-primary btn-sm px-3" :disabled="!newTemplateName.trim()" @click="confirmCreateTemplate">등록</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ================= MODAL: 테스트 발송 팝업 ================= -->
     <div v-if="showTestModal" class="modal-backdrop fade show"></div>
     <div v-if="showTestModal" class="modal fade show d-block" tabindex="-1">
@@ -393,6 +430,7 @@ import {
   wrapPreviewDocument,
   castSampleValue
 } from '../../utils/mailTemplateRender'
+import { showToast } from '../../utils/toastUtil'
 
 // 상태 관리
 const searchQuery = ref('')
@@ -403,6 +441,9 @@ const showVarInspector = ref(false)
 const showMetaEdit = ref(false)
 const showTestModal = ref(false)
 const testEmail = ref('admin@nexhub.co.kr')
+const showNewModal = ref(false)
+const newTemplateName = ref('')
+const newTemplateEngine = ref('VELOCITY')
 const htmlEditorRef = ref(null)
 
 // 데이터
@@ -602,12 +643,18 @@ function saveTemplate() {
       ver.bodyHtml = editForm.bodyHtml
       ver.bodyText = editForm.bodyText
     }
-    alert('템플릿이 성공적으로 저장되었습니다.')
+    showToast('템플릿이 성공적으로 저장되었습니다.', { type: 'success' })
   }
 }
 
 function openNewTemplateModal() {
-  const name = prompt('템플릿 명칭을 입력하세요:', '신규 공지 메일')
+  newTemplateName.value = '신규 공지 메일'
+  newTemplateEngine.value = 'VELOCITY'
+  showNewModal.value = true
+}
+
+function confirmCreateTemplate() {
+  const name = newTemplateName.value.trim()
   if (!name) return
 
   const newId = Date.now()
@@ -617,7 +664,7 @@ function openNewTemplateModal() {
     templateCode: code,
     templateName: name,
     categoryCode: 'NOTICE',
-    engineType: 'VELOCITY',
+    engineType: newTemplateEngine.value,
     localeCode: 'ko_KR',
     statusCode: 'DRAFT',
     currentVersionId: newId * 10,
@@ -636,6 +683,8 @@ function openNewTemplateModal() {
   }
   templates.value.unshift(newTpl)
   selectedTemplateId.value = newId
+  showNewModal.value = false
+  showToast(`신규 템플릿 "${name}"이 등록되었습니다.`, { type: 'success' })
 }
 
 function openTestSendModal() {
@@ -644,12 +693,12 @@ function openTestSendModal() {
 
 function sendTestMail() {
   showTestModal.value = false
-  alert(`[테스트 발송 완료]\n수신자: ${testEmail.value}\n제목: ${renderedSubject.value}`)
+  showToast(`테스트 메일이 발송되었습니다. (수신: ${testEmail.value})`, { type: 'info' })
 }
 
 function testEvent(evt) {
   activeTab.value = 'preview'
-  alert(`'${evt.eventName}' 이벤트 테스트 데이터로 전환되었습니다.`)
+  showToast(`'${evt.eventName}' 이벤트 테스트 데이터로 전환되었습니다.`, { type: 'info' })
 }
 </script>
 
@@ -673,21 +722,21 @@ function testEvent(evt) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: var(--b2b-color-bg-card);
+  border: 1px solid var(--b2b-color-border);
   border-radius: 8px;
   overflow: hidden;
 }
 
 .sidebar-top {
   padding: 16px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--b2b-color-border);
 }
 
 .sidebar-title {
   font-size: var(--b2b-font-size-h2);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--b2b-color-text-main);
 }
 
 .search-wrap {
@@ -699,14 +748,14 @@ function testEvent(evt) {
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-muted);
+  color: var(--b2b-color-text-muted);
   font-size: var(--b2b-font-size-sm);
 }
 
 .search-input {
   padding-left: 28px;
-  background: var(--bg-main);
-  border-color: var(--border-color);
+  background: var(--b2b-color-bg-main);
+  border-color: var(--b2b-color-border);
   font-size: var(--b2b-font-size-sm);
 }
 
@@ -723,13 +772,13 @@ function testEvent(evt) {
   padding: 11px 14px;
   border-radius: 6px;
   cursor: pointer;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: var(--b2b-color-bg-card);
+  border: 1px solid var(--b2b-color-border);
   transition: all 0.15s ease-in-out;
 }
 
 .template-row:hover {
-  background: var(--bg-subcard);
+  background: var(--b2b-color-bg-subcard);
   border-color: var(--b2b-color-border);
 }
 
@@ -742,7 +791,7 @@ function testEvent(evt) {
 .template-name {
   font-size: var(--b2b-font-size-body);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--b2b-color-text-main);
 }
 
 .status-dot {
@@ -760,7 +809,7 @@ function testEvent(evt) {
 .empty-state {
   text-align: center;
   padding: 30px 10px;
-  color: var(--text-muted);
+  color: var(--b2b-color-text-faint);
   font-size: var(--b2b-font-size-sm);
 }
 
@@ -770,8 +819,8 @@ function testEvent(evt) {
   flex-direction: column;
   height: calc(100vh - 150px);
   max-height: calc(100vh - 150px);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: var(--b2b-color-bg-card);
+  border: 1px solid var(--b2b-color-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -788,21 +837,21 @@ function testEvent(evt) {
 
 .main-header {
   padding: 16px 24px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--b2b-color-border);
 }
 
 .template-heading {
   font-size: var(--b2b-font-size-h2);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--b2b-color-text-main);
 }
 
 .main-tabs {
   display: flex;
   gap: 4px;
   padding: 0 24px;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-card);
+  border-bottom: 1px solid var(--b2b-color-border);
+  background: var(--b2b-color-bg-card);
 }
 
 .tab-btn {
@@ -812,13 +861,13 @@ function testEvent(evt) {
   padding: 12px 16px;
   font-size: var(--b2b-font-size-body);
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--b2b-color-text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .tab-btn:hover {
-  color: var(--text-primary);
+  color: var(--b2b-color-text-main);
 }
 
 .tab-btn.active {
@@ -837,8 +886,8 @@ function testEvent(evt) {
   justify-content: space-between;
   align-items: center;
   padding: 12px 24px;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-subcard);
+  border-bottom: 1px solid var(--b2b-color-border);
+  background: var(--b2b-color-bg-subcard);
 }
 
 .preview-stage-wrap {
@@ -847,7 +896,7 @@ function testEvent(evt) {
   padding: 24px;
   display: flex;
   justify-content: center;
-  background: var(--bg-main);
+  background: var(--b2b-color-bg-main);
 }
 
 .email-frame-card {
@@ -907,15 +956,15 @@ function testEvent(evt) {
   font-family: var(--b2b-font-family-mono);
   font-size: var(--b2b-font-size-sm);
   line-height: 1.6;
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  background: var(--b2b-color-bg-card);
+  color: var(--b2b-color-text-main);
+  border: 1px solid var(--b2b-color-border);
   border-radius: 6px;
   min-height: 200px;
 }
 
 .editor-bottom-bar {
-  background: var(--bg-card);
+  background: var(--b2b-color-bg-card);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -924,7 +973,7 @@ function testEvent(evt) {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: var(--b2b-color-border);
   border-radius: 3px;
 }
 </style>

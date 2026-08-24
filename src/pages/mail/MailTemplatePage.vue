@@ -404,6 +404,16 @@ const selectedId = ref(
     : templates.value[0]?.templateId ?? null
 )
 
+watch(
+  () => route.query.templateId,
+  (newVal) => {
+    const parsed = Number(newVal)
+    if (parsed && templates.value.some((t) => t.templateId === parsed)) {
+      selectedId.value = parsed
+    }
+  }
+)
+
 const activeTab = ref('preview')
 const deviceMode = ref('pc')
 const bodyEditor = ref(null)

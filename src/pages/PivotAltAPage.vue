@@ -322,6 +322,20 @@ export default {
             datetimeFormat: 'yyyy-MM-dd',
             commitBySelect: true
           }
+        },
+        {
+          name: 'colActions',
+          fieldName: 'colActions',
+          header: { text: '관리' },
+          width: 140,
+          editable: false,
+          styles: { textAlignment: 'center' },
+          renderer: {
+            type: 'html',
+            callback: function () {
+              return '<div class="d-flex align-items-center justify-content-center gap-1.5 h-100"><button type="button" class="btn-grid-action" data-action="edit" title="사용자 수정">수정</button><button type="button" class="btn-grid-action" data-action="delete" title="사용자 삭제">삭제</button></div>'
+            }
+          }
         }
       ],
       mockData: [
@@ -375,6 +389,34 @@ export default {
     onGridInit({ gridView, dataProvider }) {
       this.gridView = gridView
       this.dataProvider = dataProvider
+
+      // 🔹 RealGrid 공식 onCellClicked 이벤트: clickData.event 로부터 data-action 감지
+      gridView.onCellClicked = (grid, clickData) => {
+        if (clickData.dataRow < 0) return
+
+        const btn = clickData.event?.target?.closest('.btn-grid-action')
+        if (!btn) return
+
+        const action = btn.getAttribute('data-action')
+        const rowData = dataProvider.getJsonRow(clickData.dataRow)
+        if (!rowData) return
+
+        if (action === 'edit') {
+          alert(
+            `[피벗/데이터 수정]\n\n` +
+            `• ID: ${rowData.userId}\n` +
+            `• 이름: ${rowData.name}\n` +
+            `• 부서: ${rowData.dept}\n` +
+            `• 직급: ${rowData.role}\n` +
+            `• 지역: ${rowData.region}`
+          )
+        } else if (action === 'delete') {
+          alert(
+            `[피벗/데이터 삭제]\n\n` +
+            `'${rowData.name}' (${rowData.userId}) 데이터를 삭제 처리합니다.`
+          )
+        }
+      }
 
       // 소계 자동 집계 모드
       this.gridView.setRowGroup({ summaryMode: 'aggregate', mergeMode: true })
@@ -706,4 +748,60 @@ export default {
 .rg-data-cell.rg-emp-intern { color: #0891b2 !important; }
 .rg-data-cell.rg-emp-dept { color: var(--b2b-color-text-muted) !important; }
 .rg-data-cell.rg-salary-high { color: #dc2626 !important; }
+
+/* 🔹 RealGrid 인라인 액션 버튼 디자인 (B2B 화이트 카드 & 연한 검정 텍스트 스타일) */
+.btn-grid-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 23px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #334155; /* 연한 검은색 / 진회색 */
+  background-color: #ffffff; /* 하얀색 버튼 */
+  border: 1px solid #d1d5db; /* 깔끔한 경계선 */
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-grid-action:hover {
+  background-color: #f8fafc;
+  border-color: #9ca3af;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.btn-grid-action:active {
+  transform: translateY(0);
+  background-color: #f1f5f9;
+}
+
+.btn-grid-action .icon-edit {
+  color: #2563eb; /* 수정 아이콘 파랑 */
+  font-size: 11px;
+}
+
+.btn-grid-action .icon-delete {
+  color: #dc2626; /* 삭제 아이콘 빨강 */
+  font-size: 11px;
+}
+
+/* 다크모드 대응 */
+[data-theme="dark"] .btn-grid-action,
+[data-theme="dark-navy"] .btn-grid-action {
+  background-color: var(--b2b-color-bg-card, #1e293b);
+  border-color: var(--b2b-color-border, #334155);
+  color: #e2e8f0;
+}
+[data-theme="dark"] .btn-grid-action:hover,
+[data-theme="dark-navy"] .btn-grid-action:hover {
+  background-color: var(--b2b-color-hover-bg, #334155);
+  color: #ffffff;
+}
 </style>
