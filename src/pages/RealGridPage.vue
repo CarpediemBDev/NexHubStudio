@@ -258,7 +258,6 @@ export default {
         },
         {
           name: 'colEditBtn',
-          fieldName: 'colEditBtn',
           header: { text: '수정' },
           width: 75,
           editable: false,
@@ -272,7 +271,6 @@ export default {
         },
         {
           name: 'colDeleteBtn',
-          fieldName: 'colDeleteBtn',
           header: { text: '삭제' },
           width: 75,
           editable: false,

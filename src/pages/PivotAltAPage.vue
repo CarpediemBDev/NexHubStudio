@@ -325,7 +325,6 @@ export default {
         },
         {
           name: 'colActions',
-          fieldName: 'colActions',
           header: { text: '관리' },
           width: 140,
           editable: false,

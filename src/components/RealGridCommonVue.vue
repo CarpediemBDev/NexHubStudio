@@ -339,7 +339,36 @@ export default {
         if (saved) {
           const state = JSON.parse(saved)
           if (state.layout && typeof this.gridView.setColumnLayout === 'function') {
-            this.gridView.setColumnLayout(state.layout)
+            const allCols = this.gridView.getColumns() || []
+            const validColNames = new Set(allCols.map(c => c.name))
+
+            const filterValidLayout = (items) => {
+              if (!Array.isArray(items)) return []
+              return items.reduce((acc, item) => {
+                if (typeof item === 'string') {
+                  if (validColNames.has(item)) acc.push(item)
+                } else if (item && typeof item === 'object') {
+                  if (item.items) {
+                    const filteredSub = filterValidLayout(item.items)
+                    if (filteredSub.length > 0) {
+                      acc.push({ ...item, items: filteredSub })
+                    }
+                  } else if (item.name && validColNames.has(item.name)) {
+                    acc.push(item)
+                  }
+                }
+                return acc
+              }, [])
+            }
+
+            const cleanLayout = filterValidLayout(state.layout)
+            if (cleanLayout.length > 0) {
+              validColNames.forEach(name => {
+                const exists = cleanLayout.some(it => (typeof it === 'string' ? it === name : it.name === name))
+                if (!exists) cleanLayout.push(name)
+              })
+              this.gridView.setColumnLayout(cleanLayout)
+            }
           }
           if (state.fixedOpts && typeof this.gridView.setFixedOptions === 'function') {
             this.gridView.setFixedOptions(state.fixedOpts)
