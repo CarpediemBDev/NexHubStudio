@@ -274,7 +274,9 @@ export default {
           renderer: {
             type: 'html',
             callback: function (grid, model) {
-              const v = model && model.value ? String(model.value) : 'B'
+              if (!model || !model.index || model.index.dataRow < 0) return ''
+              const v = model && model.value ? String(model.value) : ''
+              if (!v) return ''
               const map = { S: ['#dc3545', '#fff'], A: ['#0d6efd', '#fff'], B: ['#198754', '#fff'], C: ['#ffc107', '#212529'], D: ['#6c757d', '#fff'] }
               const c = map[v] || ['#6c757d', '#fff']
               return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:${c[0]};color:${c[1]};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;line-height:1.5;">${v}</span></div>`
@@ -333,8 +335,10 @@ export default {
           styles: { textAlignment: 'center' },
           renderer: {
             type: 'html',
-            callback: function () {
-              return '<div class="d-flex align-items-center justify-content-center gap-1.5 h-100"><button type="button" class="btn-grid-action" data-action="edit" title="사용자 수정">수정</button><button type="button" class="btn-grid-action" data-action="delete" title="사용자 삭제">삭제</button></div>'
+            callback: function (grid, cell) {
+              const row = cell?.index?.dataRow ?? -1
+              if (row < 0) return ''
+              return `<div class="d-flex align-items-center justify-content-center gap-1.5 h-100"><button type="button" class="btn-grid-action" data-action="edit" data-row="${row}" title="사용자 수정">수정</button><button type="button" class="btn-grid-action" data-action="delete" data-row="${row}" title="사용자 삭제">삭제</button></div>`
             }
           }
         }
@@ -391,14 +395,14 @@ export default {
       this.gridView = gridView
       this.dataProvider = dataProvider
 
-      // 🔹 RealGrid 공식 onCellClicked 이벤트: clickData.event 로부터 data-action 감지
-      gridView.onCellClicked = (grid, clickData) => {
-        if (clickData.dataRow < 0) return
+      // 🔹 RealGrid2 공식 onCellItemClicked 이벤트: HTML 렌더러의 clickData.target 으로부터 data-action 감지
+      gridView.onCellItemClicked = (grid, index, clickData) => {
+        if (!clickData || clickData.dataRow < 0) return
 
-        const btn = clickData.event?.target?.closest('.btn-grid-action')
-        if (!btn) return
+        const btn = clickData.target?.closest?.('.btn-grid-action')
+        const action = btn?.getAttribute?.('data-action')
+        if (!action) return
 
-        const action = btn.getAttribute('data-action')
         const rowData = dataProvider.getJsonRow(clickData.dataRow)
         if (!rowData) return
 

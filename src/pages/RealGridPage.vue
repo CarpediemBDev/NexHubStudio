@@ -307,9 +307,9 @@ export default {
         resizable: true
       })
 
-      // 🔹 RealGrid 공식 onCellClicked 이벤트: 컬럼명(colEditBtn / colDeleteBtn)으로 직관적 분기
-      gridView.onCellClicked = (grid, clickData) => {
-        if (clickData.dataRow < 0) return
+      // 🔹 RealGrid2 공식 onCellItemClicked 이벤트: 실제 버튼 아이템 클릭 시에만 정확히 반응
+      gridView.onCellItemClicked = (grid, index, clickData) => {
+        if (!clickData || clickData.dataRow < 0) return
 
         const rowData = dataProvider.getJsonRow(clickData.dataRow)
         if (!rowData) return
