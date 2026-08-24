@@ -116,7 +116,9 @@ export default {
         { fieldName: 'skillScore', dataType: 'number' },
         { fieldName: 'region', dataType: 'text' },
         { fieldName: 'salary', dataType: 'number' },
-        { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' }
+        { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' },
+        { fieldName: 'colEditBtn', dataType: 'text' },
+        { fieldName: 'colDeleteBtn', dataType: 'text' }
       ],
       gridColumns: [
         {
@@ -258,6 +260,7 @@ export default {
         },
         {
           name: 'colEditBtn',
+          fieldName: 'colEditBtn',
           header: { text: '수정' },
           width: 75,
           editable: false,
@@ -271,6 +274,7 @@ export default {
         },
         {
           name: 'colDeleteBtn',
+          fieldName: 'colDeleteBtn',
           header: { text: '삭제' },
           width: 75,
           editable: false,

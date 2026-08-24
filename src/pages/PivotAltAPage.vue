@@ -213,7 +213,8 @@ export default {
         { fieldName: 'skillScore', dataType: 'number' },
         { fieldName: 'region', dataType: 'text' },
         { fieldName: 'salary', dataType: 'number' },
-        { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' }
+        { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' },
+        { fieldName: 'colActions', dataType: 'text' }
       ],
       gridColumns: [
         { name: 'region', fieldName: 'region', width: '85', header: { text: '지역' }, styles: { textAlignment: 'center' } },
@@ -325,6 +326,7 @@ export default {
         },
         {
           name: 'colActions',
+          fieldName: 'colActions',
           header: { text: '관리' },
           width: 140,
           editable: false,
