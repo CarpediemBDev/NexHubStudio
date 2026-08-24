@@ -102,7 +102,30 @@ const routes = [
         ]
       },
 
-      // 6. UI 컴포넌트 & 샘플 (그룹)
+      // 6. 메일 관리 (그룹)
+      {
+        path: "mail",
+        name: "MailGroup",
+        meta: { title: "메일 관리", icon: "bi-envelope-fill" },
+        children: [
+          { path: "studio-hub", name: "MailStudioHub", component: () => import("../pages/mail/MailStudioHubPage.vue"), meta: { title: "메일 스튜디오 Pro 통합 허브 (Antigravity)", icon: "bi-stars" } },
+          { path: "templates", name: "MailTemplate", component: () => import("../pages/mail/MailTemplatePage.vue"), meta: { title: "메일 템플릿 관리 (Claude)", icon: "bi-envelope-paper" } },
+          { path: "dispatch-map", name: "MailDispatchMap", component: () => import("../pages/mail/MailDispatchMapPage.vue"), meta: { title: "메일 발송 매핑 현황 (Claude)", icon: "bi-diagram-2" } },
+          { path: "send-log", name: "MailSendLog", component: () => import("../pages/mail/MailSendLogPage.vue"), meta: { title: "메일 발송 이력 (Claude)", icon: "bi-clock-history" } }
+        ]
+      },
+
+      // 7. 규격/규제 관리 (그룹)
+      {
+        path: "regulation",
+        name: "RegulationGroup",
+        meta: { title: "규격/규제 관리", icon: "bi-shield-check" },
+        children: [
+          { path: "info", name: "RegulationInfo", component: () => import("../pages/regulation/RegulationInfoPage.vue"), meta: { title: "규제 정보 관리", icon: "bi-clipboard-check" } }
+        ]
+      },
+
+      // 8. UI 컴포넌트 & 샘플 (그룹)
       {
         path: "sample-group",
         name: "SampleGroup",

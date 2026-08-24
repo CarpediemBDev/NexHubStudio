@@ -915,7 +915,7 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   z-index: 2;
-  background-color: white;
+  background-color: var(--b2b-color-bg-card);
 }
 
 /* 활성 스텝: 깜빡이는 그림자 효과 */

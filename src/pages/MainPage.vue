@@ -260,7 +260,7 @@ export default {
 
 <style scoped>
 .hero-card {
-  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  background: linear-gradient(135deg, var(--b2b-color-primary) 0%, #0a58ca 100%);
 }
 
 .decorative-circle {

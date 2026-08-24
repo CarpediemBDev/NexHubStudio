@@ -109,6 +109,6 @@ export default {
 
 <style scoped>
 .list-group-item:hover {
-  background-color: #f8f9fa;
+  background-color: var(--b2b-color-bg-subcard);
 }
 </style>

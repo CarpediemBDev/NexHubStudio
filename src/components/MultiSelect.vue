@@ -233,9 +233,9 @@ export default {
 .multi-select-input {
   min-height: 38px;
   padding: 4px 32px 4px 8px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--b2b-color-border);
   border-radius: 4px;
-  background-color: white;
+  background-color: var(--b2b-color-bg-card);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -255,7 +255,7 @@ export default {
 }
 
 .multi-select-input.disabled {
-  background-color: #e9ecef;
+  background-color: var(--b2b-color-hover-bg);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -273,7 +273,7 @@ export default {
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background-color: #0d6efd;
+  background-color: var(--b2b-color-primary);
   color: white;
   border-radius: 12px;
   cursor: pointer;
@@ -281,7 +281,7 @@ export default {
 }
 
 .selected-badge:hover {
-  background-color: #0b5ed7;
+  background-color: var(--b2b-color-primary-hover);
 }
 
 .selected-badge i {
@@ -289,7 +289,7 @@ export default {
 }
 
 .selected-text {
-  color: #212529;
+  color: var(--b2b-color-text-main);
   font-size: 1rem;
   user-select: none;
 }
@@ -313,8 +313,8 @@ export default {
   left: 0;
   right: 0;
   margin-top: 4px;
-  background-color: white;
-  border: 1px solid #ced4da;
+  background-color: var(--b2b-color-bg-card);
+  border: 1px solid var(--b2b-color-border);
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -325,13 +325,13 @@ export default {
 
 .search-box {
   padding: 8px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--b2b-color-border);
 }
 
 .select-all {
   padding: 8px 12px;
-  border-bottom: 1px solid #e9ecef;
-  background-color: #f8f9fa;
+  border-bottom: 1px solid var(--b2b-color-border);
+  background-color: var(--b2b-color-bg-subcard);
 }
 
 .select-all label {
@@ -360,7 +360,7 @@ export default {
 }
 
 .option-item:hover {
-  background-color: #f8f9fa;
+  background-color: var(--b2b-color-bg-subcard);
 }
 
 .option-item input[type='checkbox'] {
@@ -371,7 +371,7 @@ export default {
 .no-options {
   padding: 12px;
   text-align: center;
-  color: #6c757d;
+  color: var(--b2b-color-text-muted);
   font-size: 0.9rem;
 }
 

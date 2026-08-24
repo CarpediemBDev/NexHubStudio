@@ -92,13 +92,13 @@ export default {
 
 <style scoped>
 .grid-container {
-  border: 1px solid #ddd;
+  border: 1px solid var(--b2b-color-border);
   padding: 15px;
-  background: #f9f9f9;
+  background: var(--b2b-color-bg-subcard);
 }
 .highlight {
-  border: 2px solid #42b983;
-  background: #eaffea;
+  border: 2px solid var(--b2b-color-success);
+  background: rgba(22, 163, 74, 0.12);
 }
 h3 { margin-top: 0; }
 </style>

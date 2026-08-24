@@ -199,7 +199,7 @@ export default {
   width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #dee2e6;
+  background-color: var(--b2b-color-hover-bg);
   border-radius: 4px;
 }
 </style>

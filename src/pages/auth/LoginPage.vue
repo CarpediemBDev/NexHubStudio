@@ -65,21 +65,21 @@ const currentTab = ref('login');
 
 <style scoped>
 .flex-100vh { display: flex; height: 100vh; width: 100vw; margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }
-.login-layout { background-color: #fff; }
+.login-layout { background-color: var(--b2b-color-bg-card); }
 .split-left { flex: 1; background: linear-gradient(135deg, #001529 0%, #0050b3 100%); color: white; display: flex; flex-direction: column; justify-content: center; padding: 60px; position: relative; }
 .branding { position: relative; z-index: 2; }
 .logo { font-size: var(--b2b-font-size-display); margin-bottom: var(--b2b-space-4); font-weight: 700; }
 .tagline { font-size: 18px; opacity: 0.8; }
 .visual-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle fill="rgba(255,255,255,0.1)" cx="10" cy="10" r="1.5"></circle></pattern></defs><rect x="0" y="0" width="100%" height="100%" fill="url(%23dots)"></rect></svg>'); z-index: 1; }
 
-.split-right { width: 480px; display: flex; align-items: center; justify-content: center; background: #fff; box-shadow: -4px 0 16px rgba(0,0,0,0.05); }
+.split-right { width: 480px; display: flex; align-items: center; justify-content: center; background: var(--b2b-color-bg-card); box-shadow: -4px 0 16px rgba(0,0,0,0.05); }
 .form-wrapper { width: 100%; max-width: 360px; padding: 32px; }
-.tabs { display: flex; border-bottom: 2px solid #f0f0f0; margin-bottom: 32px; }
-.tab-item { padding: 12px 16px; cursor: pointer; color: #8c8c8c; font-weight: 500; transition: all 0.3s; }
+.tabs { display: flex; border-bottom: 2px solid var(--b2b-color-border); margin-bottom: 32px; }
+.tab-item { padding: 12px 16px; cursor: pointer; color: var(--b2b-color-text-faint); font-weight: 500; transition: all 0.3s; }
 .tab-item.active { color: #1890ff; border-bottom: 2px solid #1890ff; margin-bottom: -2px; }
 .form-title { font-size: var(--b2b-font-size-display); font-weight: 700; margin-bottom: var(--b2b-space-5); color: var(--b2b-color-text-main); }
 .input-group { margin-bottom: 16px; }
-.b2b-input { width: 100%; padding: 12px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; font-size: 14px; box-sizing: border-box; }
+.b2b-input { width: 100%; padding: 12px; border: 1px solid var(--b2b-color-border); border-radius: 4px; outline: none; font-size: 14px; box-sizing: border-box; }
 .b2b-input:focus { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,0.2); }
 /* 색상/폰트는 buttons.css 의 .btn-b2b-primary 를 그대로 사용.
    로그인 CTA 만 전폭 + 큰 터치 타깃으로 확장한다. */
@@ -90,6 +90,6 @@ const currentTab = ref('login');
   margin-top: var(--b2b-space-5);
   border-radius: var(--b2b-radius-lg);
 }
-.terms-box { padding: 16px; border: 1px solid #d9d9d9; border-radius: 4px; height: 120px; overflow-y: auto; font-size: 13px; color: #555; margin-bottom: 16px; background: #fafafa; }
+.terms-box { padding: 16px; border: 1px solid var(--b2b-color-border); border-radius: 4px; height: 120px; overflow-y: auto; font-size: 13px; color: var(--b2b-color-text-muted); margin-bottom: 16px; background: var(--b2b-color-bg-subcard); }
 .checkbox-group { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 </style>

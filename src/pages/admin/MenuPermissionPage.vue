@@ -157,7 +157,7 @@
 
 /* 2. Left Tree Active Selected Node Highlight Tint */
 .selected-highlight {
-  background-color: #eff6ff !important;
+  background-color: var(--b2b-color-primary-subtle) !important;
   color: var(--b2b-color-primary) !important;
   border-left: 3px solid var(--b2b-color-primary) !important;
   font-weight: 700 !important;

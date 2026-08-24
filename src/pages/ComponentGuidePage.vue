@@ -93,7 +93,7 @@ const activeComponent = computed(() => {
 
 .b2b-tab-pill:hover:not(.active) {
   background-color: rgba(13, 110, 253, 0.08);
-  color: #0d6efd;
+  color: var(--b2b-color-primary);
 }
 
 .fade-tab-enter-active,

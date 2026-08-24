@@ -677,7 +677,7 @@ export default {
 }
 
 .target-div-card.is-hover.zone-multi {
-  border-color: #0d6efd !important;
+  border-color: var(--b2b-color-primary) !important;
   border-style: solid;
   background: rgba(13, 110, 253, 0.05);
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
@@ -696,7 +696,7 @@ export default {
   justify-content: space-between;
   padding: 10px 14px;
   border-bottom: 1px solid var(--b2b-color-border, #e5e7eb);
-  border-left: 4px solid #0d6efd;
+  border-left: 4px solid var(--b2b-color-primary);
   background: var(--b2b-color-bg-subcard, #f8fafc);
 }
 
@@ -737,8 +737,8 @@ export default {
 }
 
 .div-dropped-item.item-rep {
-  border-color: #fd7e14;
-  background: #fffdfa;
+  border-color: #FD7E14;
+  background: rgba(253, 126, 20, 0.08);
   box-shadow: 0 2px 6px rgba(253, 126, 20, 0.12);
 }
 
@@ -750,7 +750,7 @@ export default {
   height: 24px;
   border: none;
   background: transparent;
-  color: #9ca3af;
+  color: var(--b2b-color-text-faint);
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
@@ -758,8 +758,8 @@ export default {
 }
 
 .btn-return-grid:hover {
-  background-color: #fee2e2;
-  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.14);
+  color: #EF4444;
   transform: scale(1.05);
 }
 
@@ -776,7 +776,7 @@ export default {
   position: fixed;
   z-index: 9999;
   pointer-events: none;
-  background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+  background: linear-gradient(135deg, var(--b2b-color-primary), var(--b2b-color-primary-hover));
   color: #ffffff;
   font-size: 0.85rem;
   padding: 8px 14px;

@@ -373,7 +373,7 @@ export default {
   border-radius: 6px;
   cursor: pointer;
 }
-.dnd-head-btn:hover:not(:disabled) { background: #eff6ff; color: #0d6efd; border-color: #bfdbfe; }
+.dnd-head-btn:hover:not(:disabled) { background: var(--b2b-color-primary-subtle); color: var(--b2b-color-primary); border-color: #bfdbfe; }
 .dnd-head-btn:disabled { opacity: 0.45; cursor: default; }
 
 /* ----- Grid host (drop target) ----- */
@@ -386,7 +386,7 @@ export default {
   outline-offset: -2px;
 }
 .dnd-grid-host.is-drop-hover {
-  outline-color: #0d6efd;
+  outline-color: var(--b2b-color-primary);
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
 }
 
@@ -401,7 +401,7 @@ export default {
 .dnd-team-host { min-height: 180px; }
 
 .rg-grip-inline {
-  color: #b0b8c4;
+  color: var(--b2b-color-text-faint);
   font-weight: 700;
   letter-spacing: 1px;
   padding: 0 2px;

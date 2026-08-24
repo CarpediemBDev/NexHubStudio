@@ -335,12 +335,12 @@ export default {
 
 <style scoped>
 .btn-check:checked + .btn-outline-success {
-  background-color: #198754;
+  background-color: var(--b2b-color-success);
   color: white;
 }
 
 .btn-check:checked + .btn-outline-secondary {
-  background-color: #6c757d;
+  background-color: var(--b2b-color-text-muted);
   color: white;
 }
 

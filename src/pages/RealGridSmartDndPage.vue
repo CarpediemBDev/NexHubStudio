@@ -870,7 +870,7 @@ export default {
 
 <style scoped>
 .bg-gradient-pro {
-  background: linear-gradient(135deg, #0d6efd 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--b2b-color-primary) 0%, #8b5cf6 100%);
 }
 
 .alert-pro-banner {
@@ -903,7 +903,7 @@ export default {
   cursor: grabbing;
 }
 .dnd-grid-host.is-drop-target {
-  box-shadow: inset 0 0 0 3px #0d6efd;
+  box-shadow: inset 0 0 0 3px var(--b2b-color-primary);
 }
 
 .grid-restore-overlay {
@@ -944,21 +944,21 @@ export default {
   flex-direction: column;
   background: var(--b2b-color-bg-card, #fff);
   border: 1px solid var(--b2b-color-border, #e5e7eb);
-  border-top: 3px solid #0d6efd;
+  border-top: 3px solid var(--b2b-color-primary);
   border-radius: 10px;
   transition: all 0.2s ease-in-out;
   overflow: hidden;
 }
 
 .dnd-zone.is-hover {
-  border-color: #0d6efd !important;
+  border-color: var(--b2b-color-primary) !important;
   background: rgba(13, 110, 253, 0.04);
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.18);
   transform: translateY(-2px);
 }
 
 .dnd-zone.is-overcapacity {
-  border-color: #dc3545 !important;
+  border-color: var(--b2b-color-danger) !important;
   background: rgba(220, 53, 69, 0.03);
 }
 
@@ -1031,7 +1031,7 @@ export default {
 }
 .dnd-chip:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  border-color: #0d6efd;
+  border-color: var(--b2b-color-primary);
 }
 .dnd-chip:active {
   cursor: grabbing;
@@ -1093,7 +1093,7 @@ export default {
 }
 .dnd-chip-remove:hover {
   background: rgba(13, 110, 253, 0.1);
-  color: #0d6efd;
+  color: var(--b2b-color-primary);
 }
 
 /* Activity Log Drawer */
@@ -1128,7 +1128,7 @@ export default {
 }
 
 .ghost-card-main {
-  background: linear-gradient(135deg, #0d6efd 0%, #1e40af 100%);
+  background: linear-gradient(135deg, var(--b2b-color-primary) 0%, #1e40af 100%);
   color: #fff;
   font-size: 0.84rem;
   font-weight: 700;
@@ -1149,7 +1149,7 @@ export default {
 
 .ghost-badge {
   background: #ffc107;
-  color: #111;
+  color: var(--b2b-color-text-main);
   font-size: 0.72rem;
   font-weight: 800;
   padding: 2px 7px;

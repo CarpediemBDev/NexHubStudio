@@ -567,7 +567,7 @@ export default {
   color: #f59e0b;
 }
 .header-process {
-  color: #94a3b8;
+  color: var(--b2b-color-text-faint);
 }
 
 /* 배정된 칩 스타일 */

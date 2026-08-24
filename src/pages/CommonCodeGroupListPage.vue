@@ -244,12 +244,12 @@ export default {
 .toolbar h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--b2b-color-text-main);
   margin: 0;
 }
 
 .table {
-  background: white;
+  background: var(--b2b-color-bg-card);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border-radius: 0.5rem;
   overflow: hidden;
@@ -264,12 +264,12 @@ export default {
 
 .table thead {
   background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 2px solid var(--b2b-color-border);
 }
 
 .table thead th {
   font-weight: 600;
-  color: #495057;
+  color: var(--b2b-color-text-muted);
   font-size: 0.875rem;
   padding: 0.875rem 0.75rem;
   text-transform: uppercase;
@@ -280,7 +280,7 @@ export default {
 .table tbody td {
   padding: 0.875rem 0.75rem;
   vertical-align: middle;
-  border-color: #f1f3f5;
+  border-color: var(--b2b-color-border);
   font-size: 0.9rem;
 }
 
@@ -290,7 +290,7 @@ export default {
 }
 
 .row-clickable:hover {
-  background-color: #f8f9fa !important;
+  background-color: var(--b2b-color-bg-subcard) !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
@@ -300,7 +300,7 @@ export default {
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--b2b-color-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
 }
@@ -311,11 +311,11 @@ export default {
 
 .icon-display {
   font-size: 1.4rem;
-  color: #6c757d;
+  color: var(--b2b-color-text-muted);
 }
 
 code {
-  background: #f1f3f5;
+  background: var(--b2b-color-bg-subcard);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.875rem;

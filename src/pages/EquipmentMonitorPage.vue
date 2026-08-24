@@ -307,8 +307,8 @@ export default {
 
 .status-dot.normal { background-color: #28a745; }
 .status-dot.warning { background-color: #ffc107; }
-.status-dot.error { background-color: #dc3545; }
-.status-dot.maintenance { background-color: #6c757d; }
+.status-dot.error { background-color: var(--b2b-color-danger); }
+.status-dot.maintenance { background-color: var(--b2b-color-text-muted); }
 .status-dot.offline { background-color: #64748b; }
 
 .equipment-map {

@@ -148,7 +148,7 @@ export default {
 
 <style scoped>
 .form-table th {
-  background-color: #f8f9fa;
+  background-color: var(--b2b-color-bg-subcard);
   font-weight: 600;
 }
 .form-table td,
