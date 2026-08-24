@@ -128,7 +128,7 @@
       <div class="b2b-grid-wrapper">
         <RealGridCommonJs
           ref="realgridComp"
-          grid-id="pivot-alt-a"
+          grid-id="pivot-alt-a-v3"
           :fields="gridFields"
           :columns="gridColumns"
           :rows="mockData"
@@ -148,7 +148,7 @@
           :use-footer="true"
           :soft-deletable="true"
           :summary-mode="'aggregate'"
-          :fit-style="'evenFill'"
+          :fit-style="'none'"
           :toast="gridToast"
           @init="onGridInit"
         />
@@ -217,14 +217,14 @@ export default {
         { fieldName: 'colActions', dataType: 'text' }
       ],
       gridColumns: [
-        { name: 'region', fieldName: 'region', width: '85', header: { text: '지역' }, styles: { textAlignment: 'center' } },
-        { name: 'dept', fieldName: 'dept', width: '110', header: { text: '부서명' }, styles: { textAlignment: 'near' } },
-        { name: 'role', fieldName: 'role', width: '100', header: { text: '직급' }, styles: { textAlignment: 'near' } },
-        { name: 'name', fieldName: 'name', width: '90', header: { text: '이름' }, styles: { textAlignment: 'center' } },
+        { name: 'region', fieldName: 'region', width: '70', header: { text: '지역' }, styles: { textAlignment: 'center' } },
+        { name: 'dept', fieldName: 'dept', width: '95', header: { text: '부서명' }, styles: { textAlignment: 'near' } },
+        { name: 'role', fieldName: 'role', width: '85', header: { text: '직급' }, styles: { textAlignment: 'near' } },
+        { name: 'name', fieldName: 'name', width: '80', header: { text: '이름' }, styles: { textAlignment: 'center' } },
         {
           name: 'workStatus',
           fieldName: 'workStatus',
-          width: '95',
+          width: '90',
           header: { text: '근무상태 (선택)' },
           styles: { textAlignment: 'center' },
           editor: {
@@ -238,7 +238,7 @@ export default {
         {
           name: 'employmentType',
           fieldName: 'employmentType',
-          width: '100',
+          width: '90',
           header: { text: '고용형태 (선택)' },
           styles: { textAlignment: 'center' },
           editor: {
@@ -261,8 +261,8 @@ export default {
         {
           name: 'evalGrade',
           fieldName: 'evalGrade',
-          width: '75',
-          header: { text: '평가 (선택)' },
+          width: '65',
+          header: { text: '평가' },
           styles: { textAlignment: 'center', fontWeight: 'bold' },
           editor: {
             type: 'dropdown',
@@ -284,7 +284,7 @@ export default {
         {
           name: 'skillScore',
           fieldName: 'skillScore',
-          width: '120',
+          width: '100',
           header: { text: '역량점수 (바)' },
           styles: { textAlignment: 'far' },
           renderer: {
@@ -299,7 +299,7 @@ export default {
         {
           name: 'salary',
           fieldName: 'salary',
-          width: '105',
+          width: '95',
           header: { text: '기본급 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
@@ -314,7 +314,7 @@ export default {
         {
           name: 'joinDate',
           fieldName: 'joinDate',
-          width: '115',
+          width: '105',
           header: { text: '입사일자 (달력)' },
           datetimeFormat: 'yyyy-MM-dd',
           styles: { textAlignment: 'center' },
@@ -328,7 +328,7 @@ export default {
           name: 'colActions',
           fieldName: 'colActions',
           header: { text: '관리' },
-          width: 140,
+          width: 130,
           editable: false,
           styles: { textAlignment: 'center' },
           renderer: {
