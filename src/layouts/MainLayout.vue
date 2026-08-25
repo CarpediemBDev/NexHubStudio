@@ -1,19 +1,19 @@
 <template>
   <div class="vben-layout d-flex h-100 overflow-hidden">
     <!-- Left Collapsible Sidebar -->
-    <VbenSidebar :collapsed="isSidebarCollapsed" />
+    <VbenSidebar :collapsed="isSidebarCollapsed" @toggle="toggleSidebar" />
 
     <!-- Right Workspace -->
     <div class="vben-main-wrapper d-flex flex-column flex-grow-1 overflow-hidden">
-      <!-- Header -->
-      <VbenHeader @toggle-sidebar="toggleSidebar" />
+      <!-- Header (TopBar 48px) -->
+      <VbenHeader :sidebar-collapsed="isSidebarCollapsed" @toggle-sidebar="toggleSidebar" />
       
-      <!-- Multi-Tab Bar -->
+      <!-- Multi-Tab Bar (38px) -->
       <VbenTabBar />
 
       <!-- Main Workspace -->
-      <main class="vben-workspace flex-grow-1 overflow-auto p-3 position-relative">
-        <!-- Global Breadcrumb Header -->
+      <main class="vben-workspace flex-grow-1 overflow-auto px-4 py-3 position-relative">
+        <!-- Global Header Component (Compact) -->
         <PageHeader />
         <router-view v-slot="{ Component, route }">
           <!-- meta.keepAlive 페이지(목록/검색 등)만 캐시. include 목록은 router meta 에서 자동 도출 -->
@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import VbenSidebar from '../components/vben/VbenSidebar.vue';
 import VbenHeader from '../components/vben/VbenHeader.vue';
@@ -50,6 +50,22 @@ const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value;
 };
 
+// Global Shortcut: Alt+B (or Ctrl+B) to toggle sidebar
+const handleGlobalKeydown = (e) => {
+  if (e.altKey && (e.key === 'b' || e.key === 'B' || e.key === 'ㅠ')) {
+    e.preventDefault();
+    toggleSidebar();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown);
+});
+
 // Add tab when route changes
 watch(
   () => route.path,
@@ -71,5 +87,6 @@ watch(
 }
 .vben-workspace {
   background-color: var(--b2b-color-bg-body);
+  padding: 18px 24px !important;
 }
 </style>
