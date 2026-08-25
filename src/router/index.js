@@ -80,7 +80,7 @@ const routes = [
           { path: "js", name: "RealGridJsSample", component: RealGridPage, meta: { title: "RealGrid (JS)", icon: "bi-grid-3x3" } },
           { path: "tree", name: "RealGridTreeSample", component: RealGridTreePage, meta: { title: "RealGrid 트리", icon: "bi-diagram-3" } },
           { path: "dnd", name: "RealGridDndSample", component: RealGridDndPage, meta: { title: "RealGrid 드래그&드롭 (Grid to Grid)", icon: "bi-arrows-move" } },
-          { path: "grid-to-div", name: "RealGridToDivGuideSample", component: RealGridToDivGuidePage, meta: { title: "RealGrid ➔ DIV 드래그앤드롭 (공식가이드)", icon: "bi-box-arrow-right" } },
+          { path: "grid-to-div", name: "RealGridToDivGuideSample", component: RealGridToDivGuidePage, meta: { title: "RealGrid 모델 그룹화 스튜디오", icon: "bi-box-arrow-right" } },
           { path: "smart-dnd", name: "RealGridSmartDndSample", component: RealGridSmartDndPage, meta: { title: "RealGrid 스마트 D&D 스튜디오 (Pro)", icon: "bi-magic" } },
           { path: "pivot-a", name: "PivotA", component: PivotAltAPage, meta: { title: "Pivot 분석 A", icon: "bi-pie-chart" } },
           { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "AI 스마트 피벗 (자체개발)", icon: "bi-bar-chart-steps" } },

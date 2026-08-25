@@ -1,67 +1,66 @@
 <template>
   <div class="b2b-page-container">
-    <!-- Header Page Title -->
-    <div class="mb-3">
-      <div class="d-flex align-items-center gap-2">
-        <h4 class="b2b-text-h1 fw-bold m-0" style="color: var(--b2b-color-text-main)">RealGrid 모델 그룹화 스튜디오 (Grid ➔ DIV)</h4>
-        <span class="badge bg-primary px-2.5 py-1">전용 핸들(`⋮⋮`) 다중 D&amp;D</span>
-        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-          <i class="bi bi-layers-half me-1"></i>다중 &amp; 단일 D&amp;D 겸용
-        </span>
-      </div>
-      <p class="small text-muted mb-0 mt-1">
-        No.(행번호)나 체크박스 컬럼 대신 <strong>전용 이동 핸들 필드(`⋮⋮`)</strong>를 추가하여, 여러 행을 블록 선택 후 핸들 영역을 끌어 우측 <strong>HTML DIV 배정함</strong>으로 일괄 그룹 배정하는 예제입니다.<br/>
-        <strong>상단 DIV:</strong> 블록 선택한 다중 모델 일괄 배정 / <strong>하단 DIV:</strong> 1개의 대표 모델만 단일 배정
-      </p>
-    </div>
-
-    <!-- Usage Banner -->
-    <div class="alert alert-info border-info-subtle bg-info-subtle text-dark py-2.5 px-3 mb-3 b2b-text-xs rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-info-circle-fill text-info fs-5"></i>
-        <span>
-          <strong>전용 핸들(`⋮⋮`) 드래그 앤 드롭 가이드:</strong>
-          ① 그리드 셀을 마우스로 끌어 <strong>여러 행을 블록 선택(파란 하이라이트)</strong>
-          ② 선택된 행 맨 좌측의 <strong>이동 핸들(`⋮⋮`) 영역을 잡고 우측 DIV 영역으로 끌어서 드롭</strong>
-        </span>
-      </div>
-      <span class="badge bg-primary text-white ms-auto">사용 가이드</span>
-    </div>
-
     <!-- Toolbar -->
     <div class="b2b-toolbar mb-3">
-      <div class="d-flex align-items-center justify-content-between w-100 flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
-            <i class="bi bi-box-arrow-right me-1"></i>RealGrid (Grip Column) ➔ 2 DIV Zones
-          </span>
-          <span class="small text-muted">
-            미배정 모델 <strong class="text-primary">{{ poolCount }}</strong>개 · 배정 완료 <strong class="text-success">{{ assignedCount }}</strong>개
-          </span>
-        </div>
+      <div class="d-flex align-items-center justify-content-end w-100 flex-wrap gap-2">
+        <!-- Add Random Data Button -->
+        <button class="btn btn-outline-primary btn-sm" title="랜덤 모델 20개 그리드에 추가" @click="appendMoreModels(20)">
+          <i class="bi bi-plus-circle me-1"></i>
+          <span>+ 20개 모델 추가</span>
+        </button>
 
-        <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
-          <!-- Add Random Data Button -->
-          <button class="btn btn-outline-primary btn-sm" title="랜덤 모델 20개 그리드에 추가" @click="appendMoreModels(20)">
-            <i class="bi bi-plus-circle me-1"></i>
-            <span>+ 20개 모델 추가</span>
-          </button>
-
-          <button class="btn-b2b-action" title="모든 DIV 배정 내역을 그리드로 초기화" @click="resetAll">
-            <i class="bi bi-arrow-counterclockwise text-secondary me-0.5"></i>
-            <span>전체 초기화</span>
-          </button>
-        </div>
+        <button class="btn-b2b-action" title="모든 그룹 배정 내역을 그리드로 초기화" @click="resetAll">
+          <i class="bi bi-arrow-counterclockwise text-secondary me-0.5"></i>
+          <span>전체 초기화</span>
+        </button>
       </div>
     </div>
 
-    <!-- Main Layout: Grid (Left) + 2 HTML DIV Drop Zones (Right) -->
+    <!-- Main Layout: Grid (Left) + Unified HTML DIV Drop Zone (Right) -->
     <div class="grid-to-div-layout">
       <!-- Left: RealGrid Component with Dedicated Drag Handle Column -->
       <div class="dnd-grid-card">
+        <!-- Grid Header: Left Guide Popover (above No column) + Right Total Count (above manufacturer column) -->
         <div class="dnd-card-head border-bottom bg-theme-subcard px-3 py-2 d-flex align-items-center justify-content-between">
-          <span class="fw-bold b2b-text-sm"><i class="bi bi-grid-3x3-gap-fill text-primary me-1.5"></i>미배정 모델 Pool (이동 핸들 필드 포함)</span>
-          <span class="badge bg-secondary-subtle text-secondary b2b-text-2xs">총 {{ poolCount }}개</span>
+          <!-- Left: Guide Popover Button positioned above 'No' & Grip Column -->
+          <div class="guide-tooltip-container" @mouseleave="showGuideTooltip = false">
+            <button
+              class="btn-guide-toggle"
+              :class="{ 'is-active': showGuideTooltip }"
+              title="사용 가이드 보기"
+              @click="showGuideTooltip = !showGuideTooltip"
+            >
+              <i class="bi bi-question-circle-fill text-primary"></i>
+              <span>가이드</span>
+            </button>
+
+            <!-- Floating Popover Tooltip -->
+            <transition name="fade-tooltip">
+              <div v-if="showGuideTooltip" class="guide-floating-popover shadow border rounded-3 p-3">
+                <div class="d-flex align-items-center justify-content-between mb-2 pb-1 border-bottom">
+                  <span class="fw-bold b2b-text-sm text-dark">
+                    <i class="bi bi-info-circle-fill text-primary me-1.5"></i>모델 그룹화 &amp; 대표 지정 가이드
+                  </span>
+                  <button class="btn-close-popover" title="닫기" @click="showGuideTooltip = false">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+                <ul class="guide-steps-list m-0 p-0 b2b-text-xs text-secondary">
+                  <li class="mb-1.5">
+                    <strong class="text-dark">1. 다중 배정:</strong> 그리드 셀을 마우스로 끌어 <span class="text-primary fw-medium">다중 블록 선택</span> 후, 맨 좌측 핸들(<code>⋮⋮</code>)을 잡고 우측 그룹 배정함으로 드롭합니다.
+                  </li>
+                  <li>
+                    <strong class="text-dark">2. 대표 모델 지정:</strong> 배정된 목록에서 원하는 모델의 <span class="text-warning-emphasis fw-medium">`☆ 대표 지정`</span> 버튼을 클릭하면 즉시 대표 모델(★)로 전환됩니다.
+                  </li>
+                </ul>
+              </div>
+            </transition>
+          </div>
+
+          <!-- Right: Total Count positioned above manufacturer column -->
+          <span class="b2b-text-xs text-secondary">
+            총 <strong class="text-primary fw-bold">{{ poolCount }}</strong>건
+          </span>
         </div>
         <div class="dnd-grid-wrapper" @mousedown.capture="onGridMouseDown">
           <RealGridCommonJs
@@ -89,63 +88,91 @@
         </div>
       </div>
 
-      <!-- Right: Target DIV Container (2 Zones: Top Multi, Bottom Single) -->
+      <!-- Right: Unified Target DIV Container -->
       <div class="dnd-div-container">
         <div
-          v-for="zone in zoneDefs"
-          :key="zone.key"
-          class="target-div-card"
-          :class="[
-            zone.key === 'groupMulti' ? 'zone-multi' : 'zone-single',
-            { 'is-hover': hoverZone === zone.key }
-          ]"
-          :data-zone="zone.key"
+          class="target-div-card unified-group-card"
+          :class="{ 'is-hover': isHoverDropZone }"
+          data-zone="groupUnified"
         >
-          <!-- Header -->
-          <div class="target-div-header" :style="{ borderLeftColor: zone.color }">
-            <div>
-              <div class="d-flex align-items-center gap-2">
-                <span class="div-badge-dot" :style="{ background: zone.color }"></span>
-                <span class="fw-bold b2b-text-sm">{{ zone.label }}</span>
-                <span class="badge b2b-text-2xs" :class="zone.key === 'groupMulti' ? 'bg-primary-soft text-primary' : 'bg-warning-soft text-dark'">
-                  {{ zone.badge }}
-                </span>
-              </div>
-              <span class="b2b-text-2xs text-muted d-block mt-0.5">{{ zone.subText }}</span>
+          <!-- Header (Clean & Symmetric) -->
+          <div class="dnd-card-head border-bottom bg-theme-subcard px-3 py-2 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-1.5">
+              <i class="bi bi-box-seam-fill text-primary me-1"></i>
+              <span class="fw-bold b2b-text-sm">그룹 배정 목록</span>
             </div>
 
-            <span class="badge bg-secondary-soft text-dark rounded-pill b2b-text-2xs px-2.5 py-1 ms-2">
-              {{ zones[zone.key].length }}개 모델
-            </span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-secondary-subtle text-secondary b2b-text-2xs">
+                총 {{ groupModels.length }}개
+              </span>
+              <button
+                v-if="groupModels.length > 0"
+                class="btn btn-outline-secondary btn-xs py-0.5 px-2"
+                title="배정된 모델 전체 비우기"
+                @click="resetAll"
+              >
+                비우기
+              </button>
+            </div>
           </div>
 
           <!-- Body -->
           <div class="target-div-body custom-scrollbar">
-            <div v-if="zones[zone.key].length === 0" class="div-empty-msg">
-              <i :class="zone.key === 'groupMulti' ? 'bi bi-layers text-primary' : 'bi bi-star text-warning'" class="fs-3 mb-1 opacity-75"></i>
-              <span class="fw-medium b2b-text-xs text-secondary">
-                {{ zone.key === 'groupMulti' ? '다중 선택된 모델들을 이 블록 영역으로 끌어오세요' : '대표 지정할 모델 1개를 이 영역으로 끌어오세요' }}
+            <div v-if="groupModels.length === 0" class="div-empty-msg">
+              <i class="bi bi-box-arrow-in-down text-primary fs-2 mb-2 opacity-75"></i>
+              <span class="fw-bold b2b-text-sm text-dark mb-1">배정된 모델이 없습니다</span>
+              <span class="b2b-text-xs text-muted text-center">
+                좌측 그리드에서 모델들을 블록 선택한 후<br/>
+                핸들(<code>⋮⋮</code>)을 잡고 이 영역으로 끌어다 놓으세요.
               </span>
             </div>
 
-            <!-- Dropped Items -->
+            <!-- Dropped Items List -->
             <div
-              v-for="(item, idx) in zones[zone.key]"
+              v-for="(item, idx) in groupModels"
               :key="item.modelId"
               class="div-dropped-item"
-              :class="{ 'item-rep': zone.key === 'representativeSingle' }"
+              :class="{ 'item-rep': item.modelId === repModelId }"
             >
-              <div class="d-flex align-items-center gap-2">
-                <span v-if="zone.key === 'representativeSingle'" class="badge bg-warning text-dark b2b-text-2xs me-1">
-                  <i class="bi bi-star-fill me-0.5"></i>대표
+              <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                <!-- Representative Toggle Button / Badge -->
+                <button
+                  v-if="item.modelId === repModelId"
+                  class="btn-rep-badge is-active"
+                  title="현재 그룹의 대표 모델입니다 (클릭 시 유지)"
+                >
+                  <i class="bi bi-star-fill text-warning me-1"></i>
+                  <span>대표 모델</span>
+                </button>
+                <button
+                  v-else
+                  class="btn-rep-badge is-candidate"
+                  title="이 모델을 대표 모델로 지정합니다"
+                  @click="setRepresentative(item.modelId)"
+                >
+                  <i class="bi bi-star me-1"></i>
+                  <span>대표 지정</span>
+                </button>
+
+                <!-- Model Info -->
+                <span class="item-name fw-bold b2b-text-sm text-dark text-truncate" :title="item.modelName">
+                  {{ item.modelName }}
                 </span>
-                <span class="item-name fw-bold b2b-text-sm text-dark">{{ item.modelName }}</span>
-                <span class="item-code b2b-text-2xs badge bg-light text-secondary border">{{ item.modelCode }}</span>
-                <span class="item-dept b2b-text-xs text-muted ms-1">{{ item.category }} · {{ item.grade }}</span>
+                <span class="item-code b2b-text-2xs badge bg-light text-secondary border flex-shrink-0">
+                  {{ item.modelCode }}
+                </span>
+                <span class="item-dept b2b-text-xs text-muted flex-shrink-0">
+                  {{ item.category }} · {{ item.grade }}
+                </span>
               </div>
-              <button class="btn-return-grid" title="그리드로 되돌리기" @click="returnToGrid(zone.key, idx)">
-                <i class="bi bi-x-lg"></i>
-              </button>
+
+              <!-- Action: Return to Grid -->
+              <div class="d-flex align-items-center gap-1 ms-2 flex-shrink-0">
+                <button class="btn-return-grid" title="그리드로 되돌리기" @click="returnToGrid(idx)">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -164,32 +191,13 @@ export default {
   data() {
     return {
       poolCount: 0,
-      hoverZone: null,
+      showGuideTooltip: false,
+      isHoverDropZone: false,
       selectionStyle: 'block',
       users: [],
       _lastSelectedRows: [],
-      zoneDefs: [
-        { 
-          key: 'groupMulti', 
-          label: '그룹 포함 모델 목록 (상단)', 
-          badge: '다중 배정 (Multi)', 
-          subText: '셀을 마우스로 블록 선택 후 핸들(⋮⋮)로 끌어다 놓으세요', 
-          color: '#0d6efd',
-          maxCount: null
-        },
-        { 
-          key: 'representativeSingle', 
-          label: '대표 모델 지정 (하단)', 
-          badge: '단일 지정 (Single Max: 1)', 
-          subText: '그룹을 대표할 단 1개의 모델만 지정 가능합니다', 
-          color: '#fd7e14',
-          maxCount: 1
-        }
-      ],
-      zones: {
-        groupMulti: [],
-        representativeSingle: []
-      },
+      groupModels: [],
+      repModelId: null,
       gridFields: [
         { fieldName: 'dragHandle', dataType: 'text' },
         { fieldName: 'modelId', dataType: 'text' },
@@ -216,8 +224,9 @@ export default {
     }
   },
   computed: {
-    assignedCount() {
-      return this.zones.groupMulti.length + this.zones.representativeSingle.length
+    representativeModel() {
+      if (!this.repModelId) return null
+      return this.groupModels.find(m => m.modelId === this.repModelId) || null
     }
   },
   mounted() {
@@ -316,7 +325,7 @@ export default {
 
     appendMoreModels(count = 20) {
       if (!this.dataProvider) return
-      const currentTotal = this.poolCount + this.assignedCount
+      const currentTotal = this.poolCount + this.groupModels.length
       const newModels = this.generateModels(count, currentTotal)
 
       newModels.forEach(m => this.dataProvider.addRow(m))
@@ -326,6 +335,14 @@ export default {
 
     syncPoolCount() {
       this.poolCount = this.dataProvider ? this.dataProvider.getRowCount() : 0
+    },
+
+    // ---------- Representative Model Management ----------
+    setRepresentative(modelId) {
+      const target = this.groupModels.find(m => m.modelId === modelId)
+      if (!target) return
+      this.repModelId = modelId
+      showToast(`'${target.modelName}' 모델이 그룹의 대표 모델로 지정되었습니다.`, { type: 'success' })
     },
 
     // ---------- Mouse Drag Events from Grid to HTML DIV ----------
@@ -361,7 +378,7 @@ export default {
         const rect = this._press.gridRect
         const isPointerOutsideRight = e.clientX > rect.right - 10
         const isHeadingRight = dx > 15 && dx > Math.abs(dy)
-        const isOverZone = !!this.getZoneAtPoint(e.clientX, e.clientY)
+        const isOverZone = this.checkIsOverDropZone(e.clientX, e.clientY)
         const isAlreadySelectedBlock = this._press.initialSelectedRows.length > 1 && dist > 8
 
         const shouldStartDnd = isPointerOutsideRight || isHeadingRight || isOverZone || isAlreadySelectedBlock
@@ -389,7 +406,7 @@ export default {
       }
 
       this.moveGhost(e)
-      this.updateHoverZone(e)
+      this.isHoverDropZone = this.checkIsOverDropZone(e.clientX, e.clientY)
     },
 
     onDocMouseUp(e) {
@@ -401,7 +418,7 @@ export default {
       this.finishDrag(e)
       document.body.style.userSelect = ''
       this.removeGhost()
-      this.hoverZone = null
+      this.isHoverDropZone = false
     },
 
     endDragListeners() {
@@ -412,7 +429,7 @@ export default {
     resolveDragRows() {
       if (!this.gridView) return []
 
-      // 1. 체크바 선택 행들 (만약 활성화된 경우)
+      // 1. 체크바 선택 행들
       const checked = this.gridView.getCheckedRows() || []
       if (checked.length > 0) {
         return Array.from(new Set(checked)).sort((a, b) => a - b)
@@ -426,7 +443,7 @@ export default {
         return sorted
       }
 
-      // 3. 마우스 다운으로 포커스가 1개로 감소했더라도, 클릭한 행이 이전에 선택한 다중 블록(_savedBlockRows)에 포함되어 있다면 전체 유지!
+      // 3. 클릭한 행이 이전에 선택한 다중 블록에 포함되어 있다면 전체 유지
       const cur = this.gridView.getCurrent()
       const currentRow = (selected.length === 1) ? selected[0] : (cur ? cur.dataRow : -1)
 
@@ -436,7 +453,7 @@ export default {
         }
       }
 
-      // 4. 그룹 헤더 행 드래그 지원: 클릭한 항목이 그룹 헤더인 경우 그 하위 모든 데이터 행들 추출!
+      // 4. 그룹 헤더 행 드래그 지원
       if (cur && cur.itemIndex >= 0) {
         const model = this.gridView.getModel(cur.itemIndex)
         if (model && model.type === 'group') {
@@ -465,7 +482,7 @@ export default {
         return selected
       }
 
-      // 6. Selection API 범위 (fallback)
+      // 6. Selection API 범위 fallback
       const sel = this.gridView.getSelection()
       if (sel && sel.startRow !== undefined && sel.endRow !== undefined) {
         const start = Math.min(sel.startRow, sel.endRow)
@@ -479,13 +496,13 @@ export default {
         }
       }
 
-      // 5. 단일 커서 선택 행
+      // 7. 단일 커서 선택 행
       return (cur && cur.dataRow >= 0) ? [cur.dataRow] : []
     },
 
     finishDrag(e) {
-      const zoneKey = this.getZoneAtPoint(e.clientX, e.clientY)
-      if (!zoneKey || !this.zones[zoneKey]) return
+      const isOver = this.checkIsOverDropZone(e.clientX, e.clientY)
+      if (!isOver) return
 
       const rows = this._dragRows
       if (!rows || !rows.length) return
@@ -493,52 +510,20 @@ export default {
       const items = rows.map(r => this.dataProvider.getJsonRow(r)).filter(Boolean)
       if (!items.length) return
 
-      const zoneDef = this.zoneDefs.find(z => z.key === zoneKey)
+      // 그룹 목록에 추가
+      this.groupModels.push(...items)
+      this.dataProvider.removeRows(rows)
 
-      if (zoneKey === 'groupMulti') {
-        // [상단 DIV] 다중 배정 영역
-        this.zones.groupMulti.push(...items)
-        this.dataProvider.removeRows(rows)
-
-        const namesSummary = items.length <= 2 
-          ? items.map(i => i.modelName).join(', ')
-          : `${items[0].modelName} 외 ${items.length - 1}개`
-
-        showToast(`${items.length}개 모델 (${namesSummary})이 '${zoneDef?.label}' 영역으로 이동되었습니다.`, { type: 'success' })
-      } else if (zoneKey === 'representativeSingle') {
-        // [하단 DIV] 단일 배정 영역 (최대 1개)
-        if (items.length > 1) {
-          const targetItem = items[0]
-          const targetRowIndex = rows[0]
-
-          let replaceNotice = ''
-          if (this.zones.representativeSingle.length > 0) {
-            const prevItem = this.zones.representativeSingle.pop()
-            this.dataProvider.addRow(prevItem)
-            replaceNotice = `기존 대표 모델 '${prevItem.modelName}'은(는) 그리드로 반환되고, `
-          }
-
-          this.zones.representativeSingle = [targetItem]
-          this.dataProvider.removeRow(targetRowIndex)
-
-          showToast(`대표 모델 영역은 단일 지정만 가능하므로, ${replaceNotice}'${targetItem.modelName}'만 대표 모델로 지정되었습니다. (나머지는 그리드 유지)`, { type: 'warning' })
-        } else {
-          const targetItem = items[0]
-          const targetRowIndex = rows[0]
-
-          let replaceNotice = ''
-          if (this.zones.representativeSingle.length > 0) {
-            const prevItem = this.zones.representativeSingle.pop()
-            this.dataProvider.addRow(prevItem)
-            replaceNotice = `기존 대표 모델 '${prevItem.modelName}'은(는) 그리드로 반환되고, `
-          }
-
-          this.zones.representativeSingle = [targetItem]
-          this.dataProvider.removeRow(targetRowIndex)
-
-          showToast(`${replaceNotice}'${targetItem.modelName}' 모델이 대표 모델로 지정되었습니다.`, { type: 'success' })
-        }
+      // 아직 대표 모델이 없다면, 첫 번째 모델을 자동으로 대표로 지정
+      if (!this.repModelId && this.groupModels.length > 0) {
+        this.repModelId = this.groupModels[0].modelId
       }
+
+      const namesSummary = items.length <= 2 
+        ? items.map(i => i.modelName).join(', ')
+        : `${items[0].modelName} 외 ${items.length - 1}개`
+
+      showToast(`${items.length}개 모델 (${namesSummary})이 그룹 배정함으로 이동되었습니다.`, { type: 'success' })
 
       if (this.gridView) {
         this.gridView.checkAll(false)
@@ -548,14 +533,10 @@ export default {
       this.syncPoolCount()
     },
 
-    getZoneAtPoint(x, y) {
+    checkIsOverDropZone(x, y) {
       const el = document.elementFromPoint(x, y)
       const targetCard = el ? el.closest('.target-div-card') : null
-      return targetCard ? targetCard.dataset.zone : null
-    },
-
-    updateHoverZone(e) {
-      this.hoverZone = this.getZoneAtPoint(e.clientX, e.clientY)
+      return !!targetCard
     },
 
     createGhost(count, items = []) {
@@ -593,9 +574,20 @@ export default {
       }
     },
 
-    returnToGrid(zoneKey, idx) {
-      const item = this.zones[zoneKey].splice(idx, 1)[0]
+    returnToGrid(idx) {
+      const item = this.groupModels.splice(idx, 1)[0]
       if (!item) return
+
+      // 삭제한 항목이 대표 모델이었던 경우, 남아있는 모델 중 첫 번째를 새 대표로 자동 승격
+      if (this.repModelId === item.modelId) {
+        if (this.groupModels.length > 0) {
+          this.repModelId = this.groupModels[0].modelId
+          showToast(`대표 모델 '${item.modelName}' 반환으로 '${this.groupModels[0].modelName}' 모델이 새 대표 모델로 지정되었습니다.`, { type: 'warning' })
+        } else {
+          this.repModelId = null
+        }
+      }
+
       delete item.dragHandle
       item.dragHandle = '⋮⋮'
       this.dataProvider.addRow(item)
@@ -604,20 +596,20 @@ export default {
     },
 
     resetAll() {
-      const allItems = [...this.zones.groupMulti, ...this.zones.representativeSingle]
-      if (!allItems.length) {
-        showToast('DIV 영역에 배정된 모델이 없습니다.', { type: 'warning' })
+      if (!this.groupModels.length) {
+        showToast('그룹 영역에 배정된 모델이 없습니다.', { type: 'warning' })
         return
       }
-      allItems.forEach(item => {
+      this.groupModels.forEach(item => {
         item.dragHandle = '⋮⋮'
         this.dataProvider.addRow(item)
       })
-      this.zones.groupMulti = []
-      this.zones.representativeSingle = []
+      const count = this.groupModels.length
+      this.groupModels = []
+      this.repModelId = null
       this._lastSelectedRows = []
       this.syncPoolCount()
-      showToast(`${allItems.length}개 모델 배정이 모두 RealGrid로 초기화되었습니다.`, { type: 'info' })
+      showToast(`${count}개 모델 배정이 모두 RealGrid로 초기화되었습니다.`, { type: 'info' })
     }
   }
 }
@@ -652,7 +644,6 @@ export default {
 .dnd-div-container {
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
 
 .target-div-card {
@@ -664,51 +655,24 @@ export default {
   border-radius: 10px;
   transition: all 0.15s ease-in-out;
   overflow: hidden;
-  min-height: 220px;
+  min-height: 540px;
 }
 
-.target-div-card.zone-multi {
-  border-color: rgba(13, 110, 253, 0.3);
+.target-div-card.unified-group-card {
+  border-color: rgba(13, 110, 253, 0.35);
+  background: rgba(13, 110, 253, 0.015);
 }
 
-.target-div-card.zone-single {
-  border-color: rgba(253, 126, 20, 0.4);
-  background: rgba(253, 126, 20, 0.015);
-}
-
-.target-div-card.is-hover.zone-multi {
+.target-div-card.is-hover {
   border-color: var(--b2b-color-primary) !important;
   border-style: solid;
-  background: rgba(13, 110, 253, 0.05);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-}
-
-.target-div-card.is-hover.zone-single {
-  border-color: #fd7e14 !important;
-  border-style: solid;
-  background: rgba(253, 126, 20, 0.08);
-  box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.2);
-}
-
-.target-div-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--b2b-color-border, #e5e7eb);
-  border-left: 4px solid var(--b2b-color-primary);
-  background: var(--b2b-color-bg-subcard, #f8fafc);
-}
-
-.div-badge-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  background: rgba(13, 110, 253, 0.06) !important;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
 }
 
 .target-div-body {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -721,9 +685,10 @@ export default {
   flex-direction: column;
   align-items: center;
   pointer-events: none;
-  padding: 16px;
+  padding: 24px;
 }
 
+/* Dropped Item Card */
 .div-dropped-item {
   display: flex;
   align-items: center;
@@ -733,13 +698,54 @@ export default {
   border: 1px solid var(--b2b-color-border, #e5e7eb);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: transform 0.1s ease;
+  transition: all 0.15s ease-in-out;
 }
 
+.div-dropped-item:hover {
+  border-color: var(--b2b-color-border-hover, #cbd5e1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Active Representative Model Item */
 .div-dropped-item.item-rep {
-  border-color: #FD7E14;
-  background: rgba(253, 126, 20, 0.08);
-  box-shadow: 0 2px 6px rgba(253, 126, 20, 0.12);
+  border-color: #f59e0b;
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.08), rgba(254, 243, 199, 0.25));
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.18);
+}
+
+/* Representative Toggle Button */
+.btn-rep-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-rep-badge.is-active {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+  cursor: default;
+}
+
+.btn-rep-badge.is-candidate {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.btn-rep-badge.is-candidate:hover {
+  background-color: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+  transform: scale(1.03);
 }
 
 .btn-return-grid {
@@ -767,6 +773,73 @@ export default {
   .grid-to-div-layout {
     grid-template-columns: 1fr;
   }
+}
+
+/* Guide Floating Tooltip Popover */
+.guide-tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-guide-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--b2b-color-bg-subcard, #f1f5f9);
+  border: 1px solid var(--b2b-color-border, #e2e8f0);
+  color: var(--b2b-color-text-sub, #64748b);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-guide-toggle:hover,
+.btn-guide-toggle.is-active {
+  background: var(--b2b-color-primary-soft, #eff6ff);
+  border-color: var(--b2b-color-primary, #3b82f6);
+  color: var(--b2b-color-primary, #2563eb);
+}
+
+.guide-floating-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1050;
+  width: 400px;
+  background: var(--b2b-color-bg-card, #ffffff);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+}
+
+.guide-steps-list {
+  list-style: none;
+}
+
+.btn-close-popover {
+  border: none;
+  background: transparent;
+  color: var(--b2b-color-text-faint, #94a3b8);
+  font-size: 0.75rem;
+  padding: 0;
+  cursor: pointer;
+}
+
+.btn-close-popover:hover {
+  color: var(--b2b-color-text-main, #0f172a);
+}
+
+.fade-tooltip-enter-active,
+.fade-tooltip-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.fade-tooltip-enter-from,
+.fade-tooltip-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>
 
