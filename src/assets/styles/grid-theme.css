@@ -185,7 +185,8 @@ canvas.rg-canvas ~ .rg-state-insert {
 [data-theme="dark-navy"] .rg-data-row:hover .rg-check-cell,
 [data-theme="dark"] [class*="rg-row"]:hover [class*="rg-cell"],
 [data-theme="dark-navy"] [class*="rg-row"]:hover [class*="rg-cell"] {
-  background-color: var(--border-color) !important;
+  background-color: var(--b2b-color-hover-bg) !important;
+  color: var(--b2b-color-text-main) !important;
 }
 
 /* JqxGrid overrides if applicable */
@@ -216,7 +217,8 @@ canvas.rg-canvas ~ .rg-state-insert {
 .table {
   --bs-table-bg: transparent !important;
   --bs-table-accent-bg: transparent !important;
-  --bs-table-hover-bg: transparent !important;
+  --bs-table-hover-bg: var(--b2b-color-hover-bg) !important;
+  --bs-table-hover-color: var(--b2b-color-text-main) !important;
   background-color: var(--bg-card) !important;
   color: var(--text-primary) !important;
 }
@@ -238,12 +240,19 @@ canvas.rg-canvas ~ .rg-state-insert {
   font-size: 0.8125rem !important; /* 13px */
 }
 
-/* 마우스 올렸을 때 Navy색으로 배경이 바뀌는 효과 완전 제거 */
+/* 마우스 올렸을 때 다크모드 글자색 사라짐 방지 (글자색 흰색 유지 및 세련된 호버 배경) */
+.table-hover > tbody > tr:hover > *,
 .table-hover tbody tr:hover,
 .table-hover tbody tr:hover td,
-.table-hover tbody tr:hover th {
-  background-color: inherit !important;
-  color: inherit !important;
+.table-hover tbody tr:hover th,
+.table-hover tbody tr:hover span:not(.badge),
+.table-hover tbody tr:hover div {
+  --bs-table-hover-color: var(--b2b-color-text-main) !important;
+  --bs-table-hover-bg: var(--b2b-color-hover-bg) !important;
+  --bs-table-color-state: var(--b2b-color-text-main) !important;
+  --bs-table-bg-state: var(--b2b-color-hover-bg) !important;
+  background-color: var(--b2b-color-hover-bg) !important;
+  color: var(--b2b-color-text-main) !important;
   box-shadow: none !important;
 }
 

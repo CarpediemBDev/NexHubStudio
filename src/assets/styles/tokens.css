@@ -386,7 +386,22 @@
 }
 
 [data-theme="dark"] .table,
-[data-theme="dark-navy"] .table,
+[data-theme="dark-navy"] .table {
+  --bs-table-bg: var(--bg-card) !important;
+  --bs-table-color: var(--text-primary) !important;
+  --bs-table-striped-color: var(--text-primary) !important;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.03) !important;
+  --bs-table-active-color: var(--text-primary) !important;
+  --bs-table-active-bg: var(--b2b-color-hover-bg) !important;
+  --bs-table-hover-color: var(--b2b-color-text-main) !important;
+  --bs-table-hover-bg: var(--b2b-color-hover-bg) !important;
+  --bs-table-color-state: var(--b2b-color-text-main) !important;
+  --bs-table-bg-state: var(--b2b-color-hover-bg) !important;
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
 [data-theme="dark"] .table td,
 [data-theme="dark-navy"] .table td,
 [data-theme="dark"] .table th,
@@ -396,13 +411,25 @@
   border-color: var(--border-color) !important;
 }
 
-/* 마우스 올렸을 때 Navy색으로 변경되는 호버 효과 제거 */
+/* 마우스 올렸을 때 다크모드 글자색 흰색 유지 및 세련된 호버 배경 */
+[data-theme="dark"] .table-hover > tbody > tr:hover > *,
+[data-theme="dark-navy"] .table-hover > tbody > tr:hover > *,
 [data-theme="dark"] .table-hover tbody tr:hover,
 [data-theme="dark-navy"] .table-hover tbody tr:hover,
 [data-theme="dark"] .table-hover tbody tr:hover td,
-[data-theme="dark-navy"] .table-hover tbody tr:hover td {
-  background-color: inherit !important;
-  color: inherit !important;
+[data-theme="dark-navy"] .table-hover tbody tr:hover td,
+[data-theme="dark"] .table-hover tbody tr:hover th,
+[data-theme="dark-navy"] .table-hover tbody tr:hover th,
+[data-theme="dark"] .table-hover tbody tr:hover span:not(.badge),
+[data-theme="dark-navy"] .table-hover tbody tr:hover span:not(.badge),
+[data-theme="dark"] .table-hover tbody tr:hover div,
+[data-theme="dark-navy"] .table-hover tbody tr:hover div {
+  --bs-table-hover-color: var(--b2b-color-text-main) !important;
+  --bs-table-hover-bg: var(--b2b-color-hover-bg) !important;
+  --bs-table-color-state: var(--b2b-color-text-main) !important;
+  --bs-table-bg-state: var(--b2b-color-hover-bg) !important;
+  background-color: var(--b2b-color-hover-bg) !important;
+  color: var(--b2b-color-text-main) !important;
 }
 
 /* 3. Cards, Modals, Popovers & Dropdowns */
@@ -804,5 +831,27 @@ h6 { font-size: var(--b2b-font-size-body); font-weight: 600; }
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 4px;
+}
+
+/* ==========================================================================
+   B2B Global Workspace Layout Alignment
+   모든 페이지 본문의 좌우 여백을 화면 타이틀(PageHeader)과 0px 오차 없이 일직선 정렬 & 풀 와이드 확장
+   ========================================================================== */
+.vben-workspace .container,
+.vben-workspace .container-fluid {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.vben-workspace .container.py-4,
+.vben-workspace .container-fluid.py-4,
+.vben-workspace .container.mt-4,
+.vben-workspace .container-fluid.mt-4 {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 

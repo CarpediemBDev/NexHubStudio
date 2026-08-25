@@ -1,9 +1,9 @@
 <template>
   <div 
     :class="[
-      'vben-sidebar border-end position-relative', 
+      'vben-sidebar border-end', 
       { 
-        'collapsed': collapsed && currentToggleStyle !== 'hover',
+        'collapsed': isCollapsed && currentToggleStyle !== 'hover',
         'sidebar-mode-hover': currentToggleStyle === 'hover',
         'sidebar-mode-drawer shadow-lg': currentToggleStyle === 'drawer'
       }
@@ -13,18 +13,18 @@
     <div 
       class="sidebar-logo d-flex align-items-center border-bottom"
       :class="[
-        (collapsed && currentToggleStyle !== 'hover') ? 'justify-content-center px-0' : 'justify-content-between px-3',
-        (collapsed && (currentToggleStyle === 'inline' || currentToggleStyle === 'double-arrow')) ? 'cursor-pointer collapsed-logo-hover' : ''
+        (isCollapsed && currentToggleStyle !== 'hover') ? 'justify-content-center px-0' : 'justify-content-between px-3',
+        (isCollapsed && (currentToggleStyle === 'inline' || currentToggleStyle === 'double-arrow')) ? 'cursor-pointer collapsed-logo-hover' : ''
       ]"
-      @click="(collapsed && (currentToggleStyle === 'inline' || currentToggleStyle === 'double-arrow')) ? $emit('toggle') : null"
-      :title="(collapsed && (currentToggleStyle === 'inline' || currentToggleStyle === 'double-arrow')) ? '사이드바 펼치기 (Alt+B)' : ''"
+      @click="(isCollapsed && (currentToggleStyle === 'inline' || currentToggleStyle === 'double-arrow')) ? tabStore.toggleSidebar() : null"
+      :title="(isCollapsed && (currentToggleStyle === 'inline' || currentToggleStyle === 'double-arrow')) ? '사이드바 펼치기 (Alt+B)' : ''"
     >
       <!-- Logo Mark & Text -->
-      <div v-if="!collapsed || currentToggleStyle !== 'double-arrow'" class="d-flex align-items-center overflow-hidden">
+      <div v-if="!isCollapsed || currentToggleStyle !== 'double-arrow'" class="d-flex align-items-center overflow-hidden">
         <div class="logo-icon-box d-flex align-items-center justify-content-center text-primary flex-shrink-0">
           <i class="bi bi-box-seam fs-5"></i>
         </div>
-        <div v-if="!collapsed || currentToggleStyle === 'hover'" class="d-flex align-items-center ms-2.5 overflow-hidden logo-text-group">
+        <div v-if="!isCollapsed || currentToggleStyle === 'hover'" class="d-flex align-items-center ms-2.5 overflow-hidden logo-text-group">
           <span class="fw-bold logo-brand text-truncate">NexHub</span>
           <span class="logo-edition badge-edition ms-2 font-monospace flex-shrink-0">STUDIO</span>
         </div>
@@ -32,9 +32,9 @@
 
       <!-- Mode 1: Notion / Linear Inline Toggle -->
       <button 
-        v-if="(!collapsed || currentToggleStyle === 'hover') && currentToggleStyle === 'inline'"
+        v-if="(!isCollapsed || currentToggleStyle === 'hover') && currentToggleStyle === 'inline'"
         class="btn btn-sidebar-toggle flex-shrink-0"
-        @click.stop="$emit('toggle')"
+        @click.stop="tabStore.toggleSidebar()"
         title="사이드바 접기 (Alt+B)"
         type="button"
       >
@@ -45,11 +45,22 @@
       <button 
         v-if="currentToggleStyle === 'double-arrow'"
         class="btn btn-sidebar-toggle flex-shrink-0"
-        @click.stop="$emit('toggle')"
-        :title="collapsed ? '사이드바 펼치기 (Alt+B)' : '사이드바 접기 (Alt+B)'"
+        @click.stop="tabStore.toggleSidebar()"
+        :title="isCollapsed ? '사이드바 펼치기 (Alt+B)' : '사이드바 접기 (Alt+B)'"
         type="button"
       >
-        <i :class="['bi', collapsed ? 'bi-chevron-double-right text-primary fs-6' : 'bi-chevron-double-left text-primary']"></i>
+        <i :class="['bi', isCollapsed ? 'bi-chevron-double-right text-primary fs-6' : 'bi-chevron-double-left text-primary']"></i>
+      </button>
+
+      <!-- Mode 8: Discord / Mobile Drawer Close Button -->
+      <button 
+        v-if="currentToggleStyle === 'drawer'"
+        class="btn btn-sidebar-toggle flex-shrink-0"
+        @click.stop="tabStore.toggleSidebar()"
+        title="사이드바 서랍 닫기 (Esc / Alt+B)"
+        type="button"
+      >
+        <i class="bi bi-x-lg text-primary fs-6"></i>
       </button>
     </div>
 
@@ -57,12 +68,12 @@
     <div v-if="currentToggleStyle === 'pill'" class="px-2 pt-2 pb-1">
       <button
         class="btn btn-floating-pill w-100 d-flex align-items-center justify-content-center gap-1.5 py-1"
-        @click="$emit('toggle')"
-        :title="collapsed ? '사이드바 펼치기' : '사이드바 접기'"
+        @click="tabStore.toggleSidebar()"
+        :title="isCollapsed ? '사이드바 펼치기' : '사이드바 접기'"
         type="button"
       >
-        <i :class="['bi', collapsed ? 'bi-arrows-angle-expand' : 'bi-arrows-angle-contract', 'small text-primary']"></i>
-        <span v-if="!collapsed" class="pill-text small fw-medium">패널 접기</span>
+        <i :class="['bi', isCollapsed ? 'bi-arrows-angle-expand' : 'bi-arrows-angle-contract', 'small text-primary']"></i>
+        <span v-if="!isCollapsed" class="pill-text small fw-medium">패널 접기</span>
       </button>
     </div>
     
@@ -75,7 +86,7 @@
             class="nav-link menu-item-main d-flex align-items-center justify-content-between rounded-3 cursor-pointer"
             :class="{ 'active-menu shadow-sm': isActive(menu.path) && !menu.children, 'expanded-group': isExpanded(menu.path) }"
             @click="handleMenuClick(menu)"
-            :title="(collapsed && currentToggleStyle !== 'hover') ? (menu.meta?.title || menu.name) : ''"
+            :title="(isCollapsed && currentToggleStyle !== 'hover') ? (menu.meta?.title || menu.name) : ''"
           >
             <div class="d-flex align-items-center text-truncate">
               <!-- Fixed Width Icon Box for Level 1 -->
@@ -83,13 +94,13 @@
                 <i v-if="menu.meta?.icon" :class="['bi', menu.meta.icon, 'fs-6']"></i>
                 <i v-else class="bi bi-folder fs-6"></i>
               </span>
-              <span v-if="!collapsed || currentToggleStyle === 'hover'" class="menu-label small fw-medium title-text text-truncate">{{ menu.meta?.title || menu.name }}</span>
+              <span v-if="!isCollapsed || currentToggleStyle === 'hover'" class="menu-label small fw-medium title-text text-truncate">{{ menu.meta?.title || menu.name }}</span>
             </div>
-            <i v-if="(!collapsed || currentToggleStyle === 'hover') && menu.children" :class="['bi', isExpanded(menu.path) ? 'bi-chevron-down' : 'bi-chevron-right', 'chevron-icon']"></i>
+            <i v-if="(!isCollapsed || currentToggleStyle === 'hover') && menu.children" :class="['bi', isExpanded(menu.path) ? 'bi-chevron-down' : 'bi-chevron-right', 'chevron-icon']"></i>
           </div>
 
           <!-- 2-Level Submenu (Clean Text Only, No Distracting Icons) -->
-          <ul v-if="(!collapsed || currentToggleStyle === 'hover') && menu.children && isExpanded(menu.path)" class="nav flex-column submenu-list gap-0.5">
+          <ul v-if="(!isCollapsed || currentToggleStyle === 'hover') && menu.children && isExpanded(menu.path)" class="nav flex-column submenu-list gap-0.5">
             <li v-for="child in menu.children" :key="child.path" class="nav-item">
               <div 
                 class="nav-link menu-item-sub d-flex align-items-center rounded-2 cursor-pointer"
@@ -108,29 +119,29 @@
     <div 
       v-if="currentToggleStyle === 'footer'" 
       class="sidebar-footer-toggle border-top d-flex align-items-center cursor-pointer"
-      :class="collapsed ? 'justify-content-center' : 'justify-content-between px-3'"
-      @click="$emit('toggle')"
-      :title="collapsed ? '사이드바 펼치기 (Alt+B)' : '사이드바 축소 (Alt+B)'"
+      :class="isCollapsed ? 'justify-content-center' : 'justify-content-between px-3'"
+      @click="tabStore.toggleSidebar()"
+      :title="isCollapsed ? '사이드바 펼치기 (Alt+B)' : '사이드바 축소 (Alt+B)'"
     >
-      <div v-if="!collapsed" class="d-flex align-items-center gap-2 small text-theme-muted">
+      <div v-if="!isCollapsed" class="d-flex align-items-center gap-2 small text-theme-muted">
         <i class="bi bi-chevron-bar-left"></i>
         <span>사이드바 축소</span>
       </div>
       <div v-else class="text-theme-muted small">
         <i class="bi bi-chevron-bar-right"></i>
       </div>
-      <kbd v-if="!collapsed" class="footer-kbd">Alt+B</kbd>
+      <kbd v-if="!isCollapsed" class="footer-kbd">Alt+B</kbd>
     </div>
 
     <!-- Mode 3: Floating Handle on Right Border (Jira / Stripe / Figma Style) -->
     <button 
       v-if="currentToggleStyle === 'floating'"
       class="btn-floating-handle shadow-sm"
-      @click.stop="$emit('toggle')"
-      :title="collapsed ? '사이드바 펼치기 (Alt+B)' : '사이드바 접기 (Alt+B)'"
+      @click.stop="tabStore.toggleSidebar()"
+      :title="isCollapsed ? '사이드바 펼치기 (Alt+B)' : '사이드바 접기 (Alt+B)'"
       type="button"
     >
-      <i :class="['bi', collapsed ? 'bi-chevron-right' : 'bi-chevron-left']"></i>
+      <i :class="['bi', isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left']"></i>
     </button>
   </div>
 </template>
@@ -147,10 +158,13 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['toggle']);
+
 const router = useRouter();
 const route = useRoute();
 const tabStore = useTabStore();
 const currentToggleStyle = computed(() => tabStore.sidebarToggleStyle || 'inline');
+const isCollapsed = computed(() => tabStore.sidebarCollapsed);
 const expandedGroups = ref(['system', 'grid-studio', 'user-group']);
 
 const menus = computed(() => {
@@ -191,6 +205,7 @@ const navigate = (path) => {
 
 <style scoped>
 .vben-sidebar {
+  position: relative;
   width: 256px;
   height: 100%;
   flex-shrink: 0;
@@ -207,11 +222,7 @@ const navigate = (path) => {
 /* Mode 5: Stripe / AWS Hover Expand Mode */
 .vben-sidebar.sidebar-mode-hover {
   width: 64px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1040;
+  position: relative;
   overflow: hidden;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
@@ -263,14 +274,26 @@ const navigate = (path) => {
   margin-right: 11px !important;
 }
 
-/* Mode 8: Discord Drawer Overlay Mode */
+/* Mode 8: Discord Drawer Overlay Mode (본문 100% 풀 와이드 지원) */
 .vben-sidebar.sidebar-mode-drawer {
-  position: absolute;
+  position: fixed !important;
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 1040;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+  z-index: 1050;
+  width: 256px !important;
+  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.22);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+.vben-sidebar.sidebar-mode-drawer.collapsed {
+  transform: translateX(-100%) !important;
+  opacity: 0;
+  pointer-events: none;
+}
+.vben-sidebar.sidebar-mode-drawer:not(.collapsed) {
+  transform: translateX(0) !important;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Mode 6: Figma Floating Pill */

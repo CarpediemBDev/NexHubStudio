@@ -1,12 +1,23 @@
 <template>
-  <div class="vben-layout d-flex h-100 overflow-hidden">
+  <div class="vben-layout d-flex h-100 overflow-hidden position-relative">
     <!-- Left Collapsible Sidebar -->
-    <VbenSidebar :collapsed="isSidebarCollapsed" @toggle="toggleSidebar" />
+    <VbenSidebar :collapsed="tabStore.sidebarCollapsed" @toggle="tabStore.toggleSidebar" />
+
+    <!-- Discord Drawer Backdrop Overlay -->
+    <div 
+      v-if="tabStore.sidebarToggleStyle === 'drawer' && !tabStore.sidebarCollapsed" 
+      class="vben-drawer-backdrop position-fixed top-0 start-0 w-100 h-100"
+      @click="tabStore.toggleSidebar"
+      title="클릭하여 메뉴 닫기"
+    ></div>
 
     <!-- Right Workspace -->
     <div class="vben-main-wrapper d-flex flex-column flex-grow-1 overflow-hidden">
       <!-- Header (TopBar 48px) -->
-      <VbenHeader :sidebar-collapsed="isSidebarCollapsed" @toggle-sidebar="toggleSidebar" />
+      <VbenHeader 
+        :sidebar-collapsed="tabStore.sidebarCollapsed" 
+        @toggle-sidebar="tabStore.toggleSidebar" 
+      />
       
       <!-- Multi-Tab Bar (38px) -->
       <VbenTabBar />
@@ -27,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import VbenSidebar from '../components/vben/VbenSidebar.vue';
 import VbenHeader from '../components/vben/VbenHeader.vue';
@@ -35,7 +46,6 @@ import VbenTabBar from '../components/vben/VbenTabBar.vue';
 import PageHeader from '../components/PageHeader.vue';
 import { useTabStore } from '../stores/tabStore';
 
-const isSidebarCollapsed = ref(false);
 const tabStore = useTabStore();
 const route = useRoute();
 
@@ -47,14 +57,14 @@ const cachedPages = useRouter()
   .filter(Boolean);
 
 const toggleSidebar = () => {
-  isSidebarCollapsed.value = !isSidebarCollapsed.value;
+  tabStore.toggleSidebar();
 };
 
 // Global Shortcut: Alt+B (or Ctrl+B) to toggle sidebar
 const handleGlobalKeydown = (e) => {
   if (e.altKey && (e.key === 'b' || e.key === 'B' || e.key === 'ㅠ')) {
     e.preventDefault();
-    toggleSidebar();
+    tabStore.toggleSidebar();
   }
 };
 
@@ -88,5 +98,14 @@ watch(
 .vben-workspace {
   background-color: var(--b2b-color-bg-body);
   padding: 18px 24px !important;
+}
+
+/* Discord Drawer Backdrop Overlay */
+.vben-drawer-backdrop {
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 1035;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
 }
 </style>

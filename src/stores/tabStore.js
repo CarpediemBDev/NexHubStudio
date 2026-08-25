@@ -26,11 +26,21 @@ export const useTabStore = defineStore('tab', {
       sidebarTheme: initialTheme, // 'light' | 'dark'
       tabStyle: initialTabStyle, // 'linear' | 'browser' | 'underline' | 'capsule'
       sidebarToggleStyle: initialToggleStyle, // 'inline' | 'footer' | 'floating' | 'header'
+      sidebarCollapsed: initialToggleStyle === 'drawer',
     };
   },
   actions: {
+    toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+    },
+    setSidebarCollapsed(collapsed) {
+      this.sidebarCollapsed = collapsed;
+    },
     setSidebarToggleStyle(style) {
       this.sidebarToggleStyle = style;
+      if (style === 'drawer') {
+        this.sidebarCollapsed = true;
+      }
       localStorage.setItem('vben_sidebar_toggle_style', style);
     },
     setTabStyle(style) {

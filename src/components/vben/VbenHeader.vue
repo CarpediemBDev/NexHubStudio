@@ -4,13 +4,13 @@
     <div class="d-flex align-items-center gap-2 overflow-hidden me-3">
       <!-- Show toggle/expand button based on active toggle style -->
       <button 
-        v-if="currentToggleStyle === 'header' || (sidebarCollapsed && currentToggleStyle === 'inline')"
+        v-if="currentToggleStyle === 'header' || currentToggleStyle === 'drawer' || (tabStore.sidebarCollapsed && currentToggleStyle === 'inline')"
         class="btn btn-ghost-icon flex-shrink-0" 
-        @click="$emit('toggle-sidebar')" 
-        :title="sidebarCollapsed ? '사이드바 펼치기 (Alt+B)' : '사이드바 접기 (Alt+B)'"
+        @click="tabStore.toggleSidebar()" 
+        :title="tabStore.sidebarCollapsed ? '메뉴 열기 (Alt+B)' : '메뉴 닫기 (Alt+B)'"
         type="button"
       >
-        <i :class="['bi', sidebarCollapsed ? 'bi-layout-sidebar-inset-reverse text-primary' : 'bi-layout-sidebar text-theme-secondary', 'fs-6']"></i>
+        <i :class="['bi', currentToggleStyle === 'drawer' ? (tabStore.sidebarCollapsed ? 'bi-list fs-5 text-primary' : 'bi-x-lg text-theme-secondary') : (tabStore.sidebarCollapsed ? 'bi-layout-sidebar-inset-reverse text-primary' : 'bi-layout-sidebar text-theme-secondary')]"></i>
       </button>
 
       <!-- Breadcrumbs with Toggle Style Selector (Replacing Home icon) -->
@@ -160,6 +160,8 @@ const props = defineProps({
     default: false,
   },
 });
+
+const emit = defineEmits(['toggle-sidebar']);
 
 const router = useRouter();
 const route = useRoute();

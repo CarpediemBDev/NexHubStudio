@@ -8,18 +8,18 @@
     <div class="content-split">
       <div class="left-panel tree-view">
         <div class="panel-header fw-bold"><i class="bi bi-diagram-3 me-1 text-primary"></i>조직도</div>
-        <ul class="tree p-3">
-          <li class="tree-item mb-1">
-            <div class="tree-node fw-bold"><i class="bi bi-building me-1.5 text-primary"></i>(주) 넥스허브</div>
-            <ul class="sub-tree ps-3 mt-1">
-              <li class="tree-item mb-1"><div class="tree-node"><i class="bi bi-folder2 me-1.5 text-secondary"></i>경영지원본부</div></li>
-              <li class="tree-item active mb-1">
-                <div class="tree-node fw-bold"><i class="bi bi-folder2-open me-1.5 text-primary"></i>R&amp;D 본부</div>
-                <ul class="sub-tree ps-3 mt-1">
-                  <li class="tree-item selected mb-1">
-                    <div class="tree-node selected-highlight fw-bold"><i class="bi bi-people me-1.5 text-primary"></i>플랫폼개발팀</div>
+        <ul class="tree">
+          <li class="tree-item tree-level-1 mb-1">
+            <span class="tree-label fw-bold">(주) 넥스허브</span>
+            <ul class="sub-tree mt-1">
+              <li class="tree-item tree-level-2 mb-1"><span class="tree-label">경영지원본부</span></li>
+              <li class="tree-item tree-level-2 active mb-1">
+                <span class="tree-label fw-bold">R&amp;D 본부</span>
+                <ul class="sub-tree mt-1">
+                  <li class="tree-item tree-level-3 selected mb-1">
+                    <span class="tree-label selected-highlight fw-bold">플랫폼개발팀</span>
                   </li>
-                  <li class="tree-item mb-1"><div class="tree-node"><i class="bi bi-people me-1.5 text-secondary"></i>AI연구팀</div></li>
+                  <li class="tree-item tree-level-3 mb-1"><span class="tree-label">AI연구팀</span></li>
                 </ul>
               </li>
             </ul>
@@ -103,15 +103,44 @@
   background-color: var(--b2b-color-bg-body);
   color: var(--b2b-color-text-main);
 }
-.tree-node {
-  padding: 4px 8px;
-  border-radius: var(--b2b-radius-sm);
+
+/* Tree View - Option A (Clean Bullets with Generous Left Spacing) */
+.tree {
+  list-style-type: disc !important;
+  padding: 16px 20px 16px 32px !important;
+  margin: 0;
   color: var(--b2b-color-text-main);
+}
+.sub-tree {
+  list-style-type: circle !important;
+  padding-left: 20px !important;
+  margin: 0;
+}
+.sub-tree .sub-tree {
+  list-style-type: square !important;
+  padding-left: 20px !important;
+}
+.tree-item {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.tree-label {
+  padding: 4px 8px;
+  border-radius: var(--b2b-radius-sm, 4px);
+  color: var(--b2b-color-text-main);
+  cursor: pointer;
+  display: inline-block;
+  transition: all 0.15s ease;
+  font-size: 13px;
+}
+.tree-label:hover {
+  background-color: var(--b2b-color-hover-bg);
 }
 .selected-highlight {
   background-color: var(--b2b-color-primary-subtle) !important;
   color: var(--b2b-color-primary) !important;
   border-left: 3px solid var(--b2b-color-primary) !important;
+  font-weight: 600;
 }
 .form-group label { width: 100px; }
 .b2b-input {
