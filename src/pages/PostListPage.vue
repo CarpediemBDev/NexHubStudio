@@ -1,8 +1,7 @@
-﻿<template>
-  <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="b2b-text-h1"><i class="bi bi-file-text me-2"></i>게시판</h2>
-      <button class="btn btn-primary" @click="goToWrite">
+<template>
+  <div class="b2b-page-container">
+    <div class="d-flex justify-content-end align-items-center mb-3">
+      <button class="btn btn-primary btn-sm" @click="goToWrite">
         <i class="bi bi-pencil-square me-1"></i>글쓰기
       </button>
     </div>

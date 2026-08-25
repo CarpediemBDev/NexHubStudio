@@ -1,20 +1,5 @@
 <template>
   <div class="b2b-page-container py-3 reg-page">
-    <!-- Page Title -->
-    <div class="mb-3 d-flex align-items-end gap-2 flex-wrap">
-      <div>
-        <h4 class="b2b-text-h1 fw-bold text-theme-primary m-0">규격/규제 정보 관리</h4>
-        <p class="text-muted small mb-0 mt-1">
-          제품을 판매하려면 지켜야 하는 규제·규격을 <strong>권역/국가 · 사업부/제품군/제품</strong> 단위로 등록하고,
-          저장 직전에 기존 데이터와의 <strong>상·하위 충돌</strong>을 판정합니다.
-        </p>
-      </div>
-      <div class="ms-auto d-flex align-items-center gap-2">
-        <span class="b2b-badge b2b-badge-outline">정보 {{ records.length }}건</span>
-        <span class="b2b-badge b2b-badge-warning">충돌이력 {{ conflicts.length }}건</span>
-      </div>
-    </div>
-
     <!-- ============================================================ -->
     <!-- 1. 검색 그리드 (조회 조건 폼)                                  -->
     <!-- ============================================================ -->

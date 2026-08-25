@@ -1,7 +1,6 @@
 <template>
   <div class="b2b-page-container flex-100vh">
-    <div class="b2b-toolbar mb-3">
-      <h4 class="b2b-text-h1 m-0 fw-bold">부서 및 조직도 관리</h4>
+    <div class="b2b-toolbar mb-3 d-flex justify-content-end">
       <div class="actions">
         <button class="btn-b2b-primary"><i class="bi bi-floppy me-1"></i>조직 개편 저장</button>
       </div>

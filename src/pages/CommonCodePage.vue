@@ -1,7 +1,6 @@
-﻿<template>
+<template>
   <div class="common-code-manager">
-    <div class="toolbar mb-3">
-      <h3 class="b2b-text-h1 mb-0">공통코드 관리</h3>
+    <div class="toolbar mb-3 d-flex justify-content-end">
       <div class="d-flex gap-2">
         <input
           type="text"

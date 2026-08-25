@@ -1,6 +1,5 @@
-﻿<template>
+<template>
   <div class="container mt-4">
-    <h2 class="b2b-text-h1 mb-4">설비지원요청</h2>
     <form @submit.prevent="submitForm">
       <table class="table table-bordered form-table mb-0">
         <colgroup>

@@ -2,7 +2,6 @@
   <div class="equipment-monitor-container bg-theme-main text-theme-primary min-vh-100 p-3">
     <!-- 대시보드 헤더 카드 (Dark Navy / Light 전역 테마 완벽 연동) -->
     <div class="monitor-header b2b-card p-3 mb-3">
-      <h1 class="b2b-text-h1 text-theme-primary mb-3">설비 모니터링 대시보드</h1>
       <div class="header-controls d-flex flex-wrap align-items-center gap-3">
         <div class="floor-selector d-flex align-items-center gap-2">
           <label class="b2b-text-body text-theme-primary fw-semibold mb-0">층 선택:</label>

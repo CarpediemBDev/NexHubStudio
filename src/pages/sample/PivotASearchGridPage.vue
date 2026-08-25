@@ -1,11 +1,5 @@
 <template>
   <div class="b2b-page-container py-3">
-    <!-- Header Page Title -->
-    <div class="mb-3">
-      <h4 class="b2b-text-h1 fw-bold text-dark m-0">Pivot 분석 A (SearchGrid 통합형)</h4>
-      <p class="text-muted small mb-0 mt-1">상단 SearchGrid 검색 조건 폼과 RealGrid 다차원 피벗 엔진이 실시간으로 연동되는 통합 분석 샘플입니다.</p>
-    </div>
-
     <!-- 1. Top Search Filter Panel (SearchGrid) -->
     <div class="mb-3">
       <SearchGrid ref="searchGrid" @open-user-popup="openPopup" @search="loadFilteredPivotData" />

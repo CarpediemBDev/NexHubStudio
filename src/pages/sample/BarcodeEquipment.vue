@@ -1,6 +1,5 @@
-﻿<template>
+<template>
   <div class="p-4">
-    <h2 class="b2b-text-h1">🏭 설비 바코드 생성기</h2>
     <div class="row g-2 align-items-end">
       <div class="col-auto">
         <label>장비타입</label>

@@ -1,7 +1,5 @@
-﻿<template>
+<template>
   <div class="container mt-4">
-    <h2 class="b2b-text-h1 mb-4">업무 의뢰 관리</h2>
-
     <!-- 1. 진행 상태 표시 (상단 스텝바) -->
     <div class="workflow-steps mb-5">
       <div

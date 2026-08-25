@@ -1,7 +1,5 @@
-﻿<template>
+<template>
   <div class="container mt-4">
-    <h2 class="b2b-text-h1 mb-4">업무 의뢰서</h2>
-
     <!-- 워크플로우 스텝바 -->
     <div class="workflow-steps mb-5">
       <div

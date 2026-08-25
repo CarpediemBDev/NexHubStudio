@@ -1,16 +1,7 @@
 <template>
   <div class="container-fluid py-4">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h2 class="b2b-text-h1 mb-1 text-theme-primary fw-bold">
-          <i class="bi bi-search me-2 text-primary"></i>AutoCompleteInput 미리보기 & 데모 갤러리
-        </h2>
-        <p class="text-theme-secondary b2b-text-xs mb-0">
-          'a' 또는 원하는 키워드를 입력해보세요. 하단에 실시간 드롭다운 자동완성 목록이 주르륵 노출됩니다.
-        </p>
-      </div>
-
+    <!-- Action Toolbar -->
+    <div class="d-flex justify-content-end align-items-center mb-4">
       <router-link to="/sample-group/component-guide" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-book me-1"></i> 전체 UI 가이드로 이동
       </router-link>

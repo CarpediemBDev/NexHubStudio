@@ -1,11 +1,5 @@
 <template>
   <div class="b2b-page-container">
-    <!-- Header Page Title -->
-    <div class="mb-3">
-      <h4 class="b2b-text-h1 fw-bold text-dark m-0">RealGrid 샘플 (공통 컴포넌트형)</h4>
-      <p class="text-muted small mb-0">공통 컴포넌트인 RealGridCommonJs를 활용하여 간결하게 작성된 고성능 그리드 샘플입니다.</p>
-    </div>
-
     <!-- Unified Management Toolbar (B2B Compact Enterprise Style) -->
     <div class="b2b-toolbar">
       <div class="d-flex align-items-center justify-content-between w-100">

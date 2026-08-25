@@ -1,7 +1,5 @@
-﻿<template>
+<template>
   <div class="test-page" style="padding: 20px;">
-    <h2 class="b2b-text-h1">JqxGrid Width Test</h2>
-    
     <div style="display: flex; gap: 30px; flex-direction: column;">
       
       <!-- Case 1: Fixed (Attempt with No Width) -->

@@ -1,17 +1,7 @@
 <template>
   <div class="b2b-page-container">
-    <!-- Header Title & Antigravity vs Claude Challenge Banner -->
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between mb-3 gap-2">
-      <div>
-        <div class="d-flex align-items-center gap-2">
-          <h4 class="b2b-text-h1 fw-bold m-0" style="color: var(--b2b-color-text-main)">
-            RealGrid ↔ DIV 스마트 D&amp;D 스튜디오 <span class="badge bg-gradient-pro text-white fs-6 ms-1 px-2.5 py-1 rounded-pill">Antigravity Pro</span>
-          </h4>
-        </div>
-        <p class="small mb-0 mt-1" style="color: var(--b2b-color-text-muted)">
-          그리드 ↔ DIV <strong>양방향 3D 스택 드래그&amp;드롭</strong>, DIV 간 팀 이동, AI 스마트 자동 배정, 실시간 과부하 캐파 모니터링
-        </p>
-      </div>
+    <!-- Top Quick Stats Toolbar -->
+    <div class="d-flex align-items-center justify-content-end mb-3">
 
       <!-- Top Quick Stats -->
       <div class="d-flex align-items-center gap-3 bg-theme-subcard px-3 py-2 rounded-3 border shadow-2xs">
