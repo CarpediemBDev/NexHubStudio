@@ -289,12 +289,12 @@ const navigate = (path) => {
 }
 .sidebar-menu {
   flex: 1 1 auto;
-  padding: 14px 10px;
+  padding: 16px 14px;
 }
 
 .sidebar-logo {
   height: 48px;
-  padding: 0 16px;
+  padding: 0 18px 0 16px;
   background-color: var(--b2b-sidebar-logo-bg);
   border-color: var(--b2b-sidebar-border) !important;
   user-select: none;
@@ -335,6 +335,7 @@ const navigate = (path) => {
   width: 28px;
   height: 28px;
   padding: 0;
+  margin-right: 2px;
   border: none;
   background: transparent;
   border-radius: 6px;
@@ -402,7 +403,7 @@ const navigate = (path) => {
 /* 1-Level Menu Main Item */
 .menu-item-main {
   min-height: 38px;
-  padding: 8px 14px 8px 12px;
+  padding: 8px 16px 8px 12px;
   color: var(--b2b-sidebar-text);
   transition: all 0.15s ease;
 }
@@ -449,7 +450,7 @@ const navigate = (path) => {
 
 .menu-item-sub {
   min-height: 32px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   color: var(--b2b-sidebar-text);
   transition: all 0.12s ease;
 }
@@ -468,11 +469,11 @@ const navigate = (path) => {
   line-height: 1.35;
 }
 
-/* 우측 쉐브론 화살표 - 짤린 느낌 없는 여유로운 여백 확보 (우측 8px 여백) */
+/* 우측 쉐브론 화살표 - 짤린 느낌 없는 여유로운 여백 확보 (우측 6px + 패딩 16px = 총 22px 확보) */
 .chevron-icon {
-  font-size: 10.5px;
+  font-size: 11px;
   margin-left: 8px;
-  margin-right: 4px;
+  margin-right: 6px;
   color: var(--b2b-color-text-muted);
   opacity: 0.65;
   flex-shrink: 0;
