@@ -400,10 +400,30 @@ const navigate = (path) => {
   transform: translateY(-50%) scale(1.15);
 }
 
+.sidebar-menu {
+  flex: 1 1 auto;
+  padding: 12px 8px;
+  overflow-x: hidden !important;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.sidebar-menu ul.nav {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu .nav-item {
+  width: 100%;
+}
+
 /* 1-Level Menu Main Item */
 .menu-item-main {
+  width: 100%;
+  box-sizing: border-box;
   min-height: 38px;
-  padding: 8px 16px 8px 12px;
+  padding: 8px 8px 8px 10px;
   color: var(--b2b-sidebar-text);
   transition: all 0.15s ease;
 }
@@ -430,7 +450,7 @@ const navigate = (path) => {
 .menu-icon-box {
   width: 22px;
   height: 22px;
-  margin-right: 11px;
+  margin-right: 10px;
   flex-shrink: 0;
   opacity: 0.85;
 }
@@ -440,17 +460,21 @@ const navigate = (path) => {
   line-height: 1.3;
 }
 
-/* 2-Level Submenu (Clean Text Only) */
+/* 2-Level Submenu (가로 삐져나옴 완전 방지) */
 .submenu-list {
-  margin-left: 21px;
+  width: calc(100% - 14px) !important;
+  margin-left: 14px !important;
   margin-top: 4px;
-  padding-left: 14px;
+  padding-left: 10px !important;
   border-left: 1.5px solid var(--b2b-color-border);
+  box-sizing: border-box;
 }
 
 .menu-item-sub {
+  width: 100%;
+  box-sizing: border-box;
   min-height: 32px;
-  padding: 6px 14px;
+  padding: 6px 10px;
   color: var(--b2b-sidebar-text);
   transition: all 0.12s ease;
 }
@@ -469,13 +493,13 @@ const navigate = (path) => {
   line-height: 1.35;
 }
 
-/* 우측 쉐브론 화살표 - 짤린 느낌 없는 여유로운 여백 확보 (우측 6px + 패딩 16px = 총 22px 확보) */
+/* 우측 쉐브론 화살표 - 살짝 더 우측으로 이동 (카드 내부 8px / 테두리 기준 16px) */
 .chevron-icon {
-  font-size: 11px;
-  margin-left: 8px;
-  margin-right: 6px;
+  font-size: 10px;
+  margin-left: 6px;
+  margin-right: 0px;
   color: var(--b2b-color-text-muted);
-  opacity: 0.65;
+  opacity: 0.6;
   flex-shrink: 0;
   transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease, color 0.15s ease;
 }
