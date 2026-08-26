@@ -47,10 +47,10 @@
                 </div>
                 <ul class="guide-steps-list m-0 p-0 b2b-text-xs text-secondary">
                   <li class="mb-1.5">
-                    <strong class="text-dark">1. 다중 배정:</strong> 그리드 셀을 마우스로 끌어 <span class="text-primary fw-medium">다중 블록 선택</span> 후, 맨 좌측 핸들(<code>⋮⋮</code>)을 잡고 우측 그룹 배정함으로 드롭합니다.
+                    <strong class="text-dark">1. 다중 배정:</strong> 그리드 셀을 마우스로 끌어 <span class="text-primary fw-medium">다중 블록 선택</span> 후, 선택 영역을 그대로 잡고 우측 그룹 배정함으로 드롭합니다.
                   </li>
                   <li>
-                    <strong class="text-dark">2. 대표 모델 지정:</strong> 배정된 목록에서 원하는 모델의 <span class="text-warning-emphasis fw-medium">`☆ 대표 지정`</span> 버튼을 클릭하면 즉시 대표 모델(★)로 전환됩니다.
+                    <strong class="text-dark">2. 대표 모델 지정:</strong> 배정된 목록에서 원하는 모델의 <span class="text-primary fw-medium">라디오 버튼</span>(행 전체 클릭 가능)을 선택하면 즉시 그룹 대표 모델로 전환됩니다. 대표는 그룹당 <strong class="text-dark">1개</strong>만 지정됩니다.
                   </li>
                 </ul>
               </div>
@@ -71,7 +71,7 @@
             :columns="gridColumns"
             :rows="users"
             :editable="false"
-            :checkable="true"
+            :checkable="false"
             :show-row-number="true"
             :state-bar-visible="false"
             :use-footer="false"
@@ -97,24 +97,11 @@
         >
           <!-- Header (Clean & Symmetric) -->
           <div class="dnd-card-head border-bottom bg-theme-subcard px-3 py-2 d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-1.5">
-              <i class="bi bi-box-seam-fill text-primary me-1"></i>
-              <span class="fw-bold b2b-text-sm">그룹 배정 목록</span>
-            </div>
+            <span class="fw-bold b2b-text-sm">그룹 배정 목록</span>
 
-            <div class="d-flex align-items-center gap-2">
-              <span class="badge bg-secondary-subtle text-secondary b2b-text-2xs">
-                총 {{ groupModels.length }}개
-              </span>
-              <button
-                v-if="groupModels.length > 0"
-                class="btn btn-outline-secondary btn-xs py-0.5 px-2"
-                title="배정된 모델 전체 비우기"
-                @click="resetAll"
-              >
-                비우기
-              </button>
-            </div>
+            <span class="badge bg-secondary-subtle text-secondary b2b-text-2xs">
+              총 {{ groupModels.length }}개
+            </span>
           </div>
 
           <!-- Body -->
@@ -124,39 +111,31 @@
               <span class="fw-bold b2b-text-sm text-dark mb-1">배정된 모델이 없습니다</span>
               <span class="b2b-text-xs text-muted text-center">
                 좌측 그리드에서 모델들을 블록 선택한 후<br/>
-                핸들(<code>⋮⋮</code>)을 잡고 이 영역으로 끌어다 놓으세요.
+                이 영역으로 끌어다 놓으세요.
               </span>
             </div>
 
-            <!-- Dropped Items List -->
-            <div
-              v-for="(item, idx) in groupModels"
+            <!-- Dropped Items List (단일 선택: 대표 모델 = 라디오) -->
+            <label
+              v-for="item in groupModels"
               :key="item.modelId"
               class="div-dropped-item"
               :class="{ 'item-rep': item.modelId === repModelId }"
+              :title="item.modelId === repModelId ? '현재 그룹의 대표 모델입니다' : item.modelName + ' 모델을 대표로 지정합니다'"
             >
-              <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
-                <!-- Representative Toggle Button / Badge -->
-                <button
-                  v-if="item.modelId === repModelId"
-                  class="btn-rep-badge is-active"
-                  title="현재 그룹의 대표 모델입니다 (클릭 시 유지)"
-                >
-                  <i class="bi bi-star-fill text-warning me-1"></i>
-                  <span>대표 모델</span>
-                </button>
-                <button
-                  v-else
-                  class="btn-rep-badge is-candidate"
-                  title="이 모델을 대표 모델로 지정합니다"
-                  @click="setRepresentative(item.modelId)"
-                >
-                  <i class="bi bi-star me-1"></i>
-                  <span>대표 지정</span>
-                </button>
+              <!-- Representative Selector (single-select) -->
+              <input
+                type="radio"
+                class="rep-radio"
+                name="groupRepModel"
+                :value="item.modelId"
+                :checked="item.modelId === repModelId"
+                @change="setRepresentative(item.modelId)"
+              />
 
-                <!-- Model Info -->
-                <span class="item-name fw-bold b2b-text-sm text-dark text-truncate" :title="item.modelName">
+              <!-- Model Info -->
+              <span class="item-main">
+                <span class="item-name fw-bold b2b-text-sm text-dark text-truncate">
                   {{ item.modelName }}
                 </span>
                 <span class="item-code b2b-text-2xs badge bg-light text-secondary border flex-shrink-0">
@@ -165,15 +144,17 @@
                 <span class="item-dept b2b-text-xs text-muted flex-shrink-0">
                   {{ item.category }} · {{ item.grade }}
                 </span>
-              </div>
+              </span>
 
               <!-- Action: Return to Grid -->
-              <div class="d-flex align-items-center gap-1 ms-2 flex-shrink-0">
-                <button class="btn-return-grid" title="그리드로 되돌리기" @click="returnToGrid(idx)">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-            </div>
+              <button
+                class="btn-return-grid"
+                title="그리드로 되돌리기"
+                @click.prevent.stop="returnToGrid(item.modelId)"
+              >
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </label>
           </div>
         </div>
       </div>
@@ -195,11 +176,9 @@ export default {
       isHoverDropZone: false,
       selectionStyle: 'block',
       users: [],
-      _lastSelectedRows: [],
       groupModels: [],
       repModelId: null,
       gridFields: [
-        { fieldName: 'dragHandle', dataType: 'text' },
         { fieldName: 'modelId', dataType: 'text' },
         { fieldName: 'modelCode', dataType: 'text' },
         { fieldName: 'modelName', dataType: 'text' },
@@ -208,13 +187,6 @@ export default {
         { fieldName: 'manufacturer', dataType: 'text' }
       ],
       gridColumns: [
-        { 
-          name: 'dragHandle', 
-          fieldName: 'dragHandle', 
-          width: 50, 
-          header: { text: '⋮⋮' }, 
-          styles: { textAlignment: 'center', background: '#f8fafc', fontBold: true } 
-        },
         { name: 'modelCode', fieldName: 'modelCode', width: 110, header: { text: '모델 코드' }, styles: { textAlignment: 'center' } },
         { name: 'modelName', fieldName: 'modelName', width: 170, header: { text: '모델명' }, styles: { textAlignment: 'near' } },
         { name: 'category', fieldName: 'category', width: 110, header: { text: '카테고리' }, styles: { textAlignment: 'center' } },
@@ -278,7 +250,6 @@ export default {
         const manufacturer = cat.mfrs[idx % cat.mfrs.length]
 
         result.push({
-          dragHandle: '⋮⋮',
           modelId: `M${String(idx).padStart(3, '0')}`,
           modelCode,
           modelName,
@@ -301,17 +272,20 @@ export default {
           rowHoverType: 'row'
         })
 
-        // 마우스 블록 선택 범위 실시간 보존
-        const trackSelection = (grid) => {
-          const selected = grid.getSelectedRows() || []
-          if (selected.length > 1) {
-            const sorted = Array.from(new Set(selected)).sort((a, b) => a - b)
-            this._lastSelectedRows = sorted
-            this._savedBlockRows = [...sorted]
-          }
+        /*
+         * RealGrid 는 셀을 누르는 순간 기존 블록 선택을 한 행으로 접어버린다.
+         * 그래서 "블록을 잡아서 끌어내기"는 누르기 전에 기억해 둔 블록이 있어야 한다.
+         *
+         * 그 기억은 선택 이벤트로 갱신하지 않는다. 마우스를 누르고 있는 동안에는
+         * RealGrid 가 선택을 계속 바꾸고(누르는 순간 접기, 끄는 동안 아래로 늘리기),
+         * 그 통보가 우리 드래그 시작보다 먼저 올지 나중에 올지 정해져 있지 않다.
+         * 대신 마우스를 뗀 시점에 '드래그가 아니었다면' 그때의 선택만 기억한다.
+         * (onDocMouseUp 참고) 여기 핸들러는 키보드 선택처럼 누르지 않은 경우만 받는다.
+         */
+        this.gridView.onSelectionEnded = () => {
+          if (this._press) return
+          this.rememberBlockFromGrid()
         }
-        this.gridView.onSelectionEnded = trackSelection
-        this.gridView.onSelectionChanged = trackSelection
       }
 
       this.syncPoolCount()
@@ -351,13 +325,16 @@ export default {
 
       const gridEl = this.$refs.poolGrid?.$el || e.currentTarget
       const gridRect = gridEl.getBoundingClientRect()
-      const selectedRows = this.resolveDragRows()
+      // capture 단계라 RealGrid 가 이번 클릭을 처리하기 전이다 = 누르기 직전의 선택 상태
+      const preSelectedRows = this.snapshotSelectedRows()
 
       this._press = {
         x: e.clientX,
         y: e.clientY,
         gridRect,
-        initialSelectedRows: selectedRows,
+        preSelectedRows,
+        // 누르기 직전까지 기억해 둔 블록. 제스처 도중 무슨 일이 나도 이 값은 안 변한다.
+        preBlockRows: [...(this._blockRows || [])],
         started: false
       }
 
@@ -375,21 +352,24 @@ export default {
       if (!this._press.started) {
         if (dist < 5) return
 
+        /*
+         * 그리드 '안'에서의 움직임은 무조건 RealGrid 의 블록 선택이다.
+         * 예전에는 dx > 15 만으로도 드래그가 시작돼서, 사용자가 행을 훑어 선택하는
+         * 제스처를 우리가 가로챘다. 그러면 mouseup 이 '드래그였다'로 처리되어
+         * 블록을 기억하는 경로가 통째로 건너뛰어졌다. (블록 이동이 안 되던 원인)
+         *
+         * 그래서 시작 조건은 '포인터가 그리드를 벗어났는가' 하나로 좁힌다.
+         */
         const rect = this._press.gridRect
         const isPointerOutsideRight = e.clientX > rect.right - 10
-        const isHeadingRight = dx > 15 && dx > Math.abs(dy)
         const isOverZone = this.checkIsOverDropZone(e.clientX, e.clientY)
-        const isAlreadySelectedBlock = this._press.initialSelectedRows.length > 1 && dist > 8
 
-        const shouldStartDnd = isPointerOutsideRight || isHeadingRight || isOverZone || isAlreadySelectedBlock
-
-        if (!shouldStartDnd) {
+        if (!isPointerOutsideRight && !isOverZone) {
           return
         }
 
-        const rows = (this._press.initialSelectedRows && this._press.initialSelectedRows.length > 0)
-          ? this._press.initialSelectedRows
-          : this.resolveDragRows()
+        // 드래그 도중 늘어난 선택이 아니라, 누른 시점을 기준으로 대상 행을 확정한다
+        const rows = this.resolveDragRows(this._press.preSelectedRows, this._press.preBlockRows)
 
         if (!rows || !rows.length) {
           this.endDragListeners()
@@ -413,7 +393,12 @@ export default {
       const wasDragging = this._press && this._press.started
       this.endDragListeners()
       this._press = null
-      if (!wasDragging) return
+
+      if (!wasDragging) {
+        // 끌지 않고 뗐다 = 순수 선택 제스처. 이때의 선택만 블록으로 기억한다.
+        this.rememberBlockFromGrid()
+        return
+      }
 
       this.finishDrag(e)
       document.body.style.userSelect = ''
@@ -426,34 +411,35 @@ export default {
       window.removeEventListener('mouseup', this.onDocMouseUp)
     },
 
-    resolveDragRows() {
+    /** 현재 선택을 블록 기억에 반영한다. 여러 행일 때만 유효하고, 단일 선택이면 비운다. */
+    rememberBlockFromGrid() {
+      const selected = this.snapshotSelectedRows()
+      this._blockRows = selected.length > 1 ? selected : []
+    },
+
+    /** 누르기 직전의 블록 선택 스냅샷 */
+    snapshotSelectedRows() {
+      if (!this.gridView) return []
+      const selected = this.gridView.getSelectedRows() || []
+      return Array.from(new Set(selected)).sort((a, b) => a - b)
+    },
+
+    /*
+     * 드래그로 옮길 데이터 행 목록.
+     * 판단 근거는 두 가지뿐이다 - 누르기 직전의 블록 선택(preSelected)과 누른 행(anchor).
+     * 드래그하는 동안 RealGrid 가 블록 선택을 아래로 늘리더라도 그 결과는 쓰지 않는다.
+     * (한 행만 눌러서 끌었는데 아래 행까지 딸려오던 원인)
+     */
+    resolveDragRows(preSelected = [], preBlock = []) {
       if (!this.gridView) return []
 
-      // 1. 체크바 선택 행들
-      const checked = this.gridView.getCheckedRows() || []
-      if (checked.length > 0) {
-        return Array.from(new Set(checked)).sort((a, b) => a - b)
-      }
-
-      // 2. 현재 마우스 블록 선택 행들
-      const selected = this.gridView.getSelectedRows() || []
-      if (selected.length > 1) {
-        const sorted = Array.from(new Set(selected)).sort((a, b) => a - b)
-        this._savedBlockRows = [...sorted]
-        return sorted
-      }
-
-      // 3. 클릭한 행이 이전에 선택한 다중 블록에 포함되어 있다면 전체 유지
       const cur = this.gridView.getCurrent()
-      const currentRow = (selected.length === 1) ? selected[0] : (cur ? cur.dataRow : -1)
+      const anchor = (cur && cur.dataRow >= 0) ? cur.dataRow : -1
 
-      if (currentRow >= 0 && this._savedBlockRows && this._savedBlockRows.length > 1) {
-        if (this._savedBlockRows.includes(currentRow)) {
-          return [...this._savedBlockRows]
-        }
-      }
+      // 누르기 직전 블록 = capture 스냅샷이 살아있으면 그것, 아니면 기억해 둔 블록
+      const block = (preSelected.length > 1) ? preSelected : preBlock
 
-      // 4. 그룹 헤더 행 드래그 지원
+      // 그룹 헤더를 누른 경우 하위 행 전체
       if (cur && cur.itemIndex >= 0) {
         const model = this.gridView.getModel(cur.itemIndex)
         if (model && model.type === 'group') {
@@ -473,31 +459,15 @@ export default {
         }
       }
 
-      // 5. 최근 블록 선택 보존 fallback
-      if (this._lastSelectedRows && this._lastSelectedRows.length > 1) {
-        return [...this._lastSelectedRows]
+      // 여러 행이 블록 선택된 상태에서 그 안쪽을 눌렀다면 블록 전체
+      if (block.length > 1 && (anchor < 0 || block.includes(anchor))) {
+        return [...block]
       }
 
-      if (selected.length === 1) {
-        return selected
-      }
+      // 그 외에는 누른 행 하나만
+      if (anchor >= 0) return [anchor]
 
-      // 6. Selection API 범위 fallback
-      const sel = this.gridView.getSelection()
-      if (sel && sel.startRow !== undefined && sel.endRow !== undefined) {
-        const start = Math.min(sel.startRow, sel.endRow)
-        const end = Math.max(sel.startRow, sel.endRow)
-        const rows = []
-        for (let i = start; i <= end; i++) {
-          if (i >= 0) rows.push(i)
-        }
-        if (rows.length > 0) {
-          return Array.from(new Set(rows)).sort((a, b) => a - b)
-        }
-      }
-
-      // 7. 단일 커서 선택 행
-      return (cur && cur.dataRow >= 0) ? [cur.dataRow] : []
+      return block.length ? [...block] : []
     },
 
     finishDrag(e) {
@@ -526,10 +496,9 @@ export default {
       showToast(`${items.length}개 모델 (${namesSummary})이 그룹 배정함으로 이동되었습니다.`, { type: 'success' })
 
       if (this.gridView) {
-        this.gridView.checkAll(false)
         this.gridView.clearSelection()
       }
-      this._lastSelectedRows = []
+      this._blockRows = []
       this.syncPoolCount()
     },
 
@@ -574,25 +543,19 @@ export default {
       }
     },
 
-    returnToGrid(idx) {
+    returnToGrid(modelId) {
+      const idx = this.groupModels.findIndex(m => m.modelId === modelId)
+      if (idx < 0) return
       const item = this.groupModels.splice(idx, 1)[0]
       if (!item) return
 
       // 삭제한 항목이 대표 모델이었던 경우, 남아있는 모델 중 첫 번째를 새 대표로 자동 승격
       if (this.repModelId === item.modelId) {
-        if (this.groupModels.length > 0) {
-          this.repModelId = this.groupModels[0].modelId
-          showToast(`대표 모델 '${item.modelName}' 반환으로 '${this.groupModels[0].modelName}' 모델이 새 대표 모델로 지정되었습니다.`, { type: 'warning' })
-        } else {
-          this.repModelId = null
-        }
+        this.repModelId = this.groupModels.length > 0 ? this.groupModels[0].modelId : null
       }
 
-      delete item.dragHandle
-      item.dragHandle = '⋮⋮'
       this.dataProvider.addRow(item)
       this.syncPoolCount()
-      showToast(`'${item.modelName}' 모델을 다시 RealGrid로 복구했습니다.`, { type: 'info' })
     },
 
     resetAll() {
@@ -601,13 +564,12 @@ export default {
         return
       }
       this.groupModels.forEach(item => {
-        item.dragHandle = '⋮⋮'
         this.dataProvider.addRow(item)
       })
       const count = this.groupModels.length
       this.groupModels = []
       this.repModelId = null
-      this._lastSelectedRows = []
+      this._blockRows = []
       this.syncPoolCount()
       showToast(`${count}개 모델 배정이 모두 RealGrid로 초기화되었습니다.`, { type: 'info' })
     }
@@ -619,14 +581,20 @@ export default {
 .grid-to-div-layout {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
   gap: 16px;
-  min-height: 540px;
+  /* 페이지 컨테이너(.b2b-page-container) 높이에 맞춰 채우고,
+     넘치는 목록은 카드 내부에서 스크롤시킨다 */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Left Grid Card */
 .dnd-grid-card {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   background: var(--b2b-color-bg-card, #fff);
   border: 1px solid var(--b2b-color-border, #e5e7eb);
   border-radius: 10px;
@@ -634,6 +602,7 @@ export default {
 }
 .dnd-grid-wrapper {
   flex: 1;
+  min-height: 0;
   cursor: grab;
 }
 .dnd-grid-wrapper:active {
@@ -644,6 +613,7 @@ export default {
 .dnd-div-container {
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .target-div-card {
@@ -655,7 +625,7 @@ export default {
   border-radius: 10px;
   transition: all 0.15s ease-in-out;
   overflow: hidden;
-  min-height: 540px;
+  min-height: 0;
 }
 
 .target-div-card.unified-group-card {
@@ -672,6 +642,7 @@ export default {
 
 .target-div-body {
   flex: 1;
+  min-height: 0;
   padding: 12px;
   display: flex;
   flex-direction: column;
@@ -688,11 +659,15 @@ export default {
   padding: 24px;
 }
 
-/* Dropped Item Card */
+/* Dropped Item Card (label 전체가 대표 선택 히트영역) */
 .div-dropped-item {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 24px;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  cursor: pointer;
   padding: 8px 12px;
   background: var(--b2b-color-bg-card, #fff);
   border: 1px solid var(--b2b-color-border, #e5e7eb);
@@ -706,46 +681,30 @@ export default {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
-/* Active Representative Model Item */
-.div-dropped-item.item-rep {
-  border-color: #f59e0b;
-  background: linear-gradient(to right, rgba(245, 158, 11, 0.08), rgba(254, 243, 199, 0.25));
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.18);
+/* 키보드 포커스(방향키 이동) 시각화 */
+.div-dropped-item:focus-within {
+  border-color: var(--b2b-color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.14);
 }
 
-/* Representative Toggle Button */
-.btn-rep-badge {
-  display: inline-flex;
+.item-main {
+  display: flex;
   align-items: center;
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
-  border: 1px solid transparent;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Representative Radio (single-select) */
+.rep-radio {
+  width: 15px;
+  height: 15px;
+  margin: 0;
   cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
-.btn-rep-badge.is-active {
-  background-color: #fef3c7;
-  color: #92400e;
-  border-color: #fcd34d;
+/* Active Representative Model Item (색 강조 없음 - 라디오 선택 상태로만 표시) */
+.div-dropped-item.item-rep {
   cursor: default;
-}
-
-.btn-rep-badge.is-candidate {
-  background-color: #f1f5f9;
-  color: #64748b;
-  border-color: #e2e8f0;
-}
-
-.btn-rep-badge.is-candidate:hover {
-  background-color: #fffbeb;
-  color: #d97706;
-  border-color: #fde68a;
-  transform: scale(1.03);
 }
 
 .btn-return-grid {
@@ -772,6 +731,9 @@ export default {
 @media (max-width: 992px) {
   .grid-to-div-layout {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(320px, auto);
+    overflow-y: auto;
   }
 }
 
@@ -845,6 +807,19 @@ export default {
 
 <!-- Floating Ghost Element Styling -->
 <style>
+/*
+ * 이 페이지 한정 레이아웃 보정.
+ * 앱 셸(html/body/.vben-layout)이 뷰포트 높이에 묶여 있지 않아
+ * .b2b-page-container 의 height:100% 가 실제로는 내용 높이를 따라간다.
+ * 그래서 배정 목록이 길어지면 카드가 무한정 늘어나고 내부 스크롤이 생기지 않는다.
+ * :has() 로 이 페이지에서만 컨테이너를 뷰포트 높이에 고정한다.
+ * 180px = 컨테이너 상단 오프셋(앱 헤더 + main 패딩 + 전역 PageHeader) + 하단 여백
+ */
+.b2b-page-container:has(.grid-to-div-layout) {
+  height: calc(100vh - 180px);
+  min-height: 380px;
+}
+
 .grid-to-div-ghost {
   position: fixed;
   z-index: 9999;
