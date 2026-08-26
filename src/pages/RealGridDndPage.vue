@@ -42,8 +42,9 @@
         </div>
         <div
           class="dnd-grid-host"
-          :class="{ 'is-drop-hover': hoverGrid === 'pool' }"
+          :class="{ 'is-drop-hover': hoverGrid === 'pool', 'is-drag-source': dragSource === 'pool' }"
           data-grid="pool"
+          @mousedown.capture="e => onGridMouseDown('pool', e)"
         >
           <RealGridCommonJs
             grid-id="dnd-pool"
@@ -53,8 +54,6 @@
             :rows="users"
             v-bind="commonGridProps"
             @init="e => onGridInit('pool', e)"
-            @row-drag-move="e => onRowDragMove('pool', e)"
-            @row-drag-end="e => onRowDragEnd('pool', e)"
           />
         </div>
       </div>
@@ -77,8 +76,9 @@
           </div>
           <div
             class="dnd-grid-host dnd-team-host"
-            :class="{ 'is-drop-hover': hoverGrid === team.key }"
+            :class="{ 'is-drop-hover': hoverGrid === team.key, 'is-drag-source': dragSource === team.key }"
             :data-grid="team.key"
+            @mousedown.capture="e => onGridMouseDown(team.key, e)"
           >
             <RealGridCommonJs
               :grid-id="'dnd-' + team.key"
@@ -88,8 +88,6 @@
               :rows="emptyRows"
               v-bind="commonGridProps"
               @init="e => onGridInit(team.key, e)"
-              @row-drag-move="e => onRowDragMove(team.key, e)"
-              @row-drag-end="e => onRowDragEnd(team.key, e)"
             />
           </div>
         </div>
@@ -113,6 +111,7 @@ export default {
   data() {
     return {
       hoverGrid: null,
+      dragSource: null,
       users: [],
       emptyRows: [], // 팀 그리드 초기 rows: 안정적 참조여야 재렌더 때 setRows([])로 안 지워짐
       counts: { pool: 0, teamA: 0, teamB: 0 },
@@ -120,7 +119,7 @@ export default {
         { key: 'teamA', label: '1팀 배정', color: '#0d6efd' },
         { key: 'teamB', label: '2팀 배정', color: '#20c997' }
       ],
-      // 세 그리드 공통 옵션 (편집 off, 체크바 on, 순수 테이블 룩 + 그립 드래그 소스)
+      // 세 그리드 공통 옵션 (편집 off, 체크바 on, 순수 테이블 룩)
       commonGridProps: {
         editable: false,
         checkable: true,
@@ -133,9 +132,6 @@ export default {
         showSavedViews: false,
         groupPanelVisible: false,
         fitStyle: 'evenFill',
-        draggableRows: true, // ← 그립 컬럼 + 드래그 소스 활성 (공통 컴포넌트 prop)
-        dragHandleHeader: '이동',
-        dragUnit: '명',
         toast: (m, o) => showToast(m, o)
       },
       gridFields: [
@@ -180,6 +176,17 @@ export default {
   created() {
     // 그리드 핸들 저장소 (비반응) — { pool: {gv, dp}, teamA: {...}, teamB: {...} }
     this.grids = {}
+    // 드래그 상태(비반응)
+    this._press = null
+    this._dragRows = []
+    this._ghost = null
+    // 그리드별 '마지막으로 만들어진 블록 선택' 기억
+    this._blocks = { pool: [], teamA: [], teamB: [] }
+  },
+  beforeUnmount() {
+    this.endDragListeners()
+    this.removeGhost()
+    document.body.style.userSelect = ''
   },
   mounted() {
     this.loadUsers()
@@ -225,25 +232,172 @@ export default {
       }
     },
 
-    // ---------- 드롭 처리 (드래그 소스는 공통 컴포넌트가 담당) ----------
-    // 컴포넌트가 emit 한 좌표로 대상(.dnd-grid-host)을 찾는다.
-    // 대상은 그리드든 DIV든 무관 — data-grid 속성만 있으면 됨.
+    /*
+     * ---------- 그리드 → 그리드 드래그 & 드롭 ----------
+     * RealGrid 자체 D&D 나 HTML5 dragstart 를 쓰지 않고
+     * grid-to-div 페이지와 동일하게 커스텀 포인터 드래그로 구현한다.
+     * 그리드 '안'에서의 움직임은 RealGrid 의 블록 선택이므로 건드리지 않고,
+     * 포인터가 소스 그리드 밖으로 나간 순간부터만 '행 이동'으로 본다.
+     */
+    onGridMouseDown(sourceKey, e) {
+      if (e.button !== 0 || !this.grids[sourceKey]) return
+
+      this._press = {
+        sourceKey,
+        x: e.clientX,
+        y: e.clientY,
+        hostRect: e.currentTarget.getBoundingClientRect(),
+        // capture 단계 = RealGrid 가 이번 클릭을 처리하기 전 → 누르기 직전의 선택 상태
+        preSelectedRows: this.snapshotSelectedRows(sourceKey),
+        preBlockRows: [...(this._blocks[sourceKey] || [])],
+        preCheckedRows: this.snapshotCheckedRows(sourceKey),
+        started: false
+      }
+
+      window.addEventListener('mousemove', this.onDocMouseMove)
+      window.addEventListener('mouseup', this.onDocMouseUp)
+    },
+
+    onDocMouseMove(e) {
+      const press = this._press
+      if (!press) return
+
+      if (!press.started) {
+        if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < 5) return
+
+        // 시작 조건은 하나 — 포인터가 소스 그리드 밖으로 나갔는가.
+        // (그리드 안에서 끌면 사용자는 행을 블록 선택하려는 것이다)
+        const r = press.hostRect
+        const outside = e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+        if (!outside) return
+
+        const rows = this.resolveDragRows(press)
+        if (!rows.length) {
+          this.endDragListeners()
+          this._press = null
+          return
+        }
+
+        press.started = true
+        this._dragRows = rows
+        this.dragSource = press.sourceKey
+        document.body.style.userSelect = 'none'
+        this.createGhost(press.sourceKey, rows)
+      }
+
+      this.moveGhost(e)
+      const target = this.gridAtPoint(e.clientX, e.clientY)
+      this.hoverGrid = target && target !== press.sourceKey ? target : null
+    },
+
+    onDocMouseUp(e) {
+      const press = this._press
+      const wasDragging = !!(press && press.started)
+      const sourceKey = press ? press.sourceKey : null
+
+      this.endDragListeners()
+      this._press = null
+
+      if (!wasDragging) {
+        // 끌지 않고 뗄다 = 순수 선택 제스처. 이때의 선택만 블록으로 기억한다.
+        if (sourceKey) this.rememberBlock(sourceKey)
+        return
+      }
+
+      const targetKey = this.gridAtPoint(e.clientX, e.clientY)
+      const rows = this._dragRows
+
+      this._dragRows = []
+      this.dragSource = null
+      this.hoverGrid = null
+      this.removeGhost()
+      document.body.style.userSelect = ''
+
+      if (!targetKey || targetKey === sourceKey || !this.grids[targetKey]) return
+      this._blocks[sourceKey] = []
+      this.moveRows(sourceKey, targetKey, rows)
+    },
+
+    endDragListeners() {
+      window.removeEventListener('mousemove', this.onDocMouseMove)
+      window.removeEventListener('mouseup', this.onDocMouseUp)
+    },
+
+    // 드롭 대상 찾기 — 그리드든 DIV 든 data-grid 속성만 있으면 된다.
     gridAtPoint(x, y) {
       const el = document.elementFromPoint(x, y)
       const host = el && el.closest ? el.closest('.dnd-grid-host') : null
       return host ? host.dataset.grid : null
     },
 
-    onRowDragMove(sourceKey, { clientX, clientY }) {
-      const target = this.gridAtPoint(clientX, clientY)
-      this.hoverGrid = target && target !== sourceKey ? target : null
+    snapshotSelectedRows(key) {
+      const gv = this.grids[key]?.gv
+      if (!gv) return []
+      return Array.from(new Set(gv.getSelectedRows() || [])).sort((a, b) => a - b)
     },
 
-    onRowDragEnd(sourceKey, { clientX, clientY, rows }) {
-      const targetKey = this.gridAtPoint(clientX, clientY)
-      this.hoverGrid = null
-      if (!targetKey || targetKey === sourceKey || !this.grids[targetKey]) return
-      this.moveRows(sourceKey, targetKey, rows)
+    snapshotCheckedRows(key) {
+      const gv = this.grids[key]?.gv
+      if (!gv) return []
+      return Array.from(new Set(gv.getCheckedRows() || [])).sort((a, b) => a - b)
+    },
+
+    /** 끌지 않고 뗄 때의 선택만 '블록'으로 기억한다(여러 행일 때만). */
+    rememberBlock(key) {
+      const selected = this.snapshotSelectedRows(key)
+      this._blocks[key] = selected.length > 1 ? selected : []
+    },
+
+    /*
+     * 이동할 데이터 행 확정.
+     * 드래그 도중 RealGrid 가 블록 선택을 늘려도 그 결과는 쓰지 않고,
+     * 누르기 직전의 상태(체크/블록)와 누른 행(anchor)만 근거로 삼는다.
+     */
+    resolveDragRows(press) {
+      const gv = this.grids[press.sourceKey]?.gv
+      if (!gv) return []
+
+      const cur = gv.getCurrent()
+      const anchor = (cur && cur.dataRow >= 0) ? cur.dataRow : -1
+
+      // 1) 체크해 둔 행이 있고 그 안쪽을 잡았다면 체크된 전체
+      const checked = press.preCheckedRows
+      if (checked.length && (anchor < 0 || checked.includes(anchor))) return [...checked]
+
+      // 2) 여러 행을 블록 선택한 상태에서 그 안쪽을 잡았다면 블록 전체
+      const block = press.preSelectedRows.length > 1 ? press.preSelectedRows : press.preBlockRows
+      if (block.length > 1 && (anchor < 0 || block.includes(anchor))) return [...block]
+
+      // 3) 그 외엔 누른 행 하나
+      if (anchor >= 0) return [anchor]
+      return block.length ? [...block] : []
+    },
+
+    createGhost(sourceKey, rows) {
+      const dp = this.grids[sourceKey]?.dp
+      const names = rows.map(r => dp && dp.getJsonRow(r) && dp.getJsonRow(r).name).filter(Boolean)
+      const label = names.length > 1
+        ? `<strong>${names[0]} 외 ${names.length - 1}명</strong>`
+        : `<strong>${names[0] || rows.length + '명'}</strong>`
+
+      const g = document.createElement('div')
+      g.className = 'dnd-drag-ghost'
+      g.innerHTML = `<i class="bi bi-person-lines-fill me-1"></i>${label} 이동 중`
+      document.body.appendChild(g)
+      this._ghost = g
+    },
+
+    moveGhost(e) {
+      if (!this._ghost) return
+      this._ghost.style.left = (e.clientX + 14) + 'px'
+      this._ghost.style.top = (e.clientY + 14) + 'px'
+    },
+
+    removeGhost() {
+      if (this._ghost) {
+        this._ghost.remove()
+        this._ghost = null
+      }
     },
 
     // 인력 풀에서 체크한 인원을 팀으로 배정 (드래그 대신 버튼)
@@ -375,6 +529,9 @@ export default {
   outline: 2px solid transparent;
   outline-offset: -2px;
 }
+.dnd-grid-host.is-drag-source {
+  opacity: 0.9;
+}
 .dnd-grid-host.is-drop-hover {
   outline-color: var(--b2b-color-primary);
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
@@ -390,14 +547,24 @@ export default {
 .dnd-team { flex: 1; min-height: 0; }
 .dnd-team-host { min-height: 180px; }
 
-.rg-grip-inline {
-  color: var(--b2b-color-text-faint);
-  font-weight: 700;
-  letter-spacing: 1px;
-  padding: 0 2px;
-}
-
 @media (max-width: 992px) {
   .dnd-layout { grid-template-columns: 1fr; }
+}
+</style>
+
+<style>
+/* 드래그 고스트는 document.body 에 붙으므로 scoped 밖에 둔다. */
+.dnd-drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  background: linear-gradient(135deg, var(--b2b-color-primary), var(--b2b-color-primary-hover));
+  color: #ffffff;
+  font-size: 0.85rem;
+  padding: 7px 14px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.45);
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 </style>
