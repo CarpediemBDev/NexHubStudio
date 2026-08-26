@@ -286,3 +286,144 @@ canvas.rg-canvas ~ .rg-state-insert {
   color: var(--text-secondary);
   margin-bottom: 0;
 }
+
+/* ==========================================================================
+   🐛 DARK — RealGrid 오버레이 레이어 배경 강제 해제
+   ── 증상: 다크모드에서 셀을 클릭하면 그 셀의 글자가 사라진다.
+   ── 원인: 위 122~178줄의 블랭킷 규칙
+        [data-theme="dark"] [class*="rg-"] { background-color: var(--bg-card) !important }
+      이 "셀 위에 절대배치되는 투명 오버레이 div" 까지 싹 잡는다.
+      RealGrid 2.10 은 포커스 사각형(.rg-focus / .rg-focus-inner)·선택영역(.rg-selection)·
+      행마스크(.rg-rowhover / .rg-rowfocus)를 셀 위에 덮는 별도 div 로 그리고,
+      원본 CSS 는 border 만 주고 background 는 비워둔다(투명).
+      → 블랭킷이 여기에 불투명 #1E293B 를 칠해버려, 클릭한 셀이 통째로 어두운 판에 가려짐.
+        (글자색이 바뀐 게 아니라 글자가 판 밑에 깔린 것)
+   ── 해결: 오버레이는 배경을 투명/반투명으로 되돌리고 포커스·선택 색을 다크 팔레트로 재정의.
+   ── specificity: `html[data-theme="dark"] .rg-focus` = (0,2,1) 로
+      블랭킷 `[data-theme="dark"] [class*="rg-"]` = (0,2,0) 을 확실히 이긴다.
+      ⚠ 이 섹션의 선택자에서 앞의 `html` 을 빼면 동점이 되어 다시 깨진다.
+   ========================================================================== */
+
+/* 1) 순수 오버레이/마스크 레이어 — 무조건 투명 */
+html[data-theme="dark"] .rg-focus-mask,
+html[data-theme="dark-navy"] .rg-focus-mask,
+html[data-theme="dark"] .rg-group-focus-mask,
+html[data-theme="dark-navy"] .rg-group-focus-mask,
+html[data-theme="dark"] .rg-selection-mask,
+html[data-theme="dark-navy"] .rg-selection-mask,
+html[data-theme="dark"] .rg-selection-layer,
+html[data-theme="dark-navy"] .rg-selection-layer,
+html[data-theme="dark"] .rg-tree-lines,
+html[data-theme="dark-navy"] .rg-tree-lines,
+html[data-theme="dark"] .rg-watermark-layer,
+html[data-theme="dark-navy"] .rg-watermark-layer,
+html[data-theme="dark"] .rg-editor-marquee,
+html[data-theme="dark-navy"] .rg-editor-marquee {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 2) 포커스 사각형 — 배경 없이 테두리만 (셀 글자가 그대로 보이도록) */
+html[data-theme="dark"] .rg-focus,
+html[data-theme="dark-navy"] .rg-focus,
+html[data-theme="dark"] .rg-focus-line,
+html[data-theme="dark-navy"] .rg-focus-line,
+html[data-theme="dark"] .rg-group-focus,
+html[data-theme="dark-navy"] .rg-group-focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 2px solid var(--b2b-color-primary-hover) !important;
+}
+
+/* 편집 중 포커스 — 조금 더 밝게 */
+html[data-theme="dark"] .rg-focus-editing,
+html[data-theme="dark-navy"] .rg-focus-editing {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 2px solid #93C5FD !important;
+}
+
+/* 그리드가 포커스를 잃었을 때(.rg-focus 와 함께 붙음) — 흐리게 */
+html[data-theme="dark"] .rg-deactive-focus,
+html[data-theme="dark-navy"] .rg-deactive-focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: rgba(var(--b2b-color-primary-rgb), 0.45) !important;
+}
+
+/* 내부 점선 포커스(displayOptions.showInnerFocus 기본 true) */
+html[data-theme="dark"] .rg-focus-inner,
+html[data-theme="dark-navy"] .rg-focus-inner,
+html[data-theme="dark"] .rg-focus-inner-line,
+html[data-theme="dark-navy"] .rg-focus-inner-line {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: rgba(226, 232, 240, 0.75) !important;
+}
+
+/* 3) 선택 영역 — 반투명 파랑 (글자 비침 유지) */
+html[data-theme="dark"] .rg-selection,
+html[data-theme="dark-navy"] .rg-selection {
+  background: rgba(var(--b2b-color-primary-rgb), 0.28) !important;
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.28) !important;
+  border: 1px solid rgba(var(--b2b-color-primary-rgb), 0.7) !important;
+}
+
+html[data-theme="dark"] .rg-selection-cell,
+html[data-theme="dark-navy"] .rg-selection-cell {
+  background: rgba(var(--b2b-color-primary-rgb), 0.32) !important;
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.32) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 4) 행 마스크(hover/focus/block) — 반투명 회색 */
+html[data-theme="dark"] .rg-rowhover,
+html[data-theme="dark-navy"] .rg-rowhover,
+html[data-theme="dark"] .rg-rowfocus,
+html[data-theme="dark-navy"] .rg-rowfocus,
+html[data-theme="dark"] .rg-rowblock,
+html[data-theme="dark-navy"] .rg-rowblock {
+  background: rgba(148, 163, 184, 0.14) !important;
+  background-color: rgba(148, 163, 184, 0.14) !important;
+}
+
+/* ==========================================================================
+   🐛 DARK — 행바(No./stateBar/checkBar) & 헤더의 focus/select 강조색
+   ── 증상: 셀을 클릭하면 그 행의 No. 숫자와 해당 컬럼 헤더 글자가 사라진다.
+   ── 원인: RealGrid 기본 CSS 가 focus/select 행바 셀에 밝은 하늘색(#D2E7FF),
+      select 에 흰색(#FFF)을 칠한다. 이 규칙은 specificity (0,3,3) 이라
+      블랭킷 (0,2,0) 을 이기고 살아남는데, 글자색만 다크 팔레트의 흰색으로
+      덮여 흰 글자 + 흰/하늘 배경이 되어 안 보인다.
+   ── 해결: 배경을 다크 팔레트의 반투명 파랑/카드색으로 재정의.
+      선택자 앞에 html 을 붙여 (0,4,3) 으로 기본 규칙 (0,3,3) 을 이긴다.
+   ========================================================================== */
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-focus,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-focus,
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-statebar-focus,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-statebar-focus,
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-checkbar-focus,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-checkbar-focus {
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.22) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-select,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-select,
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-statebar-select,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-statebar-select,
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-checkbar-select,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-checkbar-select {
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.12) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 컬럼 헤더 focus/select — 흰색/하늘색 대신 반투명 파랑 강조 */
+html[data-theme="dark"] .rg-header-cell.rg-header-focus,
+html[data-theme="dark-navy"] .rg-header-cell.rg-header-focus,
+html[data-theme="dark"] .rg-header-cell.rg-header-select,
+html[data-theme="dark-navy"] .rg-header-cell.rg-header-select,
+html[data-theme="dark"] .rg-group-header-select,
+html[data-theme="dark-navy"] .rg-group-header-select {
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.22) !important;
+  color: var(--text-primary) !important;
+}
