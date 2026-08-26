@@ -161,7 +161,7 @@ export default {
 }
 
 .page-title {
-  font-size: 19px;
+  font-size: var(--b2b-font-size-h1); /* tokens.css 타입 스케일 준수 */
   letter-spacing: -0.4px;
   color: var(--b2b-color-text-main);
   line-height: 1.3;

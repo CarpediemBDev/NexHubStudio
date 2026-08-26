@@ -51,8 +51,8 @@
   /* Type Scale - .b2b-text-* 유틸리티와 1:1 대응.
      scoped CSS 에서는 px 하드코딩 대신 이 토큰을 참조한다. */
   --b2b-font-size-display: 1.5rem;    /* 24px */
-  --b2b-font-size-h1: 1.1875rem;      /* 19px */
-  --b2b-font-size-h2: 0.9375rem;      /* 15px */
+  --b2b-font-size-h1: 1rem;           /* 16px */
+  --b2b-font-size-h2: 0.875rem;       /* 14px */
   --b2b-font-size-body: 0.8125rem;    /* 13px - 표준 */
   --b2b-font-size-sm: 0.75rem;        /* 12px */
   --b2b-font-size-xs: 0.6875rem;      /* 11px */
@@ -646,8 +646,8 @@ h6 { font-size: var(--b2b-font-size-body); font-weight: 600; }
 .h6 { font-size: var(--b2b-font-size-body); }
 
 /* Bootstrap 컴포넌트 기본 폰트 정규화 */
-.lead { font-size: var(--b2b-font-size-h2); }        /* 1.25rem -> 15px */
-.modal-title { font-size: var(--b2b-font-size-h2); } /* h5 상속 20px -> 15px */
+.lead { font-size: var(--b2b-font-size-h2); }        /* 1.25rem -> 14px */
+.modal-title { font-size: var(--b2b-font-size-h2); } /* h5 상속 20px -> 14px */
 .accordion-button { font-size: var(--b2b-font-size-body); } /* 1rem -> 13px */
 
 .b2b-text-display {

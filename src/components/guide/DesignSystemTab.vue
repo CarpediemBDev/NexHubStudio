@@ -20,8 +20,8 @@
               <h6 class="b2b-text-h2 text-theme-primary mb-3">1. 타이포그래피 (Typography)</h6>
               <div class="d-flex flex-column gap-2">
                 <div><span class="b2b-text-display text-theme-primary">Display 24px</span> <code class="b2b-text-xs">.b2b-text-display</code></div>
-                <div><span class="b2b-text-h1 text-theme-primary">Heading 1 (19px)</span> <code class="b2b-text-xs">.b2b-text-h1</code></div>
-                <div><span class="b2b-text-h2 text-theme-primary">Heading 2 (15px)</span> <code class="b2b-text-xs">.b2b-text-h2</code></div>
+                <div><span class="b2b-text-h1 text-theme-primary">Heading 1 (16px)</span> <code class="b2b-text-xs">.b2b-text-h1</code></div>
+                <div><span class="b2b-text-h2 text-theme-primary">Heading 2 (14px)</span> <code class="b2b-text-xs">.b2b-text-h2</code></div>
                 <div><span class="b2b-text-body text-theme-primary">Body 13px (표준)</span> <code class="b2b-text-xs">.b2b-text-body</code></div>
                 <div><span class="b2b-text-sm text-theme-secondary">Small 12px</span> <code class="b2b-text-xs">.b2b-text-sm</code></div>
                 <div><span class="b2b-text-xs text-theme-muted">Extra Small 11px</span> <code class="b2b-text-xs">.b2b-text-xs</code></div>
@@ -142,8 +142,8 @@ const showCodeToken = ref(false);
 
 // 폰트 적용 규정: UI 역할 -> 타입 스케일 단계
 const typeRules = [
-  { role: '페이지 제목',            spec: '19px / 600', cls: '.b2b-text-h1',   note: 'PageHeader 컴포넌트가 자동 적용' },
-  { role: '패널·섹션 제목',         spec: '15px / 600', cls: '.b2b-text-h2',   note: '분할 레이아웃 좌우 패널 헤더 포함' },
+  { role: '페이지 제목',            spec: '16px / 600', cls: '.b2b-text-h1',   note: 'PageHeader 컴포넌트가 자동 적용' },
+  { role: '패널·섹션 제목',         spec: '14px / 600', cls: '.b2b-text-h2',   note: '분할 레이아웃 좌우 패널 헤더 포함' },
   { role: '리스트 아이템 제목',      spec: '13px / 600', cls: '.b2b-text-body', note: 'weight 만 600 으로' },
   { role: '본문·입력값·버튼',        spec: '13px / 400', cls: '(기본값)',        note: 'body 기본이 13px — 클래스 불필요' },
   { role: '폼 라벨·보조 설명',       spec: '12px / 400', cls: '.b2b-text-sm',   note: '.small 도 12px 로 고정됨' },
