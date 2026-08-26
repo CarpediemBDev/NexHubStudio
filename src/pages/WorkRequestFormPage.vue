@@ -965,12 +965,14 @@ export default {
   margin-top: 10px;
   font-weight: 600;
   color: var(--b2b-color-text-muted);
-  font-size: 14px;
+  font-size: var(--b2b-font-size-body);
 }
 
+/* 활성 스텝은 색상+굵기로만 구분한다. 폰트 크기를 키우면 스텝 이동마다
+   라벨 폭이 변해 스테퍼 전체가 흔들린다. */
 .step-item.active .step-label {
   color: var(--b2b-color-primary);
-  font-size: 15px;
+  font-weight: 700;
 }
 
 .step-item.completed .step-label {

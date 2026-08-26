@@ -212,7 +212,7 @@ const openTabMenu = (event) => {
   height: 30px;
   padding: 0 14px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
   line-height: 1;
   user-select: none;
   color: var(--b2b-color-text-muted);

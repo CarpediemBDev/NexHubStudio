@@ -577,7 +577,7 @@ watch(selectedEventId, loadForm)
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
   color: var(--b2b-color-text-main);
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
 }
 .panel-header.border-top {
   border-bottom: 0;

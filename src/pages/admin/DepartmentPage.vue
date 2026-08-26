@@ -131,7 +131,7 @@
   cursor: pointer;
   display: inline-block;
   transition: all 0.15s ease;
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
 }
 .tree-label:hover {
   background-color: var(--b2b-color-hover-bg);
@@ -153,7 +153,7 @@
   border-bottom: 1px solid var(--b2b-color-border);
   padding: 8px 12px;
   text-align: left;
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
   color: var(--b2b-color-text-main);
 }
 .b2b-table th {

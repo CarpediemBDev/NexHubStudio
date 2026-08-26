@@ -162,7 +162,7 @@
 /* 3. Compact Table & Monospace Code Font */
 .compact-table th, .compact-table td {
   padding: 6px 12px !important;
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
   border-bottom: 1px solid var(--b2b-color-border);
 }
 .compact-table th {

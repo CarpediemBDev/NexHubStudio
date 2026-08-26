@@ -541,7 +541,7 @@ export default {
   max-width: 150px !important;
   height: 38px !important;
   padding: 0 12px !important;
-  font-size: 13px !important;
+  font-size: var(--b2b-font-size-body) !important;
   font-weight: 600 !important;
   display: flex !important;
   align-items: center !important;

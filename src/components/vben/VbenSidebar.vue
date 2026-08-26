@@ -363,7 +363,7 @@ const navigate = (path) => {
   background: transparent;
   border-radius: 6px;
   color: var(--b2b-color-text-muted);
-  font-size: 14px;
+  font-size: var(--b2b-font-size-body);
   transition: all 0.15s ease;
 }
 
@@ -479,7 +479,7 @@ const navigate = (path) => {
 }
 
 .menu-label {
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
   line-height: 1.3;
 }
 

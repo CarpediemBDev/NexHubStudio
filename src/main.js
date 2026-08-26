@@ -7,6 +7,10 @@ import vValidatedForm from './directives/validatedForm'
 import { showToast } from './utils/toastUtil'
 import './utils/mdEditorLocale' // md-editor-v3 한국어 로케일 전역 등록
 
+// Pretendard 를 번들로 포함한다. CDN 을 쓰지 않으므로 폐쇄망에서도 동일하게 렌더된다.
+// dynamic-subset 은 unicode-range 로 쪼개져 있어 실제 사용된 글자 구간만 내려받는다.
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css'
+
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import 'bootstrap-icons/font/bootstrap-icons.css'

@@ -44,16 +44,21 @@
   --b2b-color-success: #16A34A;
 
   /* Typography */
-  --b2b-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Pretendard 를 main.js 에서 번들로 로드하므로 모든 사용자가 동일한 서체를 본다.
+     뒤쪽 시스템 스택은 웹폰트 로드 실패 시의 안전망 — Latin 은 OS 기본 UI 서체,
+     한글은 글리프 단위 폴백으로 자동 승계된다. */
+  --b2b-font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, 'Segoe UI Variable Text', 'Segoe UI', Roboto,
+    'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Helvetica Neue', Arial, sans-serif;
   --b2b-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --b2b-font-size-base: 13px;
+  --b2b-font-size-base: var(--b2b-font-size-body); /* 본문 토큰과 항상 동기 */
 
   /* Type Scale - .b2b-text-* 유틸리티와 1:1 대응.
      scoped CSS 에서는 px 하드코딩 대신 이 토큰을 참조한다. */
   --b2b-font-size-display: 1.5rem;    /* 24px */
-  --b2b-font-size-h1: 1rem;           /* 16px */
-  --b2b-font-size-h2: 0.875rem;       /* 14px */
-  --b2b-font-size-body: 0.8125rem;    /* 13px - 표준 */
+  --b2b-font-size-h1: 1.125rem;       /* 18px */
+  --b2b-font-size-h2: 1rem;           /* 16px */
+  --b2b-font-size-body: 0.875rem;     /* 14px - 표준 */
   --b2b-font-size-sm: 0.75rem;        /* 12px */
   --b2b-font-size-xs: 0.6875rem;      /* 11px */
   --b2b-font-size-2xs: 0.625rem;      /* 10px */
@@ -596,7 +601,7 @@
    [0] Bootstrap 의 em 기반 폰트 클래스 중화
    .small / small / .badge / .form-text 는 Bootstrap 에서 em(부모 대비 배수)로
    정의되어 중첩될수록 복리로 작아진다.
-       13px -> .small 11.375 -> .small 9.95 -> <code> 8.71px
+       14px -> .small 12.25 -> .small 10.72 -> <code> 9.38px
    고정 rem 으로 못박아 스케일 이탈과 소수점 폰트를 원천 차단한다.
    ※ 아래 .b2b-text-* 가 항상 이기도록 이 블록은 반드시 먼저 선언한다.
    -------------------------------------------------------------------------- */
@@ -622,7 +627,7 @@ samp {
 
 /* 네이티브 select 드롭다운 항목은 브라우저 기본 16px 로 열린다 */
 option {
-  font-size: var(--b2b-font-size-body); /* 13px */
+  font-size: var(--b2b-font-size-body); /* 14px */
 }
 
 /* --------------------------------------------------------------------------
@@ -646,9 +651,9 @@ h6 { font-size: var(--b2b-font-size-body); font-weight: 600; }
 .h6 { font-size: var(--b2b-font-size-body); }
 
 /* Bootstrap 컴포넌트 기본 폰트 정규화 */
-.lead { font-size: var(--b2b-font-size-h2); }        /* 1.25rem -> 14px */
-.modal-title { font-size: var(--b2b-font-size-h2); } /* h5 상속 20px -> 14px */
-.accordion-button { font-size: var(--b2b-font-size-body); } /* 1rem -> 13px */
+.lead { font-size: var(--b2b-font-size-h2); }        /* 1.25rem -> 16px */
+.modal-title { font-size: var(--b2b-font-size-h2); } /* h5 상속 20px -> 16px */
+.accordion-button { font-size: var(--b2b-font-size-body); } /* 1rem -> 14px */
 
 .b2b-text-display {
   font-size: var(--b2b-font-size-display);

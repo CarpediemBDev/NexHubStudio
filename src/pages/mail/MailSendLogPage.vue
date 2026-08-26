@@ -259,7 +259,7 @@ function resend() {
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
   color: var(--b2b-color-text-main);
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
 }
 .panel-header.px-0 {
   background: none;

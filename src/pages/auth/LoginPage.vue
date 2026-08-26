@@ -79,7 +79,7 @@ const currentTab = ref('login');
 .tab-item.active { color: #1890ff; border-bottom: 2px solid #1890ff; margin-bottom: -2px; }
 .form-title { font-size: var(--b2b-font-size-display); font-weight: 700; margin-bottom: var(--b2b-space-5); color: var(--b2b-color-text-main); }
 .input-group { margin-bottom: 16px; }
-.b2b-input { width: 100%; padding: 12px; border: 1px solid var(--b2b-color-border); border-radius: 4px; outline: none; font-size: 14px; box-sizing: border-box; }
+.b2b-input { width: 100%; padding: 12px; border: 1px solid var(--b2b-color-border); border-radius: 4px; outline: none; font-size: var(--b2b-font-size-body); box-sizing: border-box; }
 .b2b-input:focus { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,0.2); }
 /* 색상/폰트는 buttons.css 의 .btn-b2b-primary 를 그대로 사용.
    로그인 CTA 만 전폭 + 큰 터치 타깃으로 확장한다. */
@@ -90,6 +90,6 @@ const currentTab = ref('login');
   margin-top: var(--b2b-space-5);
   border-radius: var(--b2b-radius-lg);
 }
-.terms-box { padding: 16px; border: 1px solid var(--b2b-color-border); border-radius: 4px; height: 120px; overflow-y: auto; font-size: 13px; color: var(--b2b-color-text-muted); margin-bottom: 16px; background: var(--b2b-color-bg-subcard); }
-.checkbox-group { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.terms-box { padding: 16px; border: 1px solid var(--b2b-color-border); border-radius: 4px; height: 120px; overflow-y: auto; font-size: var(--b2b-font-size-body); color: var(--b2b-color-text-muted); margin-bottom: 16px; background: var(--b2b-color-bg-subcard); }
+.checkbox-group { display: flex; align-items: center; gap: 8px; font-size: var(--b2b-font-size-body); }
 </style>

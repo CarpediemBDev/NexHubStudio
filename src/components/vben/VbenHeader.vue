@@ -345,7 +345,7 @@ const logout = () => {
 
 .crumb-current {
   color: var(--b2b-color-text-main);
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
 }
 
 /* User Profile Avatar Chip */

@@ -103,7 +103,7 @@ import PageHeader from '@/components/PageHeader.vue'
   border-bottom: 1px solid var(--b2b-color-border);
   padding: 8px 12px;
   text-align: left;
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
   color: var(--b2b-color-text-main);
 }
 .b2b-table th {

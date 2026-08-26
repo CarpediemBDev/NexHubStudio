@@ -293,7 +293,7 @@ export default {
 .legend-item {
   display: flex;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
   color: var(--text-primary) !important;
 }
 

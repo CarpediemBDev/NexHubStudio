@@ -20,9 +20,9 @@
               <h6 class="b2b-text-h2 text-theme-primary mb-3">1. 타이포그래피 (Typography)</h6>
               <div class="d-flex flex-column gap-2">
                 <div><span class="b2b-text-display text-theme-primary">Display 24px</span> <code class="b2b-text-xs">.b2b-text-display</code></div>
-                <div><span class="b2b-text-h1 text-theme-primary">Heading 1 (16px)</span> <code class="b2b-text-xs">.b2b-text-h1</code></div>
-                <div><span class="b2b-text-h2 text-theme-primary">Heading 2 (14px)</span> <code class="b2b-text-xs">.b2b-text-h2</code></div>
-                <div><span class="b2b-text-body text-theme-primary">Body 13px (표준)</span> <code class="b2b-text-xs">.b2b-text-body</code></div>
+                <div><span class="b2b-text-h1 text-theme-primary">Heading 1 (18px)</span> <code class="b2b-text-xs">.b2b-text-h1</code></div>
+                <div><span class="b2b-text-h2 text-theme-primary">Heading 2 (16px)</span> <code class="b2b-text-xs">.b2b-text-h2</code></div>
+                <div><span class="b2b-text-body text-theme-primary">Body 14px (표준)</span> <code class="b2b-text-xs">.b2b-text-body</code></div>
                 <div><span class="b2b-text-sm text-theme-secondary">Small 12px</span> <code class="b2b-text-xs">.b2b-text-sm</code></div>
                 <div><span class="b2b-text-xs text-theme-muted">Extra Small 11px</span> <code class="b2b-text-xs">.b2b-text-xs</code></div>
                 <div><span class="b2b-text-2xs text-theme-muted">Micro 10px</span> <code class="b2b-text-xs">.b2b-text-2xs</code></div>
@@ -114,7 +114,7 @@
             <i class="bi bi-exclamation-triangle me-1 text-warning"></i>금지 사항
           </div>
           <ul class="b2b-text-xs text-theme-secondary mb-0 ps-3">
-            <li>scoped CSS 에 <code>font-size: 14px</code> 같은 px 하드코딩 &rarr; <code>var(--b2b-font-size-*)</code> 사용</li>
+            <li>scoped CSS 에 <code>font-size: 15px</code> 같은 px 하드코딩 &rarr; <code>var(--b2b-font-size-*)</code> 사용</li>
             <li><code>.small</code> 안에 <code>.small</code> 중첩 (em 복리로 9.95px, 8.71px 같은 소수점 폰트 발생)</li>
             <li>제목에 <code>&lt;h2&gt;~&lt;h4&gt;</code> 만 쓰고 클래스 미지정 &rarr; Bootstrap 기본 32px/28px 로 튄다</li>
           </ul>
@@ -142,10 +142,10 @@ const showCodeToken = ref(false);
 
 // 폰트 적용 규정: UI 역할 -> 타입 스케일 단계
 const typeRules = [
-  { role: '페이지 제목',            spec: '16px / 600', cls: '.b2b-text-h1',   note: 'PageHeader 컴포넌트가 자동 적용' },
-  { role: '패널·섹션 제목',         spec: '14px / 600', cls: '.b2b-text-h2',   note: '분할 레이아웃 좌우 패널 헤더 포함' },
-  { role: '리스트 아이템 제목',      spec: '13px / 600', cls: '.b2b-text-body', note: 'weight 만 600 으로' },
-  { role: '본문·입력값·버튼',        spec: '13px / 400', cls: '(기본값)',        note: 'body 기본이 13px — 클래스 불필요' },
+  { role: '페이지 제목',            spec: '18px / 600', cls: '.b2b-text-h1',   note: 'PageHeader 컴포넌트가 자동 적용' },
+  { role: '패널·섹션 제목',         spec: '16px / 600', cls: '.b2b-text-h2',   note: '분할 레이아웃 좌우 패널 헤더 포함' },
+  { role: '리스트 아이템 제목',      spec: '14px / 600', cls: '.b2b-text-body', note: 'weight 만 600 으로' },
+  { role: '본문·입력값·버튼',        spec: '14px / 400', cls: '(기본값)',        note: 'body 기본이 14px — 클래스 불필요' },
   { role: '폼 라벨·보조 설명',       spec: '12px / 400', cls: '.b2b-text-sm',   note: '.small 도 12px 로 고정됨' },
   { role: '배지·캡션·타임스탬프',    spec: '11px / 400', cls: '.b2b-text-xs',   note: '.badge 도 11px 로 고정됨' },
   { role: '표 내부 보조 메타',       spec: '10px / 400', cls: '.b2b-text-2xs',  note: '최소 단위 — 이보다 작게 금지' },
