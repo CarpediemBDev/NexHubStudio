@@ -22,6 +22,7 @@ const RealGridPage = () => import("../pages/RealGridPage.vue");
 const RealGridVuePage = () => import("../pages/RealGridVuePage.vue");
 const RealGridTreePage = () => import("../pages/RealGridTreePage.vue");
 const RealGridDndPage = () => import("../pages/RealGridDndPage.vue");
+const RealGridMergePage = () => import("../pages/RealGridMergePage.vue");
 const RealGridSmartDndPage = () => import("../pages/RealGridSmartDndPage.vue");
 const RealGridToDivGuidePage = () => import("../pages/RealGridToDivGuidePage.vue");
 
@@ -79,6 +80,7 @@ const routes = [
           { path: "vue", name: "RealGridVueSample", component: RealGridVuePage, meta: { title: "RealGrid (Vue3)", icon: "bi-grid-3x3-gap" } },
           { path: "js", name: "RealGridJsSample", component: RealGridPage, meta: { title: "RealGrid (JS)", icon: "bi-grid-3x3" } },
           { path: "tree", name: "RealGridTreeSample", component: RealGridTreePage, meta: { title: "RealGrid 트리", icon: "bi-diagram-3" } },
+          { path: "merge", name: "RealGridMergeSample", component: RealGridMergePage, meta: { title: "RealGrid 셀 병합 (mergeRule)", icon: "bi-layout-three-columns" } },
           { path: "dnd", name: "RealGridDndSample", component: RealGridDndPage, meta: { title: "RealGrid 드래그&드롭 (Grid to Grid)", icon: "bi-arrows-move" } },
           { path: "grid-to-div", name: "RealGridToDivGuideSample", component: RealGridToDivGuidePage, meta: { title: "RealGrid 모델 그룹화 스튜디오", icon: "bi-box-arrow-right" } },
           { path: "smart-dnd", name: "RealGridSmartDndSample", component: RealGridSmartDndPage, meta: { title: "RealGrid 스마트 D&D 스튜디오 (Pro)", icon: "bi-magic" } },
@@ -152,6 +154,7 @@ const routes = [
       { path: "real-grid-vue", component: RealGridVuePage, meta: { hidden: true } },
       { path: "real-grid-tree", component: RealGridTreePage, meta: { hidden: true } },
       { path: "real-grid-dnd", component: RealGridDndPage, meta: { hidden: true } },
+      { path: "real-grid-merge", component: RealGridMergePage, meta: { hidden: true } },
       { path: "real-grid-smart-dnd", component: RealGridSmartDndPage, meta: { hidden: true } },
       { path: "component-guide", component: ComponentGuidePage, meta: { hidden: true } },
       { path: "pivot-alt-a", component: PivotAltAPage, meta: { hidden: true } },
