@@ -88,6 +88,7 @@ export default {
     filterable: { type: Boolean, default: undefined },
     checkable: { type: Boolean, default: undefined },
     mergeMode: { type: Boolean, default: undefined },
+    mergeable: { type: Boolean, default: undefined },
     useFooter: { type: Boolean, default: undefined },
     commitWhenLeave: { type: Boolean, default: undefined },
     rowResizable: { type: Boolean, default: undefined },
@@ -150,6 +151,7 @@ export default {
     },
     resolvedMergeMode() {
       if (this.mergeMode !== undefined) return this.mergeMode
+      if (this.mergeable !== undefined) return this.mergeable
       return false
     },
     resolvedSummaryMode() {
@@ -206,6 +208,7 @@ export default {
         if (this.gridView && newColumns && newColumns.length > 0) {
           this.gridView.setColumns(newColumns)
           this.syncColumnItems()
+          this.applyCellMerging()
         }
       }
     }
@@ -625,6 +628,32 @@ export default {
       }
     },
 
+    // =========================================================
+    // 셀 병합 (merge-mode / mergeable)
+    //  - true 이면 그룹 유무와 무관하게 모든 컬럼에 mergeRule 을 자동 적용한다.
+    //  - 컬럼 정의에서 직접 지정한 mergeRule 은 그대로 존중한다.
+    // =========================================================
+    hasOwnMergeRule(col) {
+      const rule = col && col.mergeRule
+      if (!rule) return false
+      return typeof rule === 'string' ? rule.length > 0 : !!rule.criteria
+    },
+
+    applyCellMerging() {
+      if (!this.gridView || !this.resolvedMergeMode) return
+      try {
+        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+        cols.forEach(col => {
+          if (!col || !col.name || this.hasOwnMergeRule(col)) return
+          try {
+            this.gridView.setColumnProperty(col.name, 'mergeRule', 'value')
+          } catch (e) { /* noop */ }
+        })
+      } catch (e) {
+        console.warn('[RealGrid] applyCellMerging error:', e)
+      }
+    },
+
     destroyGrid() {
       if (this.gridView) {
         try { this.gridView.destroy() } catch (e) { /* noop */ }
@@ -706,6 +735,7 @@ export default {
 
       this.initContextMenu()
       this.syncColumnItems()
+      this.applyCellMerging()
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
     }
   }

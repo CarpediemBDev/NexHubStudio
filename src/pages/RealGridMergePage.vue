@@ -77,6 +77,9 @@
             <span>
               컬럼 속성입니다. 병합된 칸도 <b>일반 데이터 셀</b>이라 배경색이 그대로입니다.
               편집·정렬·엑셀 내보내기 모두 평소와 같습니다.
+              모든 컬럼을 한 번에 묶기만 하면 될 때는 공통 컴포넌트에 <code>:merge-mode="true"</code>
+              (= <code>:mergeable="true"</code>)만 주면 되고, 이 페이지처럼 컬럼별로 다른 기준이 필요할 때 직접 수식을 씁니다.
+              컬럼 정의에 <code>mergeRule</code>이 있으면 공통 컴포넌트는 그 값을 덮어쓰지 않습니다.
             </span>
           </div>
           <div class="rg-merge-note-row">
