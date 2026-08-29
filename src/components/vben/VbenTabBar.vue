@@ -351,7 +351,7 @@ const openTabMenu = (event) => {
   border-radius: 50%;
   background: transparent;
   color: var(--b2b-color-text-muted);
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   line-height: 1;
   opacity: 0;
   transition: all 0.15s ease;
@@ -433,7 +433,7 @@ const openTabMenu = (event) => {
   align-items: center;
   padding: 6px 10px;
   border-radius: 5px;
-  font-size: 12.5px;
+  font-size: var(--b2b-font-size-sm);
   color: var(--b2b-color-text-main);
   cursor: pointer;
   transition: background-color 0.12s ease;

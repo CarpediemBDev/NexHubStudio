@@ -1840,7 +1840,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   background: transparent;
   border: 0;
   text-align: left;
-  font-size: 12.5px;
+  font-size: var(--b2b-font-size-sm);
   color: var(--text-primary);
   border-radius: 6px;
   transition: all 0.12s ease;
@@ -1859,7 +1859,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   border-radius: 6px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   font-weight: 600;
   cursor: grab;
   user-select: none;
@@ -1874,7 +1874,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   padding: 4px 8px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   font-weight: 600;
   cursor: grab;
   user-select: none;
@@ -1889,7 +1889,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   border-radius: 6px;
   background: var(--bg-subcard);
   border: 1px solid var(--border-color);
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   font-weight: 600;
   user-select: none;
 }
@@ -1924,13 +1924,13 @@ forecast 는 미래 3개 기간을 포함한다.`
   padding: 45px 16px;
   text-align: center;
   color: var(--text-secondary);
-  font-size: 13.5px;
+  font-size: var(--b2b-font-size-body);
 }
 .pivot-table {
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
-  font-size: 12.5px;
+  font-size: var(--b2b-font-size-sm);
   white-space: nowrap;
 }
 .pivot-table th,
@@ -2047,7 +2047,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   border-radius: 6px;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;

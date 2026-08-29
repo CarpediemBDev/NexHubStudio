@@ -302,7 +302,7 @@ const navigate = (path) => {
   background-color: var(--b2b-color-bg-card);
   border-radius: 20px;
   color: var(--b2b-color-text-muted);
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   transition: all 0.15s ease;
 }
 .btn-floating-pill:hover {
@@ -341,7 +341,7 @@ const navigate = (path) => {
   white-space: nowrap;
 }
 .badge-edition {
-  font-size: 9.5px;
+  font-size: var(--b2b-font-size-2xs);
   font-weight: 700;
   letter-spacing: 0.5px;
   padding: 2px 6px;
@@ -512,7 +512,7 @@ const navigate = (path) => {
 }
 
 .submenu-label {
-  font-size: 12.5px;
+  font-size: var(--b2b-font-size-sm);
   line-height: 1.35;
 }
 

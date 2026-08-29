@@ -761,7 +761,7 @@ export default {
   justify-content: center;
   height: 23px;
   padding: 0 10px;
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   font-weight: 500;
   color: #334155; /* 연한 검은색 / 진회색 */
   background-color: #ffffff; /* 하얀색 버튼 */

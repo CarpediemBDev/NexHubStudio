@@ -317,7 +317,7 @@ const logout = () => {
   border: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-card);
   color: var(--b2b-color-text-main);
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: all 0.15s ease;
@@ -330,7 +330,7 @@ const logout = () => {
 }
 
 .switcher-text {
-  font-size: 11.5px;
+  font-size: var(--b2b-font-size-xs);
   color: inherit;
 }
 
@@ -340,7 +340,7 @@ const logout = () => {
 
 .crumb-parent {
   color: var(--b2b-color-text-muted);
-  font-size: 12.5px;
+  font-size: var(--b2b-font-size-sm);
 }
 
 .crumb-current {
@@ -379,7 +379,7 @@ const logout = () => {
 }
 
 .user-name {
-  font-size: 12.5px;
+  font-size: var(--b2b-font-size-sm);
   color: var(--b2b-color-text-main);
 }
 
@@ -446,7 +446,7 @@ const logout = () => {
   align-items: center;
   padding: 6px 10px;
   border-radius: 5px;
-  font-size: 12.5px;
+  font-size: var(--b2b-font-size-sm);
   color: var(--b2b-color-text-main);
   cursor: pointer;
   transition: background-color 0.12s ease;

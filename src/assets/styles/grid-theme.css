@@ -229,7 +229,7 @@ canvas.rg-canvas ~ .rg-state-insert {
   font-weight: 600 !important;
   border-bottom: 2px solid var(--border-color) !important;
   padding: 10px var(--b2b-space-3) !important;
-  font-size: 0.8125rem !important; /* 13px */
+  font-size: var(--b2b-font-size-body) !important;
   white-space: nowrap !important;
 }
 
@@ -237,7 +237,7 @@ canvas.rg-canvas ~ .rg-state-insert {
   background-color: var(--bg-card) !important;
   border-bottom-color: var(--border-color) !important;
   color: var(--text-primary) !important;
-  font-size: 0.8125rem !important; /* 13px */
+  font-size: var(--b2b-font-size-body) !important;
 }
 
 /* 마우스 올렸을 때 다크모드 글자색 사라짐 방지 (글자색 흰색 유지 및 세련된 호버 배경) */
@@ -275,14 +275,14 @@ canvas.rg-canvas ~ .rg-state-insert {
 }
 
 .b2b-empty-state-title {
-  font-size: 0.9375rem; /* 15px */
+  font-size: var(--b2b-font-size-h2);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .b2b-empty-state-desc {
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--b2b-font-size-body);
   color: var(--text-secondary);
   margin-bottom: 0;
 }

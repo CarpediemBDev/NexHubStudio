@@ -54,6 +54,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--b2b-space-2);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .btn-sm {
@@ -65,6 +67,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--b2b-space-1);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .btn-icon-only,
@@ -75,6 +79,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
 }
 
 /* Secondary / Action Button (Default Dark Navy / Light Card Button) */
