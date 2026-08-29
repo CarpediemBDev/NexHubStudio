@@ -276,23 +276,23 @@ export default {
   height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  padding: var(--b2b-space-4);
 }
 
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 1rem;
+  padding-bottom: var(--b2b-space-4);
   border-bottom: 2px solid var(--b2b-color-border);
 }
 
 .content-area {
   display: flex;
-  gap: 1rem;
+  gap: var(--b2b-space-4);
   flex: 1;
   overflow: hidden;
-  margin-top: 1rem;
+  margin-top: var(--b2b-space-4);
 }
 
 .group-panel {
@@ -314,7 +314,7 @@ export default {
 }
 
 .panel-header {
-  padding: 0.75rem 1rem;
+  padding: var(--b2b-space-3) var(--b2b-space-4);
   border-bottom: 1px solid var(--b2b-color-border);
   display: flex;
   justify-content: space-between;
@@ -326,12 +326,12 @@ export default {
 .group-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0.5rem;
+  padding: var(--b2b-space-2);
 }
 
 .group-item {
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.25rem;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
+  margin-bottom: var(--b2b-space-1);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
@@ -354,7 +354,7 @@ export default {
 .group-name {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--b2b-space-2);
   font-size: 0.9rem;
 }
 

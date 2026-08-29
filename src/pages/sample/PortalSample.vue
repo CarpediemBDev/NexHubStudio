@@ -166,13 +166,13 @@ export default {
 .portal-container {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--b2b-space-6);
   font-family: 'Pretendard', sans-serif;
 }
 
 /* 1. 캐러셀 스타일 */
 .section-carousel {
-  margin-bottom: 3rem;
+  margin-bottom: var(--b2b-space-7);
 }
 .slide-content {
   height: 300px;
@@ -187,11 +187,11 @@ export default {
 
 /* 2. 퀵 링크 섹션 */
 .section-quick-links {
-  margin-bottom: 3rem;
-  padding: 0 0.5rem;
+  margin-bottom: var(--b2b-space-7);
+  padding: 0 var(--b2b-space-2);
 }
 .section-title {
-  margin-bottom: 1rem;
+  margin-bottom: var(--b2b-space-4);
   font-weight: bold;
   opacity: 0.6;
   text-transform: uppercase;
@@ -201,7 +201,7 @@ export default {
 .flex-row {
   display: flex;            /* Flex 컨테이너 */
   flex-wrap: wrap;          /* 줄바꿈 허용 */
-  gap: 1rem;                /* 아이템 간격 */
+  gap: var(--b2b-space-4);                /* 아이템 간격 */
 }
 
 .link-item {
@@ -228,7 +228,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: var(--b2b-space-5);
   height: 100%;
 }
 
@@ -239,7 +239,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--b2b-space-4);
   color: white;
   font-size: var(--b2b-font-size-h2);
 }
@@ -248,7 +248,7 @@ export default {
 .board-container {
   display: flex;            
   flex-wrap: wrap;          
-  gap: 2rem;                
+  gap: var(--b2b-space-6);                
 }
 
 /* 그룹별 영역 설정 */
@@ -264,8 +264,8 @@ export default {
   display: flex;                   
   justify-content: space-between;  
   align-items: flex-end;           
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+  margin-bottom: var(--b2b-space-4);
+  padding-bottom: var(--b2b-space-2);
   border-bottom: 1px solid var(--b2b-color-border);
 }
 .group-title {
@@ -275,8 +275,8 @@ export default {
   display: flex;
   align-items: center;
 }
-.icon-primary { color: var(--b2b-color-primary); margin-right: 0.5rem; }
-.icon-success { color: var(--b2b-color-success); margin-right: 0.5rem; }
+.icon-primary { color: var(--b2b-color-primary); margin-right: var(--b2b-space-2); }
+.icon-success { color: var(--b2b-color-success); margin-right: var(--b2b-space-2); }
 
 .btn-more {
   text-decoration: none;
@@ -292,7 +292,7 @@ export default {
 .flex-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--b2b-space-4);
 }
 
 /* 4컬럼 그리드 계산 */
@@ -324,7 +324,7 @@ export default {
 
 .card-inner {
   height: 100%;
-  padding: 1.5rem;
+  padding: var(--b2b-space-5);
   display: flex;            
   flex-direction: column;   
   justify-content: space-between;
@@ -359,10 +359,10 @@ export default {
 }
 
 .card-bottom {
-  margin-top: 1rem;
+  margin-top: var(--b2b-space-4);
   text-align: center;
   border-top: 1px solid var(--b2b-color-border);
-  padding-top: 1rem;
+  padding-top: var(--b2b-space-4);
 }
 
 .card-date {

@@ -228,7 +228,7 @@ export default {
 
 <style scoped>
 .code-group-list-page {
-  padding: 2rem;
+  padding: var(--b2b-space-6);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -237,7 +237,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--b2b-space-5);
 }
 
 .toolbar h3 {
@@ -255,7 +255,7 @@ export default {
 }
 
 .table-card {
-  padding: 1.5rem;
+  padding: var(--b2b-space-5);
   margin: 0 -1.5rem;
   border-radius: 0.5rem;
   box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.1);
@@ -270,14 +270,14 @@ export default {
   font-weight: 600;
   color: var(--b2b-color-text-muted);
   font-size: 0.875rem;
-  padding: 0.875rem 0.75rem;
+  padding: 0.875rem var(--b2b-space-3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border: none;
 }
 
 .table tbody td {
-  padding: 0.875rem 0.75rem;
+  padding: 0.875rem var(--b2b-space-3);
   vertical-align: middle;
   border-color: var(--b2b-color-border);
   font-size: 0.9rem;
@@ -315,7 +315,7 @@ export default {
 
 code {
   background: var(--b2b-color-bg-subcard);
-  padding: 0.25rem 0.5rem;
+  padding: var(--b2b-space-1) var(--b2b-space-2);
   border-radius: 4px;
   font-size: 0.875rem;
   color: #e83e8c;

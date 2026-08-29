@@ -1826,8 +1826,8 @@ forecast 는 미래 3개 기간을 포함한다.`
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18) !important;
   animation: submenu-fadeIn 0.15s ease-out;
 }
-.submenu-right { left: 100%; margin-left: 4px; }
-.submenu-left { right: 100%; margin-right: 4px; }
+.submenu-right { left: 100%; margin-left: var(--b2b-space-1); }
+.submenu-left { right: 100%; margin-right: var(--b2b-space-1); }
 
 @keyframes submenu-fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
@@ -1836,7 +1836,7 @@ forecast 는 미래 3개 기간을 포함한다.`
 
 .context-item {
   width: 100%;
-  padding: 6px 12px;
+  padding: 6px var(--b2b-space-3);
   background: transparent;
   border: 0;
   text-align: left;
@@ -1871,7 +1871,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 8px;
+  padding: var(--b2b-space-1) var(--b2b-space-2);
   border-radius: 6px;
   border: 1px solid var(--border-color);
   font-size: var(--b2b-font-size-xs);
@@ -1885,7 +1885,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 4px 8px;
+  padding: var(--b2b-space-1) var(--b2b-space-2);
   border-radius: 6px;
   background: var(--bg-subcard);
   border: 1px solid var(--border-color);
@@ -1897,7 +1897,7 @@ forecast 는 미래 3개 기간을 포함한다.`
 .pivot-agg-select {
   width: 76px !important;
   font-size: 11px !important;
-  padding: 2px 4px !important;
+  padding: 2px var(--b2b-space-1) !important;
   height: 24px !important;
   border-radius: 4px;
   background-color: var(--bg-card) !important;
@@ -1921,7 +1921,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   min-height: 180px;
 }
 .pivot-empty {
-  padding: 45px 16px;
+  padding: 45px var(--b2b-space-4);
   text-align: center;
   color: var(--text-secondary);
   font-size: var(--b2b-font-size-body);
@@ -1990,14 +1990,14 @@ forecast 는 미래 3개 기간을 포함한다.`
 :deep(.pivot-lvl-sep) { color: var(--text-muted); margin: 0 5px; }
 
 .layout-compact .pivot-table th,
-.layout-compact .pivot-table td { padding: 4px 8px; font-size: 12px; }
+.layout-compact .pivot-table td { padding: var(--b2b-space-1) var(--b2b-space-2); font-size: 12px; }
 
 .cursor-pointer { cursor: pointer; }
-.btn-xs { padding: 0 4px; font-size: 10px; }
+.btn-xs { padding: 0 var(--b2b-space-1); font-size: 10px; }
 .theme-chip-badge {
   font-size: 11px;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 2px var(--b2b-space-2);
   border-radius: 999px;
   background: var(--b2b-color-primary-subtle);
   color: var(--b2b-color-primary);
@@ -2030,7 +2030,7 @@ forecast 는 미래 3개 기간을 포함한다.`
 
 .ai-mode-tabs {
   display: flex;
-  gap: 4px;
+  gap: var(--b2b-space-1);
   background: var(--bg-subcard);
   padding: 3px;
   border-radius: 9px;
@@ -2041,7 +2041,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: var(--b2b-space-1);
   padding: 5px 6px;
   border: none;
   border-radius: 6px;
@@ -2085,7 +2085,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   background: rgba(250, 204, 21, 0.1);
   border-left: 3px solid #facc15;
   border-radius: 4px;
-  padding: 6px 8px;
+  padding: 6px var(--b2b-space-2);
   color: var(--text-primary);
 }
 
@@ -2095,10 +2095,10 @@ forecast 는 미래 3개 기간을 포함한다.`
   color: var(--text-secondary);
   font-weight: 700;
   border-bottom: 1px solid var(--border-color);
-  padding: 3px 4px;
+  padding: 3px var(--b2b-space-1);
 }
 .ai-forecast-table td {
-  padding: 3px 4px;
+  padding: 3px var(--b2b-space-1);
   border-bottom: 1px dashed var(--border-color);
   color: var(--text-primary);
 }
@@ -2118,7 +2118,7 @@ forecast 는 미래 3개 기간을 포함한다.`
 }
 .btn-xs {
   font-size: 11px;
-  padding: 2px 8px;
+  padding: 2px var(--b2b-space-2);
   line-height: 1.4;
 }
 </style>

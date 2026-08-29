@@ -234,7 +234,7 @@ function resend() {
 <style scoped>
 /* 헤더(48) + 탭바(38) + 전역 PageHeader(50) + 워크스페이스 패딩(32) 제외 */
 .mail-page { height: calc(100vh - 168px); min-height: 520px; }
-.content-split { display: flex; flex: 1; gap: 16px; overflow: hidden; }
+.content-split { display: flex; flex: 1; gap: var(--b2b-space-4); overflow: hidden; }
 
 .left-panel {
   flex: 1;
@@ -255,7 +255,7 @@ function resend() {
   overflow: hidden;
 }
 .panel-header {
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
   color: var(--b2b-color-text-main);
@@ -264,7 +264,7 @@ function resend() {
 .panel-header.px-0 {
   background: none;
   border-bottom: 1px solid var(--b2b-color-border);
-  padding: 0 0 4px;
+  padding: 0 0 var(--b2b-space-1);
 }
 
 .search-input { width: 190px; }
@@ -274,7 +274,7 @@ function resend() {
 .stat-row strong { color: var(--b2b-color-text-main); }
 
 .table-scroll { height: 100%; overflow: auto; }
-.detail-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; }
+.detail-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: var(--b2b-space-3); }
 
 .b2b-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .b2b-table th,
@@ -309,7 +309,7 @@ function resend() {
 .detail-table td { word-break: break-all; }
 
 .error-box {
-  padding: 8px 10px;
+  padding: var(--b2b-space-2) 10px;
   background: var(--b2b-color-bg-body);
   border: 1px solid var(--b2b-color-danger);
   border-radius: var(--b2b-radius-sm);
@@ -317,7 +317,7 @@ function resend() {
 
 .json-box {
   margin: 0;
-  padding: 8px 10px;
+  padding: var(--b2b-space-2) 10px;
   max-height: 170px;
   overflow: auto;
   font-size: 11px;

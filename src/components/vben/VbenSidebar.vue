@@ -241,7 +241,7 @@ const navigate = (path) => {
 }
 .vben-sidebar.sidebar-mode-hover .menu-item-main {
   justify-content: center !important;
-  padding: 8px 0 !important;
+  padding: var(--b2b-space-2) 0 !important;
 }
 .vben-sidebar.sidebar-mode-hover .menu-icon-box {
   margin-right: 0 !important;
@@ -254,7 +254,7 @@ const navigate = (path) => {
 }
 .vben-sidebar.sidebar-mode-hover:hover .sidebar-logo {
   justify-content: flex-start !important;
-  padding: 0 16px !important;
+  padding: 0 var(--b2b-space-4) !important;
 }
 .vben-sidebar.sidebar-mode-hover:hover .logo-text-group {
   display: flex !important;
@@ -268,7 +268,7 @@ const navigate = (path) => {
 }
 .vben-sidebar.sidebar-mode-hover:hover .menu-item-main {
   justify-content: space-between !important;
-  padding: 8px 12px !important;
+  padding: var(--b2b-space-2) var(--b2b-space-3) !important;
 }
 .vben-sidebar.sidebar-mode-hover:hover .menu-icon-box {
   margin-right: 11px !important;
@@ -312,12 +312,12 @@ const navigate = (path) => {
 }
 .sidebar-menu {
   flex: 1 1 auto;
-  padding: 16px 14px;
+  padding: var(--b2b-space-4) 14px;
 }
 
 .sidebar-logo {
   height: 48px;
-  padding: 0 18px 0 16px;
+  padding: 0 18px 0 var(--b2b-space-4);
   background-color: var(--b2b-sidebar-logo-bg);
   border-color: var(--b2b-sidebar-border) !important;
   user-select: none;
@@ -392,7 +392,7 @@ const navigate = (path) => {
   background-color: var(--b2b-color-bg-body);
   border: 1px solid var(--b2b-color-border);
   color: var(--b2b-color-text-muted);
-  padding: 1px 4px;
+  padding: 1px var(--b2b-space-1);
   border-radius: 4px;
 }
 
@@ -425,7 +425,7 @@ const navigate = (path) => {
 
 .sidebar-menu {
   flex: 1 1 auto;
-  padding: 12px 8px;
+  padding: var(--b2b-space-3) var(--b2b-space-2);
   overflow-x: hidden !important;
   overflow-y: auto;
   width: 100%;
@@ -446,7 +446,7 @@ const navigate = (path) => {
   width: 100%;
   box-sizing: border-box;
   min-height: 38px;
-  padding: 8px 8px 8px 10px;
+  padding: var(--b2b-space-2) var(--b2b-space-2) var(--b2b-space-2) 10px;
   color: var(--b2b-sidebar-text);
   transition: all 0.15s ease;
 }
@@ -487,7 +487,7 @@ const navigate = (path) => {
 .submenu-list {
   width: calc(100% - 14px) !important;
   margin-left: 14px !important;
-  margin-top: 4px;
+  margin-top: var(--b2b-space-1);
   padding-left: 10px !important;
   border-left: 1.5px solid var(--b2b-color-border);
   box-sizing: border-box;

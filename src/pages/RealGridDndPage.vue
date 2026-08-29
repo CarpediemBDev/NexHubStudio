@@ -466,7 +466,7 @@ export default {
 .dnd-layout {
   display: grid;
   grid-template-columns: 1.35fr 1fr;
-  gap: 16px;
+  gap: var(--b2b-space-4);
   align-items: stretch;
   min-height: 560px;
 }
@@ -481,7 +481,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   font-weight: 600;
   font-size: 0.88rem;
   background: var(--b2b-color-bg-subcard, #f8fafc);
@@ -503,7 +503,7 @@ export default {
   font-weight: 700;
   min-width: 24px;
   text-align: center;
-  padding: 1px 8px;
+  padding: 1px var(--b2b-space-2);
   border-radius: 10px;
   border: 1px solid var(--b2b-color-border, #e5e7eb);
 }
@@ -513,7 +513,7 @@ export default {
   color: var(--b2b-color-text-muted, #64748b);
   font-size: 0.74rem;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 2px var(--b2b-space-2);
   border-radius: 6px;
   cursor: pointer;
 }
@@ -541,7 +541,7 @@ export default {
 .dnd-teams {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--b2b-space-4);
   min-height: 0;
 }
 .dnd-team { flex: 1; min-height: 0; }

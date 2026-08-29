@@ -132,7 +132,7 @@ export default {
   background-color: var(--border-color);
 }
 .btn-xs {
-  padding: 1px 4px;
+  padding: 1px var(--b2b-space-1);
 }
 .transition-all {
   transition: all 0.15s ease-in-out;

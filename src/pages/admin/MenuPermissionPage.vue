@@ -117,7 +117,7 @@
 .content-split {
   display: flex;
   flex: 1;
-  gap: 16px;
+  gap: var(--b2b-space-4);
   overflow: hidden;
 }
 .left-panel, .right-panel {
@@ -130,13 +130,13 @@
 .left-panel { width: 320px; }
 .right-panel { flex: 1; overflow-y: auto; }
 .panel-header {
-  padding: 10px 16px;
+  padding: 10px var(--b2b-space-4);
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
 }
 
-.tree { list-style: none; padding: 12px; margin: 0; }
-.sub-tree { list-style: none; padding-left: 12px; margin-top: 4px; }
+.tree { list-style: none; padding: var(--b2b-space-3); margin: 0; }
+.sub-tree { list-style: none; padding-left: var(--b2b-space-3); margin-top: var(--b2b-space-1); }
 .tree-node {
   padding: 6px 10px;
   border-radius: var(--b2b-radius-sm);
@@ -161,7 +161,7 @@
 
 /* 3. Compact Table & Monospace Code Font */
 .compact-table th, .compact-table td {
-  padding: 6px 12px !important;
+  padding: 6px var(--b2b-space-3) !important;
   font-size: var(--b2b-font-size-body);
   border-bottom: 1px solid var(--b2b-color-border);
 }

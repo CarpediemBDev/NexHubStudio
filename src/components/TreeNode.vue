@@ -49,7 +49,7 @@ export default {
 
 <style scoped>
 .tree-node {
-  margin-left: 16px;
+  margin-left: var(--b2b-space-4);
 }
 .tree-node-content {
   display: flex;
@@ -74,6 +74,6 @@ export default {
   margin-left: 2px;
 }
 .tree-children {
-  margin-left: 16px;
+  margin-left: var(--b2b-space-4);
 }
 </style>

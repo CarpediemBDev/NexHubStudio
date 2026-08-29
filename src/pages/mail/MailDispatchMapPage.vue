@@ -552,7 +552,7 @@ watch(selectedEventId, loadForm)
 <style scoped>
 /* 헤더(48) + 탭바(38) + 전역 PageHeader(50) + 워크스페이스 패딩(32) 제외 */
 .mail-page { height: calc(100vh - 168px); min-height: 520px; }
-.content-split { display: flex; flex: 1; gap: 16px; overflow: hidden; }
+.content-split { display: flex; flex: 1; gap: var(--b2b-space-4); overflow: hidden; }
 
 .left-panel {
   flex: 1;
@@ -573,7 +573,7 @@ watch(selectedEventId, loadForm)
   overflow: hidden;
 }
 .panel-header {
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
   color: var(--b2b-color-text-main);
@@ -590,7 +590,7 @@ watch(selectedEventId, loadForm)
 .stat-row strong { color: var(--b2b-color-text-main); }
 
 .table-scroll { height: 100%; overflow: auto; }
-.setting-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; }
+.setting-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: var(--b2b-space-3); }
 
 .b2b-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .b2b-table th,
@@ -629,12 +629,12 @@ watch(selectedEventId, loadForm)
 .status-dot-warning { background: #f59e0b; }
 
 /* ---------- 설정 패널 ---------- */
-.event-desc { font-size: 12px; color: var(--b2b-color-text-main); margin: 0 0 4px; }
+.event-desc { font-size: 12px; color: var(--b2b-color-text-main); margin: 0 0 var(--b2b-space-1); }
 .source-hint {
   font-family: var(--b2b-font-family-mono);
   font-size: 11px;
   color: var(--b2b-color-text-muted);
-  margin: 0 0 12px;
+  margin: 0 0 var(--b2b-space-3);
 }
 
 .section-title {
@@ -645,7 +645,7 @@ watch(selectedEventId, loadForm)
   font-weight: 700;
   color: var(--b2b-color-text-main);
   padding-bottom: 5px;
-  margin-bottom: 8px;
+  margin-bottom: var(--b2b-space-2);
   border-bottom: 1px solid var(--b2b-color-border);
 }
 .section-title small {
@@ -671,7 +671,7 @@ watch(selectedEventId, loadForm)
 }
 .subject-preview {
   font-size: 11px;
-  padding: 6px 8px;
+  padding: 6px var(--b2b-space-2);
   color: var(--b2b-color-text-muted);
   background: var(--b2b-color-bg-body);
   border-radius: var(--b2b-radius-sm);
@@ -686,7 +686,7 @@ watch(selectedEventId, loadForm)
 .cond-input { font-family: var(--b2b-font-family-mono); }
 
 .empty-rcpt {
-  padding: 10px 12px;
+  padding: 10px var(--b2b-space-3);
   font-size: 12px;
   background: var(--b2b-color-bg-body);
   border: 1px solid var(--b2b-color-danger);

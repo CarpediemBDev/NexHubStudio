@@ -356,7 +356,7 @@ export default {
 
 .equipment-icon {
   font-size: 22px;
-  margin-bottom: 4px;
+  margin-bottom: var(--b2b-space-1);
   color: var(--text-primary) !important;
 }
 

@@ -492,14 +492,14 @@ export default {
 /* 좌측 사용자 목록 박스 */
 .shared-user-box {
   background-color: var(--bg-subcard) !important;
-  padding: 8px;
+  padding: var(--b2b-space-2);
   min-height: 480px;
   max-height: 560px;
   overflow-y: auto;
 }
 
 .shared-user-item {
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   margin-bottom: 6px;
   background-color: var(--bg-card) !important;
   border: 1px solid var(--border-color) !important;
@@ -532,7 +532,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 16px !important;
+  gap: var(--b2b-space-4) !important;
   width: 100%;
 }
 
@@ -540,7 +540,7 @@ export default {
   width: 100% !important;
   max-width: 150px !important;
   height: 38px !important;
-  padding: 0 12px !important;
+  padding: 0 var(--b2b-space-3) !important;
   font-size: var(--b2b-font-size-body) !important;
   font-weight: 600 !important;
   display: flex !important;
@@ -570,7 +570,7 @@ export default {
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
-  padding: 8px 10px;
+  padding: var(--b2b-space-2) 10px;
   min-height: 64px;
   overflow-y: auto;
 }

@@ -871,7 +871,7 @@ export default {
 .dnd-layout {
   display: grid;
   grid-template-columns: 1.3fr 1.7fr;
-  gap: 16px;
+  gap: var(--b2b-space-4);
   min-height: 540px;
 }
 
@@ -909,7 +909,7 @@ export default {
 }
 .restore-badge {
   background: var(--b2b-color-bg-card, #fff);
-  padding: 16px 24px;
+  padding: var(--b2b-space-4) var(--b2b-space-5);
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   display: flex;
@@ -953,7 +953,7 @@ export default {
 }
 
 .dnd-zone-head {
-  padding: 10px 12px;
+  padding: 10px var(--b2b-space-3);
   border-bottom: 1px solid var(--b2b-color-border, #e5e7eb);
 }
 
@@ -977,7 +977,7 @@ export default {
 .dnd-zone-count-badge {
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 2px var(--b2b-space-2);
   border-radius: 12px;
   display: inline-block;
 }
@@ -987,7 +987,7 @@ export default {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--b2b-space-2);
   min-height: 170px;
   max-height: 230px;
   overflow-y: auto;
@@ -1009,8 +1009,8 @@ export default {
 .dnd-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: var(--b2b-space-2);
+  padding: 6px var(--b2b-space-2);
   background: var(--b2b-color-bg-subcard, #f8fafc);
   border: 1px solid var(--b2b-color-border, #e5e7eb);
   border-left: 3px solid;
@@ -1076,7 +1076,7 @@ export default {
   background: transparent;
   color: var(--b2b-color-text-muted, #9ca3af);
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 2px var(--b2b-space-1);
   border-radius: 4px;
   font-size: 0.85rem;
   line-height: 1;
@@ -1122,12 +1122,12 @@ export default {
   color: #fff;
   font-size: 0.84rem;
   font-weight: 700;
-  padding: 8px 14px;
+  padding: var(--b2b-space-2) 14px;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(13, 110, 253, 0.45);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--b2b-space-2);
   white-space: nowrap;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }

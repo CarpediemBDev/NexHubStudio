@@ -79,7 +79,7 @@
 
 <style scoped>
 .flex-100vh { display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
-.content-split { display: flex; flex: 1; gap: 16px; overflow: hidden; }
+.content-split { display: flex; flex: 1; gap: var(--b2b-space-4); overflow: hidden; }
 .left-panel {
   width: 320px;
   background: var(--b2b-color-bg-card);
@@ -98,7 +98,7 @@
   overflow-y: auto;
 }
 .panel-header {
-  padding: 10px 16px;
+  padding: 10px var(--b2b-space-4);
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
   color: var(--b2b-color-text-main);
@@ -107,7 +107,7 @@
 /* Tree View - Option A (Clean Bullets with Generous Left Spacing) */
 .tree {
   list-style-type: disc !important;
-  padding: 16px 20px 16px 32px !important;
+  padding: var(--b2b-space-4) 20px var(--b2b-space-4) var(--b2b-space-6) !important;
   margin: 0;
   color: var(--b2b-color-text-main);
 }
@@ -125,7 +125,7 @@
   line-height: 1.5;
 }
 .tree-label {
-  padding: 4px 8px;
+  padding: var(--b2b-space-1) var(--b2b-space-2);
   border-radius: var(--b2b-radius-sm, 4px);
   color: var(--b2b-color-text-main);
   cursor: pointer;
@@ -151,7 +151,7 @@
 .b2b-table { width: 100%; border-collapse: collapse; }
 .b2b-table th, .b2b-table td {
   border-bottom: 1px solid var(--b2b-color-border);
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   text-align: left;
   font-size: var(--b2b-font-size-body);
   color: var(--b2b-color-text-main);

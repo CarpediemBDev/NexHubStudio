@@ -403,12 +403,12 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 20px;
-  margin-bottom: 12px;
+  margin-bottom: var(--b2b-space-3);
 }
 .rg-switch {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--b2b-space-2);
   margin: 0;
   min-height: 26px;
 }
@@ -426,7 +426,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 10px 12px;
+  padding: 10px var(--b2b-space-3);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 6px;
   background-color: var(--b2b-color-bg-subcard, #f8fafc);
@@ -434,11 +434,11 @@ export default {
 .rg-merge-note-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--b2b-space-2);
 }
 .rg-merge-tag {
   flex: none;
-  padding: 1px 8px;
+  padding: 1px var(--b2b-space-2);
   border-radius: 10px;
   font-size: 11px;
   font-weight: 700;
@@ -454,8 +454,8 @@ export default {
   color: #92400e;
 }
 .rg-merge-code {
-  margin: 12px 0 0;
-  padding: 10px 12px;
+  margin: var(--b2b-space-3) 0 0;
+  padding: 10px var(--b2b-space-3);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 6px;
   background-color: var(--b2b-color-bg-subcard, #f8fafc);

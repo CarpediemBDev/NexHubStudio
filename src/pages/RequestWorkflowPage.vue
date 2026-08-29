@@ -566,7 +566,7 @@ export default {
 .step-label {
   font-weight: 600;
   color: var(--b2b-color-text-muted);
-  margin-top: 8px;
+  margin-top: var(--b2b-space-2);
 }
 
 .step-item.active .step-label {

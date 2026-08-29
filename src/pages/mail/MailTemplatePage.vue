@@ -849,7 +849,7 @@ watch(activeTab, (tab) => {
 <style scoped>
 /* 헤더(48) + 탭바(38) + 전역 PageHeader(50) + 워크스페이스 패딩(32) 제외 */
 .mail-page { height: calc(100vh - 168px); min-height: 520px; }
-.content-split { display: flex; flex: 1; gap: 16px; overflow: hidden; }
+.content-split { display: flex; flex: 1; gap: var(--b2b-space-4); overflow: hidden; }
 
 .left-panel {
   width: 260px;
@@ -871,7 +871,7 @@ watch(activeTab, (tab) => {
   overflow: hidden;
 }
 .panel-header {
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
   color: var(--b2b-color-text-main);
@@ -883,7 +883,7 @@ watch(activeTab, (tab) => {
 
 .tpl-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
 .tpl-item {
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   border-bottom: 1px solid var(--b2b-color-border);
   border-left: 3px solid transparent;
   font-size: 12px;
@@ -896,7 +896,7 @@ watch(activeTab, (tab) => {
   border-left-color: var(--b2b-color-primary);
 }
 
-.tab-content-area { flex: 1; min-height: 0; overflow: auto; padding: 12px; }
+.tab-content-area { flex: 1; min-height: 0; overflow: auto; padding: var(--b2b-space-3); }
 
 /* 미리보기 */
 .preview-area { display: flex; flex-direction: column; padding: 0; }
@@ -904,7 +904,7 @@ watch(activeTab, (tab) => {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   border-bottom: 1px solid var(--b2b-color-border);
 }
 .subject-text {
@@ -919,7 +919,7 @@ watch(activeTab, (tab) => {
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 16px;
+  padding: var(--b2b-space-4);
   overflow: auto;
   background: var(--b2b-color-bg-body);
 }
@@ -943,7 +943,7 @@ watch(activeTab, (tab) => {
 }
 
 /* 편집 */
-.edit-area { display: flex; gap: 12px; padding: 12px; }
+.edit-area { display: flex; gap: var(--b2b-space-3); padding: var(--b2b-space-3); }
 .edit-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .meta-grid {
   display: grid;
@@ -1002,8 +1002,8 @@ watch(activeTab, (tab) => {
 .view-banner {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
+  gap: var(--b2b-space-1);
+  padding: 6px var(--b2b-space-3);
   font-size: 12px;
   color: var(--b2b-color-text-main);
   background: var(--b2b-color-primary-subtle);
@@ -1034,7 +1034,7 @@ watch(activeTab, (tab) => {
 .modal-form {
   width: 320px;
   flex: 0 0 320px;
-  padding: 12px;
+  padding: var(--b2b-space-3);
   overflow-y: auto;
   border-right: 1px solid var(--b2b-color-border);
 }
@@ -1043,7 +1043,7 @@ watch(activeTab, (tab) => {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: var(--b2b-space-3);
   background: var(--b2b-color-bg-body);
 }
 </style>

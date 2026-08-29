@@ -582,7 +582,7 @@ export default {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   grid-template-rows: minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--b2b-space-4);
   /* 페이지 컨테이너(.b2b-page-container) 높이에 맞춰 채우고,
      넘치는 목록은 카드 내부에서 스크롤시킨다 */
   flex: 1 1 auto;
@@ -643,10 +643,10 @@ export default {
 .target-div-body {
   flex: 1;
   min-height: 0;
-  padding: 12px;
+  padding: var(--b2b-space-3);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--b2b-space-2);
   overflow-y: auto;
 }
 
@@ -656,7 +656,7 @@ export default {
   flex-direction: column;
   align-items: center;
   pointer-events: none;
-  padding: 24px;
+  padding: var(--b2b-space-5);
 }
 
 /* Dropped Item Card (label 전체가 대표 선택 히트영역) */
@@ -668,7 +668,7 @@ export default {
   gap: 10px;
   margin: 0;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   background: var(--b2b-color-bg-card, #fff);
   border: 1px solid var(--b2b-color-border, #e5e7eb);
   border-radius: 8px;
@@ -690,7 +690,7 @@ export default {
 .item-main {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--b2b-space-2);
   min-width: 0;
 }
 
@@ -747,13 +747,13 @@ export default {
 .btn-guide-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--b2b-space-1);
   background: var(--b2b-color-bg-subcard, #f1f5f9);
   border: 1px solid var(--b2b-color-border, #e2e8f0);
   color: var(--b2b-color-text-sub, #64748b);
   font-size: 0.75rem;
   font-weight: 500;
-  padding: 3px 8px;
+  padding: 3px var(--b2b-space-2);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -827,7 +827,7 @@ export default {
   background: linear-gradient(135deg, var(--b2b-color-primary), var(--b2b-color-primary-hover));
   color: #ffffff;
   font-size: 0.85rem;
-  padding: 8px 14px;
+  padding: var(--b2b-space-2) 14px;
   border-radius: 20px;
   box-shadow: 0 6px 20px rgba(13, 110, 253, 0.45);
   white-space: nowrap;

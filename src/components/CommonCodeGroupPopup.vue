@@ -251,7 +251,7 @@ export default {
   justify-content: center;
   z-index: 1050;
   overflow-y: auto;
-  padding: 1rem;
+  padding: var(--b2b-space-4);
 }
 
 .modal-dialog {
@@ -278,19 +278,19 @@ export default {
 
 .modal-header {
   border-bottom: 1px solid var(--border-color);
-  padding: 1rem 1.5rem;
+  padding: var(--b2b-space-4) var(--b2b-space-5);
   flex-shrink: 0;
 }
 
 .modal-body {
-  padding: 1.5rem;
+  padding: var(--b2b-space-5);
   overflow-y: auto;
   flex: 1;
 }
 
 .modal-footer {
   border-top: 1px solid var(--border-color);
-  padding: 1rem 1.5rem;
+  padding: var(--b2b-space-4) var(--b2b-space-5);
   flex-shrink: 0;
 }
 

@@ -156,7 +156,7 @@ export default {
 <style scoped>
 .page-header {
   margin-bottom: 18px;
-  padding-bottom: 12px;
+  padding-bottom: var(--b2b-space-3);
   border-bottom: 1px solid var(--b2b-color-border);
 }
 

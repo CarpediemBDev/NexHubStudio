@@ -1161,8 +1161,8 @@ export default {
 .modal-head {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 12px 16px;
+  gap: var(--b2b-space-1);
+  padding: var(--b2b-space-3) var(--b2b-space-4);
   border-bottom: 1px solid var(--b2b-color-border, #dee2e6);
   background: var(--b2b-color-bg-subcard, #f8f9fa);
 }
@@ -1171,14 +1171,14 @@ export default {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 16px;
+  padding: var(--b2b-space-4);
 }
 
 .modal-foot {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: var(--b2b-space-2);
+  padding: 10px var(--b2b-space-4);
   border-top: 1px solid var(--b2b-color-border, #dee2e6);
   background: var(--b2b-color-bg-subcard, #f8f9fa);
 }
@@ -1193,7 +1193,7 @@ export default {
   border: 1px solid var(--b2b-color-border, #dee2e6);
   border-left: 4px solid var(--b2b-color-primary);
   border-radius: 6px;
-  padding: 10px 12px;
+  padding: 10px var(--b2b-space-3);
   background: var(--b2b-color-bg-subcard, #f8f9fa);
 }
 
@@ -1215,7 +1215,7 @@ export default {
   gap: 6px;
   border: 1px dashed var(--b2b-color-border, #dee2e6);
   border-radius: 6px;
-  padding: 8px;
+  padding: var(--b2b-space-2);
   min-height: 46px;
 }
 

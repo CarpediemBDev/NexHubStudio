@@ -245,7 +245,7 @@ export default {
   min-height: 180px;
 }
 .pivot-code {
-  padding: 14px 16px;
+  padding: 14px var(--b2b-space-4);
   background: #0f172a;
   color: #e2e8f0;
   font-family: var(--b2b-font-family-mono);

@@ -380,15 +380,15 @@ watch(
   max-height: 280px;
   overflow-y: auto;
   z-index: 1055;
-  margin-top: 4px;
+  margin-top: var(--b2b-space-1);
   border-radius: 0.5rem;
   border: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-card);
-  padding: 4px 0;
+  padding: var(--b2b-space-1) 0;
 }
 
 .autocomplete-item {
-  padding: 8px 14px;
+  padding: var(--b2b-space-2) 14px;
   cursor: pointer;
   font-size: 0.875rem;
   transition: background-color 0.15s ease-in-out;

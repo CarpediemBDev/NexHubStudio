@@ -152,7 +152,7 @@ export default {
 }
 .form-table td,
 .form-table th {
-  padding: 12px;
+  padding: var(--b2b-space-3);
   vertical-align: middle;
 }
 .file-upload-box input[type='file'] {

@@ -255,7 +255,7 @@ const logout = () => {
 .vben-header {
   height: 48px;
   z-index: 1000;
-  padding: 0 16px;
+  padding: 0 var(--b2b-space-4);
   background-color: var(--b2b-color-header-bg);
   border-bottom: 1px solid var(--b2b-color-border);
   color: var(--b2b-color-text-main);
@@ -424,7 +424,7 @@ const logout = () => {
   position: fixed;
   min-width: 210px;
   margin: 0;
-  padding: 4px;
+  padding: var(--b2b-space-1);
   list-style: none;
   background: var(--b2b-color-bg-card);
   border: 1px solid var(--b2b-color-border);
@@ -436,7 +436,7 @@ const logout = () => {
   font-size: 11px;
   font-weight: 700;
   color: var(--b2b-color-text-muted);
-  padding: 6px 10px 4px 10px;
+  padding: 6px 10px var(--b2b-space-1) 10px;
   letter-spacing: 0.3px;
   text-transform: uppercase;
 }

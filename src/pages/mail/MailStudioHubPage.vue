@@ -712,7 +712,7 @@ function testEvent(evt) {
 .studio-layout {
   display: grid;
   grid-template-columns: 260px 1fr;
-  gap: 16px;
+  gap: var(--b2b-space-4);
   height: calc(100vh - 145px);
   min-height: 560px;
 }
@@ -729,7 +729,7 @@ function testEvent(evt) {
 }
 
 .sidebar-top {
-  padding: 16px;
+  padding: var(--b2b-space-4);
   border-bottom: 1px solid var(--b2b-color-border);
 }
 
@@ -762,10 +762,10 @@ function testEvent(evt) {
 .sidebar-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: var(--b2b-space-3);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--b2b-space-2);
 }
 
 .template-row {
@@ -836,7 +836,7 @@ function testEvent(evt) {
 }
 
 .main-header {
-  padding: 16px 24px;
+  padding: var(--b2b-space-4) var(--b2b-space-5);
   border-bottom: 1px solid var(--b2b-color-border);
 }
 
@@ -848,8 +848,8 @@ function testEvent(evt) {
 
 .main-tabs {
   display: flex;
-  gap: 4px;
-  padding: 0 24px;
+  gap: var(--b2b-space-1);
+  padding: 0 var(--b2b-space-5);
   border-bottom: 1px solid var(--b2b-color-border);
   background: var(--b2b-color-bg-card);
 }
@@ -858,7 +858,7 @@ function testEvent(evt) {
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 12px 16px;
+  padding: var(--b2b-space-3) var(--b2b-space-4);
   font-size: var(--b2b-font-size-body);
   font-weight: 600;
   color: var(--b2b-color-text-muted);
@@ -885,7 +885,7 @@ function testEvent(evt) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
+  padding: var(--b2b-space-3) var(--b2b-space-5);
   border-bottom: 1px solid var(--b2b-color-border);
   background: var(--b2b-color-bg-subcard);
 }
@@ -893,7 +893,7 @@ function testEvent(evt) {
 .preview-stage-wrap {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: var(--b2b-space-5);
   display: flex;
   justify-content: center;
   background: var(--b2b-color-bg-main);
@@ -931,7 +931,7 @@ function testEvent(evt) {
 }
 
 .var-chip {
-  padding: 4px 10px;
+  padding: var(--b2b-space-1) 10px;
   font-size: var(--b2b-font-size-sm);
   border-radius: 6px;
   background-color: var(--b2b-color-primary-subtle);

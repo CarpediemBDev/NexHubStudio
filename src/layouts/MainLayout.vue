@@ -97,7 +97,7 @@ watch(
 }
 .vben-workspace {
   background-color: var(--b2b-color-bg-body);
-  padding: 18px 24px !important;
+  padding: 18px var(--b2b-space-5) !important;
 }
 
 /* Discord Drawer Backdrop Overlay */

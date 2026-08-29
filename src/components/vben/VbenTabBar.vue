@@ -200,7 +200,7 @@ const openTabMenu = (event) => {
   scrollbar-width: none;
   gap: 2px;
   height: 100%;
-  padding: 0 4px;
+  padding: 0 var(--b2b-space-1);
 }
 
 .tab-scroll-box::-webkit-scrollbar {
@@ -264,7 +264,7 @@ const openTabMenu = (event) => {
    ───────────────────────────────────────────────────────────── */
 .tab-style-browser {
   height: 38px;
-  padding-top: 4px;
+  padding-top: var(--b2b-space-1);
 }
 .tab-style-browser .vben-tab {
   height: 34px;
@@ -290,7 +290,7 @@ const openTabMenu = (event) => {
 .tab-style-underline .vben-tab {
   height: 100%;
   border-radius: 0;
-  padding: 0 16px;
+  padding: 0 var(--b2b-space-4);
 }
 .tab-style-underline .vben-tab:hover {
   color: var(--b2b-color-text-main);
@@ -345,7 +345,7 @@ const openTabMenu = (event) => {
   justify-content: center;
   width: 16px;
   height: 16px;
-  margin-left: 8px;
+  margin-left: var(--b2b-space-2);
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -412,7 +412,7 @@ const openTabMenu = (event) => {
   position: fixed;
   min-width: 200px;
   margin: 0;
-  padding: 4px;
+  padding: var(--b2b-space-1);
   list-style: none;
   background: var(--b2b-color-bg-card);
   border: 1px solid var(--b2b-color-border);
@@ -423,7 +423,7 @@ const openTabMenu = (event) => {
   font-size: 11px;
   font-weight: 700;
   color: var(--b2b-color-text-muted);
-  padding: 6px 10px 4px 10px;
+  padding: 6px 10px var(--b2b-space-1) 10px;
   letter-spacing: 0.3px;
   text-transform: uppercase;
 }
