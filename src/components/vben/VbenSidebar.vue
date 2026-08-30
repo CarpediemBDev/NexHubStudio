@@ -473,7 +473,7 @@ const navigate = (path) => {
 .menu-icon-box {
   width: 22px;
   height: 22px;
-  margin-right: 10px;
+  margin-right: var(--b2b-space-3);
   flex-shrink: 0;
   opacity: 0.85;
 }
@@ -519,7 +519,7 @@ const navigate = (path) => {
 /* 우측 쉐브론 화살표 - 살짝 더 우측으로 이동 (카드 내부 8px / 테두리 기준 16px) */
 .chevron-icon {
   font-size: 10px;
-  margin-left: 6px;
+  margin-left: var(--b2b-space-2);
   margin-right: 0px;
   color: var(--b2b-color-text-muted);
   opacity: 0.6;

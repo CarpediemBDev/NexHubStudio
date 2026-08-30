@@ -42,6 +42,7 @@
   --b2b-color-danger: #DC2626;
   --b2b-color-danger-hover: #B91C1C;
   --b2b-color-success: #16A34A;
+  --b2b-color-warning: #D97706;
 
   /* Typography */
   /* Pretendard 를 main.js 에서 번들로 로드하므로 모든 사용자가 동일한 서체를 본다.

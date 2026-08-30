@@ -998,7 +998,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   color: var(--b2b-color-text-muted, #9ca3af);
   font-size: 0.82rem;
   pointer-events: none;
@@ -1138,8 +1138,10 @@ export default {
 }
 
 .ghost-badge {
-  background: #ffc107;
-  color: var(--b2b-color-text-main);
+  background: var(--b2b-color-warning);
+  /* 앰버 배경 위 글자는 테마와 무관하게 어두운 색으로 고정한다
+     (테마 글자색을 쓰면 다크에서 흰 글씨 + 노란 배경이 되어 대비가 무너진다) */
+  color: #1E293B;
   font-size: 0.72rem;
   font-weight: 800;
   padding: 2px 7px;

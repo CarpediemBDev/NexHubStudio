@@ -1884,7 +1884,7 @@ forecast 는 미래 3개 기간을 포함한다.`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   padding: var(--b2b-space-1) var(--b2b-space-2);
   border-radius: 6px;
   background: var(--bg-subcard);

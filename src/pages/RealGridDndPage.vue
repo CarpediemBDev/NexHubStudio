@@ -480,7 +480,7 @@ export default {
 .dnd-col-head {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   padding: var(--b2b-space-2) var(--b2b-space-3);
   font-weight: 600;
   font-size: 0.88rem;

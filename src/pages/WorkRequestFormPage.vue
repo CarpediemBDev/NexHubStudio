@@ -877,7 +877,7 @@ export default {
 }
 
 .file-upload-box input[type='file'] {
-  margin-top: 10px;
+  margin-top: var(--b2b-space-3);
 }
 
 .workflow-steps {
@@ -962,7 +962,7 @@ export default {
 }
 
 .step-label {
-  margin-top: 10px;
+  margin-top: var(--b2b-space-3);
   font-weight: 600;
   color: var(--b2b-color-text-muted);
   font-size: var(--b2b-font-size-body);

@@ -402,7 +402,7 @@ export default {
 .rg-merge-switches {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 20px;
+  gap: var(--b2b-space-2) var(--b2b-space-5);
   margin-bottom: var(--b2b-space-3);
 }
 .rg-switch {
@@ -425,7 +425,7 @@ export default {
 .rg-merge-note {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   padding: 10px var(--b2b-space-3);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 6px;

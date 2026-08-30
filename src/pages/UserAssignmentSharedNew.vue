@@ -613,7 +613,7 @@ export default {
   text-align: center;
   color: var(--text-secondary);
   font-size: 0.85rem;
-  margin-top: 20px;
+  margin-top: var(--b2b-space-5);
   font-style: italic;
 }
 

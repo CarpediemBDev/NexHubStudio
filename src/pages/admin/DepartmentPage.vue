@@ -121,7 +121,7 @@
   padding-left: 20px !important;
 }
 .tree-item {
-  margin-bottom: 6px;
+  margin-bottom: var(--b2b-space-2);
   line-height: 1.5;
 }
 .tree-label {

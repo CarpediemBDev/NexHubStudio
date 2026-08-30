@@ -640,7 +640,7 @@ watch(selectedEventId, loadForm)
 .section-title {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   font-size: 12px;
   font-weight: 700;
   color: var(--b2b-color-text-main);
@@ -665,9 +665,9 @@ watch(selectedEventId, loadForm)
 .picked-tpl {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   font-size: 11px;
-  margin-bottom: 6px;
+  margin-bottom: var(--b2b-space-2);
 }
 .subject-preview {
   font-size: 11px;

@@ -156,6 +156,6 @@ export default {
   vertical-align: middle;
 }
 .file-upload-box input[type='file'] {
-  margin-top: 10px;
+  margin-top: var(--b2b-space-3);
 }
 </style>

@@ -547,7 +547,7 @@ export default {
   font-size: var(--b2b-font-size-display);
   color: var(--b2b-color-text-muted);
   transition: all 0.3s ease;
-  margin-bottom: 10px;
+  margin-bottom: var(--b2b-space-3);
 }
 
 .step-item.active .step-circle {
@@ -634,7 +634,7 @@ export default {
   }
 
   .step-item {
-    margin-bottom: 20px;
+    margin-bottom: var(--b2b-space-5);
   }
 }
 </style>

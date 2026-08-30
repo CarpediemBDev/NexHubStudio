@@ -533,7 +533,7 @@ export default {
 /* Transfer 아이템 */
 .transfer-item {
   padding: 10px 14px;
-  margin-bottom: 6px;
+  margin-bottom: var(--b2b-space-2);
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 6px;

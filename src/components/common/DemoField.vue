@@ -106,7 +106,7 @@ export default {
 .demo-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--b2b-space-2);
 }
 
 .demo-field-label {
@@ -148,7 +148,7 @@ export default {
 .demo-field-value {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   min-width: 0;
 }
 

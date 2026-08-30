@@ -665,7 +665,7 @@ export default {
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr) 24px;
   align-items: center;
-  gap: 10px;
+  gap: var(--b2b-space-3);
   margin: 0;
   cursor: pointer;
   padding: var(--b2b-space-2) var(--b2b-space-3);

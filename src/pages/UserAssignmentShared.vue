@@ -500,7 +500,7 @@ export default {
 
 .shared-user-item {
   padding: var(--b2b-space-2) var(--b2b-space-3);
-  margin-bottom: 6px;
+  margin-bottom: var(--b2b-space-2);
   background-color: var(--bg-card) !important;
   border: 1px solid var(--border-color) !important;
   border-radius: 6px;
@@ -568,7 +568,7 @@ export default {
 .assigned-box {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   align-items: center;
   padding: var(--b2b-space-2) 10px;
   min-height: 64px;

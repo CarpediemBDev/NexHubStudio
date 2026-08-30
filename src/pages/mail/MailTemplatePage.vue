@@ -903,7 +903,7 @@ watch(activeTab, (tab) => {
 .preview-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--b2b-space-3);
   padding: var(--b2b-space-2) var(--b2b-space-3);
   border-bottom: 1px solid var(--b2b-color-border);
 }
@@ -948,7 +948,7 @@ watch(activeTab, (tab) => {
 .meta-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px 10px;
+  gap: var(--b2b-space-2) var(--b2b-space-3);
   padding: 10px;
   border: 1px solid var(--b2b-color-border);
   border-radius: var(--b2b-radius-md);

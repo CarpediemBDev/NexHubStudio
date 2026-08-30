@@ -304,11 +304,11 @@ export default {
   display: inline-block;
 }
 
-.status-dot.normal { background-color: #28a745; }
-.status-dot.warning { background-color: #ffc107; }
+.status-dot.normal { background-color: var(--b2b-color-success); }
+.status-dot.warning { background-color: var(--b2b-color-warning); }
 .status-dot.error { background-color: var(--b2b-color-danger); }
 .status-dot.maintenance { background-color: var(--b2b-color-text-muted); }
-.status-dot.offline { background-color: #64748b; }
+.status-dot.offline { background-color: var(--b2b-color-text-muted); }
 
 .equipment-map {
   background-color: var(--bg-card) !important;

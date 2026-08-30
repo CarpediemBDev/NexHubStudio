@@ -1128,7 +1128,7 @@ export default {
   display: block;
   font-size: 12px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: var(--b2b-space-2);
   color: var(--b2b-color-text-primary, #212529);
 }
 
@@ -1212,7 +1212,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   border: 1px dashed var(--b2b-color-border, #dee2e6);
   border-radius: 6px;
   padding: var(--b2b-space-2);
