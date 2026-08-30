@@ -1,17 +1,7 @@
 <template>
   <div class="container-fluid py-4">
-    <!-- Header Title -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h2 class="mb-1 text-theme-primary fw-bold">
-          <i class="bi bi-book me-2 text-primary"></i>공통 컴포넌트 & 디자인 시스템 가이드
-        </h2>
-        <p class="text-theme-secondary b2b-text-xs mb-0">
-          NexHub Studio 시스템 공통 UI 컴포넌트 사양, 자동완성 기능 및 코드 사용가이드입니다.
-        </p>
-      </div>
-
-      <!-- Quick Link to Autocomplete Demo -->
+    <!-- Action Toolbar -->
+    <div class="d-flex justify-content-end align-items-center mb-4">
       <router-link to="/sample/autocomplete" class="btn btn-primary btn-sm">
         <i class="bi bi-search me-1"></i> 자동완성 단독 미리보기
       </router-link>
@@ -93,7 +83,7 @@ const activeComponent = computed(() => {
 
 .b2b-tab-pill:hover:not(.active) {
   background-color: rgba(13, 110, 253, 0.08);
-  color: #0d6efd;
+  color: var(--b2b-color-primary);
 }
 
 .fade-tab-enter-active,

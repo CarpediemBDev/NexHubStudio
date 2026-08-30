@@ -1,11 +1,5 @@
 <template>
   <div class="b2b-page-container py-3">
-    <!-- Header Page Title -->
-    <div class="mb-3">
-      <h4 class="fw-bold text-dark m-0">Pivot 분석 A (SearchGrid 통합형)</h4>
-      <p class="text-muted small mb-0 mt-1">상단 SearchGrid 검색 조건 폼과 RealGrid 다차원 피벗 엔진이 실시간으로 연동되는 통합 분석 샘플입니다.</p>
-    </div>
-
     <!-- 1. Top Search Filter Panel (SearchGrid) -->
     <div class="mb-3">
       <SearchGrid ref="searchGrid" @open-user-popup="openPopup" @search="loadFilteredPivotData" />
@@ -39,7 +33,7 @@
               <span>{{ activePresetName }}</span>
             </button>
             <ul class="dropdown-menu shadow-sm fs-7">
-              <li><h6 class="dropdown-header py-1">⚡ 빠른 피셋 분석 선택</h6></li>
+              <li><h6 class="b2b-text-xs dropdown-header py-1">⚡ 빠른 피셋 분석 선택</h6></li>
               <li v-for="preset in quickPresets" :key="preset.id">
                 <button
                   class="dropdown-item d-flex align-items-center justify-content-between py-1.5"
@@ -115,15 +109,23 @@ export default {
         { name: 'name', type: 'string' },
         { name: 'dept', type: 'string' },
         { name: 'role', type: 'string' },
+        { name: 'workStatus', type: 'string' },
+        { name: 'employmentType', type: 'string' },
+        { name: 'evalGrade', type: 'string' },
+        { name: 'skillScore', type: 'number' },
         { name: 'region', type: 'string' },
         { name: 'salary', type: 'number' },
-        { name: 'joinYear', type: 'number' }
+        { name: 'joinDate', type: 'string' }
       ],
       columns: [
         { text: 'ID', datafield: 'userId', width: 110, editable: false },
         { text: '성명', datafield: 'name', width: 100, editable: false },
         { text: '부서', datafield: 'dept', width: 130, editable: false },
         { text: '직무/역할', datafield: 'role', width: 120, editable: false },
+        { text: '근무상태', datafield: 'workStatus', width: 95, editable: false, cellsalign: 'center', align: 'center' },
+        { text: '고용형태', datafield: 'employmentType', width: 100, editable: false, cellsalign: 'center', align: 'center' },
+        { text: '평가등급', datafield: 'evalGrade', width: 80, editable: false, cellsalign: 'center', align: 'center' },
+        { text: '역량점수', datafield: 'skillScore', width: 100, editable: false, cellsalign: 'right', align: 'right' },
         { text: '근무지역', datafield: 'region', width: 100, editable: false },
         {
           text: '급여 (만원)',
@@ -135,9 +137,9 @@ export default {
           cellsformat: 'n'
         },
         {
-          text: '입사년도',
-          datafield: 'joinYear',
-          width: 100,
+          text: '입사일자',
+          datafield: 'joinDate',
+          width: 110,
           editable: false,
           cellsalign: 'center',
           align: 'center'
@@ -165,10 +167,10 @@ export default {
 
     getDefaultUsers() {
       return [
-        { userId: 'park.mj', name: '박민준', dept: '경영지원', role: 'Security', region: '서울', salary: 5240, joinYear: 2019 },
-        { userId: 'lee.sh', name: '이수현', dept: '경영지원', role: 'PM', region: '대전', salary: 9520, joinYear: 2024 },
-        { userId: 'han.mj', name: '한민준', dept: '디자인팀', role: 'DevOps', region: '광주', salary: 8900, joinYear: 2021 },
-        { userId: 'lee.yb', name: '이예빈', dept: '모바일팀', role: 'QA', region: '서울', salary: 8860, joinYear: 2024 }
+        { userId: 'minjun.park', name: '박민준', dept: '경영지원', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 88, region: '서울', salary: 5240, joinDate: '2019-04-12' },
+        { userId: 'suhyeon.lee', name: '이수현', dept: '경영지원', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 95, region: '대전', salary: 9520, joinDate: '2024-01-15' },
+        { userId: 'minjun.han', name: '한민준', dept: '디자인팀', role: 'DevOps', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 72, region: '광주', salary: 8900, joinDate: '2021-08-20' },
+        { userId: 'yebin.lee', name: '이예빈', dept: '모바일팀', role: 'QA', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 84, region: '서울', salary: 8860, joinDate: '2024-05-10' }
       ]
     },
 

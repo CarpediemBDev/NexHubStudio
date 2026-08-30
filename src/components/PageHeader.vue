@@ -1,30 +1,30 @@
 <template>
-  <div class="page-header mb-3 pb-2 border-bottom border-theme d-flex align-items-center justify-content-between flex-wrap gap-2">
-    <!-- Left Side: Clean Title (No Icon) & Badges/Description -->
-    <div class="d-inline-flex align-items-center gap-2 flex-wrap">
-      <h1 class="page-title b2b-text-h1 mb-0 text-theme-primary d-flex align-items-center">
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap">
+    <!-- Left Side: Clean Title & Badges/Description -->
+    <div class="d-inline-flex align-items-center flex-wrap gap-2.5">
+      <h1 class="page-title mb-0 text-theme-primary fw-bold d-flex align-items-center">
         {{ computedTitle }}
       </h1>
 
       <!-- Product Badge (Optional) -->
       <span
         v-if="badgeText"
-        class="b2b-badge b2b-badge-primary fw-normal"
+        class="b2b-badge b2b-badge-primary fw-medium"
         :class="badgeClass"
       >
         {{ badgeText }}
       </span>
 
       <!-- Description Text (Optional) -->
-      <span v-if="description" class="text-theme-secondary b2b-text-sm ms-1">
+      <span v-if="description" class="text-theme-muted page-desc">
         {{ description }}
       </span>
     </div>
 
-    <!-- Right Side: Breadcrumbs (12px Path) & Right Action Buttons Slot -->
+    <!-- Right Side: Breadcrumbs (Optional) & Right Action Buttons Slot -->
     <div class="d-flex align-items-center gap-3 ms-auto my-auto">
       <nav v-if="showBreadcrumb" aria-label="breadcrumb" class="d-flex align-items-center">
-        <ol class="breadcrumb b2b-text-sm mb-0 align-items-center">
+        <ol class="breadcrumb b2b-text-xs mb-0 align-items-center">
           <li class="breadcrumb-item d-inline-flex align-items-center">
             <router-link to="/" class="text-decoration-none text-theme-secondary opacity-75 hover-opacity-100">
               <i class="bi bi-house-door me-1"></i>홈
@@ -102,7 +102,7 @@ export default {
     // Show breadcrumbs
     showBreadcrumb: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   setup(props) {
@@ -154,7 +154,24 @@ export default {
 </script>
 
 <style scoped>
-/* 부트스트랩 기본 항목 간격 제거 → 구분자(::before) 패딩으로만 간격을 대칭 제어 */
+.page-header {
+  margin-bottom: 18px;
+  padding-bottom: var(--b2b-space-3);
+  border-bottom: 1px solid var(--b2b-color-border);
+}
+
+.page-title {
+  font-size: var(--b2b-font-size-h1); /* tokens.css 타입 스케일 준수 */
+  letter-spacing: -0.4px;
+  color: var(--b2b-color-text-main);
+  line-height: 1.3;
+}
+
+.page-desc {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .breadcrumb-item + .breadcrumb-item {
   padding-left: 0;
 }
@@ -162,7 +179,7 @@ export default {
   content: '/';
   color: var(--text-secondary);
   opacity: 0.5;
-  padding: 0 0.9rem;
+  padding: 0 0.6rem;
 }
 .hover-opacity-100:hover {
   opacity: 1 !important;

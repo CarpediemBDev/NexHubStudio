@@ -15,6 +15,8 @@ async function getRouter() {
 export const useTabStore = defineStore('tab', {
   state: () => {
     const initialTheme = localStorage.getItem('vben_sidebar_theme') || 'light';
+    const initialTabStyle = localStorage.getItem('vben_tab_style') || 'linear';
+    const initialToggleStyle = localStorage.getItem('vben_sidebar_toggle_style') || 'inline';
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', initialTheme);
     }
@@ -22,9 +24,29 @@ export const useTabStore = defineStore('tab', {
       visitedTabs: [], // { path, name, meta }
       activeTab: '',
       sidebarTheme: initialTheme, // 'light' | 'dark'
+      tabStyle: initialTabStyle, // 'linear' | 'browser' | 'underline' | 'capsule'
+      sidebarToggleStyle: initialToggleStyle, // 'inline' | 'footer' | 'floating' | 'header'
+      sidebarCollapsed: initialToggleStyle === 'drawer',
     };
   },
   actions: {
+    toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+    },
+    setSidebarCollapsed(collapsed) {
+      this.sidebarCollapsed = collapsed;
+    },
+    setSidebarToggleStyle(style) {
+      this.sidebarToggleStyle = style;
+      if (style === 'drawer') {
+        this.sidebarCollapsed = true;
+      }
+      localStorage.setItem('vben_sidebar_toggle_style', style);
+    },
+    setTabStyle(style) {
+      this.tabStyle = style;
+      localStorage.setItem('vben_tab_style', style);
+    },
     toggleSidebarTheme() {
       this.sidebarTheme = this.sidebarTheme === 'light' ? 'dark' : 'light';
       localStorage.setItem('vben_sidebar_theme', this.sidebarTheme);
@@ -83,3 +105,4 @@ export const useTabStore = defineStore('tab', {
     },
   },
 });
+

@@ -1,7 +1,5 @@
-﻿<template>
+<template>
   <div class="container mt-4">
-    <h2 class="mb-4">업무 의뢰서</h2>
-
     <!-- 워크플로우 스텝바 -->
     <div class="workflow-steps mb-5">
       <div
@@ -198,7 +196,7 @@
         <div class="accordion-collapse collapse" :class="{ show: sections.receive }">
           <div class="accordion-body p-0">
             <div class="alert alert-info m-3">
-              <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>접수된 의뢰 정보</h6>
+              <h6 class="b2b-text-h2 alert-heading"><i class="bi bi-info-circle me-2"></i>접수된 의뢰 정보</h6>
               <p class="mb-1"><strong>제목:</strong> {{ formData.title || '(제목)' }}</p>
               <p class="mb-0"><strong>요청자:</strong> {{ formData.requester || '(요청자)' }}</p>
             </div>
@@ -868,18 +866,18 @@ export default {
 
 <style scoped>
 .form-table th {
-  background-color: #f8f9fa;
+  background-color: var(--b2b-color-bg-subcard);
   font-weight: 600;
 }
 
 .form-table td,
 .form-table th {
-  padding: 12px;
+  padding: var(--b2b-space-3);
   vertical-align: middle;
 }
 
 .file-upload-box input[type='file'] {
-  margin-top: 10px;
+  margin-top: var(--b2b-space-3);
 }
 
 .workflow-steps {
@@ -905,25 +903,25 @@ export default {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #e9ecef;
-  border: 3px solid #dee2e6;
+  background-color: var(--b2b-color-hover-bg);
+  border: 3px solid var(--b2b-color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  color: #6c757d;
+  color: var(--b2b-color-text-muted);
   transition: all 0.3s ease;
   position: relative;
   z-index: 2;
-  background-color: white;
+  background-color: var(--b2b-color-bg-card);
 }
 
 /* 활성 스텝: 깜빡이는 그림자 효과 */
 .step-item.active .step-circle {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
+  background-color: var(--b2b-color-primary);
+  border-color: var(--b2b-color-primary);
   color: white;
-  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+  box-shadow: 0 0 0 4px rgba(var(--b2b-color-primary-rgb), 0.2);
   animation: pulseShadow 2s ease-in-out infinite;
 }
 
@@ -934,8 +932,8 @@ export default {
 
 /* 완료된 스텝: 눌러진 느낌 (축소 + 안쪽 그림자 + 아래로 이동) */
 .step-item.completed .step-circle {
-  background-color: #198754;
-  border-color: #198754;
+  background-color: var(--b2b-color-success);
+  border-color: var(--b2b-color-success);
   color: white;
   transform: scale(0.92) translateY(2px);
   box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
@@ -945,10 +943,10 @@ export default {
 @keyframes pulseShadow {
   0%,
   100% {
-    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+    box-shadow: 0 0 0 4px rgba(var(--b2b-color-primary-rgb), 0.2);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(13, 110, 253, 0.1);
+    box-shadow: 0 0 0 8px rgba(var(--b2b-color-primary-rgb), 0.1);
   }
 }
 
@@ -964,19 +962,21 @@ export default {
 }
 
 .step-label {
-  margin-top: 10px;
+  margin-top: var(--b2b-space-3);
   font-weight: 600;
-  color: #6c757d;
-  font-size: 14px;
+  color: var(--b2b-color-text-muted);
+  font-size: var(--b2b-font-size-body);
 }
 
+/* 활성 스텝은 색상+굵기로만 구분한다. 폰트 크기를 키우면 스텝 이동마다
+   라벨 폭이 변해 스테퍼 전체가 흔들린다. */
 .step-item.active .step-label {
-  color: #0d6efd;
-  font-size: 15px;
+  color: var(--b2b-color-primary);
+  font-weight: 700;
 }
 
 .step-item.completed .step-label {
-  color: #198754;
+  color: var(--b2b-color-success);
 }
 
 .step-line {
@@ -985,14 +985,14 @@ export default {
   left: 50%;
   width: 100%;
   height: 4px;
-  background-color: #dee2e6;
+  background-color: var(--b2b-color-border);
   z-index: 0;
   overflow: hidden;
 }
 
 /* 완료된 스텝의 연결선 - 흐르는 그라데이션 */
 .step-item.completed .step-line {
-  background: linear-gradient(90deg, #198754 0%, #20c997 50%, #198754 100%);
+  background: linear-gradient(90deg, var(--b2b-color-success) 0%, #20C997 50%, var(--b2b-color-success) 100%);
   background-size: 200% 100%;
   animation: flowGradient 3s ease-in-out infinite;
   box-shadow: 0 0 8px rgba(25, 135, 84, 0.4);

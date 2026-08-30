@@ -1,6 +1,5 @@
-﻿<template>
+<template>
   <div class="container mt-4">
-    <h2 class="mb-4">설비지원요청</h2>
     <form @submit.prevent="submitForm">
       <table class="table table-bordered form-table mb-0">
         <colgroup>
@@ -148,15 +147,15 @@ export default {
 
 <style scoped>
 .form-table th {
-  background-color: #f8f9fa;
+  background-color: var(--b2b-color-bg-subcard);
   font-weight: 600;
 }
 .form-table td,
 .form-table th {
-  padding: 12px;
+  padding: var(--b2b-space-3);
   vertical-align: middle;
 }
 .file-upload-box input[type='file'] {
-  margin-top: 10px;
+  margin-top: var(--b2b-space-3);
 }
 </style>

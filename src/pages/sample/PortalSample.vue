@@ -12,7 +12,7 @@
           <div class="carousel-item active" data-bs-interval="5000">
              <div class="slide-content bg-dark">
                 <div class="slide-text">
-                    <h2>스마트 팩토리 모니터링</h2>
+                    <h2 class="b2b-text-display">스마트 팩토리 모니터링</h2>
                     <p>실시간 설비 현황과 생산성을 한눈에 확인하세요.</p>
                 </div>
             </div>
@@ -20,7 +20,7 @@
           <div class="carousel-item" data-bs-interval="5000">
              <div class="slide-content bg-primary">
                 <div class="slide-text">
-                    <h2>안전한 작업 환경</h2>
+                    <h2 class="b2b-text-display">안전한 작업 환경</h2>
                     <p>작업자 안전을 위한 가이드라인과 수칙을 준수합니다.</p>
                 </div>
             </div>
@@ -28,7 +28,7 @@
           <div class="carousel-item" data-bs-interval="5000">
              <div class="slide-content bg-success">
                 <div class="slide-text">
-                    <h2>지속 가능한 성장</h2>
+                    <h2 class="b2b-text-display">지속 가능한 성장</h2>
                     <p>혁신적인 기술로 미래를 선도하는 기업.</p>
                 </div>
             </div>
@@ -166,13 +166,13 @@ export default {
 .portal-container {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--b2b-space-6);
   font-family: 'Pretendard', sans-serif;
 }
 
 /* 1. 캐러셀 스타일 */
 .section-carousel {
-  margin-bottom: 3rem;
+  margin-bottom: var(--b2b-space-7);
 }
 .slide-content {
   height: 300px;
@@ -187,21 +187,21 @@ export default {
 
 /* 2. 퀵 링크 섹션 */
 .section-quick-links {
-  margin-bottom: 3rem;
-  padding: 0 0.5rem;
+  margin-bottom: var(--b2b-space-7);
+  padding: 0 var(--b2b-space-2);
 }
 .section-title {
-  margin-bottom: 1rem;
+  margin-bottom: var(--b2b-space-4);
   font-weight: bold;
   opacity: 0.6;
   text-transform: uppercase;
-  font-size: 0.9rem;
+  font-size: var(--b2b-font-size-sm);
 }
 
 .flex-row {
   display: flex;            /* Flex 컨테이너 */
   flex-wrap: wrap;          /* 줄바꿈 허용 */
-  gap: 1rem;                /* 아이템 간격 */
+  gap: var(--b2b-space-4);                /* 아이템 간격 */
 }
 
 .link-item {
@@ -212,7 +212,7 @@ export default {
 .link-card {
   display: block;
   text-decoration: none;
-  background: white;
+  background: var(--b2b-color-bg-card);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   transition: transform 0.2s, box-shadow 0.2s;
@@ -228,7 +228,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: var(--b2b-space-5);
   height: 100%;
 }
 
@@ -239,16 +239,16 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--b2b-space-4);
   color: white;
-  font-size: 1.25rem;
+  font-size: var(--b2b-font-size-h2);
 }
 
 /* 3. 대시보드 분할 레이아웃 */
 .board-container {
   display: flex;            
   flex-wrap: wrap;          
-  gap: 2rem;                
+  gap: var(--b2b-space-6);                
 }
 
 /* 그룹별 영역 설정 */
@@ -264,35 +264,35 @@ export default {
   display: flex;                   
   justify-content: space-between;  
   align-items: flex-end;           
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #eee;
+  margin-bottom: var(--b2b-space-4);
+  padding-bottom: var(--b2b-space-2);
+  border-bottom: 1px solid var(--b2b-color-border);
 }
 .group-title {
   margin: 0;
-  font-weight: bold;
-  font-size: 1.25rem;
+  font-weight: 600;
+  font-size: var(--b2b-font-size-h2);
   display: flex;
   align-items: center;
 }
-.icon-primary { color: #0d6efd; margin-right: 0.5rem; }
-.icon-success { color: #198754; margin-right: 0.5rem; }
+.icon-primary { color: var(--b2b-color-primary); margin-right: var(--b2b-space-2); }
+.icon-success { color: var(--b2b-color-success); margin-right: var(--b2b-space-2); }
 
 .btn-more {
   text-decoration: none;
-  color: #6c757d;
-  font-size: 0.875rem;
+  color: var(--b2b-color-text-muted);
+  font-size: var(--b2b-font-size-body);
 }
 .btn-more:hover {
   text-decoration: underline;
-  color: #000;
+  color: var(--b2b-color-text-main);
 }
 
 /* 내부 카드 그리드 */
 .flex-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--b2b-space-4);
 }
 
 /* 4컬럼 그리드 계산 */
@@ -308,11 +308,11 @@ export default {
 
 /* 카드 스타일 */
 .content-card {
-  background: white;
+  background: var(--b2b-color-bg-card);
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.05);
   transition: all 0.3s;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--b2b-color-border);
   overflow: hidden;
   min-height: 380px;        /* 기존 trump-shape 스타일 병합 */
   height: 100%;
@@ -324,7 +324,7 @@ export default {
 
 .card-inner {
   height: 100%;
-  padding: 1.5rem;
+  padding: var(--b2b-space-5);
   display: flex;            
   flex-direction: column;   
   justify-content: space-between;
@@ -340,8 +340,8 @@ export default {
 
 .card-desc {
   margin: 0;
-  font-size: 1.1rem;
-  color: #333;
+  font-size: var(--b2b-font-size-body);
+  color: var(--b2b-color-text-main);
   line-height: 1.6;
   font-weight: 500;
   
@@ -354,21 +354,21 @@ export default {
 }
 
 .card-title-text {
-  font-size: 1.25rem;
+  font-size: var(--b2b-font-size-h2);
   font-weight: bold;
 }
 
 .card-bottom {
-  margin-top: 1rem;
+  margin-top: var(--b2b-space-4);
   text-align: center;
-  border-top: 1px solid #f8f8f8;
-  padding-top: 1rem;
+  border-top: 1px solid var(--b2b-color-border);
+  padding-top: var(--b2b-space-4);
 }
 
 .card-date {
   display: block;
-  font-size: 0.85rem;
-  color: #888;
+  font-size: var(--b2b-font-size-sm);
+  color: var(--b2b-color-text-muted);
 }
 
 /* 반응형 처리 */
@@ -388,11 +388,4 @@ export default {
 }
 
 /* 유틸리티 (필요 시 부트스트랩 클래스로 대체 가능) */
-.bg-success { background-color: #198754 !important; }
-.bg-primary { background-color: #0d6efd !important; }
-.bg-danger { background-color: #dc3545 !important; }
-.bg-info { background-color: #0dcaf0 !important; }
-.bg-warning { background-color: #ffc107 !important; }
-.bg-secondary { background-color: #6c757d !important; }
-.bg-dark { background-color: #212529 !important; }
 </style>

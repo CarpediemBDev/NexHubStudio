@@ -315,21 +315,21 @@ export default {
 
 <style scoped>
 .upload-area {
-  border: 2px dashed #dee2e6;
+  border: 2px dashed var(--b2b-color-border);
   border-radius: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
-  background-color: #f8f9fa;
+  background-color: var(--b2b-color-bg-subcard);
 }
 
 .upload-area:hover {
-  border-color: #0d6efd;
-  background-color: #e7f1ff;
+  border-color: var(--b2b-color-primary);
+  background-color: var(--b2b-color-primary-subtle);
 }
 
 .upload-area.drag-over {
-  border-color: #0d6efd;
-  background-color: #cfe2ff;
+  border-color: var(--b2b-color-primary);
+  background-color: var(--b2b-color-primary-subtle);
   border-style: solid;
 }
 
@@ -338,6 +338,6 @@ export default {
 }
 
 .list-group-item:hover {
-  background-color: #f8f9fa;
+  background-color: var(--b2b-color-bg-subcard);
 }
 </style>

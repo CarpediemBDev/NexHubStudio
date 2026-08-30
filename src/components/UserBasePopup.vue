@@ -318,21 +318,21 @@ export default {
 .b2b-modal-header {
   background-color: var(--b2b-color-bg-card);
   border-bottom: 1px solid var(--b2b-color-border) !important;
-  padding: 12px 16px;
+  padding: var(--b2b-space-3) var(--b2b-space-4);
   cursor: move;
 }
 
 .b2b-modal-body {
   flex: 1 1 auto;
   overflow: auto;
-  padding: 16px;
+  padding: var(--b2b-space-4);
   background-color: var(--b2b-color-bg-body);
 }
 
 .b2b-modal-footer {
   background-color: var(--b2b-color-bg-card);
   border-top: 1px solid var(--b2b-color-border) !important;
-  padding: 12px 16px;
+  padding: var(--b2b-space-3) var(--b2b-space-4);
 }
 
 @media (max-width: 576px) {

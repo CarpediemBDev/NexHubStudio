@@ -1,7 +1,5 @@
-﻿<template>
+<template>
   <div class="container mt-4">
-    <h2 class="mb-4">업무 의뢰 관리</h2>
-
     <!-- 1. 진행 상태 표시 (상단 스텝바) -->
     <div class="workflow-steps mb-5">
       <div
@@ -150,7 +148,7 @@
           <div class="accordion-body">
             <!-- 의뢰 내용 요약 (읽기 전용) -->
             <div class="alert alert-info">
-              <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>접수된 의뢰 정보</h6>
+              <h6 class="b2b-text-h2 alert-heading"><i class="bi bi-info-circle me-2"></i>접수된 의뢰 정보</h6>
               <p class="mb-1"><strong>제목:</strong> {{ requestData.title || '(의뢰 제목)' }}</p>
               <p class="mb-0">
                 <strong>우선순위:</strong>
@@ -541,42 +539,42 @@ export default {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #e9ecef;
-  border: 3px solid #dee2e6;
+  background-color: var(--b2b-color-hover-bg);
+  border: 3px solid var(--b2b-color-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  color: #6c757d;
+  font-size: var(--b2b-font-size-display);
+  color: var(--b2b-color-text-muted);
   transition: all 0.3s ease;
-  margin-bottom: 10px;
+  margin-bottom: var(--b2b-space-3);
 }
 
 .step-item.active .step-circle {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
+  background-color: var(--b2b-color-primary);
+  border-color: var(--b2b-color-primary);
   color: white;
-  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+  box-shadow: 0 0 0 4px rgba(var(--b2b-color-primary-rgb), 0.15);
 }
 
 .step-item.completed .step-circle {
-  background-color: #198754;
-  border-color: #198754;
+  background-color: var(--b2b-color-success);
+  border-color: var(--b2b-color-success);
   color: white;
 }
 
 .step-label {
   font-weight: 600;
-  color: #6c757d;
-  margin-top: 8px;
+  color: var(--b2b-color-text-muted);
+  margin-top: var(--b2b-space-2);
 }
 
 .step-item.active .step-label {
-  color: #0d6efd;
+  color: var(--b2b-color-primary);
 }
 
 .step-item.completed .step-label {
-  color: #198754;
+  color: var(--b2b-color-success);
 }
 
 .step-line {
@@ -585,12 +583,12 @@ export default {
   left: 50%;
   width: 100%;
   height: 3px;
-  background-color: #dee2e6;
+  background-color: var(--b2b-color-border);
   z-index: -1;
 }
 
 .step-item.completed .step-line {
-  background-color: #198754;
+  background-color: var(--b2b-color-success);
 }
 
 /* 파일 업로드 영역 */
@@ -600,25 +598,25 @@ export default {
 }
 
 .file-upload-area:hover {
-  background-color: #f8f9fa !important;
-  border-color: #0d6efd !important;
+  background-color: var(--b2b-color-hover-bg) !important;
+  border-color: var(--b2b-color-primary) !important;
 }
 
 /* 아코디언 커스텀 */
 .accordion-button:not(.collapsed) {
-  background-color: #e7f1ff;
-  color: #0d6efd;
+  background-color: var(--b2b-color-primary-subtle);
+  color: var(--b2b-color-primary);
 }
 
 .accordion-button:focus {
   box-shadow: none;
-  border-color: rgba(0, 0, 0, 0.125);
+  border-color: var(--b2b-color-border);
 }
 
 .accordion-button.disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background-color: #e9ecef;
+  background-color: var(--b2b-color-hover-bg);
 }
 
 .accordion-button:disabled {
@@ -636,7 +634,7 @@ export default {
   }
 
   .step-item {
-    margin-bottom: 20px;
+    margin-bottom: var(--b2b-space-5);
   }
 }
 </style>

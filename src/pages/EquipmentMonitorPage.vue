@@ -2,7 +2,6 @@
   <div class="equipment-monitor-container bg-theme-main text-theme-primary min-vh-100 p-3">
     <!-- 대시보드 헤더 카드 (Dark Navy / Light 전역 테마 완벽 연동) -->
     <div class="monitor-header b2b-card p-3 mb-3">
-      <h1 class="b2b-text-h1 text-theme-primary mb-3">설비 모니터링 대시보드</h1>
       <div class="header-controls d-flex flex-wrap align-items-center gap-3">
         <div class="floor-selector d-flex align-items-center gap-2">
           <label class="b2b-text-body text-theme-primary fw-semibold mb-0">층 선택:</label>
@@ -294,7 +293,7 @@ export default {
 .legend-item {
   display: flex;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
   color: var(--text-primary) !important;
 }
 
@@ -305,11 +304,11 @@ export default {
   display: inline-block;
 }
 
-.status-dot.normal { background-color: #28a745; }
-.status-dot.warning { background-color: #ffc107; }
-.status-dot.error { background-color: #dc3545; }
-.status-dot.maintenance { background-color: #6c757d; }
-.status-dot.offline { background-color: #64748b; }
+.status-dot.normal { background-color: var(--b2b-color-success); }
+.status-dot.warning { background-color: var(--b2b-color-warning); }
+.status-dot.error { background-color: var(--b2b-color-danger); }
+.status-dot.maintenance { background-color: var(--b2b-color-text-muted); }
+.status-dot.offline { background-color: var(--b2b-color-text-muted); }
 
 .equipment-map {
   background-color: var(--bg-card) !important;
@@ -357,7 +356,7 @@ export default {
 
 .equipment-icon {
   font-size: 22px;
-  margin-bottom: 4px;
+  margin-bottom: var(--b2b-space-1);
   color: var(--text-primary) !important;
 }
 

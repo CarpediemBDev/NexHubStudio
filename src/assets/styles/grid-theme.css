@@ -10,6 +10,19 @@
   color: var(--text-primary) !important;
 }
 
+/* --------------------------------------------------------------------------
+   [SEAM] 셀 색상 이음매
+   RealGrid 기본 CSS 는 특정도가 높아(최대 0,3,3) !important 없이는 못 이긴다.
+   그러나 color/background 에까지 !important 를 걸면 우리 자신의 동적 스타일
+   (styleCallback 클래스, 조건부 행 강조, JS 런타임 색)까지 막혀버린다.
+   그래서 !important 는 '속성'에만 걸고 '값'은 변수로 열어 둔다.
+
+     - RealGrid 기본 CSS 는 여전히 이긴다 (!important 유지)
+     - 우리 코드는 !important 없이 변수만 세팅해 덮는다
+         .rg-emp-regular { --rg-cell-color: var(--b2b-color-primary); }
+         el.style.setProperty('--rg-cell-bg', computed)   // JS 런타임도 가능
+   -------------------------------------------------------------------------- */
+
 /* 컬럼 헤더 — indicator/checkBar/stateBar 포함 모두 동일 색상 */
 .rg-header,
 .rg-header-cell,
@@ -19,8 +32,8 @@
 .rg-state-header,
 [class*="rg-"][class*="header"],
 [class*="rg-"][class*="head"] {
-  background-color: var(--bg-header) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--rg-header-bg, var(--b2b-color-bg-header)) !important;
+  color: var(--rg-header-color, var(--b2b-color-text-main)) !important;
   font-weight: 600 !important;
   border-bottom: 1px solid var(--border-color) !important;
 }
@@ -33,14 +46,16 @@
 [class*="rg-cell"] {
   border-right: 1px solid var(--border-color) !important;
   border-bottom: 1px solid var(--border-color) !important;
-  color: var(--text-primary) !important;
-  background-color: var(--bg-card) !important;
+  color: var(--rg-cell-color, var(--b2b-color-text-main)) !important;
+  background-color: var(--rg-cell-bg, var(--b2b-color-bg-card)) !important;
 }
 
+/* hover 는 변수만 바꾼다. 셀렉터 특정도(0,3,0)가 페이지 클래스(0,1,0)보다
+   높으므로 조건부 행 색이 있어도 hover 가 우선한다. */
 .rg-data-row:hover .rg-data-cell,
 .rg-data-row:hover .rg-indicator-cell,
 .rg-data-row:hover .rg-check-cell {
-  background-color: var(--b2b-color-hover-bg) !important;
+  --rg-cell-bg: var(--b2b-color-hover-bg);
 }
 
 /* ==========================================================================
@@ -66,27 +81,48 @@
 }
 
 /* ==========================================================================
+   STYLE CALLBACK CELL CLASSES
+   RealGrid styleCallback 이 돌려주는 셀 클래스. 4개 페이지
+   (RealGrid JS/Vue/Tree, Pivot A)에 동일 규칙이 복붙되어 있던 것을 통합했다.
+   위 SEAM 덕분에 !important 없이 변수만 세팅하면 된다.
+   ========================================================================== */
+
+/* 고용형태 — 범주형 색상. semantic(성공/경고/위험)이 아니라 '구분'이 목적이라
+   토큰이 아닌 고정 색을 쓴다. 다크에서도 배경 대비가 확보되는 600 계열. */
+.rg-emp-regular  { --rg-cell-color: var(--b2b-color-primary); }
+.rg-emp-contract { --rg-cell-color: #EA580C; }  /* orange-600  */
+.rg-emp-parttime { --rg-cell-color: #7C3AED; }  /* violet-600  */
+.rg-emp-intern   { --rg-cell-color: #0891B2; }  /* cyan-600    */
+.rg-emp-dept     { --rg-cell-color: var(--b2b-color-text-muted); }
+
+/* 임계값 강조 */
+.rg-salary-high  { --rg-cell-color: var(--b2b-color-danger); }
+
+/* ==========================================================================
    STATE BAR — 행 상태 컬러 뱃지 (추가=초록, 수정=파랑, 삭제=빨강)
    RealGrid가 state cell에 부여하는 data-rowstate 속성 기반 CSS
    ========================================================================== */
 
-/* 추가(I = Insert) → 초록 */
+/* 이음매를 통해 변수만 세팅한다 (!important 불필요).
+   색은 Tailwind 원색이 아니라 앱의 semantic 토큰을 따른다. */
+
+/* 추가(I = Insert) → success */
 .rg-state-cell[data-rowstate="I"],
 .rg-state-cell[data-rowstate="insert"],
 canvas.rg-canvas ~ .rg-state-insert {
-  background-color: #22c55e !important;  /* green-500 */
+  --rg-cell-bg: var(--b2b-color-success);
 }
 
-/* 수정(U = Update) → 파랑 */
+/* 수정(U = Update) → primary */
 .rg-state-cell[data-rowstate="U"],
 .rg-state-cell[data-rowstate="update"] {
-  background-color: #3b82f6 !important;  /* blue-500 */
+  --rg-cell-bg: var(--b2b-color-primary);
 }
 
-/* 삭제(D = Delete) → 빨강 */
+/* 삭제(D = Delete) → danger */
 .rg-state-cell[data-rowstate="D"],
 .rg-state-cell[data-rowstate="delete"] {
-  background-color: #ef4444 !important;  /* red-500 */
+  --rg-cell-bg: var(--b2b-color-danger);
 }
 
 /* ==========================================================================
@@ -155,11 +191,18 @@ canvas.rg-canvas ~ .rg-state-insert {
 [data-theme="dark-navy"] [class*="rg-head"],
 [data-theme="dark"] [class*="rg-indicator"],
 [data-theme="dark-navy"] [class*="rg-indicator"] {
-  background-color: var(--bg-main) !important;
-  color: var(--text-primary) !important;
+  /* 다크에서는 헤더를 본문보다 더 어둡게(= --bg-main) 눌러 대비를 준다.
+     기본 규칙과 값이 다르므로 이 블록은 유지한다. 이음매를 통해 세팅한다. */
+  --rg-header-bg: var(--b2b-color-bg-body);
+  --rg-header-color: var(--b2b-color-text-main);
   border-color: var(--border-color) !important;
 }
 
+/* [SEAM/DARK] 다크 전용 셀 규칙
+   위 블랭킷 `[data-theme="dark"] [class*="rg-"]` 이 (0,2,0) 으로 모든 rg 요소의
+   color/background 를 덮기 때문에, 기본 셀 규칙(0,1,0)의 이음매가 다크에서 무력화된다.
+   같은 (0,2,0) 특정도로 '뒤에' 선언해 블랭킷을 이기면서 이음매를 복원한다.
+   ⚠ 이 블록을 지우면 다크에서 styleCallback 셀 색과 행 상태색이 전부 사라진다. */
 [data-theme="dark"] .rg-data-cell,
 [data-theme="dark-navy"] .rg-data-cell,
 [data-theme="dark"] .rg-indicator-cell,
@@ -172,11 +215,12 @@ canvas.rg-canvas ~ .rg-state-insert {
 [data-theme="dark-navy"] .rg-row-cell,
 [data-theme="dark"] [class*="rg-cell"],
 [data-theme="dark-navy"] [class*="rg-cell"] {
-  background-color: var(--bg-card) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--rg-cell-bg, var(--b2b-color-bg-card)) !important;
+  color: var(--rg-cell-color, var(--b2b-color-text-main)) !important;
   border-color: var(--border-color) !important;
 }
 
+/* 다크 hover — 이음매로 세팅. (0,3,0) 이라 조건부 행 색보다 우선한다. */
 [data-theme="dark"] .rg-data-row:hover .rg-data-cell,
 [data-theme="dark-navy"] .rg-data-row:hover .rg-data-cell,
 [data-theme="dark"] .rg-data-row:hover .rg-indicator-cell,
@@ -185,7 +229,7 @@ canvas.rg-canvas ~ .rg-state-insert {
 [data-theme="dark-navy"] .rg-data-row:hover .rg-check-cell,
 [data-theme="dark"] [class*="rg-row"]:hover [class*="rg-cell"],
 [data-theme="dark-navy"] [class*="rg-row"]:hover [class*="rg-cell"] {
-  background-color: var(--border-color) !important;
+  --rg-cell-bg: var(--b2b-color-hover-bg);
 }
 
 /* JqxGrid overrides if applicable */
@@ -216,7 +260,8 @@ canvas.rg-canvas ~ .rg-state-insert {
 .table {
   --bs-table-bg: transparent !important;
   --bs-table-accent-bg: transparent !important;
-  --bs-table-hover-bg: transparent !important;
+  --bs-table-hover-bg: var(--b2b-color-hover-bg) !important;
+  --bs-table-hover-color: var(--b2b-color-text-main) !important;
   background-color: var(--bg-card) !important;
   color: var(--text-primary) !important;
 }
@@ -226,8 +271,8 @@ canvas.rg-canvas ~ .rg-state-insert {
   color: var(--text-primary) !important;
   font-weight: 600 !important;
   border-bottom: 2px solid var(--border-color) !important;
-  padding: 10px 12px !important;
-  font-size: 0.8125rem !important; /* 13px */
+  padding: 10px var(--b2b-space-3) !important;
+  font-size: var(--b2b-font-size-body) !important;
   white-space: nowrap !important;
 }
 
@@ -235,15 +280,22 @@ canvas.rg-canvas ~ .rg-state-insert {
   background-color: var(--bg-card) !important;
   border-bottom-color: var(--border-color) !important;
   color: var(--text-primary) !important;
-  font-size: 0.8125rem !important; /* 13px */
+  font-size: var(--b2b-font-size-body) !important;
 }
 
-/* 마우스 올렸을 때 Navy색으로 배경이 바뀌는 효과 완전 제거 */
+/* 마우스 올렸을 때 다크모드 글자색 사라짐 방지 (글자색 흰색 유지 및 세련된 호버 배경) */
+.table-hover > tbody > tr:hover > *,
 .table-hover tbody tr:hover,
 .table-hover tbody tr:hover td,
-.table-hover tbody tr:hover th {
-  background-color: inherit !important;
-  color: inherit !important;
+.table-hover tbody tr:hover th,
+.table-hover tbody tr:hover span:not(.badge),
+.table-hover tbody tr:hover div {
+  --bs-table-hover-color: var(--b2b-color-text-main) !important;
+  --bs-table-hover-bg: var(--b2b-color-hover-bg) !important;
+  --bs-table-color-state: var(--b2b-color-text-main) !important;
+  --bs-table-bg-state: var(--b2b-color-hover-bg) !important;
+  background-color: var(--b2b-color-hover-bg) !important;
+  color: var(--b2b-color-text-main) !important;
   box-shadow: none !important;
 }
 
@@ -254,7 +306,7 @@ canvas.rg-canvas ~ .rg-state-insert {
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  padding: 32px 16px;
+  padding: var(--b2b-space-6) var(--b2b-space-4);
   text-align: center;
 }
 
@@ -266,14 +318,155 @@ canvas.rg-canvas ~ .rg-state-insert {
 }
 
 .b2b-empty-state-title {
-  font-size: 0.9375rem; /* 15px */
+  font-size: var(--b2b-font-size-h2);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .b2b-empty-state-desc {
-  font-size: 0.8125rem; /* 13px */
+  font-size: var(--b2b-font-size-body);
   color: var(--text-secondary);
   margin-bottom: 0;
+}
+
+/* ==========================================================================
+   🐛 DARK — RealGrid 오버레이 레이어 배경 강제 해제
+   ── 증상: 다크모드에서 셀을 클릭하면 그 셀의 글자가 사라진다.
+   ── 원인: 위 122~178줄의 블랭킷 규칙
+        [data-theme="dark"] [class*="rg-"] { background-color: var(--bg-card) !important }
+      이 "셀 위에 절대배치되는 투명 오버레이 div" 까지 싹 잡는다.
+      RealGrid 2.10 은 포커스 사각형(.rg-focus / .rg-focus-inner)·선택영역(.rg-selection)·
+      행마스크(.rg-rowhover / .rg-rowfocus)를 셀 위에 덮는 별도 div 로 그리고,
+      원본 CSS 는 border 만 주고 background 는 비워둔다(투명).
+      → 블랭킷이 여기에 불투명 #1E293B 를 칠해버려, 클릭한 셀이 통째로 어두운 판에 가려짐.
+        (글자색이 바뀐 게 아니라 글자가 판 밑에 깔린 것)
+   ── 해결: 오버레이는 배경을 투명/반투명으로 되돌리고 포커스·선택 색을 다크 팔레트로 재정의.
+   ── specificity: `html[data-theme="dark"] .rg-focus` = (0,2,1) 로
+      블랭킷 `[data-theme="dark"] [class*="rg-"]` = (0,2,0) 을 확실히 이긴다.
+      ⚠ 이 섹션의 선택자에서 앞의 `html` 을 빼면 동점이 되어 다시 깨진다.
+   ========================================================================== */
+
+/* 1) 순수 오버레이/마스크 레이어 — 무조건 투명 */
+html[data-theme="dark"] .rg-focus-mask,
+html[data-theme="dark-navy"] .rg-focus-mask,
+html[data-theme="dark"] .rg-group-focus-mask,
+html[data-theme="dark-navy"] .rg-group-focus-mask,
+html[data-theme="dark"] .rg-selection-mask,
+html[data-theme="dark-navy"] .rg-selection-mask,
+html[data-theme="dark"] .rg-selection-layer,
+html[data-theme="dark-navy"] .rg-selection-layer,
+html[data-theme="dark"] .rg-tree-lines,
+html[data-theme="dark-navy"] .rg-tree-lines,
+html[data-theme="dark"] .rg-watermark-layer,
+html[data-theme="dark-navy"] .rg-watermark-layer,
+html[data-theme="dark"] .rg-editor-marquee,
+html[data-theme="dark-navy"] .rg-editor-marquee {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 2) 포커스 사각형 — 배경 없이 테두리만 (셀 글자가 그대로 보이도록) */
+html[data-theme="dark"] .rg-focus,
+html[data-theme="dark-navy"] .rg-focus,
+html[data-theme="dark"] .rg-focus-line,
+html[data-theme="dark-navy"] .rg-focus-line,
+html[data-theme="dark"] .rg-group-focus,
+html[data-theme="dark-navy"] .rg-group-focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 2px solid var(--b2b-color-primary-hover) !important;
+}
+
+/* 편집 중 포커스 — 조금 더 밝게 */
+html[data-theme="dark"] .rg-focus-editing,
+html[data-theme="dark-navy"] .rg-focus-editing {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 2px solid #93C5FD !important;
+}
+
+/* 그리드가 포커스를 잃었을 때(.rg-focus 와 함께 붙음) — 흐리게 */
+html[data-theme="dark"] .rg-deactive-focus,
+html[data-theme="dark-navy"] .rg-deactive-focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: rgba(var(--b2b-color-primary-rgb), 0.45) !important;
+}
+
+/* 내부 점선 포커스(displayOptions.showInnerFocus 기본 true) */
+html[data-theme="dark"] .rg-focus-inner,
+html[data-theme="dark-navy"] .rg-focus-inner,
+html[data-theme="dark"] .rg-focus-inner-line,
+html[data-theme="dark-navy"] .rg-focus-inner-line {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: rgba(226, 232, 240, 0.75) !important;
+}
+
+/* 3) 선택 영역 — 반투명 파랑 (글자 비침 유지) */
+html[data-theme="dark"] .rg-selection,
+html[data-theme="dark-navy"] .rg-selection {
+  background: rgba(var(--b2b-color-primary-rgb), 0.28) !important;
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.28) !important;
+  border: 1px solid rgba(var(--b2b-color-primary-rgb), 0.7) !important;
+}
+
+html[data-theme="dark"] .rg-selection-cell,
+html[data-theme="dark-navy"] .rg-selection-cell {
+  background: rgba(var(--b2b-color-primary-rgb), 0.32) !important;
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.32) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 4) 행 마스크(hover/focus/block) — 반투명 회색 */
+html[data-theme="dark"] .rg-rowhover,
+html[data-theme="dark-navy"] .rg-rowhover,
+html[data-theme="dark"] .rg-rowfocus,
+html[data-theme="dark-navy"] .rg-rowfocus,
+html[data-theme="dark"] .rg-rowblock,
+html[data-theme="dark-navy"] .rg-rowblock {
+  background: rgba(148, 163, 184, 0.14) !important;
+  background-color: rgba(148, 163, 184, 0.14) !important;
+}
+
+/* ==========================================================================
+   🐛 DARK — 행바(No./stateBar/checkBar) & 헤더의 focus/select 강조색
+   ── 증상: 셀을 클릭하면 그 행의 No. 숫자와 해당 컬럼 헤더 글자가 사라진다.
+   ── 원인: RealGrid 기본 CSS 가 focus/select 행바 셀에 밝은 하늘색(#D2E7FF),
+      select 에 흰색(#FFF)을 칠한다. 이 규칙은 specificity (0,3,3) 이라
+      블랭킷 (0,2,0) 을 이기고 살아남는데, 글자색만 다크 팔레트의 흰색으로
+      덮여 흰 글자 + 흰/하늘 배경이 되어 안 보인다.
+   ── 해결: 배경을 다크 팔레트의 반투명 파랑/카드색으로 재정의.
+      선택자 앞에 html 을 붙여 (0,4,3) 으로 기본 규칙 (0,3,3) 을 이긴다.
+   ========================================================================== */
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-focus,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-focus,
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-statebar-focus,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-statebar-focus,
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-checkbar-focus,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-checkbar-focus {
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.22) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-select,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-select,
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-statebar-select,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-statebar-select,
+html[data-theme="dark"] .rg-rowbarcontainer .rg-table tr td.rg-checkbar-select,
+html[data-theme="dark-navy"] .rg-rowbarcontainer .rg-table tr td.rg-checkbar-select {
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.12) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 컬럼 헤더 focus/select — 흰색/하늘색 대신 반투명 파랑 강조 */
+html[data-theme="dark"] .rg-header-cell.rg-header-focus,
+html[data-theme="dark-navy"] .rg-header-cell.rg-header-focus,
+html[data-theme="dark"] .rg-header-cell.rg-header-select,
+html[data-theme="dark-navy"] .rg-header-cell.rg-header-select,
+html[data-theme="dark"] .rg-group-header-select,
+html[data-theme="dark-navy"] .rg-group-header-select {
+  background-color: rgba(var(--b2b-color-primary-rgb), 0.22) !important;
+  color: var(--text-primary) !important;
 }

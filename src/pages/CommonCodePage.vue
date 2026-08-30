@@ -1,7 +1,6 @@
-﻿<template>
+<template>
   <div class="common-code-manager">
-    <div class="toolbar mb-3">
-      <h3 class="mb-0">공통코드 관리</h3>
+    <div class="toolbar mb-3 d-flex justify-content-end">
       <div class="d-flex gap-2">
         <input
           type="text"
@@ -277,85 +276,85 @@ export default {
   height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  padding: var(--b2b-space-4);
 }
 
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #dee2e6;
+  padding-bottom: var(--b2b-space-4);
+  border-bottom: 2px solid var(--b2b-color-border);
 }
 
 .content-area {
   display: flex;
-  gap: 1rem;
+  gap: var(--b2b-space-4);
   flex: 1;
   overflow: hidden;
-  margin-top: 1rem;
+  margin-top: var(--b2b-space-4);
 }
 
 .group-panel {
   width: 250px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--b2b-color-border);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: var(--b2b-color-bg-card);
 }
 
 .code-panel {
   flex: 1;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--b2b-color-border);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: var(--b2b-color-bg-card);
 }
 
 .panel-header {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #dee2e6;
+  padding: var(--b2b-space-3) var(--b2b-space-4);
+  border-bottom: 1px solid var(--b2b-color-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f8f9fa;
+  background: var(--b2b-color-bg-subcard);
   border-radius: 8px 8px 0 0;
 }
 
 .group-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0.5rem;
+  padding: var(--b2b-space-2);
 }
 
 .group-item {
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.25rem;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
+  margin-bottom: var(--b2b-space-1);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .group-item:hover {
-  background: #e9ecef;
+  background: var(--b2b-color-hover-bg);
 }
 
 .group-item.active {
-  background: #0d6efd;
+  background: var(--b2b-color-primary);
   color: white;
 }
 
 .group-item.active .badge {
-  background: white !important;
-  color: #0d6efd !important;
+  background: var(--b2b-color-bg-card) !important;
+  color: var(--b2b-color-primary) !important;
 }
 
 .group-name {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--b2b-space-2);
   font-size: 0.9rem;
 }
 

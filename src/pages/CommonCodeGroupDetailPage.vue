@@ -335,37 +335,37 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #d0d7de;
+  padding-bottom: var(--b2b-space-4);
+  margin-bottom: var(--b2b-space-5);
+  border-bottom: 1px solid var(--b2b-color-border);
 }
 
 .group-info {
   flex: 1;
-  padding: 0 1rem;
+  padding: 0 var(--b2b-space-4);
 }
 
 .group-info-content {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--b2b-space-3);
 }
 
 .group-icon {
   font-size: 1.5rem;
-  color: #57606a;
+  color: var(--b2b-color-text-muted);
 }
 
 .group-title {
-  font-size: 1.5rem;
+  font-size: var(--b2b-font-size-h1);
   font-weight: 600;
-  color: #24292f;
+  color: var(--b2b-color-text-main);
   margin: 0;
 }
 
 .content-area {
   display: flex;
-  gap: 1rem;
+  gap: var(--b2b-space-4);
   flex: 1;
   overflow: hidden;
 }
@@ -383,29 +383,29 @@ export default {
 }
 
 .panel-header {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #d0d7de;
+  padding: var(--b2b-space-3) var(--b2b-space-4);
+  border-bottom: 1px solid var(--b2b-color-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f6f8fa;
+  background: var(--b2b-color-bg-subcard);
 }
 
 .panel-title {
   font-weight: 600;
-  color: #24292f;
+  color: var(--b2b-color-text-main);
   font-size: 0.875rem;
 }
 
 .panel-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--b2b-space-2);
 }
 
 .badge {
-  background: #eaeef2;
-  color: #57606a;
-  padding: 0.25rem 0.5rem;
+  background: var(--b2b-color-hover-bg);
+  color: var(--b2b-color-text-muted);
+  padding: var(--b2b-space-1) var(--b2b-space-2);
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -414,12 +414,12 @@ export default {
 .tree-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0.5rem;
+  padding: var(--b2b-space-2);
 }
 
 .tree-item {
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.25rem;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
+  margin-bottom: var(--b2b-space-1);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -427,8 +427,8 @@ export default {
 }
 
 .tree-item:hover {
-  background: #f6f8fa;
-  border-color: #d0d7de;
+  background: var(--b2b-color-bg-subcard);
+  border-color: var(--b2b-color-border);
 }
 
 .tree-item.active {
@@ -438,21 +438,21 @@ export default {
 }
 
 .tree-item.active .badge {
-  background: white !important;
+  background: var(--b2b-color-bg-card) !important;
   color: #0969da !important;
 }
 
 .tree-item-content {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--b2b-space-2);
   font-size: 0.875rem;
 }
 
 .drag-handle {
   cursor: grab;
   opacity: 0.4;
-  color: #57606a;
+  color: var(--b2b-color-text-muted);
 }
 
 .drag-handle:active {
@@ -462,12 +462,12 @@ export default {
 .code-text {
   font-weight: 600;
   min-width: 80px;
-  color: #24292f;
+  color: var(--b2b-color-text-main);
 }
 
 .value-text {
   flex: 1;
-  color: #57606a;
+  color: var(--b2b-color-text-muted);
 }
 
 /* 버튼 스타일 개선: 메인페이지와 통일, 작고 심플하게 */
@@ -493,7 +493,7 @@ export default {
 .github-btn-danger {
   color: #cf222e;
   border: 1px solid rgba(207, 34, 46, 0.2);
-  background: #fff;
+  background: var(--b2b-color-bg-card);
 }
 .github-btn-danger:hover {
   background: #cf222e;

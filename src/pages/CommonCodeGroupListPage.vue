@@ -1,7 +1,6 @@
-﻿<template>
+<template>
   <div class="code-group-list-page">
-    <div class="toolbar mb-3">
-      <h3 class="mb-0">공통코드 그룹 관리</h3>
+    <div class="toolbar mb-3 d-flex justify-content-end">
       <div class="d-flex gap-2">
         <input
           type="text"
@@ -229,7 +228,7 @@ export default {
 
 <style scoped>
 .code-group-list-page {
-  padding: 2rem;
+  padding: var(--b2b-space-6);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -238,25 +237,25 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--b2b-space-5);
 }
 
 .toolbar h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--b2b-color-text-main);
   margin: 0;
 }
 
 .table {
-  background: white;
+  background: var(--b2b-color-bg-card);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border-radius: 0.5rem;
   overflow: hidden;
 }
 
 .table-card {
-  padding: 1.5rem;
+  padding: var(--b2b-space-5);
   margin: 0 -1.5rem;
   border-radius: 0.5rem;
   box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.1);
@@ -264,23 +263,23 @@ export default {
 
 .table thead {
   background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 2px solid var(--b2b-color-border);
 }
 
 .table thead th {
   font-weight: 600;
-  color: #495057;
+  color: var(--b2b-color-text-muted);
   font-size: 0.875rem;
-  padding: 0.875rem 0.75rem;
+  padding: 0.875rem var(--b2b-space-3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border: none;
 }
 
 .table tbody td {
-  padding: 0.875rem 0.75rem;
+  padding: 0.875rem var(--b2b-space-3);
   vertical-align: middle;
-  border-color: #f1f3f5;
+  border-color: var(--b2b-color-border);
   font-size: 0.9rem;
 }
 
@@ -290,7 +289,7 @@ export default {
 }
 
 .row-clickable:hover {
-  background-color: #f8f9fa !important;
+  background-color: var(--b2b-color-bg-subcard) !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
@@ -300,7 +299,7 @@ export default {
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--b2b-color-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
 }
@@ -311,12 +310,12 @@ export default {
 
 .icon-display {
   font-size: 1.4rem;
-  color: #6c757d;
+  color: var(--b2b-color-text-muted);
 }
 
 code {
-  background: #f1f3f5;
-  padding: 0.25rem 0.5rem;
+  background: var(--b2b-color-bg-subcard);
+  padding: var(--b2b-space-1) var(--b2b-space-2);
   border-radius: 4px;
   font-size: 0.875rem;
   color: #e83e8c;

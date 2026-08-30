@@ -496,7 +496,7 @@ export default {
   width: 60px !important;
   height: 60px !important;
   min-height: 60px !important;
-  padding: 4px !important;
+  padding: var(--b2b-space-1) !important;
   border-radius: 50% !important;
   border: 1px solid transparent !important;
   display: inline-flex !important;
@@ -555,7 +555,7 @@ export default {
 .card-header {
   background: var(--bg-subcard);
   border-bottom: 1px dashed var(--border-color);
-  padding: 12px 16px;
+  padding: var(--b2b-space-3) var(--b2b-space-4);
 }
 .header-research {
   color: #3b82f6;
@@ -567,14 +567,14 @@ export default {
   color: #f59e0b;
 }
 .header-process {
-  color: #94a3b8;
+  color: var(--b2b-color-text-faint);
 }
 
 /* 배정된 칩 스타일 */
 .assigned-chip {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px 6px 6px;
+  padding: 6px var(--b2b-space-3) 6px 6px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -605,7 +605,7 @@ export default {
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  margin-right: 8px;
+  margin-right: var(--b2b-space-2);
   font-weight: bold;
 }
 
@@ -613,7 +613,7 @@ export default {
   text-align: center;
   color: var(--text-secondary);
   font-size: 0.85rem;
-  margin-top: 20px;
+  margin-top: var(--b2b-space-5);
   font-style: italic;
 }
 

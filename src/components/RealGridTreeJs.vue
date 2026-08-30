@@ -1025,14 +1025,20 @@ export default {
     addChildToCurrent(values = {}, opts = {}) {
       if (!this.dataProvider || !this.gridView) return -1
       const parentDataRow = this.getCurrentDataRow()
-      if (parentDataRow < 0) return -1
+      if (parentDataRow < 0) return this.addRootRow(values, opts)
       const newRow = this.dataProvider.addChildRow(parentDataRow, values, -1, false)
 
       this.$nextTick(() => {
         try {
           const parentItem = this._itemOfDataRow(parentDataRow)
           if (parentItem >= 0) this.gridView.expand(parentItem, false, true)
-          const childItem = this._itemOfDataRow(newRow)
+          let childItem = this._itemOfDataRow(newRow)
+          if (childItem < 0) {
+            if (typeof this.gridView.expandAll === 'function') {
+              this.gridView.expandAll()
+            }
+            childItem = this._itemOfDataRow(newRow)
+          }
           if (childItem >= 0) {
             this.gridView.setCurrent({ itemIndex: childItem, column: opts.editColumn || undefined })
             if (opts.editColumn && typeof this.gridView.showEditor === 'function') {
@@ -1047,24 +1053,38 @@ export default {
       return newRow
     },
 
-    addRootRow(values = {}) {
-      if (!this.dataProvider) return -1
-      return this.dataProvider.addChildRow(-1, values, -1, false)
-    },
-
-    addSiblingToCurrent(values = {}, opts = {}) {
+    addRootRow(values = {}, opts = {}) {
       if (!this.dataProvider || !this.gridView) return -1
+      const rootChildren = typeof this.dataProvider.getChildren === 'function'
+        ? (this.dataProvider.getChildren(-1) || [])
+        : []
       const currentItem = this.getCurrentItemIndex()
-      if (currentItem < 0) return this.addRootRow(values)
+      let targetIndex = rootChildren.length
 
-      const parentItem = this.gridView.getParent(currentItem)
-      const parentDataRow = parentItem >= 0 ? this.gridView.getDataRow(parentItem) : -1
+      if (currentItem >= 0) {
+        let rootDataRow = this.gridView.getDataRow(currentItem)
+        let pItem = this.gridView.getParent(currentItem)
+        while (pItem >= 0) {
+          rootDataRow = this.gridView.getDataRow(pItem)
+          pItem = this.gridView.getParent(pItem)
+        }
+        const idx = rootChildren.indexOf(rootDataRow)
+        if (idx >= 0) targetIndex = idx + 1
+      }
 
-      const newRow = this.dataProvider.addChildRow(parentDataRow, values, -1, false)
+      const newRow = typeof this.dataProvider.insertChildRow === 'function'
+        ? this.dataProvider.insertChildRow(-1, targetIndex, values, -1, false)
+        : this.dataProvider.addChildRow(-1, values, -1, false)
 
       this.$nextTick(() => {
         try {
-          const childItem = this._itemOfDataRow(newRow)
+          let childItem = this._itemOfDataRow(newRow)
+          if (childItem < 0) {
+            if (typeof this.gridView.expandAll === 'function') {
+              this.gridView.expandAll()
+            }
+            childItem = this._itemOfDataRow(newRow)
+          }
           if (childItem >= 0) {
             this.gridView.setCurrent({ itemIndex: childItem, column: opts.editColumn || undefined })
             if (opts.editColumn && typeof this.gridView.showEditor === 'function') {
@@ -1072,7 +1092,54 @@ export default {
             }
             if (typeof this.gridView.setFocus === 'function') this.gridView.setFocus()
           }
-        } catch (e) { /* noop */ }
+        } catch (e) {
+          console.warn('[RealGridTree] addRootRow focus error:', e)
+        }
+      })
+      return newRow
+    },
+
+    addSiblingToCurrent(values = {}, opts = {}) {
+      if (!this.dataProvider || !this.gridView) return -1
+      const currentItem = this.getCurrentItemIndex()
+      if (currentItem < 0) return this.addRootRow(values, opts)
+
+      const currentDataRow = this.gridView.getDataRow(currentItem)
+      const parentItem = this.gridView.getParent(currentItem)
+      const parentDataRow = parentItem >= 0 ? this.gridView.getDataRow(parentItem) : -1
+
+      const siblings = typeof this.dataProvider.getChildren === 'function'
+        ? (this.dataProvider.getChildren(parentDataRow) || [])
+        : []
+      const currentPos = siblings.indexOf(currentDataRow)
+      const targetIndex = currentPos >= 0 ? currentPos + 1 : siblings.length
+
+      const newRow = typeof this.dataProvider.insertChildRow === 'function'
+        ? this.dataProvider.insertChildRow(parentDataRow, targetIndex, values, -1, false)
+        : this.dataProvider.addChildRow(parentDataRow, values, -1, false)
+
+      this.$nextTick(() => {
+        try {
+          if (parentItem >= 0) {
+            this.gridView.expand(parentItem, false, true)
+          }
+          let childItem = this._itemOfDataRow(newRow)
+          if (childItem < 0) {
+            if (typeof this.gridView.expandAll === 'function') {
+              this.gridView.expandAll()
+            }
+            childItem = this._itemOfDataRow(newRow)
+          }
+          if (childItem >= 0) {
+            this.gridView.setCurrent({ itemIndex: childItem, column: opts.editColumn || undefined })
+            if (opts.editColumn && typeof this.gridView.showEditor === 'function') {
+              this.gridView.showEditor()
+            }
+            if (typeof this.gridView.setFocus === 'function') this.gridView.setFocus()
+          }
+        } catch (e) {
+          console.warn('[RealGridTree] addSiblingToCurrent focus error:', e)
+        }
       })
       return newRow
     },
@@ -1316,7 +1383,6 @@ export default {
         { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
       ]
       if (this.gridId) {
-        menuItems.push({ label: '🔖 현재 뷰 저장...', tag: 'saveView' })
         menuItems.push({ label: '🔄 컬럼 레이아웃 저장값 초기화', tag: 'resetLayout' })
       }
       menuItems.push(

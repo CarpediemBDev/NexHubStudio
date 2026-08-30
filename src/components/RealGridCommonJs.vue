@@ -88,6 +88,7 @@ export default {
     filterable: { type: Boolean, default: undefined },
     checkable: { type: Boolean, default: undefined },
     mergeMode: { type: Boolean, default: undefined },
+    mergeable: { type: Boolean, default: undefined },
     useFooter: { type: Boolean, default: undefined },
     commitWhenLeave: { type: Boolean, default: undefined },
     rowResizable: { type: Boolean, default: undefined },
@@ -150,6 +151,7 @@ export default {
     },
     resolvedMergeMode() {
       if (this.mergeMode !== undefined) return this.mergeMode
+      if (this.mergeable !== undefined) return this.mergeable
       return false
     },
     resolvedSummaryMode() {
@@ -206,6 +208,7 @@ export default {
         if (this.gridView && newColumns && newColumns.length > 0) {
           this.gridView.setColumns(newColumns)
           this.syncColumnItems()
+          this.applyCellMerging()
         }
       }
     }
@@ -340,7 +343,36 @@ export default {
         if (saved) {
           const state = JSON.parse(saved)
           if (state.layout && typeof this.gridView.setColumnLayout === 'function') {
-            this.gridView.setColumnLayout(state.layout)
+            const allCols = this.gridView.getColumns() || []
+            const validColNames = new Set(allCols.map(c => c.name))
+
+            const filterValidLayout = (items) => {
+              if (!Array.isArray(items)) return []
+              return items.reduce((acc, item) => {
+                if (typeof item === 'string') {
+                  if (validColNames.has(item)) acc.push(item)
+                } else if (item && typeof item === 'object') {
+                  if (item.items) {
+                    const filteredSub = filterValidLayout(item.items)
+                    if (filteredSub.length > 0) {
+                      acc.push({ ...item, items: filteredSub })
+                    }
+                  } else if (item.name && validColNames.has(item.name)) {
+                    acc.push(item)
+                  }
+                }
+                return acc
+              }, [])
+            }
+
+            const cleanLayout = filterValidLayout(state.layout)
+            if (cleanLayout.length > 0) {
+              validColNames.forEach(name => {
+                const exists = cleanLayout.some(it => (typeof it === 'string' ? it === name : it.name === name))
+                if (!exists) cleanLayout.push(name)
+              })
+              this.gridView.setColumnLayout(cleanLayout)
+            }
           }
           if (state.fixedOpts && typeof this.gridView.setFixedOptions === 'function') {
             this.gridView.setFixedOptions(state.fixedOpts)
@@ -410,9 +442,8 @@ export default {
       if (!this.gridView) return
 
       try {
-        this.gridView.setIndicator({
+        this.gridView.setRowIndicator({
           visible: this.resolvedShowRowNumber,
-          draggableSelectedRows: false,
           ...(customOpts.indicator || {})
         })
       } catch (e) { /* noop */ }
@@ -590,14 +621,36 @@ export default {
         { label: '📌 선택한 행/열 모두 고정', tag: 'fixBoth' },
         { label: '❌ 고정 해제 (초기화)', tag: 'clearFixing' }
       ]
-      if (this.showSavedViews) {
-        menuItems.push({ label: '-' })
-        menuItems.push({ label: '💾 현재 뷰 상태 저장', tag: 'saveView' })
-      }
       this.gridView.setContextMenu(menuItems)
       this.gridView.onContextMenuPopup = () => true
       this.gridView.onContextMenuItemClicked = (grid, item, clickData) => {
         this.handleDynamicFixing(item, clickData)
+      }
+    },
+
+    // =========================================================
+    // 셀 병합 (merge-mode / mergeable)
+    //  - true 이면 그룹 유무와 무관하게 모든 컬럼에 mergeRule 을 자동 적용한다.
+    //  - 컬럼 정의에서 직접 지정한 mergeRule 은 그대로 존중한다.
+    // =========================================================
+    hasOwnMergeRule(col) {
+      const rule = col && col.mergeRule
+      if (!rule) return false
+      return typeof rule === 'string' ? rule.length > 0 : !!rule.criteria
+    },
+
+    applyCellMerging() {
+      if (!this.gridView || !this.resolvedMergeMode) return
+      try {
+        const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+        cols.forEach(col => {
+          if (!col || !col.name || this.hasOwnMergeRule(col)) return
+          try {
+            this.gridView.setColumnProperty(col.name, 'mergeRule', 'value')
+          } catch (e) { /* noop */ }
+        })
+      } catch (e) {
+        console.warn('[RealGrid] applyCellMerging error:', e)
       }
     },
 
@@ -682,6 +735,7 @@ export default {
 
       this.initContextMenu()
       this.syncColumnItems()
+      this.applyCellMerging()
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
     }
   }

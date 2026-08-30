@@ -11,7 +11,7 @@
             <i class="bi bi-pencil-square fs-4"></i>
           </div>
           <div>
-            <h2 class="mb-0">{{ isEdit ? '게시글 수정' : '게시글 작성' }}</h2>
+            <h2 class="b2b-text-h1 mb-0">{{ isEdit ? '게시글 수정' : '게시글 작성' }}</h2>
             <small class="text-muted">{{
               isEdit ? '게시글을 수정합니다' : '새로운 게시글을 작성합니다'
             }}</small>
@@ -335,12 +335,12 @@ export default {
 
 <style scoped>
 .btn-check:checked + .btn-outline-success {
-  background-color: #198754;
+  background-color: var(--b2b-color-success);
   color: white;
 }
 
 .btn-check:checked + .btn-outline-secondary {
-  background-color: #6c757d;
+  background-color: var(--b2b-color-text-muted);
   color: white;
 }
 

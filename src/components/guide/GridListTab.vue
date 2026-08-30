@@ -107,7 +107,7 @@ const searchGridCode = `<SearchGrid @search="handleSearch" @open-user-popup="han
 
 const pagedListCode = `<PagedList :items="pagedItems" :page-size="3">
   <template #item="{ item }">
-    <h6>{{ item.name }}</h6>
+    <h6 class="b2b-text-body">{{ item.name }}</h6>
   </template>
 </PagedList>`;
 

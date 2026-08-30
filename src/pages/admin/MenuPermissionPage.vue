@@ -1,13 +1,5 @@
 <template>
   <div class="b2b-page-container flex-100vh">
-    <!-- Top Page Header -->
-    <div class="b2b-toolbar mb-3">
-      <div class="d-flex align-items-center gap-2">
-        <h4 class="m-0 fw-bold">메뉴 및 권한 관리</h4>
-        <span class="badge b2b-badge-live ms-2">RBAC System</span>
-      </div>
-    </div>
-
     <!-- Content Split Panel -->
     <div class="content-split">
       <!-- LEFT: Menu Structure Tree Card -->
@@ -125,7 +117,7 @@
 .content-split {
   display: flex;
   flex: 1;
-  gap: 16px;
+  gap: var(--b2b-space-4);
   overflow: hidden;
 }
 .left-panel, .right-panel {
@@ -138,13 +130,13 @@
 .left-panel { width: 320px; }
 .right-panel { flex: 1; overflow-y: auto; }
 .panel-header {
-  padding: 10px 16px;
+  padding: 10px var(--b2b-space-4);
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
 }
 
-.tree { list-style: none; padding: 12px; margin: 0; }
-.sub-tree { list-style: none; padding-left: 12px; margin-top: 4px; }
+.tree { list-style: none; padding: var(--b2b-space-3); margin: 0; }
+.sub-tree { list-style: none; padding-left: var(--b2b-space-3); margin-top: var(--b2b-space-1); }
 .tree-node {
   padding: 6px 10px;
   border-radius: var(--b2b-radius-sm);
@@ -157,7 +149,7 @@
 
 /* 2. Left Tree Active Selected Node Highlight Tint */
 .selected-highlight {
-  background-color: #eff6ff !important;
+  background-color: var(--b2b-color-primary-subtle) !important;
   color: var(--b2b-color-primary) !important;
   border-left: 3px solid var(--b2b-color-primary) !important;
   font-weight: 700 !important;
@@ -169,8 +161,8 @@
 
 /* 3. Compact Table & Monospace Code Font */
 .compact-table th, .compact-table td {
-  padding: 6px 12px !important;
-  font-size: 13px;
+  padding: 6px var(--b2b-space-3) !important;
+  font-size: var(--b2b-font-size-body);
   border-bottom: 1px solid var(--b2b-color-border);
 }
 .compact-table th {

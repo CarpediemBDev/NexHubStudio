@@ -80,7 +80,7 @@ import PageHeader from '@/components/PageHeader.vue'
 
 <style scoped>
 .flex-100vh { display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
-.content-split { display: flex; flex: 1; gap: 16px; overflow: hidden; }
+.content-split { display: flex; flex: 1; gap: var(--b2b-space-4); overflow: hidden; }
 .left-panel, .right-panel {
   background: var(--b2b-color-bg-card);
   border: 1px solid var(--b2b-color-border);
@@ -92,7 +92,7 @@ import PageHeader from '@/components/PageHeader.vue'
 .grid-40 { width: 40%; flex: none; }
 .grid-60 { width: 60%; flex: 1; }
 .panel-header {
-  padding: 10px 16px;
+  padding: 10px var(--b2b-space-4);
   border-bottom: 1px solid var(--b2b-color-border);
   background-color: var(--b2b-color-bg-body);
   color: var(--b2b-color-text-main);
@@ -101,9 +101,9 @@ import PageHeader from '@/components/PageHeader.vue'
 .b2b-table { width: 100%; border-collapse: collapse; }
 .b2b-table th, .b2b-table td {
   border-bottom: 1px solid var(--b2b-color-border);
-  padding: 8px 12px;
+  padding: var(--b2b-space-2) var(--b2b-space-3);
   text-align: left;
-  font-size: 13px;
+  font-size: var(--b2b-font-size-body);
   color: var(--b2b-color-text-main);
 }
 .b2b-table th {

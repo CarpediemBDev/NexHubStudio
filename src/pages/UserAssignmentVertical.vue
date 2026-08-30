@@ -3,7 +3,7 @@
     <!-- 연구원 그룹 -->
     <div class="card mb-4 border-primary bg-theme-card text-theme-primary shadow-sm">
       <div class="card-header bg-primary bg-opacity-10 border-primary d-flex align-items-center justify-content-between">
-        <h5 class="mb-0 text-primary fw-bold">연구원 배정</h5>
+        <h5 class="b2b-text-h2 mb-0 text-primary fw-bold">연구원 배정</h5>
         <span class="badge bg-primary px-2.5 py-1.5">선택됨 {{ researchers.length }}명</span>
       </div>
       <div class="card-body">
@@ -72,7 +72,7 @@
           <!-- 선택된 연구원 (Right Box) -->
           <div class="col-md-5">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0 fw-bold text-theme-primary">선택된 연구원</h6>
+              <h6 class="b2b-text-h2 mb-0 fw-bold text-theme-primary">선택된 연구원</h6>
               <span class="badge bg-primary px-2 py-1">{{ researchers.length }}명</span>
             </div>
             <div
@@ -110,7 +110,7 @@
     <!-- 오퍼레이션 그룹 -->
     <div class="card mb-4 border-success bg-theme-card text-theme-primary shadow-sm">
       <div class="card-header bg-success bg-opacity-10 border-success d-flex align-items-center justify-content-between">
-        <h5 class="mb-0 text-success fw-bold">오퍼레이션 배정</h5>
+        <h5 class="b2b-text-h2 mb-0 text-success fw-bold">오퍼레이션 배정</h5>
         <span class="badge bg-success px-2.5 py-1.5">선택됨 {{ operations.length }}명</span>
       </div>
       <div class="card-body">
@@ -179,7 +179,7 @@
           <!-- 선택된 오퍼레이션 -->
           <div class="col-md-5">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0 fw-bold text-theme-primary">선택된 오퍼레이션</h6>
+              <h6 class="b2b-text-h2 mb-0 fw-bold text-theme-primary">선택된 오퍼레이션</h6>
               <span class="badge bg-success px-2 py-1">{{ operations.length }}명</span>
             </div>
             <div
@@ -217,7 +217,7 @@
     <!-- 실무자 그룹 -->
     <div class="card mb-4 border-warning bg-theme-card text-theme-primary shadow-sm">
       <div class="card-header bg-warning bg-opacity-10 border-warning d-flex align-items-center justify-content-between">
-        <h5 class="mb-0 text-warning fw-bold">실무자 배정</h5>
+        <h5 class="b2b-text-h2 mb-0 text-warning fw-bold">실무자 배정</h5>
         <span class="badge bg-warning text-dark px-2.5 py-1.5">선택됨 {{ workers.length }}명</span>
       </div>
       <div class="card-body">
@@ -286,7 +286,7 @@
           <!-- 선택된 실무자 -->
           <div class="col-md-5">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0 fw-bold text-theme-primary">선택된 실무자</h6>
+              <h6 class="b2b-text-h2 mb-0 fw-bold text-theme-primary">선택된 실무자</h6>
               <span class="badge bg-warning text-dark px-2 py-1">{{ workers.length }}명</span>
             </div>
             <div
@@ -533,7 +533,7 @@ export default {
 /* Transfer 아이템 */
 .transfer-item {
   padding: 10px 14px;
-  margin-bottom: 6px;
+  margin-bottom: var(--b2b-space-2);
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 6px;

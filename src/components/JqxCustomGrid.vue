@@ -266,11 +266,12 @@ export default {
   mounted() {
     this.loadSavedViews()
     this.syncColumnItems()
-    // Auto-Resize Observer
     if (window.ResizeObserver && this.$refs.gridContainerRef) {
       this.resizeObserver = new ResizeObserver(() => {
         window.requestAnimationFrame(() => {
-          if (this.$refs.grid) {
+          // 그리드가 화면에 붙어있을 때만 refresh. 페이지 이탈(keepAlive)·HMR 로 DOM 이
+          // 분리되면 isConnected 가 false → 파괴된 그리드에 refresh 호출을 막아 jqx 셀렉터 에러 방지.
+          if (this.$refs.grid && this.$refs.gridContainerRef?.isConnected) {
             this.$refs.grid.refresh()
           }
         })
@@ -659,12 +660,31 @@ export default {
   font-weight: bold;
 }
 
-.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell) { background-color: #22c55e !important; }
-.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell::after) { content: '+'; color: #fff; font-weight: bold; }
+/* 상태 마커 — 추가=+ / 수정=✓체크 / 삭제=− (심볼만, 하단 점 없이 정중앙).
+   솔리드 컬러 바 위에서 또렷하게 보이도록 흰색 SVG 로 렌더. */
+.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell),
+.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell),
+.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell) {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 15px 15px;
+}
 
-.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell) { background-color: #3b82f6 !important; }
-.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell::after) { content: '✏'; color: #fff; font-size: 10px; }
+/* 추가(A) → 초록 + 흰색 '+' */
+.jqx-custom-grid :deep(.jqs-row-a .jqs-state-cell) {
+  background-color: #22c55e !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='7' y='3.5' width='2' height='9' rx='1' fill='white'/%3E%3Crect x='3.5' y='7' width='9' height='2' rx='1' fill='white'/%3E%3C/svg%3E");
+}
 
-.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell) { background-color: #ef4444 !important; }
-.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell::after) { content: '−'; color: #fff; font-weight: bold; }
+/* 수정(U) → 파랑 + 흰색 체크(✓) */
+.jqx-custom-grid :deep(.jqs-row-u .jqs-state-cell) {
+  background-color: #3b82f6 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpolyline points='3.5 8.5 6.5 11.5 12.5 4.5' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* 삭제(D) → 빨강 + 흰색 '−' */
+.jqx-custom-grid :deep(.jqs-row-d .jqs-state-cell) {
+  background-color: #ef4444 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='3.5' y='7' width='9' height='2' rx='1' fill='white'/%3E%3C/svg%3E");
+}
 </style>

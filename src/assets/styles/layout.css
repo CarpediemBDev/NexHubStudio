@@ -20,15 +20,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: var(--b2b-space-2) var(--b2b-space-4);
   background-color: var(--b2b-color-bg-card);
   border-bottom: 1px solid var(--b2b-color-border);
-  min-height: 48px;
+  min-height: var(--b2b-space-7);
 }
 
 .b2b-grid-wrapper {
   flex: 1 1 auto;
-  padding: 16px;
+  padding: var(--b2b-space-4);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -39,7 +39,7 @@ body {
   background-color: var(--b2b-color-bg-card);
   border: 1px solid var(--b2b-color-border);
   border-radius: var(--b2b-radius-md);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--b2b-shadow-sm);
   display: flex;
   flex-direction: column;
   overflow: hidden;

@@ -1,24 +1,11 @@
 <template>
   <div class="b2b-page-container">
-    <!-- 페이지 헤더 -->
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-      <div>
-        <h4 class="fw-bold m-0" style="color: var(--b2b-color-text-main)">사용자 관리</h4>
-        <p class="small mb-0 mt-1" style="color: var(--b2b-color-text-muted)">시스템 사용자 목록을 조회하고 관리합니다</p>
-      </div>
-      <div>
-        <button class="btn-b2b-primary" @click="openPopup()">
-          <i class="bi bi-plus-lg"></i> 사용자 추가
-        </button>
-      </div>
-    </div>
-
     <div class="row g-3">
       <!-- LEFT: 사용자 목록 -->
       <div class="col-12 col-lg-6">
-        <!-- 검색바 -->
-        <div class="b2b-toolbar mb-3 p-2 bg-theme-subcard border border-theme rounded-2">
-          <div class="input-group input-group-sm rounded-2">
+        <!-- 검색바 & 액션 툴바 -->
+        <div class="b2b-toolbar mb-3 p-2 bg-theme-subcard border border-theme rounded-2 d-flex align-items-center gap-2">
+          <div class="input-group input-group-sm rounded-2 flex-grow-1">
             <span class="input-group-text bg-theme-card border-theme text-theme-secondary">
               <i class="bi bi-search"></i>
             </span>
@@ -28,6 +15,9 @@
               placeholder="ID, 이름, 부서, 직무로 검색..."
             />
           </div>
+          <button class="btn-b2b-primary btn-sm flex-shrink-0" @click="openPopup()">
+            <i class="bi bi-plus-lg me-1"></i>사용자 추가
+          </button>
         </div>
 
         <!-- 사용자 목록 테이블 -->

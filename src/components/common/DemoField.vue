@@ -106,14 +106,14 @@ export default {
 .demo-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--b2b-space-2);
 }
 
 .demo-field-label {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--b2b-space-2);
 }
 
 .demo-field-title {
@@ -148,7 +148,7 @@ export default {
 .demo-field-value {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--b2b-space-2);
   min-width: 0;
 }
 
@@ -186,8 +186,8 @@ export default {
   right: 6px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
+  gap: var(--b2b-space-1);
+  padding: 2px var(--b2b-space-2);
   border: 1px solid var(--border-color, #334155);
   border-radius: 5px;
   background: var(--bg-card, #ffffff);
@@ -206,7 +206,7 @@ export default {
 
 .demo-snippet-pre {
   margin: 0;
-  padding: 10px 12px;
+  padding: 10px var(--b2b-space-3);
   background: var(--bg-subcard, #0f172a);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 6px;

@@ -138,7 +138,11 @@ function getFieldLabel(field) {
     gender: '성별',
     quarter: '분기',
     year: '연도',
-    region: '지역'
+    region: '지역',
+    workStatus: '근무상태',
+    employmentType: '고용형태',
+    evalGrade: '평가등급',
+    skillScore: '역량점수'
   }
   return map[field] || field
 }

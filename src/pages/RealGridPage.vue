@@ -1,11 +1,5 @@
 <template>
   <div class="b2b-page-container">
-    <!-- Header Page Title -->
-    <div class="mb-3">
-      <h4 class="fw-bold text-dark m-0">RealGrid 샘플 (공통 컴포넌트형)</h4>
-      <p class="text-muted small mb-0">공통 컴포넌트인 RealGridCommonJs를 활용하여 간결하게 작성된 고성능 그리드 샘플입니다.</p>
-    </div>
-
     <!-- Unified Management Toolbar (B2B Compact Enterprise Style) -->
     <div class="b2b-toolbar">
       <div class="d-flex align-items-center justify-content-between w-100">
@@ -110,103 +104,181 @@ export default {
         { fieldName: 'name', dataType: 'text' },
         { fieldName: 'dept', dataType: 'text' },
         { fieldName: 'role', dataType: 'text' },
-        { fieldName: 'status', dataType: 'text' },
-        { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyyMMdd' },
-        { fieldName: 'activeYn', dataType: 'text' },
+        { fieldName: 'workStatus', dataType: 'text' },
+        { fieldName: 'employmentType', dataType: 'text' },
+        { fieldName: 'evalGrade', dataType: 'text' },
+        { fieldName: 'skillScore', dataType: 'number' },
+        { fieldName: 'region', dataType: 'text' },
         { fieldName: 'salary', dataType: 'number' },
-        { fieldName: 'sales', dataType: 'number' }
+        { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' },
+        { fieldName: 'colEditBtn', dataType: 'text' },
+        { fieldName: 'colDeleteBtn', dataType: 'text' }
       ],
       gridColumns: [
         {
           name: 'userId',
           fieldName: 'userId',
-          width: '90',
+          width: '120',
           header: { text: 'ID' },
           editable: false,
           styles: { textAlignment: 'center' }
         },
         {
-          name: 'dept',
-          fieldName: 'dept',
-          width: '110',
-          header: { text: '부서명' },
-          styles: { textAlignment: 'near' },
-          mergeRule: { criteria: 'value' }
-        },
-        {
           name: 'name',
           fieldName: 'name',
-          width: '100',
-          header: { text: '이름' },
+          width: '110',
+          header: { text: '성명' },
           styles: { textAlignment: 'center' }
+        },
+        {
+          name: 'dept',
+          fieldName: 'dept',
+          width: '130',
+          header: { text: '부서' },
+          styles: { textAlignment: 'near' }
         },
         {
           name: 'role',
           fieldName: 'role',
-          width: '120',
-          header: { text: '역할/직급' },
+          width: '110',
+          header: { text: '직무/역할' },
           styles: { textAlignment: 'near' }
         },
         {
-          name: 'status',
-          fieldName: 'status',
-          width: '110',
-          header: { text: '재직상태 (셀렉트)' },
+          name: 'workStatus',
+          fieldName: 'workStatus',
+          width: '100',
+          header: { text: '근무상태 (선택)' },
           styles: { textAlignment: 'center' },
           editor: {
             type: 'dropdown',
-            dropDownCount: 4,
+            dropDownCount: 3,
             domainOnly: true,
             labels: ['재직', '휴직', '퇴사'],
             values: ['재직', '휴직', '퇴사']
-          },
-          displayCallback: function (grid, index, value) {
-            if (!value) return '선택'
-            return value
           }
         },
         {
-          name: 'joinDate',
-          fieldName: 'joinDate',
+          name: 'employmentType',
+          fieldName: 'employmentType',
           width: '110',
-          header: { text: '입사일 (달력)' },
+          header: { text: '고용형태 (선택)' },
           styles: { textAlignment: 'center' },
-          datetimeFormat: 'yyyy-MM-dd',
           editor: {
-            type: 'date',
-            datetimeFormat: 'yyyy-MM-dd',
-            commitOnSelect: true
+            type: 'dropdown',
+            dropDownCount: 3,
+            domainOnly: true,
+            labels: ['정규직', '계약직', '파트타임'],
+            values: ['정규직', '계약직', '파트타임']
+          },
+          styleCallback: function (grid, dataCell) {
+            const v = dataCell.value
+            if (v === '정규직') return 'rg-emp-regular'
+            if (v === '계약직') return 'rg-emp-contract'
+            if (v === '파트타임') return 'rg-emp-parttime'
+            if (v === '인턴') return 'rg-emp-intern'
+            if (v === '소속') return 'rg-emp-dept'
+            return ''
           }
         },
         {
-          name: 'activeYn',
-          fieldName: 'activeYn',
-          width: '85',
-          header: { text: '활성 (체크)' },
-          styles: { textAlignment: 'center' },
+          name: 'evalGrade',
+          fieldName: 'evalGrade',
+          width: '80',
+          header: { text: '평가등급 (선택)' },
+          styles: { textAlignment: 'center', fontWeight: 'bold' },
+          editor: {
+            type: 'dropdown',
+            dropDownCount: 5,
+            domainOnly: true,
+            labels: ['S', 'A', 'B', 'C', 'D'],
+            values: ['S', 'A', 'B', 'C', 'D']
+          },
           renderer: {
-            type: 'check',
-            trueValues: 'Y',
-            falseValues: 'N'
+            type: 'html',
+            callback: function (grid, model) {
+              const v = model && model.value ? String(model.value) : 'B'
+              const map = { S: ['#dc3545', '#fff'], A: ['#0d6efd', '#fff'], B: ['#198754', '#fff'], C: ['#ffc107', '#212529'], D: ['#6c757d', '#fff'] }
+              const c = map[v] || ['#6c757d', '#fff']
+              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:${c[0]};color:${c[1]};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;line-height:1.5;">${v}</span></div>`
+            }
           }
+        },
+        {
+          name: 'skillScore',
+          fieldName: 'skillScore',
+          width: '130',
+          header: { text: '역량 점수 (바)' },
+          styles: { textAlignment: 'far' },
+          renderer: {
+            type: 'bar',
+            minimum: 0,
+            maximum: 100,
+            showLabel: true
+          },
+          footer: { expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
+        },
+        {
+          name: 'region',
+          fieldName: 'region',
+          width: '90',
+          header: { text: '근무지역' },
+          styles: { textAlignment: 'center' }
         },
         {
           name: 'salary',
           fieldName: 'salary',
           width: '110',
-          header: { text: '기본급 (만원)' },
+          header: { text: '급여 (만원)' },
           numberFormat: '#,##0',
           styles: { textAlignment: 'far' },
+          styleCallback: function (grid, dataCell) {
+            const val = Number(dataCell.value)
+            if (val >= 7000) return 'rg-salary-high'
+            return ''
+          },
           footer: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
         },
         {
-          name: 'sales',
-          fieldName: 'sales',
-          width: '120',
-          header: { text: '영업실적 (만원)' },
-          numberFormat: '#,##0',
-          styles: { textAlignment: 'far' },
-          footer: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
+          name: 'joinDate',
+          fieldName: 'joinDate',
+          width: '115',
+          header: { text: '입사일자 (달력)' },
+          datetimeFormat: 'yyyy-MM-dd',
+          styles: { textAlignment: 'center' },
+          editor: {
+            type: 'date',
+            datetimeFormat: 'yyyy-MM-dd',
+            commitBySelect: true
+          }
+        },
+        {
+          name: 'colEditBtn',
+          fieldName: 'colEditBtn',
+          header: { text: '수정' },
+          width: 75,
+          editable: false,
+          styles: { textAlignment: 'center' },
+          renderer: {
+            type: 'html',
+            callback: function () {
+              return '<div class="d-flex align-items-center justify-content-center h-100"><button type="button" class="btn-grid-action" title="사용자 정보 수정">수정</button></div>'
+            }
+          }
+        },
+        {
+          name: 'colDeleteBtn',
+          fieldName: 'colDeleteBtn',
+          header: { text: '삭제' },
+          width: 75,
+          editable: false,
+          styles: { textAlignment: 'center' },
+          renderer: {
+            type: 'html',
+            callback: function () {
+              return '<div class="d-flex align-items-center justify-content-center h-100"><button type="button" class="btn-grid-action" title="사용자 삭제">삭제</button></div>'
+            }
+          }
         }
       ]
     }
@@ -229,19 +301,39 @@ export default {
         resizable: true
       })
 
+      // 🔹 RealGrid2 공식 onCellItemClicked 이벤트: 실제 버튼 아이템 클릭 시에만 정확히 반응
+      gridView.onCellItemClicked = (grid, index, clickData) => {
+        if (!clickData || clickData.dataRow < 0) return
+
+        const rowData = dataProvider.getJsonRow(clickData.dataRow)
+        if (!rowData) return
+
+        if (clickData.column === 'colEditBtn') {
+          alert(
+            `[사용자 수정]\n\n` +
+            `• ID: ${rowData.userId}\n` +
+            `• 성명: ${rowData.name}\n` +
+            `• 부서: ${rowData.dept}\n` +
+            `• 직무: ${rowData.role}\n` +
+            `• 근무상태: ${rowData.workStatus}`
+          )
+        } else if (clickData.column === 'colDeleteBtn') {
+          alert(
+            `[사용자 삭제]\n\n` +
+            `'${rowData.name}' (${rowData.userId}) 사용자를 삭제 처리합니다.`
+          )
+        }
+      }
+
       // 우클릭 행/열 고정 메뉴는 RealGridCommonJs 컴포넌트가 내부에서 처리(refs 불필요)
     },
 
     async loadUsers() {
       const defaultUsers = [
-        { userId: 'u001', name: '김철수', dept: '개발 1팀', role: '수석연구원', status: '재직', joinDate: '2021-03-01', activeYn: 'Y', salary: 7200, sales: 12000 },
-        { userId: 'u002', name: '이영희', dept: '개발 1팀', role: '책임연구원', status: '재직', joinDate: '2022-05-15', activeYn: 'Y', salary: 6100, sales: 9800 },
-        { userId: 'u003', name: '박민수', dept: '개발 1팀', role: '선임연구원', status: '휴직', joinDate: '2023-01-10', activeYn: 'N', salary: 4800, sales: 7500 },
-        { userId: 'u004', name: '정수진', dept: '개발 2팀', role: '수석연구원', status: '재직', joinDate: '2020-11-01', activeYn: 'Y', salary: 7500, sales: 14500 },
-        { userId: 'u005', name: '홍길동', dept: '개발 2팀', role: '책임연구원', status: '재직', joinDate: '2022-08-20', activeYn: 'Y', salary: 6300, sales: 11000 },
-        { userId: 'u006', name: '강지훈', dept: '개발 2팀', role: '선임연구원', status: '재직', joinDate: '2023-04-12', activeYn: 'Y', salary: 4600, sales: 8200 },
-        { userId: 'u007', name: '조유진', dept: '영업 1팀', role: '부장', status: '재직', joinDate: '2019-07-01', activeYn: 'Y', salary: 8000, sales: 32000 },
-        { userId: 'u008', name: '윤상호', dept: '영업 1팀', role: '차장', status: '퇴사', joinDate: '2021-02-15', activeYn: 'N', salary: 6800, sales: 24000 }
+        { userId: 'minjun.park', name: '박민준', dept: '경영지원', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 88, region: '서울', salary: 5240, joinDate: '2019-04-12' },
+        { userId: 'suhyun.lee', name: '이수현', dept: '경영지원', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 95, region: '대전', salary: 9520, joinDate: '2024-01-15' },
+        { userId: 'minjun.han', name: '한민준', dept: '디자인팀', role: 'DevOps', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 72, region: '광주', salary: 8900, joinDate: '2021-08-20' },
+        { userId: 'jihoon.kim', name: '김지훈', dept: '개발팀', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 84, region: '서울', salary: 7200, joinDate: '2020-03-09' }
       ]
       try {
         const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
@@ -249,11 +341,7 @@ export default {
         if (!res.ok) throw new Error('Fetch failed')
         const data = await res.json()
         const rows = Array.isArray(data) ? data : data.users || []
-        const rawUsers = rows.length > 0 ? rows : defaultUsers
-        this.users = rawUsers.map((u, i) => ({
-          ...u,
-          joinDate: u.joinDate ? u.joinDate.replace(/-/g, '') : `20240${(i % 9) + 1}15`
-        }))
+        this.users = rows.length > 0 ? rows : defaultUsers
       } catch (error) {
         console.warn('Using default mock users:', error)
         this.users = defaultUsers
@@ -266,10 +354,15 @@ export default {
       this.dataProvider.insertRow(0, {
         userId: tempId,
         name: '신규 사용자',
-        dept: '개발 1팀',
-        role: '연구원',
+        dept: '개발팀',
+        role: 'PM',
+        workStatus: '재직',
+        employmentType: '정규직',
+        evalGrade: 'B',
+        skillScore: 75,
+        region: '서울',
         salary: 4500,
-        sales: 0
+        joinDate: new Date().toISOString().slice(0, 10)
       })
       if (this.gridView) this.gridView.setCurrent({ itemIndex: 0 })
       showToast('상단에 새 행이 추가되었습니다 (State: Created).', { type: 'info' })
@@ -355,4 +448,63 @@ export default {
 </script>
 
 <style scoped>
+</style>
+
+<style>
+
+/* 🔹 RealGrid 인라인 액션 버튼 디자인 (B2B 화이트 카드 & 연한 검정 텍스트 스타일) */
+.btn-grid-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 23px;
+  padding: 0 10px;
+  font-size: var(--b2b-font-size-xs);
+  font-weight: 500;
+  color: #334155; /* 연한 검은색 / 진회색 */
+  background-color: #ffffff; /* 하얀색 버튼 */
+  border: 1px solid #d1d5db; /* 깔끔한 경계선 */
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-grid-action:hover {
+  background-color: #f8fafc;
+  border-color: #9ca3af;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.btn-grid-action:active {
+  transform: translateY(0);
+  background-color: #f1f5f9;
+}
+
+.btn-grid-action .icon-edit {
+  color: #2563eb; /* 수정 아이콘 파랑 */
+  font-size: 11px;
+}
+
+.btn-grid-action .icon-delete {
+  color: #dc2626; /* 삭제 아이콘 빨강 */
+  font-size: 11px;
+}
+
+/* 다크모드 대응 */
+[data-theme="dark"] .btn-grid-action,
+[data-theme="dark-navy"] .btn-grid-action {
+  background-color: var(--b2b-color-bg-card, #1e293b);
+  border-color: var(--b2b-color-border, #334155);
+  color: #e2e8f0;
+}
+[data-theme="dark"] .btn-grid-action:hover,
+[data-theme="dark-navy"] .btn-grid-action:hover {
+  background-color: var(--b2b-color-hover-bg, #334155);
+  color: #ffffff;
+}
 </style>

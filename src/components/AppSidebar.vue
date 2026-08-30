@@ -111,6 +111,23 @@ export default {
           ],
         },
         {
+          label: '메일 관리',
+          icon: 'bi-envelope-fill',
+          children: [
+            { label: '메일 스튜디오 통합 허브', to: '/mail/studio-hub' },
+            { label: '메일 템플릿 관리', to: '/mail/templates' },
+            { label: '메일 발송 매핑 현황', to: '/mail/dispatch-map' },
+            { label: '메일 발송 이력', to: '/mail/send-log' },
+          ],
+        },
+        {
+          label: '규격/규제 관리',
+          icon: 'bi-shield-check',
+          children: [
+            { label: '규제 정보 관리', to: '/regulation/info' },
+          ],
+        },
+        {
           label: '시스템 & 개발 가이드',
           icon: 'bi-gear',
           children: [
@@ -199,7 +216,7 @@ export default {
   width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #dee2e6;
+  background-color: var(--b2b-color-hover-bg);
   border-radius: 4px;
 }
 </style>
