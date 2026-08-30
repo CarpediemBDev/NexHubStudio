@@ -7,6 +7,15 @@ REM
 REM    dev.bat          backend + frontend  (frontend only if backend/ absent)
 REM    dev.bat front    frontend only  -> http://localhost:5173
 REM    dev.bat back     backend only   -> https://localhost:8443
+REM    dev.bat clean    remove generated backend artifacts (no server start)
+REM
+REM  clean removes only regenerable, gitignored output:
+REM    backend\build    Gradle compile output
+REM    backend\.gradle  Gradle build cache
+REM    backend\data     H2 file DB   <- manually entered rows are lost
+REM    backend\logs     Spring Boot logs
+REM  Source under backend\src is tracked by git and is never touched.
+REM  Next start is slower (full compile + Liquibase re-seed).
 REM
 REM  NOTE: backend/ exists ONLY on the feature/fullstack-migration branch.
 REM        On master the frontend runs, but there is no /api proxy,
@@ -45,10 +54,72 @@ echo.
 
 if /i "!MODE!"=="front" goto front
 if /i "!MODE!"=="back"  goto back
+if /i "!MODE!"=="clean" goto clean
 if /i "!MODE!"=="all"   goto back
-echo  [X] unknown argument "!MODE!"   (use: front ^| back ^| no argument)
+echo  [X] unknown argument "!MODE!"   (use: front ^| back ^| clean ^| no argument)
 endlocal
 exit /b 1
+
+REM --------------------------------------------------------------- clean ---
+:clean
+set "BUSY="
+netstat -ano | findstr "LISTENING" | findstr ":8443" >nul 2>&1
+if not errorlevel 1 set "BUSY=8443"
+netstat -ano | findstr "LISTENING" | findstr ":5173" >nul 2>&1
+if errorlevel 1 goto busy_checked
+if defined BUSY set "BUSY=!BUSY! 5173"
+if not defined BUSY set "BUSY=5173"
+:busy_checked
+if defined BUSY goto clean_busy
+
+if not exist "%~dp0backend" goto clean_nothing
+echo   removing generated artifacts under backend\
+call :rmdir_if "%~dp0backend\build"
+call :rmdir_if "%~dp0backend\.gradle"
+call :rmdir_if "%~dp0backend\data"
+call :rmdir_if "%~dp0backend\logs"
+
+REM If nothing is left (i.e. no tracked source, e.g. on master), drop the folder.
+dir /a /b "%~dp0backend" 2>nul | findstr "." >nul
+if errorlevel 1 goto clean_drop_dir
+echo.
+echo   backend\src is kept - it is tracked by git.
+goto clean_done
+
+:clean_drop_dir
+rmdir /q "%~dp0backend" 2>nul
+echo   removed: backend\  (was empty - no tracked source on this branch)
+goto clean_done
+
+:clean_nothing
+echo   nothing to clean - backend\ does not exist.
+echo.
+endlocal
+exit /b 0
+
+:clean_busy
+echo  [X] servers are still running on port(s): !BUSY!
+echo      Stop them first - running processes hold locks on build\ and data\.
+endlocal
+exit /b 1
+
+:clean_done
+echo.
+echo   Done. Next backend start will be slower
+echo   (full compile + Liquibase re-creates the schema and seed data).
+echo.
+endlocal
+exit /b 0
+
+:rmdir_if
+if not exist "%~1" goto rmdir_skip
+rmdir /s /q "%~1" 2>nul
+if exist "%~1" echo   [X] failed : %~1
+if not exist "%~1" echo   removed  : %~1
+goto :eof
+:rmdir_skip
+echo   skipped  : %~1  (not present)
+goto :eof
 
 REM ------------------------------------------------------------- backend ---
 :back
