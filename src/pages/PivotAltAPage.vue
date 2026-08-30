@@ -746,13 +746,6 @@ export default {
 </style>
 
 <style>
-/* RealGrid 동적 셀 스타일 (styleCallback 전용) */
-.rg-data-cell.rg-emp-regular { color: var(--b2b-color-primary) !important; }
-.rg-data-cell.rg-emp-contract { color: #ea580c !important; }
-.rg-data-cell.rg-emp-parttime { color: #7c3aed !important; }
-.rg-data-cell.rg-emp-intern { color: #0891b2 !important; }
-.rg-data-cell.rg-emp-dept { color: var(--b2b-color-text-muted) !important; }
-.rg-data-cell.rg-salary-high { color: #dc2626 !important; }
 
 /* 🔹 RealGrid 인라인 액션 버튼 디자인 (B2B 화이트 카드 & 연한 검정 텍스트 스타일) */
 .btn-grid-action {

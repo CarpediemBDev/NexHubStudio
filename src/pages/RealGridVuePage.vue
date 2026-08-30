@@ -373,12 +373,3 @@ export default {
 <style scoped>
 </style>
 
-<style>
-/* RealGrid 동적 셀 스타일 (styleCallback 전용) */
-.rg-data-cell.rg-emp-regular { color: var(--b2b-color-primary) !important; }
-.rg-data-cell.rg-emp-contract { color: #ea580c !important; }
-.rg-data-cell.rg-emp-parttime { color: #7c3aed !important; }
-.rg-data-cell.rg-emp-intern { color: #0891b2 !important; }
-.rg-data-cell.rg-emp-dept { color: var(--b2b-color-text-muted) !important; }
-.rg-data-cell.rg-salary-high { color: #dc2626 !important; }
-</style>
