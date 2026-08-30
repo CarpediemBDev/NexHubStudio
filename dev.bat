@@ -54,7 +54,8 @@ REM ------------------------------------------------------------- backend ---
 :back
 if exist "backend\gradlew.bat" goto have_backend
 if /i "!MODE!"=="back" goto no_backend
-echo  [!] backend\ not found - starting frontend only.
+REM Do not use "!" here: EnableDelayedExpansion consumes it even when escaped.
+echo  [*] backend\ not found - starting frontend only.
 echo      Need the backend?  git switch feature/fullstack-migration
 echo.
 goto front
