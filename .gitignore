@@ -61,6 +61,12 @@ Thumbs.db
 *.tgz
 *.zip
 
+# --- Local JDK (로컬 실행용, 커밋 대상 아님) ---
+# openjdk21.zip 을 루트에 풀면 jdk-21.0.4+7/ 같은 폴더가 생긴다(약 330MB).
+# 과거 lib 만 있는 불완전한 jdk21/ 잔재가 남아 혼동을 준 적이 있어 둘 다 무시한다.
+# (openjdk21.zip 자체는 위의 *.zip 규칙으로 이미 무시됨)
+jdk*/
+
 # --- Backend (Gradle) build artifacts & runtime data ---
 backend/.gradle/
 backend/build/
