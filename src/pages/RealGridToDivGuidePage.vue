@@ -62,7 +62,12 @@
             총 <strong class="text-primary fw-bold">{{ poolCount }}</strong>건
           </span>
         </div>
-        <div class="dnd-grid-wrapper" @mousedown.capture="onGridMouseDown">
+        <div
+          class="dnd-grid-wrapper"
+          :class="{ 'is-block-drag': isBlockDrag }"
+          @pointerdown.capture="onGridPointerDown"
+          @mousedown.capture="onGridMouseDown"
+        >
           <RealGridCommonJs
             ref="poolGrid"
             grid-id="realgrid-official-grid-to-div-v2"
@@ -174,6 +179,7 @@ export default {
       poolCount: 0,
       showGuideTooltip: false,
       isHoverDropZone: false,
+      isBlockDrag: false,
       selectionStyle: 'block',
       users: [],
       groupModels: [],
@@ -320,21 +326,69 @@ export default {
     },
 
     // ---------- Mouse Drag Events from Grid to HTML DIV ----------
+    /*
+     * RealGrid 는 셀 누르기를 pointerdown 에서 처리한다.
+     * 그래서 mousedown 은 이미 '선택이 한 행으로 접힌 뒤'라 누르기 직전 상태를 볼 수 없다.
+     * 래퍼의 pointerdown capture 는 RealGrid 핸들러(자손 엘리먼트)보다 먼저 오므로,
+     * 여기서만 '누르기 직전의 진짜 블록'을 스냅샷할 수 있다.
+     */
+    onGridPointerDown(e) {
+      if (e.button !== 0 || !this.gridView) return
+      this._prePress = {
+        rows: this.snapshotSelectedRows(),
+        selection: this.snapshotSelection()
+      }
+    },
+
     onGridMouseDown(e) {
       if (e.button !== 0 || !this.gridView) return
 
       const gridEl = this.$refs.poolGrid?.$el || e.currentTarget
       const gridRect = gridEl.getBoundingClientRect()
-      // capture 단계라 RealGrid 가 이번 클릭을 처리하기 전이다 = 누르기 직전의 선택 상태
-      const preSelectedRows = this.snapshotSelectedRows()
+
+      // pointerdown 스냅샷 = 누르기 직전의 선택. (mousedown 시점의 선택은 이미 접혔다)
+      const pre = this._prePress || { rows: [], selection: null }
+      const preSelectedRows = pre.rows || []
+
+      const cur = this.gridView.getCurrent()
+      const anchor = (cur && cur.itemIndex >= 0)
+        ? { itemIndex: cur.itemIndex, dataRow: cur.dataRow, column: cur.column }
+        : null
+
+      /*
+       * 블록 안쪽을 눌렀다 = 옮기려는 제스처다. 새 블록을 그으려는 게 아니다.
+       *
+       * 이때 RealGrid 를 그대로 두면 누르는 순간 블록이 한 행으로 접히고,
+       * 끄는 동안 포인터를 따라 블록이 다시 그어진다. 옮겨지는 행은 처음 블록 그대로인데
+       * 화면만 계속 바뀌니 "블록이 재지정된다"고 보인다.
+       *
+       * 그래서 (1) 접힌 선택을 즉시 원래 블록으로 되돌리고,
+       *        (2) RealGrid 에 합성 pointerup/mouseup 을 보내 드래그 추적을 끊고,
+       *        (3) 그래도 그리드 안쪽 움직임은 새로 긋길래, 움직임마다 되돌린다(keepBlockSelection).
+       * pointerdown~mousedown 사이에는 화면이 다시 그려지지 않으므로 깜빡임 없이 블록이 고정된다.
+       */
+      const canFreeze = !!(anchor && anchor.dataRow >= 0 &&
+        preSelectedRows.length > 1 && pre.selection &&
+        preSelectedRows.includes(anchor.dataRow))
+
+      if (canFreeze) {
+        this.gridView.setSelection(pre.selection, false)
+        this.releaseGridPointer(e)
+        this.isBlockDrag = true
+      }
 
       this._press = {
         x: e.clientX,
         y: e.clientY,
         gridRect,
+        anchor,
         preSelectedRows,
+        // 고정해 둘 블록. 그리드가 다시 그으려 할 때마다 이 값으로 되돌린다.
+        blockSelection: canFreeze ? pre.selection : null,
         // 누르기 직전까지 기억해 둔 블록. 제스처 도중 무슨 일이 나도 이 값은 안 변한다.
         preBlockRows: [...(this._blockRows || [])],
+        // 블록을 잡고 있는 제스처인가 = 그리드 선택과 더 이상 경쟁하지 않는다
+        moveGesture: canFreeze,
         started: false
       }
 
@@ -342,8 +396,34 @@ export default {
       window.addEventListener('mouseup', this.onDocMouseUp)
     },
 
+    /** RealGrid 의 드래그 선택 추적을 끊는다. 우리 핸들러가 되받지 않도록 표시해서 보낸다. */
+    releaseGridPointer(e) {
+      const target = e.target
+      if (!target) return
+
+      const base = {
+        bubbles: true,
+        cancelable: true,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        button: 0,
+        buttons: 0
+      }
+
+      const pointerUp = new PointerEvent('pointerup', { ...base, pointerId: 1, pointerType: 'mouse' })
+      pointerUp.__nexhubSynthetic = true
+      target.dispatchEvent(pointerUp)
+
+      const mouseUp = new MouseEvent('mouseup', base)
+      mouseUp.__nexhubSynthetic = true
+      target.dispatchEvent(mouseUp)
+    },
+
     onDocMouseMove(e) {
       if (!this._press) return
+
+      // 고스트가 뜨기 전(임계값 이내)이라도 블록은 흔들리면 안 된다
+      this.keepBlockSelection()
 
       const dx = e.clientX - this._press.x
       const dy = e.clientY - this._press.y
@@ -359,12 +439,15 @@ export default {
          * 블록을 기억하는 경로가 통째로 건너뛰어졌다. (블록 이동이 안 되던 원인)
          *
          * 그래서 시작 조건은 '포인터가 그리드를 벗어났는가' 하나로 좁힌다.
+         *
+         * 단, 블록을 잡고 누른 제스처(moveGesture)는 예외다. 그때는 RealGrid 의 선택 추적을
+         * 이미 끊어놨으므로 경쟁할 상대가 없다. 곧바로 고스트를 띄워 "이건 이동 중"임을 보여준다.
          */
         const rect = this._press.gridRect
         const isPointerOutsideRight = e.clientX > rect.right - 10
         const isOverZone = this.checkIsOverDropZone(e.clientX, e.clientY)
 
-        if (!isPointerOutsideRight && !isOverZone) {
+        if (!this._press.moveGesture && !isPointerOutsideRight && !isOverZone) {
           return
         }
 
@@ -389,12 +472,46 @@ export default {
       this.isHoverDropZone = this.checkIsOverDropZone(e.clientX, e.clientY)
     },
 
+    /*
+     * 블록 고정.
+     *
+     * RealGrid 는 누르고 있는 동안 포인터를 따라 선택을 계속 다시 긋는다.
+     * 합성 pointerup 만으로는 그리드 안쪽 움직임까지 끊지 못해서, 움직임마다 원래 블록으로 되돌린다.
+     * 이 핸들러는 window 버블이라 그리드 자신의 갱신 '뒤'에 돌고, 그 사이에 화면을 다시 그리지 않으므로
+     * 사용자 눈에는 블록이 처음부터 고정돼 있는 것으로 보인다.
+     */
+    keepBlockSelection() {
+      const frozen = this._press && this._press.blockSelection
+      if (!frozen || !this.gridView) return
+
+      const cur = this.gridView.getSelection()
+      if (cur && cur.startItem === frozen.startItem && cur.endItem === frozen.endItem &&
+          cur.startColumn === frozen.startColumn && cur.endColumn === frozen.endColumn) {
+        return
+      }
+      this.gridView.setSelection(frozen, false)
+    },
+
     onDocMouseUp(e) {
-      const wasDragging = this._press && this._press.started
+      if (e && e.__nexhubSynthetic) return
+
+      const press = this._press
+      const wasDragging = !!(press && press.started)
+      // 그리드가 마지막 순간에 늘려놓은 선택이 남지 않도록 뗄 때도 한 번 되돌린다
+      this.keepBlockSelection()
       this.endDragListeners()
       this._press = null
+      this._prePress = null
+      this.isBlockDrag = false
 
       if (!wasDragging) {
+        /*
+         * 블록 안을 끌지 않고 그냥 클릭했다 = 그 행 하나만 고르려는 의도다.
+         * 위에서 블록을 되돌려 놨으므로, 여기서 눌린 행으로 다시 접어준다.
+         */
+        if (press && press.moveGesture && press.anchor) {
+          this.collapseSelectionTo(press.anchor)
+        }
         // 끌지 않고 뗐다 = 순수 선택 제스처. 이때의 선택만 블록으로 기억한다.
         this.rememberBlockFromGrid()
         return
@@ -406,6 +523,19 @@ export default {
       this.isHoverDropZone = false
     },
 
+    /** 블록을 눌린 셀 하나로 접는다. */
+    collapseSelectionTo(anchor) {
+      if (!this.gridView || !anchor || anchor.itemIndex < 0) return
+      this.gridView.setSelection({
+        cellType: 'data',
+        style: this.selectionStyle,
+        startItem: anchor.itemIndex,
+        endItem: anchor.itemIndex,
+        startColumn: anchor.column,
+        endColumn: anchor.column
+      }, false)
+    },
+
     endDragListeners() {
       window.removeEventListener('mousemove', this.onDocMouseMove)
       window.removeEventListener('mouseup', this.onDocMouseUp)
@@ -415,6 +545,24 @@ export default {
     rememberBlockFromGrid() {
       const selected = this.snapshotSelectedRows()
       this._blockRows = selected.length > 1 ? selected : []
+    },
+
+    /**
+     * 선택 영역 스냅샷. setSelection 에 그대로 되돌려 넣을 수 있는 순수 값으로 복사한다.
+     * (getSelection() 이 준 객체는 RealGrid 가 계속 고쳐 쓰므로 참조로 들고 있으면 안 된다)
+     */
+    snapshotSelection() {
+      if (!this.gridView) return null
+      const sel = this.gridView.getSelection()
+      if (!sel || sel.startItem == null) return null
+      return {
+        cellType: sel.cellType,
+        style: sel.style,
+        startItem: sel.startItem,
+        startColumn: sel.startColumn,
+        endItem: sel.endItem,
+        endColumn: sel.endColumn
+      }
     },
 
     /** 누르기 직전의 블록 선택 스냅샷 */
@@ -499,6 +647,7 @@ export default {
         this.gridView.clearSelection()
       }
       this._blockRows = []
+      this._prePress = null
       this.syncPoolCount()
     },
 
@@ -570,6 +719,7 @@ export default {
       this.groupModels = []
       this.repModelId = null
       this._blockRows = []
+      this._prePress = null
       this.syncPoolCount()
       showToast(`${count}개 모델 배정이 모두 RealGrid로 초기화되었습니다.`, { type: 'info' })
     }
@@ -607,6 +757,14 @@ export default {
 }
 .dnd-grid-wrapper:active {
   cursor: grabbing;
+}
+/*
+ * 블록을 잡고 끄는 동안에는 선택이 고정돼 있다는 걸 커서로도 알린다.
+ * (RealGrid 가 셀 위에서 자체 커서를 씌우므로 자손까지 강제한다)
+ */
+.dnd-grid-wrapper.is-block-drag,
+.dnd-grid-wrapper.is-block-drag * {
+  cursor: grabbing !important;
 }
 
 /* Right DIV Container */
