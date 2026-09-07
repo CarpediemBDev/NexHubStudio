@@ -69,8 +69,9 @@
                   </li>
                   <li>
                     <strong class="text-dark">대표 모델 지정:</strong>
-                    배정된 목록에서 <span class="text-primary fw-medium">라디오 버튼</span>(행 전체 클릭 가능)을 선택하면
-                    즉시 그룹 대표 모델로 전환됩니다. 대표는 그룹당 <strong class="text-dark">1개</strong>만 지정됩니다.
+                    배정 목록은 <span class="text-primary fw-medium">카테고리별로 묶여</span> 표시됩니다.
+                    각 그룹 안에서 <span class="text-primary fw-medium">라디오 버튼</span>(행 전체 클릭 가능)을 선택하면
+                    즉시 대표 모델로 전환되며, 대표는 <strong class="text-dark">카테고리마다 1개</strong>씩 지정됩니다.
                   </li>
                 </ul>
               </div>
@@ -127,7 +128,7 @@
           <div class="dnd-card-head border-bottom bg-theme-subcard px-3 py-2 d-flex align-items-center justify-content-between">
             <span class="fw-bold b2b-text-sm">그룹 배정 목록</span>
             <span class="badge bg-secondary-subtle text-secondary b2b-text-2xs">
-              총 {{ groupModels.length }}개
+              카테고리 {{ groupedAssignments.length }} · 총 {{ groupModels.length }}개
             </span>
           </div>
 
@@ -141,43 +142,61 @@
               </span>
             </div>
 
-            <!-- 배정 목록 (단일 선택: 대표 모델 = 라디오) -->
-            <label
-              v-for="item in groupModels"
-              :key="item.modelId"
-              class="div-dropped-item"
-              :class="{ 'item-rep': item.modelId === repModelId }"
-              :title="item.modelId === repModelId ? '현재 그룹의 대표 모델입니다' : item.modelName + ' 모델을 대표로 지정합니다'"
+            <!-- 배정 목록: 카테고리별 그룹. 대표 모델(라디오)은 그룹마다 1개 -->
+            <div
+              v-for="group in groupedAssignments"
+              :key="group.category"
+              class="div-group-block"
             >
-              <input
-                type="radio"
-                class="rep-radio"
-                name="treeGroupRepModel"
-                :value="item.modelId"
-                :checked="item.modelId === repModelId"
-                @change="setRepresentative(item.modelId)"
-              />
+              <div class="div-group-head">
+                <span class="group-name b2b-text-xs fw-bold text-dark text-truncate">
+                  {{ group.category }}
+                </span>
+                <span class="group-count b2b-text-2xs badge bg-secondary-subtle text-secondary flex-shrink-0">
+                  {{ group.models.length }}
+                </span>
+              </div>
 
-              <span class="item-main">
-                <span class="item-name fw-bold b2b-text-sm text-dark text-truncate">
-                  {{ item.modelName }}
-                </span>
-                <span class="item-code b2b-text-2xs badge bg-light text-secondary border flex-shrink-0">
-                  {{ item.modelCode }}
-                </span>
-                <span class="item-dept b2b-text-xs text-muted flex-shrink-0">
-                  {{ item.category }} · {{ item.grade }}
-                </span>
-              </span>
-
-              <button
-                class="btn-return-grid"
-                title="트리로 되돌리기"
-                @click.prevent.stop="returnToTree(item.modelId)"
+              <label
+                v-for="item in group.models"
+                :key="item.modelId"
+                class="div-dropped-item"
+                :class="{ 'item-rep': item.modelId === repByCategory[group.category] }"
+                :title="item.modelId === repByCategory[group.category]
+                  ? group.category + ' 그룹의 대표 모델입니다'
+                  : item.modelName + ' 모델을 ' + group.category + ' 그룹의 대표로 지정합니다'"
               >
-                <i class="bi bi-x-lg"></i>
-              </button>
-            </label>
+                <!-- 라디오 그룹을 카테고리마다 분리해야 그룹별로 하나씩 켜진다 -->
+                <input
+                  type="radio"
+                  class="rep-radio"
+                  :name="'treeGroupRep_' + group.category"
+                  :value="item.modelId"
+                  :checked="item.modelId === repByCategory[group.category]"
+                  @change="setRepresentative(group.category, item.modelId)"
+                />
+
+                <span class="item-main">
+                  <span class="item-name fw-bold b2b-text-sm text-dark text-truncate">
+                    {{ item.modelName }}
+                  </span>
+                  <span class="item-code b2b-text-2xs badge bg-light text-secondary border flex-shrink-0">
+                    {{ item.modelCode }}
+                  </span>
+                  <span class="item-dept b2b-text-xs text-muted flex-shrink-0">
+                    {{ item.grade }}
+                  </span>
+                </span>
+
+                <button
+                  class="btn-return-grid"
+                  title="트리로 되돌리기"
+                  @click.prevent.stop="returnToTree(item.modelId)"
+                >
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -225,7 +244,8 @@ export default {
       catalog: [],
       // 우측 배정 목록(순서 유지)
       groupModels: [],
-      repModelId: null,
+      // 대표 모델은 카테고리마다 1개 — { '센서/전자': 'M001', ... }
+      repByCategory: {},
       checkedCount: 0,
       gridFields: [
         { fieldName: 'nodeType', dataType: 'text' },
@@ -258,6 +278,21 @@ export default {
     },
     poolCount() {
       return this.poolModels.length
+    },
+    /*
+     * 배정 목록을 카테고리별로 묶는다. 그룹 순서는 CATEGORY_DEFS 를 따라
+     * 좌측 트리와 같게 맞춘다. 대표 모델은 여기 담지 않는다 —
+     * repByCategory 를 참조하면 syncRepresentatives 가 자기 자신을 다시 계산하게 된다.
+     */
+    groupedAssignments() {
+      const byCategory = new Map()
+      this.groupModels.forEach(m => {
+        if (!byCategory.has(m.category)) byCategory.set(m.category, [])
+        byCategory.get(m.category).push(m)
+      })
+      return CATEGORY_DEFS
+        .filter(cat => byCategory.has(cat.name))
+        .map(cat => ({ category: cat.name, models: byCategory.get(cat.name) }))
     },
     /*
      * 트리는 상태(전체 모델 - 배정 목록)에서 매번 통째로 다시 만든다.
@@ -505,10 +540,8 @@ export default {
 
       if (!added.length) return 0
 
-      // 아직 대표 모델이 없다면 첫 번째 모델을 자동으로 대표로 지정
-      if (!this.repModelId) {
-        this.repModelId = this.groupModels[0].modelId
-      }
+      // 새로 생긴 카테고리 그룹에 대표를 채운다
+      this.syncRepresentatives()
 
       const summary = added.length <= 2
         ? added.map(m => m.modelName).join(', ')
@@ -528,10 +561,9 @@ export default {
       const item = this.groupModels.splice(idx, 1)[0]
       if (!item) return
 
-      // 되돌린 항목이 대표였다면 남아있는 모델 중 첫 번째를 새 대표로 승격
-      if (this.repModelId === item.modelId) {
-        this.repModelId = this.groupModels.length > 0 ? this.groupModels[0].modelId : null
-      }
+      // 되돌린 항목이 그 그룹의 대표였다면 같은 그룹의 첫 모델로 승계한다.
+      // 그룹이 통째로 비었으면 대표 자리도 함께 사라진다. (syncRepresentatives)
+      this.syncRepresentatives()
       this.resetCheckState()
     },
 
@@ -542,16 +574,31 @@ export default {
       }
       const count = this.groupModels.length
       this.groupModels = []
-      this.repModelId = null
+      this.repByCategory = {}
       this.resetCheckState()
       showToast(`${count}개 모델 배정이 모두 트리로 초기화되었습니다.`, { type: 'info' })
     },
 
-    setRepresentative(modelId) {
+    /**
+     * 카테고리마다 대표가 정확히 1개 있도록 맞춘다.
+     * 기존 대표가 그 그룹에 그대로 남아있으면 유지하고, 빠졌거나 없으면 첫 모델로 채운다.
+     * 남은 모델이 없는 카테고리는 새 객체에 아예 담기지 않아 대표 자리도 같이 정리된다.
+     */
+    syncRepresentatives() {
+      const next = {}
+      this.groupedAssignments.forEach(group => {
+        const current = this.repByCategory[group.category]
+        const stillThere = current && group.models.some(m => m.modelId === current)
+        next[group.category] = stillThere ? current : group.models[0].modelId
+      })
+      this.repByCategory = next
+    },
+
+    setRepresentative(category, modelId) {
       const target = this.groupModels.find(m => m.modelId === modelId)
       if (!target) return
-      this.repModelId = modelId
-      showToast(`'${target.modelName}' 모델이 그룹의 대표 모델로 지정되었습니다.`, { type: 'success' })
+      this.repByCategory = { ...this.repByCategory, [category]: modelId }
+      showToast(`'${target.modelName}' 모델이 ${category} 그룹의 대표 모델로 지정되었습니다.`, { type: 'success' })
     },
 
     // ---------- 방식 1: 트리 → DIV 마우스 드래그 ----------
@@ -951,6 +998,33 @@ export default {
   align-items: center;
   pointer-events: none;
   padding: var(--b2b-space-5);
+}
+
+/* 카테고리 그룹 블록 */
+.div-group-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--b2b-space-1);
+}
+
+/* 스크롤해도 어느 그룹을 보고 있는지 놓치지 않도록 헤더를 고정한다 */
+.div-group-head {
+  position: sticky;
+  top: calc(var(--b2b-space-3) * -1);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--b2b-space-2);
+  padding: var(--b2b-space-1) var(--b2b-space-2);
+  margin-bottom: 1px;
+  background: var(--b2b-color-bg-subcard, #f1f5f9);
+  border-left: 3px solid var(--b2b-color-primary, #3b82f6);
+  border-radius: 4px;
+}
+
+/* 그룹 안의 항목은 헤더 아래로 한 단 들여쓴다 */
+.div-group-block .div-dropped-item {
+  margin-left: var(--b2b-space-3);
 }
 
 /* Dropped Item Card (label 전체가 대표 선택 히트영역) */
