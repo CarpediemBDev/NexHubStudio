@@ -58,14 +58,19 @@
                   <li class="mb-1.5">
                     <strong class="text-dark">방식 1 · 드래그 &amp; 드롭:</strong>
                     트리의 모델 행을 잡고 우측 배정함으로 끌어다 놓습니다.
-                    여러 행을 <span class="text-primary fw-medium">블록 선택</span>한 뒤 그 안쪽을 잡고 끌면 한 번에 옮겨지고,
-                    <span class="text-primary fw-medium">카테고리 행</span>을 끌면 하위 모델 전체가 함께 이동합니다.
+                    여러 행을 <span class="text-primary fw-medium">블록 선택</span>한 뒤 그 안쪽을 잡고 끌면 한 번에 옮겨집니다.
                   </li>
                   <li class="mb-1.5">
                     <strong class="text-dark">방식 2 · 체크 후 버튼:</strong>
                     좌측 <span class="text-primary fw-medium">체크박스</span>로 모델을 고르고 상단
                     <span class="text-primary fw-medium">[체크 항목 배정]</span> 버튼을 누릅니다.
-                    카테고리를 체크하면 하위 모델이 모두 함께 체크됩니다.
+                    행을 <span class="text-primary fw-medium">블록으로 훑으면</span> 그 안의 모델이 자동으로 체크되며,
+                    앞서 체크한 항목은 그대로 유지됩니다.
+                  </li>
+                  <li class="mb-1.5">
+                    <strong class="text-dark">배정 단위는 모델:</strong>
+                    <span class="text-primary fw-medium">카테고리 행</span>은 분류 라벨이라 체크·배정 대상이 아닙니다.
+                    블록에 카테고리가 섞여도 모델만 선택됩니다.
                   </li>
                   <li>
                     <strong class="text-dark">대표 모델 지정:</strong>
@@ -396,11 +401,23 @@ export default {
         return info && info.nodeType === 'category' ? 'rg-tree-category-row' : undefined
       })
 
-      // 방식 2: 체크 전파(카테고리 ↔ 하위 모델)
-      gridView.onItemChecked = (grid, itemIndex, checked) => {
-        this.propagateCheck(itemIndex, checked)
-        this.syncCheckedCount()
-      }
+      /*
+       * 배정 대상은 모델뿐이다. 카테고리는 분류 라벨이라 체크 자체를 막는다.
+       * 이렇게 해야 "고른 것 = 체크된 것"이 항상 일치한다. 부모를 체크 가능하게 두면
+       * 체크바가 2상태뿐이라 '일부만 체크'를 표현하지 못해 개수가 어긋나 보인다.
+       */
+      gridView.setCheckBar({
+        visible: true,
+        width: 34,
+        exclusive: false,
+        head: 'check',
+        checkableCallback: (dataSource, item) => {
+          const info = this.nodeInfo(item && item.dataRow)
+          return !!(info && info.nodeType === 'model')
+        }
+      })
+
+      gridView.onItemChecked = () => this.syncCheckedCount()
       gridView.onItemAllChecked = () => {
         this.$nextTick(this.syncCheckedCount)
       }
@@ -431,69 +448,26 @@ export default {
 
     /**
      * dataRow 목록 → 실제로 옮길 모델 ID 목록.
-     * 카테고리 노드는 하위 모델 전체로 펼치고, 중복은 제거한다.
+     * 배정 단위는 모델뿐이라 카테고리 행은 그냥 걸러낸다. 블록에 카테고리가
+     * 섞여 들어와도 개수가 늘지 않는다. 중복은 Set 으로 제거한다.
      */
     rowsToModelIds(dataRows) {
       if (!this.dataProvider) return []
       const ids = []
       const seen = new Set()
 
-      const pushModel = (info) => {
+      ;(dataRows || []).forEach(row => {
+        const info = this.nodeInfo(row)
         if (!info || info.nodeType !== 'model' || !info.modelId) return
         if (seen.has(info.modelId)) return
         seen.add(info.modelId)
         ids.push(info.modelId)
-      }
-
-      ;(dataRows || []).forEach(row => {
-        const info = this.nodeInfo(row)
-        if (!info) return
-        if (info.nodeType === 'category') {
-          let descendants = []
-          try {
-            descendants = this.dataProvider.getDescendants(row) || []
-          } catch (e) {
-            descendants = []
-          }
-          descendants.forEach(d => pushModel(this.nodeInfo(d)))
-        } else {
-          pushModel(info)
-        }
       })
 
       return ids
     },
 
     // ---------- 방식 2: 체크박스 + 버튼 ----------
-    /** 카테고리를 체크하면 하위 전체를, 하위를 하나라도 풀면 카테고리도 푼다. */
-    propagateCheck(itemIndex, checked) {
-      if (!this.gridView || this._checkSyncing) return
-      this._checkSyncing = true
-      try {
-        const dataRow = this.gridView.getDataRow(itemIndex)
-        const info = this.nodeInfo(dataRow)
-
-        if (info && info.nodeType === 'category') {
-          // (itemIndex, checked, recursive, visibleOnly, checkableOnly, checkEvent)
-          this.gridView.checkChildren(itemIndex, checked, true, false, true, false)
-          return
-        }
-
-        const parentItem = this.gridView.getParent(itemIndex)
-        if (parentItem < 0) return
-        const children = this.gridView.getChildren(parentItem) || []
-        const allChecked = children.length > 0 && children.every(ci => this.gridView.isCheckedItem(ci))
-        if (this.gridView.isCheckedItem(parentItem) !== allChecked) {
-          // (itemIndex, checked, exclusive, checkEvent)
-          this.gridView.checkItem(parentItem, allChecked, false, false)
-        }
-      } catch (e) {
-        console.warn('[TreeToDiv] propagateCheck error:', e)
-      } finally {
-        this._checkSyncing = false
-      }
-    },
-
     checkedModelIds() {
       if (!this.gridView) return []
       let rows = []
@@ -810,6 +784,32 @@ export default {
     rememberBlockFromGrid() {
       const selected = this.snapshotSelectedRows()
       this._blockRows = selected.length > 1 ? selected : []
+      // 블록을 씌우면 그 안의 모델을 체크한다
+      if (selected.length > 1) this.checkRowsInBlock(selected)
+    },
+
+    /*
+     * 블록에 걸린 모델 행을 체크한다.
+     *
+     * 기존 체크는 지우지 않고 누적한다 — 블록을 새로 그을 때마다 앞의 체크가 날아가면
+     * 여러 카테고리에 걸쳐 고르는 게 불가능해진다.
+     * 단일 행 선택(그냥 클릭)은 호출되지 않는다. 클릭할 때마다 체크가 붙으면
+     * 행을 훑어보는 것조차 못 하게 된다. (rememberBlockFromGrid 의 length > 1 조건)
+     * 카테고리 행은 체크 대상이 아니므로 걸러진다.
+     */
+    checkRowsInBlock(dataRows) {
+      if (!this.gridView) return
+      const items = []
+      dataRows.forEach(row => {
+        const info = this.nodeInfo(row)
+        if (!info || info.nodeType !== 'model') return
+        const itemIndex = this.gridView.getItemIndex(row)
+        if (itemIndex >= 0) items.push(itemIndex)
+      })
+      if (!items.length) return
+      // (itemIndices, checked, checkEvent) — 이벤트는 끄고 개수만 한 번에 맞춘다
+      this.gridView.checkItems(items, true, false)
+      this.syncCheckedCount()
     },
 
     /**
