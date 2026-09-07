@@ -25,6 +25,7 @@ const RealGridDndPage = () => import("../pages/RealGridDndPage.vue");
 const RealGridMergePage = () => import("../pages/RealGridMergePage.vue");
 const RealGridSmartDndPage = () => import("../pages/RealGridSmartDndPage.vue");
 const RealGridToDivGuidePage = () => import("../pages/RealGridToDivGuidePage.vue");
+const RealGridTreeToDivPage = () => import("../pages/RealGridTreeToDivPage.vue");
 
 const routes = [
   {
@@ -83,6 +84,7 @@ const routes = [
           { path: "merge", name: "RealGridMergeSample", component: RealGridMergePage, meta: { title: "RealGrid 셀 병합 (mergeRule)", icon: "bi-layout-three-columns" } },
           { path: "dnd", name: "RealGridDndSample", component: RealGridDndPage, meta: { title: "RealGrid 드래그&드롭 (Grid to Grid)", icon: "bi-arrows-move" } },
           { path: "grid-to-div", name: "RealGridToDivGuideSample", component: RealGridToDivGuidePage, meta: { title: "RealGrid 모델 그룹화 스튜디오", icon: "bi-box-arrow-right" } },
+          { path: "tree-to-div", name: "RealGridTreeToDivSample", component: RealGridTreeToDivPage, meta: { title: "RealGrid 트리 그룹화", icon: "bi-diagram-3-fill" } },
           { path: "smart-dnd", name: "RealGridSmartDndSample", component: RealGridSmartDndPage, meta: { title: "RealGrid 스마트 D&D 스튜디오 (Pro)", icon: "bi-magic" } },
           { path: "pivot-a", name: "PivotA", component: PivotAltAPage, meta: { title: "Pivot 분석 A", icon: "bi-pie-chart" } },
           { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "AI 스마트 피벗 (자체개발)", icon: "bi-bar-chart-steps" } },
@@ -156,6 +158,7 @@ const routes = [
       { path: "real-grid-dnd", component: RealGridDndPage, meta: { hidden: true } },
       { path: "real-grid-merge", component: RealGridMergePage, meta: { hidden: true } },
       { path: "real-grid-smart-dnd", component: RealGridSmartDndPage, meta: { hidden: true } },
+      { path: "real-grid-tree-to-div", component: RealGridTreeToDivPage, meta: { hidden: true } },
       { path: "component-guide", component: ComponentGuidePage, meta: { hidden: true } },
       { path: "pivot-alt-a", component: PivotAltAPage, meta: { hidden: true } },
       { path: "real-pivot", component: RealPivotPage, meta: { hidden: true } },
