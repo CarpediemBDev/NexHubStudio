@@ -9,6 +9,17 @@
           <span>+ 20개 모델 추가</span>
         </button>
 
+        <button
+          class="btn-b2b-primary"
+          :disabled="checkedCount === 0"
+          title="좌측 그리드에서 체크한 모델을 우측 그룹 배정함으로 옮깁니다"
+          @click="assignChecked"
+        >
+          <i class="bi bi-arrow-right-circle me-0.5"></i>
+          <span>체크 항목 배정</span>
+          <span v-if="checkedCount > 0" class="badge bg-white text-primary ms-1">{{ checkedCount }}</span>
+        </button>
+
         <button class="btn-b2b-action" title="모든 그룹 배정 내역을 그리드로 초기화" @click="resetAll">
           <i class="bi bi-arrow-counterclockwise text-secondary me-0.5"></i>
           <span>전체 초기화</span>
@@ -47,10 +58,16 @@
                 </div>
                 <ul class="guide-steps-list m-0 p-0 b2b-text-xs text-secondary">
                   <li class="mb-1.5">
-                    <strong class="text-dark">1. 다중 배정:</strong> 그리드 셀을 마우스로 끌어 <span class="text-primary fw-medium">다중 블록 선택</span> 후, 선택 영역을 그대로 잡고 우측 그룹 배정함으로 드롭합니다.
+                    <strong class="text-dark">1. 드래그 배정:</strong> 그리드 셀을 마우스로 끌어 <span class="text-primary fw-medium">다중 블록 선택</span> 후, 선택 영역을 그대로 잡고 우측 그룹 배정함으로 드롭합니다.
+                  </li>
+                  <li class="mb-1.5">
+                    <strong class="text-dark">2. 체크 후 버튼:</strong> 블록으로 훑으면 그 안의 모델이 <span class="text-primary fw-medium">자동으로 체크</span>되고, 상단
+                    <span class="text-primary fw-medium">[체크 항목 배정]</span> 버튼으로 한 번에 옮깁니다.
+                    블록을 다시 긋거나 <span class="text-primary fw-medium">블록 밖을 클릭해 블록이 사라지면 체크도 함께 해제</span>됩니다.
+                    체크박스를 직접 누른 것은 그대로 유지됩니다.
                   </li>
                   <li>
-                    <strong class="text-dark">2. 대표 모델 지정:</strong> 배정된 목록에서 원하는 모델의 <span class="text-primary fw-medium">라디오 버튼</span>(행 전체 클릭 가능)을 선택하면 즉시 그룹 대표 모델로 전환됩니다. 대표는 그룹당 <strong class="text-dark">1개</strong>만 지정됩니다.
+                    <strong class="text-dark">3. 대표 모델 지정:</strong> 배정된 목록에서 원하는 모델의 <span class="text-primary fw-medium">라디오 버튼</span>(행 전체 클릭 가능)을 선택하면 즉시 그룹 대표 모델로 전환됩니다. 대표는 그룹당 <strong class="text-dark">1개</strong>만 지정됩니다.
                   </li>
                 </ul>
               </div>
@@ -76,7 +93,8 @@
             :columns="gridColumns"
             :rows="users"
             :editable="false"
-            :checkable="false"
+            :checkable="true"
+            :check-bar-width="34"
             :show-row-number="true"
             :state-bar-visible="false"
             :use-footer="false"
@@ -177,6 +195,7 @@ export default {
   data() {
     return {
       poolCount: 0,
+      checkedCount: 0,
       showGuideTooltip: false,
       isHoverDropZone: false,
       isBlockDrag: false,
@@ -292,9 +311,69 @@ export default {
           if (this._press) return
           this.rememberBlockFromGrid()
         }
+
+        this.gridView.onItemChecked = () => this.syncCheckedCount()
+        this.gridView.onItemAllChecked = () => this.$nextTick(this.syncCheckedCount)
       }
 
       this.syncPoolCount()
+    },
+
+    /*
+     * 체크 상태는 '지금 화면의 블록' 과 항상 일치시킨다.
+     * 화면에 블록이 없는데 체크만 남아 있으면 무엇이 배정될지 화면만 보고는 알 수 없다.
+     */
+    syncCheckedCount() {
+      this.checkedCount = this.checkedRows().length
+    },
+
+    /** 체크된 데이터 행. (평면 그리드는 getCheckedRows(sort) — 트리와 인자 의미가 다르다) */
+    checkedRows() {
+      if (!this.gridView) return []
+      try {
+        return this.gridView.getCheckedRows() || []
+      } catch (e) {
+        return []
+      }
+    },
+
+    /** 블록에 걸린 행을 체크한다. 이전 블록의 체크는 지운다. */
+    syncChecksToBlock(dataRows) {
+      if (!this.gridView) return
+      const items = []
+      ;(dataRows || []).forEach(row => {
+        const itemIndex = this.gridView.getItemIndex(row)
+        if (itemIndex >= 0) items.push(itemIndex)
+      })
+
+      this.clearAllChecks()
+      if (items.length) {
+        // (itemIndices, checked, checkEvent) — 이벤트는 끄고 개수는 한 번에 맞춘다
+        this.gridView.checkItems(items, true, false)
+      }
+      this.syncCheckedCount()
+    },
+
+    clearAllChecks() {
+      if (!this.gridView || !this.checkedCount) return
+      // (checked, visibleOnly, checkableOnly, checkEvent)
+      this.gridView.checkAll(false, false, true, false)
+      this.syncCheckedCount()
+    },
+
+    /** 그 좌표가 체크바(제어열)인가. RealGrid 는 체크바 셀을 .rg-checkbar-cell 로 그린다. */
+    isCheckbarPoint(x, y) {
+      const el = document.elementFromPoint(x, y)
+      return !!(el && el.closest('[class*="rg-checkbar"]'))
+    },
+
+    assignChecked() {
+      const rows = this.checkedRows()
+      if (!rows.length) {
+        showToast('배정할 모델을 좌측 그리드에서 체크해 주세요.', { type: 'warning' })
+        return
+      }
+      this.assignRows([...rows].sort((a, b) => a - b))
     },
 
     async loadUsers() {
@@ -334,6 +413,12 @@ export default {
      */
     onGridPointerDown(e) {
       if (e.button !== 0 || !this.gridView) return
+      /*
+       * 체크바를 눌렀는지는 '누른 위치' 로 판별한다.
+       * 이벤트 순서로는 안 된다 — RealGrid 의 체크 토글(onItemChecked)은 우리 mouseup
+       * 뒤에 오기 때문에, 그 사이 rememberBlockFromGrid 가 방금 켠 체크를 지워버린다.
+       */
+      this._pressOnCheckbar = this.isCheckbarPoint(e.clientX, e.clientY)
       this._prePress = {
         rows: this.snapshotSelectedRows(),
         selection: this.snapshotSelection()
@@ -395,6 +480,7 @@ export default {
       window.addEventListener('mousemove', this.onDocMouseMove)
       window.addEventListener('mouseup', this.onDocMouseUp)
     },
+
 
     /** RealGrid 의 드래그 선택 추적을 끊는다. 우리 핸들러가 되받지 않도록 표시해서 보낸다. */
     releaseGridPointer(e) {
@@ -545,6 +631,23 @@ export default {
     rememberBlockFromGrid() {
       const selected = this.snapshotSelectedRows()
       this._blockRows = selected.length > 1 ? selected : []
+
+      // 체크바를 누른 제스처인가. (onGridPointerDown 에서 위치로 판별해 둔 값)
+      const viaCheckbar = this._pressOnCheckbar
+
+      // 블록을 씌웠다 = 그 안의 행이 고른 것
+      if (selected.length > 1) {
+        this.syncChecksToBlock(selected)
+        return
+      }
+
+      /*
+       * 블록이 사라졌다(블록 밖을 클릭했거나 선택이 풀렸다) = 고른 게 없다. 체크도 비운다.
+       * 예외는 체크바 직접 클릭. 그것도 '한 행 선택'이라 여기서 지우면 수동 체크가 불가능해진다.
+       * 이 함수는 한 제스처에 두 번 불리므로(mouseup, onSelectionEnded) 표시를 여기서 내리면 안 된다.
+       */
+      if (viaCheckbar) return
+      this.clearAllChecks()
     },
 
     /**
@@ -621,8 +724,11 @@ export default {
     finishDrag(e) {
       const isOver = this.checkIsOverDropZone(e.clientX, e.clientY)
       if (!isOver) return
+      this.assignRows(this._dragRows)
+    },
 
-      const rows = this._dragRows
+    /** 드래그 드롭과 [체크 항목 배정] 이 함께 쓰는 실제 이동 경로 */
+    assignRows(rows) {
       if (!rows || !rows.length) return
 
       const items = rows.map(r => this.dataProvider.getJsonRow(r)).filter(Boolean)
@@ -648,6 +754,7 @@ export default {
       }
       this._blockRows = []
       this._prePress = null
+      this.syncCheckedCount()
       this.syncPoolCount()
     },
 
@@ -705,6 +812,7 @@ export default {
 
       this.dataProvider.addRow(item)
       this.syncPoolCount()
+      this.syncCheckedCount()
     },
 
     resetAll() {

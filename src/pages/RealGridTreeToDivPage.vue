@@ -64,8 +64,9 @@
                     <strong class="text-dark">방식 2 · 체크 후 버튼:</strong>
                     좌측 <span class="text-primary fw-medium">체크박스</span>로 모델을 고르고 상단
                     <span class="text-primary fw-medium">[체크 항목 배정]</span> 버튼을 누릅니다.
-                    행을 <span class="text-primary fw-medium">블록으로 훑으면</span> 그 안의 모델이 자동으로 체크되며,
-                    앞서 체크한 항목은 그대로 유지됩니다.
+                    행을 <span class="text-primary fw-medium">블록으로 훑으면</span> 그 안의 모델이 자동으로 체크됩니다.
+                    블록을 다시 긋거나 <span class="text-primary fw-medium">블록 밖을 클릭해 블록이 사라지면 체크도 함께 해제</span>되어,
+                    화면의 블록과 체크가 항상 일치합니다. 체크박스를 직접 누른 것은 그대로 유지됩니다.
                   </li>
                   <li class="mb-1.5">
                     <strong class="text-dark">배정 단위는 모델:</strong>
@@ -418,9 +419,7 @@ export default {
       })
 
       gridView.onItemChecked = () => this.syncCheckedCount()
-      gridView.onItemAllChecked = () => {
-        this.$nextTick(this.syncCheckedCount)
-      }
+      gridView.onItemAllChecked = () => this.$nextTick(this.syncCheckedCount)
 
       /*
        * RealGrid 는 셀을 누르는 순간 기존 블록 선택을 한 행으로 접어버린다.
@@ -584,6 +583,12 @@ export default {
      */
     onGridPointerDown(e) {
       if (e.button !== 0 || !this.gridView) return
+      /*
+       * 체크바를 눌렀는지는 '누른 위치' 로 판별한다.
+       * 이벤트 순서로는 안 된다 — RealGrid 의 체크 토글(onItemChecked)은 우리 mouseup
+       * 뒤에 오기 때문에, 그 사이 rememberBlockFromGrid 가 방금 켠 체크를 지워버린다.
+       */
+      this._pressOnCheckbar = this.isCheckbarPoint(e.clientX, e.clientY)
       this._prePress = {
         rows: this.snapshotSelectedRows(),
         selection: this.snapshotSelection()
@@ -640,6 +645,7 @@ export default {
       window.addEventListener('mousemove', this.onDocMouseMove)
       window.addEventListener('mouseup', this.onDocMouseUp)
     },
+
 
     /** RealGrid 의 드래그 선택 추적을 끊는다. 우리 핸들러가 되받지 않도록 표시해서 보낸다. */
     releaseGridPointer(e) {
@@ -784,20 +790,53 @@ export default {
     rememberBlockFromGrid() {
       const selected = this.snapshotSelectedRows()
       this._blockRows = selected.length > 1 ? selected : []
-      // 블록을 씌우면 그 안의 모델을 체크한다
-      if (selected.length > 1) this.checkRowsInBlock(selected)
+
+      // 체크바를 누른 제스처인가. (onGridPointerDown 에서 위치로 판별해 둔 값)
+      const viaCheckbar = this._pressOnCheckbar
+
+      // 블록을 씌웠다 = 그 안의 모델이 고른 것
+      if (selected.length > 1) {
+        this.syncChecksToBlock(selected)
+        return
+      }
+
+      /*
+       * 블록이 사라졌다(블록 밖을 클릭했거나 선택이 풀렸다) = 고른 게 없다.
+       * 체크도 같이 비운다. 화면에 블록이 없는데 체크만 남아 있으면
+       * 무엇이 배정될지 화면만 보고는 알 수 없다.
+       *
+       * 예외는 체크바 직접 클릭. 그것도 '한 행 선택'이라 여기서 지우면
+       * 수동으로 체크하는 것 자체가 불가능해진다.
+       */
+      if (viaCheckbar) return
+      this.clearAllChecks()
+    },
+
+    /** 그 좌표가 체크바(제어열)인가. RealGrid 는 체크바 셀을 .rg-checkbar-cell 로 그린다. */
+    isCheckbarPoint(x, y) {
+      const el = document.elementFromPoint(x, y)
+      return !!(el && el.closest('[class*="rg-checkbar"]'))
+    },
+
+    clearAllChecks() {
+      if (!this.gridView || !this.checkedCount) return
+      // (checked, visibleOnly, checkableOnly, checkEvent) — 접힌 노드까지 해제
+      this.gridView.checkAll(false, false, true, false)
+      this.syncCheckedCount()
     },
 
     /*
-     * 블록에 걸린 모델 행을 체크한다.
+     * 체크 상태를 방금 그은 블록에 맞춘다.
      *
-     * 기존 체크는 지우지 않고 누적한다 — 블록을 새로 그을 때마다 앞의 체크가 날아가면
-     * 여러 카테고리에 걸쳐 고르는 게 불가능해진다.
-     * 단일 행 선택(그냥 클릭)은 호출되지 않는다. 클릭할 때마다 체크가 붙으면
-     * 행을 훑어보는 것조차 못 하게 된다. (rememberBlockFromGrid 의 length > 1 조건)
+     * 이전 블록의 체크는 지운다. 블록을 다른 데로 옮겼는데 앞의 체크가 남아 있으면
+     * 화면에 보이는 블록과 실제로 배정될 목록이 어긋나, 무엇을 고른 상태인지 알 수 없게 된다.
+     * '블록 = 체크된 것' 이 항상 눈에 보이는 그대로여야 한다.
+     *
+     * 단, 단일 행 선택(그냥 클릭)에서는 호출되지 않는다. (rememberBlockFromGrid 의 length > 1)
+     * 체크바를 직접 클릭하는 것도 한 행 선택이라, 여기서 지우면 수동 체크가 아예 불가능해진다.
      * 카테고리 행은 체크 대상이 아니므로 걸러진다.
      */
-    checkRowsInBlock(dataRows) {
+    syncChecksToBlock(dataRows) {
       if (!this.gridView) return
       const items = []
       dataRows.forEach(row => {
@@ -806,9 +845,12 @@ export default {
         const itemIndex = this.gridView.getItemIndex(row)
         if (itemIndex >= 0) items.push(itemIndex)
       })
-      if (!items.length) return
-      // (itemIndices, checked, checkEvent) — 이벤트는 끄고 개수만 한 번에 맞춘다
-      this.gridView.checkItems(items, true, false)
+
+      this.clearAllChecks()
+      if (items.length) {
+        // (itemIndices, checked, checkEvent) — 이벤트는 끄고 개수는 한 번에 맞춘다
+        this.gridView.checkItems(items, true, false)
+      }
       this.syncCheckedCount()
     },
 

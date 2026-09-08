@@ -265,10 +265,10 @@ gridView.onSelectionEnded = () => {
 rememberBlockFromGrid() {
   const selected = this.snapshotSelectedRows()
   this._blockRows = selected.length > 1 ? selected : []
-  if (selected.length > 1) this.checkRowsInBlock(selected)
+  if (selected.length > 1) this.syncChecksToBlock(selected)
 }
 
-checkRowsInBlock(dataRows) {
+syncChecksToBlock(dataRows) {
   const items = []
   dataRows.forEach(row => {
     const info = this.nodeInfo(row)
@@ -276,17 +276,35 @@ checkRowsInBlock(dataRows) {
     const itemIndex = this.gridView.getItemIndex(row)
     if (itemIndex >= 0) items.push(itemIndex)
   })
-  if (!items.length) return
-  this.gridView.checkItems(items, true, false)       // checkEvent=false
+
+  // (checked, visibleOnly, checkableOnly, checkEvent)
+  this.gridView.checkAll(false, false, true, false)  // 이전 블록 체크 해제
+  if (items.length) this.gridView.checkItems(items, true, false)
   this.syncCheckedCount()
 }
 ```
 
-두 가지 판단이 들어가 있습니다. 다르게 가려면 이 두 줄만 바꾸면 됩니다.
+규칙은 하나입니다 — **체크 상태 = 지금 화면의 블록.**
 
-- **누적한다.** 새 블록을 그어도 앞의 체크가 안 날아갑니다. 지우면 여러 그룹에 걸쳐 고르는 게 불가능해집니다.
-- **단일 행은 제외한다**(`length > 1`). 클릭 한 번이 곧 1행 선택이라, 이걸 체크로 치면 행을 훑어보는 것조차 못 하게 됩니다.
+- **블록을 그으면** 그 안의 모델만 체크되고, 이전 블록의 체크는 지워집니다. `checkAll`의 두 번째 인자를 `false`로 줘야 **접혀 있는 카테고리 안의 체크까지** 해제됩니다.
+- **블록이 사라지면**(블록 밖 클릭 등) 체크도 같이 비웁니다. 화면에 블록이 없는데 체크만 남아 있으면 무엇이 배정될지 화면만 보고는 알 수 없습니다.
+- **예외는 체크바 직접 클릭.** 그것도 '한 행 선택'이라 그냥 지우면 수동 체크가 아예 불가능해집니다.
 
+### 체크바 클릭은 이벤트 순서로 구분할 수 없다
+
+`onItemChecked`(RealGrid의 체크 토글)는 **우리 `mouseup`보다 뒤에** 옵니다. 그래서 "체크 이벤트가 왔으면 지우지 않는다"로 짜면 그 사이에 이미 지워진 뒤라, 방금 켜진 체크가 사라집니다. **누른 위치로 판별해야 합니다.**
+
+```js
+/** 그 좌표가 체크바(제어열)인가. RealGrid 는 체크바 셀을 .rg-checkbar-cell 로 그린다. */
+isCheckbarPoint(x, y) {
+  const el = document.elementFromPoint(x, y)
+  return !!(el && el.closest('[class*="rg-checkbar"]'))
+}
+```
+
+`onGridPointerDown`에서 `this._pressOnCheckbar = this.isCheckbarPoint(e.clientX, e.clientY)` 로 한 번 재두고, `rememberBlockFromGrid`에서 그 값이 참이면 지우지 않습니다.
+
+> `rememberBlockFromGrid` 는 한 제스처에 **두 번** 불립니다(`onDocMouseUp`, `onSelectionEnded`). 그래서 이 표시를 그 안에서 소비(리셋)하면 안 됩니다 — 첫 호출이 소비해 버리면 두 번째 호출이 방금 켜진 체크를 지웁니다. 표시를 내리는 곳은 제스처 시작 한 군데뿐입니다.
 ---
 
 ## 6. RealGrid 트리 함정 넷
@@ -359,7 +377,9 @@ nodeInfo(dataRow) {
 | `snapshotSelectedRows` | 복붙 | 선택 dataRow 정렬·중복 제거 |
 | `resolveDragRows` | 복붙 | 블록/앵커로 대상 행 확정 |
 | `rememberBlockFromGrid` | 교체 | 블록 기억 + 자동 체크 훅 |
-| `checkRowsInBlock` | 교체 | 잎 판별 조건(`nodeType`)만 교체 |
+| `syncChecksToBlock` | 교체 | 잎 판별 조건(`nodeType`)만 교체 |
+| `clearAllChecks` | 복붙 | 접힌 노드 포함 전체 체크 해제 |
+| `isCheckbarPoint` | 복붙 | 누른 좌표가 체크바인지 판별 |
 | `checkIsOverDropZone` | 복붙 | 드롭 존 판정 (클래스명만 확인) |
 | `createGhost` / `moveGhost` / `removeGhost` | 교체 | 고스트. 라벨 문구만 도메인 |
 | `finishDrag` | 교체 | 드롭 시 실제 이동 호출 |
