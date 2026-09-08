@@ -1,0 +1,890 @@
+<!--
+  RealTree 배정 이식 가이드 — Artifact 소스 겸 단독 열람용.
+  Artifact 로 게시할 때는 런타임이 doctype/html/head/body 를 감싸므로 여기 넣지 않는다.
+  charset 만 선언해 두면 레포에서 파일을 직접 열어도 한글이 깨지지 않는다.
+-->
+<meta charset="utf-8">
+<title>RealGrid 트리 배정 이식 가이드</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+  /* ── 팔레트는 RealGrid 자체 스타일시트에서 가져왔다 ──
+     #4277AD  realgrid-white.css 의 확장 아이콘·체크박스 chrome
+     #D2D5DA  .rg-tree-line 배경색
+     #E56615  체크박스 indeterminate 막대           */
+  :root {
+    --paper:      #FBFCFD;
+    --surface:    #F1F4F7;
+    --surface-2:  #E7ECF1;
+    --ink:        #17212B;
+    --ink-soft:   #4A5966;
+    --ink-faint:  #78889A;
+    --line:       #D2D5DA;
+    --line-soft:  #E5E9ED;
+    --accent:     #4277AD;
+    --accent-ink: #2C5580;
+    --accent-wash:#E8F0F7;
+    --warn:       #E56615;
+    --warn-wash:  #FDF0E6;
+    --code-bg:    #F4F7F9;
+    --readout-bg: #1B2836;
+    --readout-ink:#C7D6E4;
+
+    --step: 1.6rem;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #12181F;
+      --surface:    #1A222C;
+      --surface-2:  #232D39;
+      --ink:        #E4EAF0;
+      --ink-soft:   #A8B7C5;
+      --ink-faint:  #7C8B9B;
+      --line:       #2F3B48;
+      --line-soft:  #232D39;
+      --accent:     #79AEDD;
+      --accent-ink: #A9CCEC;
+      --accent-wash:#1B2937;
+      --warn:       #F58A45;
+      --warn-wash:  #2E2018;
+      --code-bg:    #171F28;
+      --readout-bg: #0D141B;
+      --readout-ink:#B7C9D9;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #12181F;
+    --surface:    #1A222C;
+    --surface-2:  #232D39;
+    --ink:        #E4EAF0;
+    --ink-soft:   #A8B7C5;
+    --ink-faint:  #7C8B9B;
+    --line:       #2F3B48;
+    --line-soft:  #232D39;
+    --accent:     #79AEDD;
+    --accent-ink: #A9CCEC;
+    --accent-wash:#1B2937;
+    --warn:       #F58A45;
+    --warn-wash:  #2E2018;
+    --code-bg:    #171F28;
+    --readout-bg: #0D141B;
+    --readout-ink:#B7C9D9;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.1rem, 4vw, 2.5rem) 6rem;
+  }
+
+  p, li { max-width: 68ch; }
+
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace; }
+
+  /* ── 머리말 ── */
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.6rem; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-size: clamp(1.9rem, 5vw, 2.9rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.18;
+    text-wrap: balance;
+    margin: 0.5rem 0 0.7rem;
+  }
+  .standfirst { font-size: 1.02rem; color: var(--ink-soft); margin: 0; }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    margin-top: 1.5rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.74rem;
+    color: var(--ink-faint);
+  }
+  .meta b { color: var(--ink-soft); font-weight: 500; }
+
+  /* ── 섹션 ── */
+  section { margin-top: 3.6rem; }
+  h2 {
+    font-size: 1.32rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin: 0 0 0.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+    text-wrap: balance;
+  }
+  h2 .num {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--accent);
+    margin-right: 0.7rem;
+    vertical-align: 0.18em;
+  }
+  h3 {
+    font-size: 0.97rem;
+    font-weight: 600;
+    margin: 2.1rem 0 0.5rem;
+    color: var(--ink);
+  }
+  p { margin: 0 0 0.9rem; }
+  .lede { color: var(--ink-soft); }
+
+  /* ── 코드 ── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 3px;
+    padding: 0.95rem 1.1rem;
+    overflow-x: auto;
+    font-size: 0.795rem;
+    line-height: 1.68;
+    margin: 0.9rem 0 1.3rem;
+    tab-size: 2;
+  }
+  pre b { color: var(--accent-ink); font-weight: 600; }
+  pre i { color: var(--ink-faint); font-style: normal; }
+  pre em { color: var(--warn); font-style: normal; font-weight: 500; }
+  p code, li code, td code {
+    background: var(--surface);
+    border-radius: 2px;
+    padding: 0.08em 0.36em;
+    font-size: 0.855em;
+  }
+
+  .filetag {
+    display: block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    margin-bottom: -0.55rem;
+    padding-left: 0.15rem;
+  }
+
+  /* ── 계측 판독 ── */
+  .readout {
+    background: var(--readout-bg);
+    color: var(--readout-ink);
+    border-radius: 3px;
+    padding: 1rem 1.15rem;
+    overflow-x: auto;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.765rem;
+    line-height: 1.85;
+    margin: 1rem 0 0.6rem;
+    border-left: 3px solid var(--warn);
+  }
+  .readout .hl { color: #F0A868; }
+  .readout .dim { color: #6C8199; }
+  .caption {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    margin: 0 0 1.4rem;
+    max-width: 68ch;
+  }
+
+  /* ── 이벤트 파이프라인 (실제 순서라서 번호를 쓴다) ── */
+  .pipe { display: grid; gap: 0; margin: 1.2rem 0 1.5rem; }
+  .pipe-row {
+    display: grid;
+    grid-template-columns: 2.1rem minmax(0, 13rem) minmax(0, 1fr);
+    gap: 0.5rem 1.1rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--line-soft);
+    align-items: baseline;
+  }
+  .pipe-row:first-child { border-top: 1px solid var(--line); }
+  .pipe-row.ours { background: var(--accent-wash); margin-inline: -0.8rem; padding-inline: 0.8rem; }
+  .pipe-n {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .pipe-ev { font-family: "IBM Plex Mono", monospace; font-size: 0.79rem; font-weight: 500; }
+  .pipe-ev .who { display: block; font-size: 0.68rem; color: var(--ink-faint); font-weight: 400; letter-spacing: 0.02em; }
+  .pipe-what { font-size: 0.86rem; color: var(--ink-soft); }
+  .pipe-what strong { color: var(--ink); font-weight: 600; }
+
+  /* ── 인벤토리 표 ── */
+  .tablewrap { overflow-x: auto; margin: 1.1rem 0 1.5rem; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.83rem; }
+  th {
+    text-align: left;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 0.9rem 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  td { padding: 0.5rem 0.9rem 0.5rem 0; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  td:first-child { font-family: "IBM Plex Mono", monospace; font-size: 0.79rem; white-space: nowrap; }
+  td:last-child, th:last-child { padding-right: 0; color: var(--ink-soft); }
+
+  .chip {
+    display: inline-block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 0.12em 0.5em;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .chip.copy  { background: var(--accent-wash); color: var(--accent-ink); }
+  .chip.swap  { background: var(--warn-wash);   color: var(--warn); }
+  .chip.state { background: var(--surface-2);   color: var(--ink-soft); }
+
+  /* ── 함정 ── */
+  .trap {
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--warn);
+    border-radius: 2px;
+    padding: 1.05rem 1.2rem 0.6rem;
+    margin: 1.2rem 0;
+    background: var(--surface);
+  }
+  .trap h4 {
+    margin: 0 0 0.45rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .trap p { font-size: 0.87rem; margin-bottom: 0.7rem; }
+  .trap pre { margin-bottom: 0.9rem; background: var(--paper); }
+
+  ul, ol { padding-left: 1.15rem; margin: 0.4rem 0 1.1rem; }
+  li { margin-bottom: 0.42rem; }
+  ul.tight li { margin-bottom: 0.22rem; }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    padding: 0.15rem 0 0.15rem 1rem;
+    margin: 1.2rem 0;
+    color: var(--ink-soft);
+    font-size: 0.89rem;
+  }
+  .callout strong { color: var(--ink); }
+
+  /* ── 체크리스트 ── */
+  .check { list-style: none; padding: 0; margin: 1rem 0 0; }
+  .check li {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: 0.6rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--line-soft);
+    max-width: none;
+    align-items: baseline;
+  }
+  .check li:first-child { border-top: 1px solid var(--line); }
+  .check .k {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .check .t { font-size: 0.88rem; }
+  .check .t span { display: block; color: var(--ink-faint); font-size: 0.8rem; }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.3rem;
+    border-top: 2px solid var(--ink);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+  }
+  footer p { max-width: none; margin-bottom: 0.3rem; }
+
+  @media (max-width: 620px) {
+    .pipe-row { grid-template-columns: 1.6rem 1fr; }
+    .pipe-what { grid-column: 2; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">RealGrid TreeView · 이식 노트</div>
+    <h1>RealGrid 트리 배정 이식 가이드</h1>
+    <p class="standfirst">
+      트리에서 블록으로 고르고, 끌어다 놓거나 체크해서 오른쪽 목록으로 옮기는 기능을
+      다른 프로젝트에 옮길 때 무엇을 그대로 복사하고 무엇을 갈아끼워야 하는지.
+    </p>
+    <div class="meta">
+      <span><b>원본</b> src/pages/RealGridTreeToDivPage.vue</span>
+      <span><b>의존</b> RealGridTreeJs.vue · realgrid</span>
+      <span><b>Vue</b> 3 Options API</span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="num">01</span>옮기는 기능</h2>
+    <p class="lede">
+      세 덩어리가 한 페이지에 얹혀 있지만 서로 독립적이다. 필요한 것만 골라 가져가도 된다.
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>기능</th><th>핵심</th><th>이 문서</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>블록 드래그 배정</td>
+            <td>그리드 밖 DIV로 끌어다 놓기. 여러 행을 블록으로 잡고 통째로.</td>
+            <td>04 · 05</td>
+          </tr>
+          <tr>
+            <td>블록 → 자동 체크</td>
+            <td>체크 상태가 화면의 블록과 항상 일치한다. 버튼으로 일괄 배정.</td>
+            <td>06</td>
+          </tr>
+          <tr>
+            <td>부모 제외 규칙</td>
+            <td>잎(자식)만 배정 대상. 부모 행은 체크박스가 아예 안 그려진다.</td>
+            <td>07</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <strong>가장 값나가는 부분은 04·05다.</strong>
+      RealGrid가 셀 선택을 <code>pointerdown</code>에서 처리하기 때문에 생기는 문제로,
+      한 번 밟지 않으면 존재조차 모르고 지나간다.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>먼저 갖춰야 할 것</h2>
+
+    <h3>공통 컴포넌트</h3>
+    <p>
+      트리는 <code>RealGridTreeJs.vue</code>(TreeView + LocalTreeDataProvider)를 쓴다.
+      평면 그리드용 공통 컴포넌트로는 계층이 안 나오니 반드시 트리 쪽을 가져가야 한다.
+      컴포넌트 자체는 수정할 필요가 없다 — 페이지에서 props와 <code>@init</code>으로만 제어한다.
+    </p>
+
+    <span class="filetag">페이지 &lt;script&gt;</span>
+<pre>import RealGridTreeJs from '@/components/RealGridTreeJs.vue'
+import { showToast } from '@/utils/toastUtil.js'   <i>// 없으면 아무 토스트로 교체</i></pre>
+
+    <h3>@init에서 받아 보관하는 두 개</h3>
+    <p>
+      아래 모든 코드가 이 두 개를 전제로 한다. <b>반응형으로 만들지 말 것</b> —
+      <code>data()</code>에 넣으면 Vue가 RealGrid 내부까지 프록시로 감싸서 오작동한다.
+    </p>
+<pre>onGridInit({ gridView, dataProvider }) {
+  <b>this.gridView = gridView</b>          <i>// data() 아님. 인스턴스에 직접</i>
+  <b>this.dataProvider = dataProvider</b>
+
+  gridView.setDisplayOptions({
+    <em>selectionStyle: 'block'</em>,          <i>// 블록 선택이 이 기능의 전제</i>
+    rowHoverType: 'row'
+  })
+}</pre>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>템플릿 계약</h2>
+    <p class="lede">
+      드래그 엔진이 DOM에서 기대하는 것은 세 가지뿐이다. 클래스명이 곧 계약이다.
+    </p>
+
+    <span class="filetag">페이지 &lt;template&gt;</span>
+<pre>&lt;div
+  class="dnd-grid-wrapper"
+  :class="{ 'is-block-drag': isBlockDrag }"
+  <b>@pointerdown.capture="onGridPointerDown"</b>   <i>// ① 반드시 capture</i>
+  <b>@mousedown.capture="onGridMouseDown"</b>
+&gt;
+  &lt;RealGridTreeJs <b>ref="treeGrid"</b> ... @init="onGridInit" /&gt;
+&lt;/div&gt;
+
+&lt;!-- 드롭 존. 이 클래스명으로 판정한다 --&gt;
+&lt;div class="<b>target-div-card</b>"&gt; ... &lt;/div&gt;</pre>
+
+    <ul class="tight">
+      <li><code>ref="treeGrid"</code> — <code>onGridMouseDown</code>에서 그리드 경계 사각형을 잰다. 이름을 바꾸면 그 한 줄도 같이 고칠 것.</li>
+      <li><code>.target-div-card</code> — <code>checkIsOverDropZone</code>이 <code>closest()</code>로 찾는다.</li>
+      <li><code>.is-block-drag</code> — 블록을 잡고 끄는 동안 커서를 <code>grabbing</code>으로 고정하는 용도.</li>
+    </ul>
+
+    <h3>CSS는 두 조각만</h3>
+<pre>.dnd-grid-wrapper { cursor: grab; }
+<i>/* RealGrid가 셀 위에 자체 커서를 씌우므로 자손까지 강제한다 */</i>
+.dnd-grid-wrapper.is-block-drag,
+.dnd-grid-wrapper.is-block-drag * { cursor: grabbing !important; }</pre>
+    <p>
+      드래그 고스트 스타일은 <b>scoped가 아닌 전역 <code>&lt;style&gt;</code></b>에 넣어야 한다.
+      고스트를 <code>document.body</code>에 붙이기 때문에 scoped 속성이 안 먹는다.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>블록이 재지정돼 보이던 문제</h2>
+    <p class="lede">
+      여러 행을 블록으로 선택한 뒤 그 안쪽을 잡고 끌면, 옮겨지는 행은 처음 블록 그대로인데
+      화면에서는 블록이 포인터를 따라 계속 다시 그어졌다. 커밋 <code>ea9164f</code>에서 잡은 문제다.
+    </p>
+
+    <h3>원인은 이벤트 순서 하나</h3>
+    <p>
+      RealGrid는 셀 선택을 <code>mousedown</code>이 아니라 <b><code>pointerdown</code>에서</b> 처리한다.
+      브라우저는 마우스를 한 번 누르면 <code>pointerdown → mousedown</code> 순으로 이벤트를 내므로,
+      <code>mousedown</code>에 도달한 시점에는 이미 늦다.
+    </p>
+
+    <p>
+      3~5행을 블록 선택해둔 상태에서 그 안(4행)을 눌러 각 시점의 그리드 상태를 찍은 실측값:
+    </p>
+
+    <div class="readout">
+<span class="dim">1.</span> pointerdown <span class="hl">CAPTURE</span>  | current.dataRow=<span class="hl">3</span> | selectedRows=<span class="hl">[3,4,5]</span>
+<span class="dim">2.</span> pointerdown bubble   | current.dataRow=4 | selectedRows=<span class="hl">[4]</span>
+<span class="dim">3.</span> mousedown  CAPTURE   | current.dataRow=4 | selectedRows=[3,4,5]
+    </div>
+    <p class="caption">
+      ①에서 <code>current.dataRow</code>가 아직 3이다 — 사용자는 4행을 눌렀지만 RealGrid가 처리 전이라 직전 커서가 남아 있다.
+      ②에서 앵커는 4로 정확해졌지만 그 대가로 블록이 <code>[4]</code>로 접혔다.
+      ③의 <code>[3,4,5]</code>는 우리 핸들러가 이미 복원한 결과다.
+    </p>
+
+    <div class="callout">
+      필요한 두 정보가 <strong>서로 다른 순간에만</strong> 존재한다.
+      누르기 직전의 블록은 ①에서만, 실제로 누른 행(앵커)은 ②부터.
+      그래서 핸들러가 두 개다 — ①은 기억만 하고, 판정은 <code>mousedown</code>에서 한다.
+    </div>
+
+    <h3>capture가 필수인 이유</h3>
+    <p>
+      이벤트는 캡처(바깥→안쪽) → 타깃 → 버블(안쪽→바깥) 순으로 흐른다.
+      래퍼는 RealGrid 셀의 조상이므로, 캡처로 붙여야 RealGrid보다 <b>먼저</b> 받는다.
+      기본값인 버블로 붙이면 ②를 받게 되고 — 블록은 이미 사라진 뒤다.
+    </p>
+    <p>
+      <code>@pointerdown.capture</code>는 Vue가 만든 이벤트가 아니라
+      <code>addEventListener('pointerdown', fn, { capture: true })</code>의 축약이다.
+      <code>pointerdown</code>은 W3C Pointer Events 표준이고 <code>PointerEvent</code>는 <code>MouseEvent</code>를 상속한다.
+    </p>
+    <p>
+      <code>mousedown</code> 쪽 <code>.capture</code>는 현재 기준으로는 <b>없어도 동작한다</b>.
+      <code>pointerdown</code>이 통째로 먼저 끝나므로 어느 단계든 RealGrid 처리는 이미 완료다.
+      남겨둔 이유는 두 핸들러의 단계를 맞춰 순서를 예측 가능하게 두는 것과,
+      RealGrid가 나중에 셀에서 <code>stopPropagation()</code>을 부르면 버블 핸들러는 아예 안 불리기 때문이다.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span>해결: 네 단계</h2>
+    <p class="lede">
+      아래 파이프라인이 엔진 전체다. 파란 줄이 우리 코드가 끼어드는 지점.
+    </p>
+
+    <div class="pipe">
+      <div class="pipe-row ours">
+        <div class="pipe-n">①</div>
+        <div class="pipe-ev">onGridPointerDown<span class="who">pointerdown · capture</span></div>
+        <div class="pipe-what">
+          판단하지 않고 <strong>기억만</strong> 한다. 누르기 직전의 선택 행 목록과 선택 영역을
+          <code>this._prePress</code>에 스냅샷.
+        </div>
+      </div>
+      <div class="pipe-row">
+        <div class="pipe-n">·</div>
+        <div class="pipe-ev">RealGrid 내부<span class="who">pointerdown</span></div>
+        <div class="pipe-what">블록을 눌린 한 행으로 접고, 커서(current)를 그 행으로 옮긴다.</div>
+      </div>
+      <div class="pipe-row ours">
+        <div class="pipe-n">②</div>
+        <div class="pipe-ev">onGridMouseDown<span class="who">mousedown · capture</span></div>
+        <div class="pipe-what">
+          ①의 블록과 지금의 앵커를 맞대어 <strong>이동 제스처인지 판정</strong>.
+          맞으면 접힌 선택을 되돌리고, 합성 <code>pointerup</code>으로 RealGrid의 드래그 추적을 끊는다.
+          window에 mousemove/mouseup을 건다.
+        </div>
+      </div>
+      <div class="pipe-row ours">
+        <div class="pipe-n">③</div>
+        <div class="pipe-ev">onDocMouseMove<span class="who">window</span></div>
+        <div class="pipe-what">
+          움직임마다 블록을 원래대로 되돌린다(<code>keepBlockSelection</code>).
+          <strong>드래그 시작 판정</strong>은 여기 — 5px이 아니라 그리드를 벗어났는가로.
+        </div>
+      </div>
+      <div class="pipe-row ours">
+        <div class="pipe-n">④</div>
+        <div class="pipe-ev">onDocMouseUp<span class="who">window</span></div>
+        <div class="pipe-what">
+          끌었으면 드롭 처리, 안 끌었으면 눌린 행 하나로 접고 그때의 블록을 기억한다.
+        </div>
+      </div>
+    </div>
+
+    <h3>① 스냅샷 — 판단하지 않는다</h3>
+<pre>onGridPointerDown(e) {
+  if (e.button !== 0 || !this.gridView) return
+  this._prePress = {
+    rows: this.snapshotSelectedRows(),
+    selection: this.snapshotSelection()
+  }
+}</pre>
+    <p>
+      <code>snapshotSelection()</code>이 <code>getSelection()</code> 결과를 그대로 들고 있지 않고
+      순수 값으로 복사하는 게 중요하다. RealGrid는 그 객체를 계속 고쳐 쓴다.
+    </p>
+<pre>snapshotSelection() {
+  const sel = this.gridView.getSelection()
+  if (!sel || sel.startItem == null) return null
+  return {                       <i>// 참조로 들고 있으면 안 된다</i>
+    cellType: sel.cellType, style: sel.style,
+    startItem: sel.startItem, startColumn: sel.startColumn,
+    endItem: sel.endItem, endColumn: sel.endColumn
+  }
+}</pre>
+
+    <h3>② 판정과 동결</h3>
+<pre>const cur = this.gridView.getCurrent()
+const anchor = (cur &amp;&amp; cur.itemIndex &gt;= 0)
+  ? { itemIndex: cur.itemIndex, dataRow: cur.dataRow, column: cur.column } : null
+
+<i>// 여러 행이 선택돼 있었고(①), 그 블록 안쪽을 눌렀다(②) = 옮기려는 제스처</i>
+const canFreeze = !!(anchor &amp;&amp; anchor.dataRow &gt;= 0 &amp;&amp;
+  preSelectedRows.length &gt; 1 &amp;&amp; pre.selection &amp;&amp;
+  <b>preSelectedRows.includes(anchor.dataRow)</b>)
+
+if (canFreeze) {
+  <b>this.gridView.setSelection(pre.selection, false)</b>   <i>// 접힌 걸 되돌리고</i>
+  <b>this.releaseGridPointer(e)</b>                        <i>// 추적을 끊고</i>
+  this.isBlockDrag = true
+}</pre>
+    <p>
+      <code>pointerdown</code>과 <code>mousedown</code> 사이에는 리페인트가 없다.
+      그래서 접혔다가 되돌아온 게 화면에 안 보인다 — 깜빡임 없이 블록이 고정된 것처럼 보이는 이유다.
+    </p>
+
+    <h3>합성 이벤트로 추적 끊기</h3>
+<pre>releaseGridPointer(e) {
+  const base = { bubbles: true, cancelable: true,
+    clientX: e.clientX, clientY: e.clientY, button: 0, buttons: 0 }
+
+  const pointerUp = new PointerEvent('pointerup',
+    { ...base, pointerId: 1, pointerType: 'mouse' })
+  <em>pointerUp.__nexhubSynthetic = true</em>     <i>// 우리가 되받지 않도록 표시</i>
+  e.target.dispatchEvent(pointerUp)
+
+  const mouseUp = new MouseEvent('mouseup', base)
+  <em>mouseUp.__nexhubSynthetic = true</em>
+  e.target.dispatchEvent(mouseUp)
+}</pre>
+    <p>
+      표시해서 보낸 이벤트는 <code>onDocMouseUp</code> 첫 줄에서 걸러진다.
+      <code>if (e &amp;&amp; e.__nexhubSynthetic) return</code> — 이 한 줄을 빠뜨리면 드래그가 즉시 종료된다.
+    </p>
+
+    <h3>③ 그래도 다시 긋는다 — 움직임마다 되돌리기</h3>
+<pre>keepBlockSelection() {
+  const frozen = this._press &amp;&amp; this._press.blockSelection
+  if (!frozen || !this.gridView) return
+  const cur = this.gridView.getSelection()
+  if (cur &amp;&amp; cur.startItem === frozen.startItem &amp;&amp; cur.endItem === frozen.endItem &amp;&amp;
+      cur.startColumn === frozen.startColumn &amp;&amp; cur.endColumn === frozen.endColumn) return
+  this.gridView.setSelection(frozen, false)
+}</pre>
+    <p>
+      합성 <code>pointerup</code>만으로는 그리드 안쪽 움직임까지 끊지 못한다.
+      이 핸들러는 <b>window 버블</b>이라 그리드 자신의 갱신 뒤에 돌고,
+      그 사이 화면을 다시 그리지 않으므로 사용자 눈에는 처음부터 고정돼 보인다.
+    </p>
+
+    <h3>③ 드래그 시작 조건 — 거리가 아니라 경계</h3>
+<pre>const rect = this._press.gridRect
+const isPointerOutsideRight = e.clientX &gt; rect.right - 10
+const isOverZone = this.checkIsOverDropZone(e.clientX, e.clientY)
+
+<i>// 그리드 '안'에서의 움직임은 RealGrid의 블록 선택이다. 가로채면 안 된다.</i>
+if (!this._press.moveGesture &amp;&amp; !isPointerOutsideRight &amp;&amp; !isOverZone) return</pre>
+    <div class="trap">
+      <h4>여기를 <code>dist &gt; 15</code> 같은 거리 조건으로 두면 기능이 깨진다</h4>
+      <p>
+        사용자가 행을 훑어 블록을 그리는 제스처를 드래그로 가로채게 된다.
+        그러면 <code>mouseup</code>이 "드래그였다"로 처리되어
+        블록을 기억하는 경로가 통째로 건너뛰어지고, 결과적으로 <b>블록 이동이 아예 안 된다</b>.
+        예외는 <code>moveGesture</code> 하나 — ②에서 이미 RealGrid의 선택 추적을 끊었으니 경쟁 상대가 없다.
+      </p>
+    </div>
+
+    <h3>④ 끌지 않았을 때</h3>
+<pre>if (!wasDragging) {
+  <i>// 블록 안을 그냥 클릭했다 = 그 행 하나만 고르려는 의도</i>
+  if (press &amp;&amp; press.moveGesture &amp;&amp; press.anchor) this.collapseSelectionTo(press.anchor)
+  this.rememberBlockFromGrid()    <i>// 이때의 선택만 블록으로 기억한다</i>
+  return
+}
+this.finishDrag(e)</pre>
+    <p>
+      블록 기억을 <b>선택 이벤트로 갱신하지 않는 것</b>이 핵심이다.
+      누르고 있는 동안에는 RealGrid가 선택을 계속 바꾸고, 그 통보가 우리 드래그 시작보다
+      먼저 올지 나중에 올지 정해져 있지 않다. 그래서 <code>onSelectionEnded</code>는 이렇게 막는다.
+    </p>
+<pre>gridView.onSelectionEnded = () =&gt; {
+  <b>if (this._press) return</b>        <i>// 누르는 중이면 무시. 키보드 선택만 통과</i>
+  this.rememberBlockFromGrid()
+}</pre>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span>블록 = 체크</h2>
+    <p class="lede">
+      규칙은 하나다. <strong>체크 상태 = 지금 화면의 블록.</strong>
+      화면에 블록이 없는데 체크만 남아 있으면 무엇이 배정될지 화면만 보고는 알 수 없다.
+    </p>
+    <p>
+      새 이벤트를 만들 필요가 없다. <code>rememberBlockFromGrid()</code>가 이미
+      마우스 블록과 키보드 Shift 선택이 함께 합류하는 "선택 제스처가 끝난 시점"이다.
+    </p>
+<pre>rememberBlockFromGrid() {
+  const selected = this.snapshotSelectedRows()
+  this._blockRows = selected.length &gt; 1 ? selected : []
+
+  <i>// 체크바를 누른 제스처인가. (onGridPointerDown 에서 위치로 판별해 둔 값)</i>
+  const viaCheckbar = this._pressOnCheckbar
+
+  <i>// 블록을 씌웠다 = 그 안의 모델이 고른 것</i>
+  if (selected.length &gt; 1) {
+    <b>this.syncChecksToBlock(selected)</b>
+    return
+  }
+
+  <i>// 블록이 사라졌다 = 고른 게 없다. 체크도 비운다.</i>
+  if (<em>viaCheckbar</em>) return
+  <b>this.clearAllChecks()</b>
+}</pre>
+
+    <h3>규칙 셋</h3>
+    <ul>
+      <li>
+        <b>블록을 그으면</b> 그 안의 모델만 체크되고 이전 블록의 체크는 지워진다.
+        <code>checkAll</code>의 두 번째 인자를 <code>false</code>로 줘야
+        <b>접혀 있는 카테고리 안의 체크까지</b> 해제된다.
+      </li>
+      <li><b>블록이 사라지면</b>(블록 밖 클릭 등) 체크도 같이 비운다.</li>
+      <li>
+        <b>예외는 체크바 직접 클릭.</b> 그것도 '한 행 선택'이라 그냥 지우면
+        수동 체크가 아예 불가능해진다.
+      </li>
+    </ul>
+
+    <div class="trap">
+      <h4>체크바 클릭은 이벤트 순서로 구분할 수 없다</h4>
+      <p>
+        RealGrid의 체크 토글(<code>onItemChecked</code>)은 <b>우리 <code>mouseup</code>보다 뒤에</b> 온다.
+        그래서 "체크 이벤트가 왔으면 지우지 않는다"로 짜면 그 사이에 이미 지워진 뒤라,
+        방금 켜진 체크가 사라진다. <b>누른 위치로 판별해야 한다.</b>
+      </p>
+<pre>isCheckbarPoint(x, y) {
+  const el = document.elementFromPoint(x, y)
+  return !!(el &amp;&amp; el.closest('<b>[class*="rg-checkbar"]</b>'))
+}</pre>
+      <p>
+        <code>onGridPointerDown</code>에서
+        <code>this._pressOnCheckbar = this.isCheckbarPoint(e.clientX, e.clientY)</code>로 한 번 재둔다.
+      </p>
+    </div>
+
+    <div class="trap">
+      <h4><code>rememberBlockFromGrid</code>는 한 제스처에 두 번 불린다</h4>
+      <p>
+        <code>onDocMouseUp</code>과 <code>onSelectionEnded</code> 양쪽에서 온다.
+        그래서 위 표시를 이 함수 안에서 소비(리셋)하면 안 된다 —
+        첫 호출이 소비해 버리면 두 번째 호출이 방금 켜진 체크를 지운다.
+        표시를 내리는 곳은 <b>제스처 시작 한 군데뿐</b>이다.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span>RealGrid 트리 함정 넷</h2>
+    <p class="lede">에러가 안 나고 조용히 틀리는 것들이라 미리 알고 가는 게 싸다.</p>
+
+    <div class="trap">
+      <h4>잎 노드에 <code>children: []</code>를 넣으면 펼침 화살표가 그려진다</h4>
+      <p>
+        <code>setNestedRows</code>의 <code>childrenProp</code>은 "자식 배열"이 아니라
+        <b>자식이 있는지를 지시하는 속성</b>이다. 빈 배열도 "자식 있음"으로 읽힌다.
+        잎에는 키 자체를 넣지 않아야 RealGrid가 잎으로 보고 화살표 자리를 비운다.
+      </p>
+<pre><i>// 잘못</i>  { modelName: '...', <em>children: []</em> }
+<i>// 맞음</i>  { modelName: '...' }</pre>
+    </div>
+
+    <div class="trap">
+      <h4>트리의 <code>getCheckedRows</code>는 인자 의미가 다르다</h4>
+      <p>
+        <code>GridBase</code>는 <code>getCheckedRows(sort, visibleOnly, allRows)</code>지만
+        <code>TreeView</code>는 <code>getCheckedRows(visibleOnly)</code>다.
+        접혀 있는 노드까지 포함하려면 <code>false</code>를 넘겨야 한다.
+      </p>
+<pre>this.gridView.getCheckedRows(<b>false</b>)   <i>// visibleOnly = false</i></pre>
+    </div>
+
+    <div class="trap">
+      <h4>부모를 체크 대상에서 빼려면 <code>checkableCallback</code></h4>
+      <p>
+        공통 컴포넌트가 설정한 체크바를 <code>@init</code>에서 덮어쓴다. 나머지 옵션도 같이 넘겨야 유실되지 않는다.
+        <code>checkAll</code>과 헤더 전체체크도 이 콜백을 존중한다.
+      </p>
+<pre>gridView.setCheckBar({
+  visible: true, width: 34, exclusive: false, head: 'check',
+  <b>checkableCallback: (dataSource, item) =&gt; {</b>
+    const info = this.nodeInfo(item &amp;&amp; item.dataRow)
+    return !!(info &amp;&amp; info.nodeType === 'model')
+  }
+})</pre>
+    </div>
+
+    <div class="trap">
+      <h4>트리 provider의 <code>getJsonRow</code>는 기본이 재귀다</h4>
+      <p>
+        하위까지 통째로 묶어 준다. 한 행의 값만 필요하면 재귀를 명시적으로 꺼야 한다.
+      </p>
+<pre>nodeInfo(dataRow) {
+  if (!this.dataProvider || dataRow == null || dataRow &lt; 0) return null
+  try { return this.dataProvider.getJsonRow(dataRow, <b>false, false</b>) || null }
+  catch (e) { return null }
+}</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">08</span>복붙 인벤토리</h2>
+    <p class="lede">
+      <span class="chip copy">복붙</span> 도메인을 모른다. 그대로 가져가면 된다. ·
+      <span class="chip swap">교체</span> 여기만 여러분 데이터로. ·
+      <span class="chip state">상태</span> 미리 있어야 하는 값.
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>이름</th><th></th><th>역할</th></tr></thead>
+        <tbody>
+          <tr><td>onGridPointerDown</td><td><span class="chip copy">복붙</span></td><td>누르기 직전 선택 스냅샷</td></tr>
+          <tr><td>onGridMouseDown</td><td><span class="chip copy">복붙</span></td><td>이동 제스처 판정, 블록 동결, window 리스너 등록</td></tr>
+          <tr><td>releaseGridPointer</td><td><span class="chip copy">복붙</span></td><td>합성 pointerup/mouseup으로 추적 끊기</td></tr>
+          <tr><td>onDocMouseMove</td><td><span class="chip swap">교체</span></td><td>드래그 시작 판정. <code>rowsToModelIds</code>·<code>createGhost</code> 호출부만 손댄다</td></tr>
+          <tr><td>keepBlockSelection</td><td><span class="chip copy">복붙</span></td><td>움직임마다 블록 복원</td></tr>
+          <tr><td>onDocMouseUp</td><td><span class="chip copy">복붙</span></td><td>드롭 / 순수 선택 분기</td></tr>
+          <tr><td>collapseSelectionTo</td><td><span class="chip copy">복붙</span></td><td>블록을 눌린 셀 하나로 접기</td></tr>
+          <tr><td>endDragListeners</td><td><span class="chip copy">복붙</span></td><td>window 리스너 해제</td></tr>
+          <tr><td>snapshotSelection</td><td><span class="chip copy">복붙</span></td><td>선택 영역 순수 값 복사</td></tr>
+          <tr><td>snapshotSelectedRows</td><td><span class="chip copy">복붙</span></td><td>선택 dataRow 정렬·중복 제거</td></tr>
+          <tr><td>resolveDragRows</td><td><span class="chip copy">복붙</span></td><td>블록/앵커로 대상 행 확정</td></tr>
+          <tr><td>rememberBlockFromGrid</td><td><span class="chip swap">교체</span></td><td>블록 기억 + 자동 체크 훅</td></tr>
+          <tr><td>syncChecksToBlock</td><td><span class="chip swap">교체</span></td><td>잎 판별 조건(<code>nodeType</code>)만 교체</td></tr>
+          <tr><td>clearAllChecks</td><td><span class="chip copy">복붙</span></td><td>접힌 노드 포함 전체 체크 해제</td></tr>
+          <tr><td>isCheckbarPoint</td><td><span class="chip copy">복붙</span></td><td>누른 좌표가 체크바인지 판별</td></tr>
+          <tr><td>checkIsOverDropZone</td><td><span class="chip copy">복붙</span></td><td>드롭 존 판정 (클래스명만 확인)</td></tr>
+          <tr><td>createGhost / moveGhost / removeGhost</td><td><span class="chip swap">교체</span></td><td>고스트. 라벨 문구만 도메인</td></tr>
+          <tr><td>finishDrag</td><td><span class="chip swap">교체</span></td><td>드롭 시 실제 이동 호출</td></tr>
+          <tr><td>nodeInfo / rowsToModelIds</td><td><span class="chip swap">교체</span></td><td>행 → 도메인 ID 변환</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>필요한 상태</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>값</th><th>어디에</th><th>왜</th></tr></thead>
+        <tbody>
+          <tr><td>gridView<br>dataProvider</td><td>인스턴스 직접</td><td>@init에서 받는다. data()에 넣으면 Vue가 프록시로 감싼다</td></tr>
+          <tr><td>isBlockDrag<br>isHoverDropZone</td><td>data()</td><td>커서·드롭 존 하이라이트. 화면에 반영돼야 한다</td></tr>
+          <tr><td>selectionStyle</td><td>data()</td><td><code>'block'</code> 고정. setSelection에 같이 넘긴다</td></tr>
+          <tr><td>_prePress<br>_press<br>_blockRows<br>_dragIds<br>_ghost</td><td>인스턴스 직접</td><td>mousemove마다 바뀐다. 반응형이면 매 프레임 리렌더가 돈다</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <strong><code>_</code> 프리픽스 다섯 개를 <code>data()</code>에 넣지 말 것.</strong>
+      드래그 중 초당 수십 번 갱신되는 값이라 반응형으로 만들면 프레임마다 렌더가 돌고,
+      <code>_press.gridRect</code>처럼 DOM 객체가 섞인 값은 프록시로 감싸이면서 비교가 어긋난다.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">09</span>갈아끼울 곳은 넷</h2>
+    <p class="lede">
+      엔진이 도메인을 만나는 접점은 이게 전부다. 이 네 개만 여러분 데이터에 맞추면 나머지는 그대로 돈다.
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>훅</th><th>계약</th><th>부르는 곳</th></tr></thead>
+        <tbody>
+          <tr><td>nodeInfo(dataRow)</td><td>행 → 노드 객체 (잎 판별용 필드 포함)</td><td>전역</td></tr>
+          <tr><td>rowsToModelIds(rows)</td><td>dataRow 배열 → 도메인 ID 배열. 대상 아닌 행은 여기서 걸러낸다</td><td>onDocMouseMove · checkedModelIds</td></tr>
+          <tr><td>assignModels(ids)</td><td>실제 이동. 성공 개수 반환</td><td>finishDrag · assignChecked</td></tr>
+          <tr><td>createGhost(ids)</td><td>따라다니는 라벨 문구</td><td>onDocMouseMove</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      <b>계층 해석을 <code>rowsToModelIds</code> 한 곳에 몰아두는 게 요령이다.</b>
+      드래그·체크·블록 혼합이 모두 이 함수로 합류하므로,
+      "부모는 제외" 든 "부모는 하위 전체로 펼침" 이든 정책을 여기 한 곳에서만 바꾸면 된다.
+      중복은 <code>Set</code>으로 거른다.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">10</span>이식 체크리스트</h2>
+    <ol class="check">
+      <li><span class="k">01</span><span class="t">RealGridTreeJs.vue 복사, <code>@init</code>에서 gridView·dataProvider 보관<span>data()에 넣지 않는다</span></span></li>
+      <li><span class="k">02</span><span class="t"><code>setDisplayOptions({ selectionStyle: 'block' })</code><span>블록 선택이 전제다</span></span></li>
+      <li><span class="k">03</span><span class="t">래퍼에 <code>@pointerdown.capture</code> + <code>@mousedown.capture</code><span>capture를 빼면 블록을 못 본다</span></span></li>
+      <li><span class="k">04</span><span class="t">드롭 존에 <code>.target-div-card</code>, 그리드에 <code>ref</code></span></li>
+      <li><span class="k">05</span><span class="t">인벤토리의 <span class="chip copy">복붙</span> 12개를 그대로 붙여넣기</span></li>
+      <li><span class="k">06</span><span class="t">도메인 훅 4개 구현 (09절)</span></li>
+      <li><span class="k">07</span><span class="t">고스트 CSS를 <b>전역</b> <code>&lt;style&gt;</code>에 (scoped 아님)</span></li>
+      <li><span class="k">08</span><span class="t">잎 노드에서 <code>children</code> 키 제거<span>안 그러면 잎마다 화살표가 뜬다</span></span></li>
+      <li><span class="k">09</span><span class="t"><code>beforeUnmount</code>에서 <code>endDragListeners()</code> + <code>removeGhost()</code><span>window 리스너와 body 고스트가 남는다</span></span></li>
+    </ol>
+    <h3>마지막 하나를 빠뜨리기 쉽다</h3>
+<pre>beforeUnmount() {
+  this.endDragListeners()   <i>// window mousemove/mouseup</i>
+  this.removeGhost()        <i>// document.body에 붙인 고스트</i>
+}</pre>
+  </section>
+
+  <footer>
+    <p>원본 · src/pages/RealGridTreeToDivPage.vue · NexHubStudio</p>
+    <p>블록 드래그 수정 이력 · ea9164f (grid-to-div) → 트리 페이지로 이식</p>
+  </footer>
+
+</div>

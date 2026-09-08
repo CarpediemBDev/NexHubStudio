@@ -5,6 +5,7 @@
 - 원본: `src/pages/RealGridTreeToDivPage.vue` (`/grid-studio/tree-to-div`)
 - 전제: 트리 컴포넌트 자체의 이식은 [realtree-이식가이드.md](./realtree-이식가이드.md) 참고. 이 문서는 그 위에 얹는 **배정 기능**만 다룹니다.
 - 환경: Vue 3 Options API
+- 같은 내용의 **HTML 판**: [realtree-배정-이식가이드.html](./realtree-배정-이식가이드.html) (브라우저로 바로 열림. Artifact 게시용 소스이기도 하므로 doctype/html/head/body 는 없다)
 
 ---
 
