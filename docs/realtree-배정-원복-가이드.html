@@ -1,0 +1,664 @@
+<!--
+  배정 원복(X) 구현 가이드 — Artifact 소스 겸 단독 열람용.
+  Artifact 로 게시할 때는 런타임이 doctype/html/head/body 를 감싸므로 여기 넣지 않는다.
+  charset 만 선언해 두면 레포에서 파일을 직접 열어도 한글이 깨지지 않는다.
+-->
+<meta charset="utf-8">
+<title>배정 원복(X) 구현 가이드</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+  /* ── 팔레트는 RealGrid 자체 스타일시트에서 가져왔다 ──
+     #4277AD  realgrid-white.css 의 확장 아이콘·체크박스 chrome
+     #D2D5DA  .rg-tree-line 배경색
+     #E56615  체크박스 indeterminate 막대           */
+  :root {
+    --paper:      #FBFCFD;
+    --surface:    #F1F4F7;
+    --surface-2:  #E7ECF1;
+    --ink:        #17212B;
+    --ink-soft:   #4A5966;
+    --ink-faint:  #78889A;
+    --line:       #D2D5DA;
+    --line-soft:  #E5E9ED;
+    --accent:     #4277AD;
+    --accent-ink: #2C5580;
+    --accent-wash:#E8F0F7;
+    --warn:       #E56615;
+    --warn-wash:  #FDF0E6;
+    --code-bg:    #F4F7F9;
+    --readout-bg: #1B2836;
+    --readout-ink:#C7D6E4;
+
+    --step: 1.6rem;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #12181F;
+      --surface:    #1A222C;
+      --surface-2:  #232D39;
+      --ink:        #E4EAF0;
+      --ink-soft:   #A8B7C5;
+      --ink-faint:  #7C8B9B;
+      --line:       #2F3B48;
+      --line-soft:  #232D39;
+      --accent:     #79AEDD;
+      --accent-ink: #A9CCEC;
+      --accent-wash:#1B2937;
+      --warn:       #F58A45;
+      --warn-wash:  #2E2018;
+      --code-bg:    #171F28;
+      --readout-bg: #0D141B;
+      --readout-ink:#B7C9D9;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #12181F;
+    --surface:    #1A222C;
+    --surface-2:  #232D39;
+    --ink:        #E4EAF0;
+    --ink-soft:   #A8B7C5;
+    --ink-faint:  #7C8B9B;
+    --line:       #2F3B48;
+    --line-soft:  #232D39;
+    --accent:     #79AEDD;
+    --accent-ink: #A9CCEC;
+    --accent-wash:#1B2937;
+    --warn:       #F58A45;
+    --warn-wash:  #2E2018;
+    --code-bg:    #171F28;
+    --readout-bg: #0D141B;
+    --readout-ink:#B7C9D9;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.1rem, 4vw, 2.5rem) 6rem;
+  }
+
+  p, li { max-width: 68ch; }
+
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace; }
+
+  /* ── 머리말 ── */
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.6rem; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-size: clamp(1.9rem, 5vw, 2.9rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.18;
+    text-wrap: balance;
+    margin: 0.5rem 0 0.7rem;
+  }
+  .standfirst { font-size: 1.02rem; color: var(--ink-soft); margin: 0; }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    margin-top: 1.5rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.74rem;
+    color: var(--ink-faint);
+  }
+  .meta b { color: var(--ink-soft); font-weight: 500; }
+
+  /* ── 섹션 ── */
+  section { margin-top: 3.6rem; }
+  h2 {
+    font-size: 1.32rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin: 0 0 0.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+    text-wrap: balance;
+  }
+  h2 .num {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--accent);
+    margin-right: 0.7rem;
+    vertical-align: 0.18em;
+  }
+  h3 {
+    font-size: 0.97rem;
+    font-weight: 600;
+    margin: 2.1rem 0 0.5rem;
+    color: var(--ink);
+  }
+  p { margin: 0 0 0.9rem; }
+  .lede { color: var(--ink-soft); }
+
+  /* ── 코드 ── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 3px;
+    padding: 0.95rem 1.1rem;
+    overflow-x: auto;
+    font-size: 0.795rem;
+    line-height: 1.68;
+    margin: 0.9rem 0 1.3rem;
+    tab-size: 2;
+  }
+  pre b { color: var(--accent-ink); font-weight: 600; }
+  pre i { color: var(--ink-faint); font-style: normal; }
+  pre em { color: var(--warn); font-style: normal; font-weight: 500; }
+  p code, li code, td code {
+    background: var(--surface);
+    border-radius: 2px;
+    padding: 0.08em 0.36em;
+    font-size: 0.855em;
+  }
+
+  .filetag {
+    display: block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    margin-bottom: -0.55rem;
+    padding-left: 0.15rem;
+  }
+
+  /* ── 계측 판독 ── */
+  .readout {
+    background: var(--readout-bg);
+    color: var(--readout-ink);
+    border-radius: 3px;
+    padding: 1rem 1.15rem;
+    overflow-x: auto;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.765rem;
+    line-height: 1.85;
+    margin: 1rem 0 0.6rem;
+    border-left: 3px solid var(--warn);
+  }
+  .readout .hl { color: #F0A868; }
+  .readout .dim { color: #6C8199; }
+  .caption {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    margin: 0 0 1.4rem;
+    max-width: 68ch;
+  }
+
+  /* ── 이벤트 파이프라인 (실제 순서라서 번호를 쓴다) ── */
+  .pipe { display: grid; gap: 0; margin: 1.2rem 0 1.5rem; }
+  .pipe-row {
+    display: grid;
+    grid-template-columns: 2.1rem minmax(0, 13rem) minmax(0, 1fr);
+    gap: 0.5rem 1.1rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--line-soft);
+    align-items: baseline;
+  }
+  .pipe-row:first-child { border-top: 1px solid var(--line); }
+  .pipe-row.ours { background: var(--accent-wash); margin-inline: -0.8rem; padding-inline: 0.8rem; }
+  .pipe-n {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .pipe-ev { font-family: "IBM Plex Mono", monospace; font-size: 0.79rem; font-weight: 500; }
+  .pipe-ev .who { display: block; font-size: 0.68rem; color: var(--ink-faint); font-weight: 400; letter-spacing: 0.02em; }
+  .pipe-what { font-size: 0.86rem; color: var(--ink-soft); }
+  .pipe-what strong { color: var(--ink); font-weight: 600; }
+
+  /* ── 인벤토리 표 ── */
+  .tablewrap { overflow-x: auto; margin: 1.1rem 0 1.5rem; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.83rem; }
+  th {
+    text-align: left;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 0.9rem 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  td { padding: 0.5rem 0.9rem 0.5rem 0; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  td:first-child { font-family: "IBM Plex Mono", monospace; font-size: 0.79rem; white-space: nowrap; }
+  td:last-child, th:last-child { padding-right: 0; color: var(--ink-soft); }
+
+  .chip {
+    display: inline-block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 0.12em 0.5em;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .chip.copy  { background: var(--accent-wash); color: var(--accent-ink); }
+  .chip.swap  { background: var(--warn-wash);   color: var(--warn); }
+  .chip.state { background: var(--surface-2);   color: var(--ink-soft); }
+
+  /* ── 함정 ── */
+  .trap {
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--warn);
+    border-radius: 2px;
+    padding: 1.05rem 1.2rem 0.6rem;
+    margin: 1.2rem 0;
+    background: var(--surface);
+  }
+  .trap h4 {
+    margin: 0 0 0.45rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .trap p { font-size: 0.87rem; margin-bottom: 0.7rem; }
+  .trap pre { margin-bottom: 0.9rem; background: var(--paper); }
+
+  ul, ol { padding-left: 1.15rem; margin: 0.4rem 0 1.1rem; }
+  li { margin-bottom: 0.42rem; }
+  ul.tight li { margin-bottom: 0.22rem; }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    padding: 0.15rem 0 0.15rem 1rem;
+    margin: 1.2rem 0;
+    color: var(--ink-soft);
+    font-size: 0.89rem;
+  }
+  .callout strong { color: var(--ink); }
+
+  /* ── 체크리스트 ── */
+  .check { list-style: none; padding: 0; margin: 1rem 0 0; }
+  .check li {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: 0.6rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--line-soft);
+    max-width: none;
+    align-items: baseline;
+  }
+  .check li:first-child { border-top: 1px solid var(--line); }
+  .check .k {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .check .t { font-size: 0.88rem; }
+  .check .t span { display: block; color: var(--ink-faint); font-size: 0.8rem; }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.3rem;
+    border-top: 2px solid var(--ink);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+  }
+  footer p { max-width: none; margin-bottom: 0.3rem; }
+
+  @media (max-width: 620px) {
+    .pipe-row { grid-template-columns: 1.6rem 1fr; }
+    .pipe-what { grid-column: 2; }
+  }
+</style>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">배정 목록 · 되돌리기 노트</div>
+    <h1>배정 목록 X(원복) 구현 가이드</h1>
+    <p class="standfirst">
+      우측 배정 목록에서 X를 눌러 하나를 빼면, 좌측 그리드·트리로 정확히 그 하나만 돌아와야 한다.
+      말은 한 줄인데 옮겨 심으면 거의 반드시 두 가지가 깨진다 — 왜 깨지고, 어떤 구조가 안 깨지는가.
+    </p>
+    <div class="meta">
+      <span><b>원본 ①</b> RealGridTreeToDivPage.vue (트리 · 권장)</span>
+      <span><b>원본 ②</b> RealGridToDivGuidePage.vue (평면)</span>
+      <span><b>Vue</b> 3 Options API</span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="num">01</span>깨지는 두 가지</h2>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>증상</th><th>보이는 것</th><th>원인 표</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>A · 원복 안 됨</td>
+            <td>X를 눌렀는데 좌측에 다시 안 나타난다. 우측에서만 사라지고 그대로 끝.</td>
+            <td>05</td>
+          </tr>
+          <tr>
+            <td>B · 전부 사라짐</td>
+            <td>하나만 지웠는데 우측 목록이 통째로 비거나 엉뚱한 항목까지 함께 사라진다.</td>
+            <td>06</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <strong>한 줄 규칙 — 우측 배정 목록이 원본이고, 좌측은 그 결과로 파생되는 화면이다.</strong>
+      되돌리기가 깨지는 구현은 예외 없이 이 관계가 뒤집혀 있거나, 좌우가 각자 자기 데이터를 들고 서로를 모른다.
+      그러면 “우측에서 빼기”와 “좌측에 넣기”가 별개 작업이 되고, 둘 중 하나만 성공하는 순간 증상 A가 난다.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>권장 구조 — 좌측을 computed로 파생</h2>
+    <p class="lede">
+      상태는 두 개뿐이다. 전체 원본과, 우측으로 옮긴 것들의 목록.
+      좌측은 <b>둘의 차집합</b>이므로 되돌리는 코드가 따로 없다.
+    </p>
+
+    <span class="filetag">RealGridTreeToDivPage.vue</span>
+<pre>data() {
+  return {
+    <b>catalog: []</b>,             <i>// 전체 원본(평면). 배정/원복으로 절대 변하지 않는다</i>
+    <b>assignedCategories: []</b>   <i>// 우측으로 옮긴 것 (모델 단위면 modelId 배열)</i>
+  }
+},
+computed: {
+  assignedSet() { return new Set(this.assignedCategories) },
+
+  <i>// 좌측 = 전체 − 배정됨</i>
+  poolCategories() {
+    return CATEGORY_DEFS.filter(cat =&gt; <em>!this.assignedSet.has(cat.name)</em> &amp;&amp; this.modelsByCategory.get(cat.name).length)
+  },
+
+  <i>// 트리 rows 는 매번 통째로 다시 만든다</i>
+  treeRows() {
+    return this.poolCategories.map(cat =&gt; ({ nodeType: 'category', category: cat.name, <i>/* ... */</i> }))
+  }
+}</pre>
+
+    <p>되돌리기는 이게 전부다.</p>
+<pre>returnCategory(name) {
+  const idx = this.assignedCategories.indexOf(name)
+  if (idx &lt; 0) return
+  <b>this.assignedCategories.splice(idx, 1)</b>   <i>// ← 두 번째 인자 1 (06-1)</i>
+
+  if (this.openedCategory === name) this.openedCategory = null  <i>// 열려 있던 팝업 닫기</i>
+  this.syncRepresentatives()   <i>// 그룹별 대표 모델 승계</i>
+  this.syncRepCategory()       <i>// 대표 그룹(우측 라디오) 승계</i>
+  this.resetCheckState()       <i>// 트리를 다시 그리면 체크는 사라진다 → 카운트도 초기화</i>
+}</pre>
+
+    <p>
+      <code>RealGridTreeJs</code>는 <code>rows</code> prop을 deep watch해 <code>setTreeRows()</code>를 다시 부른다.
+      <code>treeRows</code>가 바뀌면 좌측은 알아서 복구된다.
+      <b>RealGrid 노드를 직접 지우고 붙이지 않는 것</b>이 핵심이다 —
+      트리에서 그렇게 하면 부모가 빈 채로 남거나 <code>dataRow</code> 인덱스가 어긋나는데,
+      통째로 다시 만들면 그 경우의 수가 아예 없다.
+    </p>
+
+    <div class="callout">
+      성능 걱정은 나중이다. 재구성은 배정·원복이 일어날 때만 돈다.
+      사람이 클릭하는 빈도로는 수천 행에서도 문제가 되지 않는다.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>대안 구조 — provider 직접 조작 (평면 전용)</h2>
+    <p class="lede">
+      계층이 없는 평면 그리드라면 <code>dataProvider</code>를 직접 만져도 안전하다.
+      <b>트리에서는 쓰지 않는다.</b>
+    </p>
+
+    <span class="filetag">RealGridToDivGuidePage.vue</span>
+<pre>returnToGrid(modelId) {
+  const idx = this.groupModels.findIndex(m =&gt; m.modelId === modelId)
+  if (idx &lt; 0) return
+  const item = <b>this.groupModels.splice(idx, 1)[0]</b>   <i>// 뺀 '그 객체'를 그대로 되돌린다</i>
+  if (!item) return
+
+  if (this.repModelId === item.modelId) {              <i>// 대표였으면 승계</i>
+    this.repModelId = this.groupModels.length &gt; 0 ? this.groupModels[0].modelId : null
+  }
+
+  <em>this.dataProvider.addRow(item)</em>                     <i>// ← 이 한 줄 누락이 증상 A의 1순위</i>
+  this.syncPoolCount()
+  this.syncCheckedCount()
+}</pre>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>규칙</th><th>이유</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>뺀 객체를 그대로</td>
+            <td>다시 만들면 필드가 빠지거나 타입이 달라져 좌측에서 빈 행처럼 보인다.</td>
+          </tr>
+          <tr>
+            <td>카운트 재계산</td>
+            <td>provider를 직접 만지면 화면 숫자는 자동으로 따라오지 않는다.</td>
+          </tr>
+          <tr>
+            <td>트리에는 금지</td>
+            <td>되돌린 행을 어느 부모 밑에 넣을지 매번 계산해야 하고, 부모가 이미 지워졌으면 붙을 곳이 없다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>X 버튼의 이벤트 계약</h2>
+    <p class="lede">
+      카드 전체가 클릭 대상(팝업 열기·대표 선택)인 경우가 많다. X는 반드시 전파를 끊어야 한다.
+    </p>
+<pre><i>&lt;!-- 카드 전체 = 팝업 열기 --&gt;</i>
+&lt;div class="div-dropped-item" role="button" tabindex="0" @click="openCategoryPopup(group.category)"&gt;
+
+  <i>&lt;!-- 라디오도 카드 클릭으로 번지면 안 된다 --&gt;</i>
+  &lt;input type="radio" class="rep-radio" <b>@click.stop</b> @change="setRepCategory(group.category)" /&gt;
+
+  &lt;span class="item-main"&gt;...&lt;/span&gt;
+
+  <i>&lt;!-- X: 카드 클릭까지 발동하면 '지웠는데 팝업이 뜨는' 동작이 된다 --&gt;</i>
+  &lt;button class="btn-return-grid" <b>@click.stop</b>="returnCategory(group.category)"&gt;
+    &lt;i class="bi bi-x-lg"&gt;&lt;/i&gt;
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+    <ul class="tight">
+      <li>카드가 <code>&lt;label&gt;</code>이면 <code>@click.prevent.stop</code>. <code>prevent</code>가 없으면 라벨 클릭이 내부 라디오를 토글한다.</li>
+      <li>드래그로 카드 위에 드롭한 직후의 click도 막는다 — <code>finishDrag</code>에서 한 틱만 <code>_suppressCardClick</code>을 세운다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span>증상 A · 좌측에 안 돌아온다</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>원인</th><th>확인법</th><th>고침</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>addRow 누락</td>
+            <td>provider 조작 방식인데 우측 배열 길이만 줄어든다.</td>
+            <td>02장 구조로 바꾸거나 <code>addRow</code> 추가</td>
+          </tr>
+          <tr>
+            <td>rows가 고정</td>
+            <td>좌측 rows가 computed가 아니라 <code>data</code>다.</td>
+            <td>좌측을 상태에서 파생시킨다</td>
+          </tr>
+          <tr>
+            <td>제자리 수정</td>
+            <td>rows를 <code>push</code>/<code>splice</code>만 하는데 watch가 얕다.</td>
+            <td>새 배열로 교체하거나 deep watch</td>
+          </tr>
+          <tr>
+            <td>부모 증발</td>
+            <td>마지막 자식을 옮긴 뒤 트리에서 부모 행이 사라졌다.</td>
+            <td>트리는 03장 방식 금지 → 02장</td>
+          </tr>
+          <tr>
+            <td>원본 훼손</td>
+            <td>배정할 때 <code>catalog.splice(...)</code>로 원본에서 지운다.</td>
+            <td>원본은 불변. ‘배정됨’ 목록만 따로 관리</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span>증상 B · 하나 지웠는데 다 사라진다</h2>
+
+    <div class="trap">
+      <h4>1 · splice 두 번째 인자 누락</h4>
+      <p>가장 흔하다. 인자가 하나면 <b>그 뒤가 전부</b> 잘린다.</p>
+<pre>arr.splice(idx)      <i>// ✗ idx부터 끝까지 삭제</i>
+<b>arr.splice(idx, 1)</b>   <i>// ✓ 하나만</i></pre>
+    </div>
+
+    <div class="trap">
+      <h4>2 · v-for의 key를 인덱스로</h4>
+      <p>중간을 지우면 뒤 항목들의 key가 밀려, Vue가 남길 DOM과 지울 DOM을 잘못 고른다.</p>
+<pre>&lt;div v-for="(item, i) in list" <i>:key="i"</i>&gt;        <i>// ✗</i>
+&lt;div v-for="item in list" <b>:key="item.modelId"</b>&gt;  <i>// ✓ 안정적인 식별자</i></pre>
+    </div>
+
+    <div class="trap">
+      <h4>3 · 삭제 조건이 분류·그룹 기준</h4>
+      <p>같은 카테고리의 형제들이 통째로 날아간다.</p>
+<pre>list.filter(m =&gt; m.category !== item.category)  <i>// ✗</i>
+list.filter(m =&gt; <b>m.modelId !== id</b>)             <i>// ✓ 항상 고유 id 비교</i></pre>
+    </div>
+
+    <div class="trap">
+      <h4>4 · 좌우가 같은 배열 인스턴스를 공유</h4>
+      <p>한쪽에서 지우면 다른 쪽도 같이 비워진다. 목록은 항상 새 배열로 만들어 넘긴다.</p>
+    </div>
+
+    <div class="trap">
+      <h4>5 · 좌우 필터 조건이 한쪽에서 뒤집힘</h4>
+      <p><code>has</code>와 <code>!has</code>를 각각 다른 파일에 복붙해 두면 언젠가 한쪽만 고친다. 판정은 한 곳에서만 정의한다.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span>되돌린 뒤 남는 잔여물</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>증상</th><th>원인</th><th>고침</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>라디오 꺼짐</td>
+            <td>지운 항목이 대표였는데 승계를 안 했다.</td>
+            <td>“없으면 남은 첫 번째” 규칙을 한 함수에 모은다</td>
+          </tr>
+          <tr>
+            <td>체크 수 남음</td>
+            <td>그리드 체크는 사라졌는데 페이지 카운트만 남았다.</td>
+            <td><code>resetCheckState()</code>로 카운트·블록 기억까지</td>
+          </tr>
+          <tr>
+            <td>유령 팝업</td>
+            <td>팝업 대상이 사라졌는데 상태만 남았다.</td>
+            <td>지운 이름이 열린 대상이면 <code>null</code></td>
+          </tr>
+          <tr>
+            <td>not exists column</td>
+            <td>저장된 레이아웃이 사라진 컬럼을 참조한다.</td>
+            <td>컬럼을 바꿨으면 <code>grid-id</code>를 올린다</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">08</span>부모(그룹) 단위로 옮길 때</h2>
+    <p class="lede">
+      자식은 숨기고 부모만 옮기는 화면에서는 <b>자식을 복사해 들고 다니지 않는다.</b>
+    </p>
+<pre><i>// 우측에는 부모 이름만 쌓는다. 자식은 소속으로 언제든 다시 묶인다</i>
+assignedCategories: ['센서/전자', ...]
+
+assignedGroups() {
+  return this.assignedCategories.map(name =&gt; ({
+    category: name,
+    models: <b>this.modelsByCategory.get(name)</b> || []   <i>// ← 파생</i>
+  }))
+}</pre>
+    <p>
+      되돌리기가 이름 하나 빼는 일이 된다. 모델이 추가돼도 자식 수가 저절로 맞는다.
+      자식 배열을 우측에 복사해 두면 “부모는 돌아왔는데 자식은 옛날 것”이 된다.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">09</span>이식 후 5분 점검</h2>
+    <p class="lede">순서대로 해 보고 하나라도 어긋나면 05·06의 표에서 원인을 찾는다.</p>
+    <ol class="check">
+      <li><span class="k">01</span><span class="t">3개를 우측으로 옮긴다<span>좌측에서 정확히 3개가 사라진다</span></span></li>
+      <li><span class="k">02</span><span class="t">가운데 것 X<span>그것만 좌측 원래 자리(정렬·부모 밑)에 돌아오고 우측에 2개가 남는다</span></span></li>
+      <li><span class="k">03</span><span class="t">대표였던 것 X<span>라디오가 남은 항목으로 옮겨 붙는다</span></span></li>
+      <li><span class="k">04</span><span class="t">마지막 하나 X<span>우측은 빈 안내로, 좌측은 처음 상태와 개수·순서까지 동일</span></span></li>
+      <li><span class="k">05</span><span class="t">X를 눌러도 카드 클릭(팝업·선택)이 함께 발동하지 않는다</span></li>
+      <li><span class="k">06</span><span class="t">되돌린 항목을 다시 옮긴다<span>중복 없이 한 번만 들어간다</span></span></li>
+      <li><span class="k">07</span><span class="t">[전체 초기화]<span>좌측이 초기 상태와 완전히 동일</span></span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="num">10</span>AI에게 그대로 주는 규칙</h2>
+    <p class="lede">이식을 지시할 때 아래 블록을 프롬프트에 붙인다.</p>
+    <div class="readout">
+<span class="hl">배정 목록의 X(되돌리기)를 구현할 때 지킬 것</span>
+
+<span class="dim">1.</span> 우측 배정 목록만 상태로 들고, 좌측 목록/트리 rows 는 "전체 − 배정됨" computed 로 파생시켜라.
+   좌측 rows 를 직접 지우거나 넣지 마라. 특히 트리(RealGrid TreeView)에서는 절대 금지.
+<span class="dim">2.</span> 되돌리기는 "배정 배열에서 그 항목 하나 빼기"로 끝나야 한다. <span class="hl">arr.splice(idx, 1)</span> — 두 번째 인자 1 필수.
+<span class="dim">3.</span> v-for 의 :key 는 인덱스가 아니라 항목의 고유 id.
+<span class="dim">4.</span> 삭제 조건은 항상 고유 id 비교다. 분류/그룹/이름 기준으로 filter 하지 마라.
+<span class="dim">5.</span> 원본 전체 목록(catalog)은 배정/원복으로 변경하지 않는다.
+<span class="dim">6.</span> 지운 항목이 대표(라디오)였다면 남은 첫 항목으로 승계하고, 목록이 비면 대표를 null 로.
+   이 규칙은 배정·원복·초기화가 모두 같은 함수를 부르도록 한 곳에 모은다.
+<span class="dim">7.</span> X 버튼은 @click.stop (label 안이면 @click.prevent.stop) 으로 카드 클릭과 분리한다.
+<span class="dim">8.</span> 되돌린 뒤 체크 카운트·블록 기억·열린 팝업 상태를 함께 정리한다.
+<span class="dim">9.</span> 컬럼 구성을 바꿨다면 저장된 레이아웃 충돌을 피하려 grid-id 를 올린다.
+
+<span class="hl">검증</span> 3개 배정 → 가운데 X → 좌측에 그것만 복귀, 우측 2개 유지 → 대표 X → 라디오 승계
+     → 마지막 X → 양쪽 모두 초기 상태. 이 시나리오가 통과해야 완료다.
+    </div>
+    <p class="caption">같은 내용의 Markdown 판: docs/realtree-배정-원복-가이드.md</p>
+  </section>
+
+  <footer>
+    <p>원본 · src/pages/RealGridTreeToDivPage.vue (트리) · src/pages/RealGridToDivGuidePage.vue (평면) · NexHubStudio</p>
+    <p>짝 문서 · realtree-배정-이식가이드.html (배정 쪽) — 이 문서는 되돌리기만 다룬다</p>
+  </footer>
+
+</div>

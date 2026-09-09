@@ -1,9 +1,10 @@
-# RealTree 배정(블록 드래그 & 체크) 이식 가이드
+# RealGrid 배정(블록 드래그 & 체크) 이식 가이드
 
-트리에서 **블록으로 고르고, 끌어다 놓거나 체크해서 오른쪽 목록으로 옮기는** 기능을 다른 프로젝트로 옮기기 위한 문서입니다.
+그리드에서 **블록으로 고르고, 끌어다 놓거나 체크해서 오른쪽 목록으로 옮기는** 기능을 다른 프로젝트로 옮기기 위한 문서입니다.
 
-- 원본: `src/pages/RealGridTreeToDivPage.vue` (`/grid-studio/tree-to-div`)
-- 전제: 트리 컴포넌트 자체의 이식은 [realtree-이식가이드.md](./realtree-이식가이드.md) 참고. 이 문서는 그 위에 얹는 **배정 기능**만 다룹니다.
+- 원본(기준): `src/pages/RealGridToDivGuidePage.vue` (`/grid-studio/grid-to-div`) — 평면 그리드, **배정 단위 = 행(모델)**
+- 트리 변형: `src/pages/RealGridTreeToDivPage.vue` (`/grid-studio/tree-to-div`) — 계층에 얹은 사례. 현재 이 페이지의 **배정 단위는 부모(그룹)** 입니다. 6장 참고
+- 트리 컴포넌트 자체의 이식은 [realtree-이식가이드.md](./realtree-이식가이드.md), 되돌리기(X)는 [realtree-배정-원복-가이드.md](./realtree-배정-원복-가이드.md)
 - 환경: Vue 3 Options API
 - 같은 내용의 **HTML 판**: [realtree-배정-이식가이드.html](./realtree-배정-이식가이드.html) (브라우저로 바로 열림. Artifact 게시용 소스이기도 하므로 doctype/html/head/body 는 없다)
 
@@ -17,9 +18,11 @@
 |---|---|---|
 | 블록 드래그 배정 | 그리드 밖 DIV로 끌어다 놓기. 여러 행을 블록으로 잡고 통째로 | 3 · 4장 |
 | 블록 → 자동 체크 | 블록을 씌우면 그 안의 행이 체크됨. 버튼으로 일괄 배정 | 5장 |
-| 부모 제외 규칙 | 잎(자식)만 배정 대상. 부모 행은 체크박스가 아예 안 그려짐 | 6장 |
+| 트리에 얹기 | 계층에서 무엇을 배정 단위로 볼지(잎만·부모만·부모→하위 펼침)를 **한 함수에서** 정한다 | 6장 |
 
 > **가장 값나가는 부분은 3·4장입니다.** RealGrid가 셀 선택을 `pointerdown`에서 처리하기 때문에 생기는 문제로, 한 번 밟지 않으면 존재조차 모르고 지나갑니다. (커밋 `ea9164f`)
+
+> **엔진은 평면·트리가 동일합니다.** 두 페이지의 2~5장 코드는 같은 것을 복사한 것이고, 갈라지는 곳은 "행 → 도메인 값" 변환 한 군데(8장)뿐입니다.
 
 ---
 
@@ -27,11 +30,11 @@
 
 ### 1-1. 공통 컴포넌트
 
-트리는 `RealGridTreeJs.vue`(TreeView + LocalTreeDataProvider)를 씁니다. 평면 그리드용 공통 컴포넌트로는 계층이 안 나오니 반드시 트리 쪽이어야 합니다. **컴포넌트 자체는 수정할 필요가 없습니다** — 페이지에서 props와 `@init`으로만 제어합니다.
+평면 그리드는 `RealGridCommonJs.vue`(GridView + LocalDataProvider), 계층이 필요하면 `RealGridTreeJs.vue`(TreeView + LocalTreeDataProvider)를 씁니다. **어느 쪽도 컴포넌트를 수정할 필요가 없습니다** — 페이지에서 props와 `@init`으로만 제어합니다.
 
 ```js
-import RealGridTreeJs from '@/components/RealGridTreeJs.vue'
-import { showToast } from '@/utils/toastUtil.js'   // 없으면 아무 토스트로 교체
+import RealGridCommonJs from '@/components/RealGridCommonJs.vue'   // 계층이면 RealGridTreeJs.vue
+import { showToast } from '@/utils/toastUtil.js'                   // 없으면 아무 토스트로 교체
 ```
 
 ### 1-2. `@init`에서 받아 보관하는 두 개
@@ -63,7 +66,7 @@ onGridInit({ gridView, dataProvider }) {
   @pointerdown.capture="onGridPointerDown"   <!-- ① 반드시 capture -->
   @mousedown.capture="onGridMouseDown"
 >
-  <RealGridTreeJs ref="treeGrid" ... @init="onGridInit" />
+  <RealGridCommonJs ref="poolGrid" ... @init="onGridInit" />   <!-- 트리면 RealGridTreeJs -->
 </div>
 
 <!-- 드롭 존. 이 클래스명으로 판정한다 -->
@@ -72,7 +75,7 @@ onGridInit({ gridView, dataProvider }) {
 
 | 계약 | 쓰이는 곳 |
 |---|---|
-| `ref="treeGrid"` | `onGridMouseDown`에서 그리드 경계 사각형을 잰다. 이름을 바꾸면 그 한 줄도 같이 수정 |
+| `ref="poolGrid"` | `onGridMouseDown`에서 그리드 경계 사각형을 잰다. 이름을 바꾸면 그 한 줄(`this.$refs.poolGrid?.$el`)도 같이 수정 |
 | `.target-div-card` | `checkIsOverDropZone`이 `closest()`로 찾는다 |
 | `.is-block-drag` | 블록을 잡고 끄는 동안 커서를 `grabbing`으로 고정 |
 
@@ -272,8 +275,7 @@ rememberBlockFromGrid() {
 syncChecksToBlock(dataRows) {
   const items = []
   dataRows.forEach(row => {
-    const info = this.nodeInfo(row)
-    if (!info || info.nodeType !== 'model') return   // 부모 행은 걸러진다
+    // 계층이면 여기서 배정 대상만 남긴다 (6장·8장 정책 지점)
     const itemIndex = this.gridView.getItemIndex(row)
     if (itemIndex >= 0) items.push(itemIndex)
   })
@@ -287,7 +289,7 @@ syncChecksToBlock(dataRows) {
 
 규칙은 하나입니다 — **체크 상태 = 지금 화면의 블록.**
 
-- **블록을 그으면** 그 안의 모델만 체크되고, 이전 블록의 체크는 지워집니다. `checkAll`의 두 번째 인자를 `false`로 줘야 **접혀 있는 카테고리 안의 체크까지** 해제됩니다.
+- **블록을 그으면** 그 안의 행만 체크되고, 이전 블록의 체크는 지워집니다. `checkAll`의 두 번째 인자를 `false`로 줘야 트리에서 **접혀 있는 노드 안의 체크까지** 해제됩니다.
 - **블록이 사라지면**(블록 밖 클릭 등) 체크도 같이 비웁니다. 화면에 블록이 없는데 체크만 남아 있으면 무엇이 배정될지 화면만 보고는 알 수 없습니다.
 - **예외는 체크바 직접 클릭.** 그것도 '한 행 선택'이라 그냥 지우면 수동 체크가 아예 불가능해집니다.
 
@@ -308,16 +310,22 @@ isCheckbarPoint(x, y) {
 > `rememberBlockFromGrid` 는 한 제스처에 **두 번** 불립니다(`onDocMouseUp`, `onSelectionEnded`). 그래서 이 표시를 그 안에서 소비(리셋)하면 안 됩니다 — 첫 호출이 소비해 버리면 두 번째 호출이 방금 켜진 체크를 지웁니다. 표시를 내리는 곳은 제스처 시작 한 군데뿐입니다.
 ---
 
-## 6. RealGrid 트리 함정 넷
+## 6. 트리에 얹을 때 — 계층 함정 넷
 
-에러가 안 나고 **조용히 틀리는** 것들이라 미리 알고 가는 게 쌉니다.
+평면 그리드에는 없는 문제입니다. 에러가 안 나고 **조용히 틀리는** 것들이라 미리 알고 가는 게 쌉니다.
 
-### 6-1. 잎 노드에 `children: []`를 넣으면 펼침 화살표가 그려진다
+> 현재 `tree-to-div` 페이지의 **배정 단위는 부모(그룹)** 입니다. 자식은 좌측에 아예 그리지 않고, 부모를 옮기면 소속으로 자식이 따라옵니다.
+> 잎(자식)을 옮기던 예전 판과 정책만 다를 뿐 **엔진은 그대로**입니다. 바뀌는 곳은 8장의 변환 함수 하나입니다.
 
-`setNestedRows`의 `childrenProp`은 "자식 배열"이 아니라 **자식이 있는지를 지시하는 속성**입니다. 빈 배열도 "자식 있음"으로 읽힙니다. 잎에는 키 자체를 넣지 않아야 RealGrid가 잎으로 보고 화살표 자리를 비웁니다.
+### 6-1. `children` 키는 "자식 배열"이 아니라 "자식 있음" 표시다
+
+`setNestedRows`의 `childrenProp`은 빈 배열도 **"자식 있음"** 으로 읽습니다. 그래서
+
+- 잎을 그릴 때는 키 자체를 넣지 않아야 화살표 자리가 비고,
+- **부모만 다루는 화면(현재 tree-to-div)** 이라면 rows에 `children`을 아예 넣지 않습니다. 그래야 "자식은 숨긴다"가 성립합니다.
 
 ```js
-// 잘못
+// 잘못 — 잎에도 펼침 화살표가 그려진다
 { modelName: '...', children: [] }
 // 맞음
 { modelName: '...' }
@@ -331,7 +339,7 @@ isCheckbarPoint(x, y) {
 this.gridView.getCheckedRows(false)   // visibleOnly = false
 ```
 
-### 6-3. 부모를 체크 대상에서 빼려면 `checkableCallback`
+### 6-3. 배정 대상이 아닌 행은 `checkableCallback`으로 뺀다
 
 공통 컴포넌트가 설정한 체크바를 `@init`에서 덮어씁니다. 나머지 옵션도 같이 넘겨야 유실되지 않습니다. `checkAll`과 헤더 전체체크도 이 콜백을 존중합니다.
 
@@ -340,10 +348,12 @@ gridView.setCheckBar({
   visible: true, width: 34, exclusive: false, head: 'check',
   checkableCallback: (dataSource, item) => {
     const info = this.nodeInfo(item && item.dataRow)
-    return !!(info && info.nodeType === 'model')
+    return !!(info && info.nodeType === 'category')   // ← 정책. 잎만 옮기던 판에서는 'model'
   }
 })
 ```
+
+체크바가 2상태뿐이라 '일부만 체크'를 표현하지 못합니다. **배정 단위가 아닌 행은 체크 자체를 막아야** "고른 것 = 체크된 것"이 화면과 어긋나지 않습니다.
 
 ### 6-4. 트리 provider의 `getJsonRow`는 기본이 재귀다
 
@@ -369,7 +379,7 @@ nodeInfo(dataRow) {
 | `onGridPointerDown` | 복붙 | 누르기 직전 선택 스냅샷 |
 | `onGridMouseDown` | 복붙 | 이동 제스처 판정, 블록 동결, window 리스너 등록 |
 | `releaseGridPointer` | 복붙 | 합성 pointerup/mouseup으로 추적 끊기 |
-| `onDocMouseMove` | 교체 | 드래그 시작 판정. `rowsToModelIds`·`createGhost` 호출부만 손댐 |
+| `onDocMouseMove` | 교체 | 드래그 시작 판정. 변환 함수·`createGhost` 호출부만 손댐 |
 | `keepBlockSelection` | 복붙 | 움직임마다 블록 복원 |
 | `onDocMouseUp` | 복붙 | 드롭 / 순수 선택 분기 |
 | `collapseSelectionTo` | 복붙 | 블록을 눌린 셀 하나로 접기 |
@@ -378,13 +388,13 @@ nodeInfo(dataRow) {
 | `snapshotSelectedRows` | 복붙 | 선택 dataRow 정렬·중복 제거 |
 | `resolveDragRows` | 복붙 | 블록/앵커로 대상 행 확정 |
 | `rememberBlockFromGrid` | 교체 | 블록 기억 + 자동 체크 훅 |
-| `syncChecksToBlock` | 교체 | 잎 판별 조건(`nodeType`)만 교체 |
+| `syncChecksToBlock` | 교체 | 평면은 그대로. 계층이면 배정 대상 판별 조건만 추가 |
 | `clearAllChecks` | 복붙 | 접힌 노드 포함 전체 체크 해제 |
 | `isCheckbarPoint` | 복붙 | 누른 좌표가 체크바인지 판별 |
 | `checkIsOverDropZone` | 복붙 | 드롭 존 판정 (클래스명만 확인) |
 | `createGhost` / `moveGhost` / `removeGhost` | 교체 | 고스트. 라벨 문구만 도메인 |
 | `finishDrag` | 교체 | 드롭 시 실제 이동 호출 |
-| `nodeInfo` / `rowsToModelIds` | 교체 | 행 → 도메인 ID 변환 |
+| 변환 함수 (`rowsToXxx`) | 교체 | 행 → 도메인 값 변환. 계층이면 `nodeInfo`도 함께 |
 
 ### 필요한 상태
 
@@ -393,7 +403,7 @@ nodeInfo(dataRow) {
 | `gridView`, `dataProvider` | 인스턴스 직접 | `@init`에서 받는다. `data()`에 넣으면 Vue가 프록시로 감싼다 |
 | `isBlockDrag`, `isHoverDropZone` | `data()` | 커서·드롭 존 하이라이트. 화면에 반영돼야 한다 |
 | `selectionStyle` | `data()` | `'block'` 고정. `setSelection`에 같이 넘긴다 |
-| `_prePress`, `_press`, `_blockRows`, `_dragIds`, `_ghost` | 인스턴스 직접 | mousemove마다 바뀐다. 반응형이면 매 프레임 리렌더가 돈다 |
+| `_prePress`, `_press`, `_blockRows`, `_dragRows`(또는 `_dragNames`), `_ghost` | 인스턴스 직접 | mousemove마다 바뀐다. 반응형이면 매 프레임 리렌더가 돈다 |
 
 > **`_` 프리픽스 다섯 개를 `data()`에 넣지 마세요.** 드래그 중 초당 수십 번 갱신되는 값이라 반응형으로 만들면 프레임마다 렌더가 돌고, `_press.gridRect`처럼 DOM 객체가 섞인 값은 프록시로 감싸이면서 비교가 어긋납니다.
 
@@ -401,44 +411,67 @@ nodeInfo(dataRow) {
 
 ## 8. 갈아끼울 곳은 넷
 
-엔진이 도메인을 만나는 접점은 이게 전부입니다.
+엔진이 도메인을 만나는 접점은 이게 전부입니다. **평면과 트리가 갈라지는 곳도 여기 하나뿐입니다.**
 
 | 훅 | 계약 | 부르는 곳 |
 |---|---|---|
-| `nodeInfo(dataRow)` | 행 → 노드 객체 (잎 판별용 필드 포함) | 전역 |
-| `rowsToModelIds(rows)` | dataRow 배열 → 도메인 ID 배열. 대상 아닌 행은 여기서 걸러낸다 | `onDocMouseMove`, `checkedModelIds` |
-| `assignModels(ids)` | 실제 이동. 성공 개수 반환 | `finishDrag`, `assignChecked` |
-| `createGhost(ids)` | 따라다니는 라벨 문구 | `onDocMouseMove` |
+| 변환 `rowsToXxx(rows)` | dataRow 배열 → 도메인 값 배열. 대상 아닌 행은 **여기서** 걸러낸다 | `onDocMouseMove`, `checkedXxx` |
+| 배정 `assignXxx(값들)` | 실제 이동. 성공 개수 반환 | `finishDrag`, `assignChecked` |
+| `createGhost(값들)` | 따라다니는 라벨 문구 | `onDocMouseMove` |
+| `nodeInfo(dataRow)` | (계층 전용) 행 → 노드 객체. 배정 단위 판별 필드 포함 | 변환·체크바 콜백 |
 
-**계층 해석을 `rowsToModelIds` 한 곳에 몰아두는 게 요령입니다.** 드래그·체크·블록 혼합이 모두 이 함수로 합류하므로, "부모는 제외" 든 "부모는 하위 전체로 펼침" 이든 정책을 여기 한 곳에서만 바꾸면 됩니다. 중복은 `Set`으로 거릅니다.
+**계층 해석을 변환 함수 한 곳에 몰아두는 게 요령입니다.** 드래그·체크·블록 혼합이 모두 이 함수로 합류하므로, "잎만" 이든 "부모만" 이든 "부모는 하위 전체로 펼침" 이든 정책을 여기서만 바꾸면 됩니다. 중복은 `Set`으로 거릅니다.
+
+### 평면 — 행을 그대로 옮긴다 (grid-to-div)
+
+변환이랄 게 없습니다. 드래그로 확정한 dataRow 배열을 그대로 넘깁니다.
 
 ```js
-rowsToModelIds(dataRows) {
-  const ids = []
+assignRows(rows) {
+  if (!rows || !rows.length) return
+  const items = rows.map(r => this.dataProvider.getJsonRow(r)).filter(Boolean)
+  if (!items.length) return
+
+  this.groupModels.push(...items)      // 우측 목록
+  this.dataProvider.removeRows(rows)   // 좌측에서 제거
+  // ... 대표 지정 · 토스트 · 선택/체크 정리
+}
+```
+
+### 계층 — 배정 단위로 접어서 넘긴다 (tree-to-div, 현재는 부모 단위)
+
+```js
+rowsToCategoryNames(dataRows) {
+  const names = []
   const seen = new Set()
   ;(dataRows || []).forEach(row => {
     const info = this.nodeInfo(row)
-    if (!info || info.nodeType !== 'model' || !info.modelId) return   // ← 정책
-    if (seen.has(info.modelId)) return
-    seen.add(info.modelId)
-    ids.push(info.modelId)
+    if (!info || info.nodeType !== 'category' || !info.category) return   // ← 정책
+    if (seen.has(info.category)) return
+    seen.add(info.category)
+    names.push(info.category)
   })
-  return ids
+  return names
 }
 ```
+
+잎(모델)을 옮기는 화면이라면 조건을 `nodeType !== 'model'`, 값은 `info.modelId` 로 바꾸면 그대로 돕니다.
+부모를 하위 전체로 펼치고 싶으면 이 함수 안에서 자식을 훑어 넣으면 됩니다 — **다른 곳은 손대지 않습니다.**
+
+> 좌측 목록을 어떻게 되돌릴지(우측 X)는 이 문서 범위 밖입니다. [realtree-배정-원복-가이드.md](./realtree-배정-원복-가이드.md) 를 함께 보세요.
 
 ---
 
 ## 9. 이식 체크리스트
 
-1. `RealGridTreeJs.vue` 복사, `@init`에서 `gridView`·`dataProvider` 보관 — **`data()`에 넣지 않는다**
+1. `RealGridCommonJs.vue`(계층이면 `RealGridTreeJs.vue`) 복사, `@init`에서 `gridView`·`dataProvider` 보관 — **`data()`에 넣지 않는다**
 2. `setDisplayOptions({ selectionStyle: 'block' })` — 블록 선택이 전제
 3. 래퍼에 `@pointerdown.capture` + `@mousedown.capture` — **capture를 빼면 블록을 못 본다**
 4. 드롭 존에 `.target-div-card`, 그리드에 `ref`
 5. 인벤토리의 **복붙** 12개를 그대로 붙여넣기
 6. 도메인 훅 4개 구현 (8장)
 7. 고스트 CSS를 **전역** `<style>`에 (scoped 아님)
-8. 잎 노드에서 `children` 키 제거 — 안 그러면 잎마다 화살표가 뜬다
+8. (계층만) `children` 키 정리 — 잎에 넣으면 화살표가 뜨고, 부모만 다루는 화면이면 아예 넣지 않는다
 9. `beforeUnmount` 정리 — 빠뜨리기 쉽다
 
 ```js
