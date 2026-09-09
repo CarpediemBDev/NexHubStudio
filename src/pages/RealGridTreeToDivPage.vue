@@ -3,7 +3,7 @@
     <!-- Toolbar -->
     <div class="b2b-toolbar mb-3">
       <div class="d-flex align-items-center justify-content-end w-100 flex-wrap gap-2">
-        <button class="btn btn-outline-primary btn-sm" title="랜덤 모델 20개 트리에 추가" @click="appendMoreModels(20)">
+        <button class="btn btn-outline-primary btn-sm" title="랜덤 모델 20개를 각 그룹에 추가" @click="appendMoreModels(20)">
           <i class="bi bi-plus-circle me-1"></i>
           <span>+ 20개 모델 추가</span>
         </button>
@@ -12,7 +12,7 @@
         <button
           class="btn-b2b-primary"
           :disabled="checkedCount === 0"
-          title="좌측 트리에서 체크한 모델을 우측 그룹 배정함으로 옮깁니다"
+          title="좌측 트리에서 체크한 부모 그룹을 우측 배정함으로 옮깁니다"
           @click="assignChecked"
         >
           <i class="bi bi-arrow-right-circle me-0.5"></i>
@@ -29,7 +29,7 @@
 
     <!-- Main Layout: Tree Grid (Left) + HTML DIV Drop Zone (Right) -->
     <div class="tree-to-div-layout">
-      <!-- Left: RealGrid TreeView -->
+      <!-- Left: RealGrid TreeView — 부모(그룹) 행만 보여준다 -->
       <div class="dnd-grid-card">
         <div class="dnd-card-head border-bottom bg-theme-subcard px-3 py-2 d-flex align-items-center justify-content-between">
           <!-- Left: Guide Popover -->
@@ -48,7 +48,7 @@
               <div v-if="showGuideTooltip" class="guide-floating-popover shadow border rounded-3 p-3">
                 <div class="d-flex align-items-center justify-content-between mb-2 pb-1 border-bottom">
                   <span class="fw-bold b2b-text-sm text-dark">
-                    <i class="bi bi-diagram-3-fill text-primary me-1.5"></i>트리 모델 그룹화 가이드
+                    <i class="bi bi-diagram-3-fill text-primary me-1.5"></i>부모 그룹 배정 가이드
                   </span>
                   <button class="btn-close-popover" title="닫기" @click="showGuideTooltip = false">
                     <i class="bi bi-x-lg"></i>
@@ -56,28 +56,33 @@
                 </div>
                 <ul class="guide-steps-list m-0 p-0 b2b-text-xs text-secondary">
                   <li class="mb-1.5">
+                    <strong class="text-dark">배정 단위는 부모(그룹):</strong>
+                    자식 모델은 좌측에 <span class="text-primary fw-medium">보이지 않습니다.</span>
+                    부모를 옮기면 <span class="text-primary fw-medium">자식 모델이 통째로 함께</span> 따라갑니다.
+                  </li>
+                  <li class="mb-1.5">
                     <strong class="text-dark">방식 1 · 드래그 &amp; 드롭:</strong>
-                    트리의 모델 행을 잡고 우측 배정함으로 끌어다 놓습니다.
+                    트리의 부모 행을 잡고 우측 배정함으로 끌어다 놓습니다.
                     여러 행을 <span class="text-primary fw-medium">블록 선택</span>한 뒤 그 안쪽을 잡고 끌면 한 번에 옮겨집니다.
                   </li>
                   <li class="mb-1.5">
                     <strong class="text-dark">방식 2 · 체크 후 버튼:</strong>
-                    좌측 <span class="text-primary fw-medium">체크박스</span>로 모델을 고르고 상단
+                    좌측 <span class="text-primary fw-medium">체크박스</span>로 그룹을 고르고 상단
                     <span class="text-primary fw-medium">[체크 항목 배정]</span> 버튼을 누릅니다.
-                    행을 <span class="text-primary fw-medium">블록으로 훑으면</span> 그 안의 모델이 자동으로 체크됩니다.
-                    블록을 다시 긋거나 <span class="text-primary fw-medium">블록 밖을 클릭해 블록이 사라지면 체크도 함께 해제</span>되어,
-                    화면의 블록과 체크가 항상 일치합니다. 체크박스를 직접 누른 것은 그대로 유지됩니다.
+                    행을 <span class="text-primary fw-medium">블록으로 훑으면</span> 그 안의 그룹이 자동으로 체크되고,
+                    <span class="text-primary fw-medium">블록이 사라지면 체크도 함께 해제</span>되어 화면과 항상 일치합니다.
                   </li>
                   <li class="mb-1.5">
-                    <strong class="text-dark">배정 단위는 모델:</strong>
-                    <span class="text-primary fw-medium">카테고리 행</span>은 분류 라벨이라 체크·배정 대상이 아닙니다.
-                    블록에 카테고리가 섞여도 모델만 선택됩니다.
+                    <strong class="text-dark">대표 그룹:</strong>
+                    우측 카드의 <span class="text-primary fw-medium">라디오</span>를 선택하면 그 그룹이
+                    배정 목록 전체의 <span class="text-primary fw-medium">대표 그룹</span>이 됩니다. (목록당 1개)
                   </li>
                   <li>
-                    <strong class="text-dark">대표 모델 지정:</strong>
-                    배정 목록은 <span class="text-primary fw-medium">카테고리별로 묶여</span> 표시됩니다.
-                    각 그룹 안에서 <span class="text-primary fw-medium">라디오 버튼</span>(행 전체 클릭 가능)을 선택하면
-                    즉시 대표 모델로 전환되며, 대표는 <strong class="text-dark">카테고리마다 1개</strong>씩 지정됩니다.
+                    <strong class="text-dark">자식 확인 · 그룹 대표 모델:</strong>
+                    우측에 배정된 <span class="text-primary fw-medium">부모 카드를 클릭</span>하면
+                    부모와 자식을 한 트리에서 보여주는 팝업이 열립니다.
+                    팝업 왼쪽의 <span class="text-primary fw-medium">라디오</span>를 선택하면
+                    그 그룹의 대표 모델이 바뀝니다. (그룹당 1개)
                   </li>
                 </ul>
               </div>
@@ -85,7 +90,7 @@
           </div>
 
           <span class="b2b-text-xs text-secondary">
-            미배정 <strong class="text-primary fw-bold">{{ poolCount }}</strong>건 · 카테고리 {{ treeRows.length }}개
+            미배정 그룹 <strong class="text-primary fw-bold">{{ poolCategories.length }}</strong>개 · 모델 {{ poolModelCount }}개
           </span>
         </div>
 
@@ -97,7 +102,7 @@
         >
           <RealGridTreeJs
             ref="treeGrid"
-            grid-id="realgrid-tree-to-div-v1"
+            grid-id="realgrid-tree-to-div-v2"
             height="100%"
             :fields="gridFields"
             :columns="gridColumns"
@@ -116,7 +121,7 @@
             :draggable="false"
             :pinnable="false"
             :auto-expand-all="true"
-            :tree-line-visible="true"
+            :tree-line-visible="false"
             :check-bar-width="34"
             :toast="gridToast"
             @init="onGridInit"
@@ -124,7 +129,7 @@
         </div>
       </div>
 
-      <!-- Right: Target DIV Container -->
+      <!-- Right: Target DIV Container — 부모만 보인다. 자식은 카드를 눌러 팝업에서 확인 -->
       <div class="dnd-div-container">
         <div
           class="target-div-card unified-group-card"
@@ -133,85 +138,89 @@
         >
           <div class="dnd-card-head border-bottom bg-theme-subcard px-3 py-2 d-flex align-items-center justify-content-between">
             <span class="fw-bold b2b-text-sm">그룹 배정 목록</span>
-            <span class="badge bg-secondary-subtle text-secondary b2b-text-2xs">
-              카테고리 {{ groupedAssignments.length }} · 총 {{ groupModels.length }}개
+            <span class="b2b-text-2xs text-secondary">
+              <template v-if="repCategory">대표 그룹 <strong class="text-dark">{{ repCategory }}</strong> · </template>
+              그룹 {{ assignedGroups.length }} · 모델 {{ assignedModelCount }}개
             </span>
           </div>
 
           <div class="target-div-body custom-scrollbar">
-            <div v-if="groupModels.length === 0" class="div-empty-msg">
+            <div v-if="assignedGroups.length === 0" class="div-empty-msg">
               <i class="bi bi-box-arrow-in-down text-primary fs-2 mb-2 opacity-75"></i>
-              <span class="fw-bold b2b-text-sm text-dark mb-1">배정된 모델이 없습니다</span>
+              <span class="fw-bold b2b-text-sm text-dark mb-1">배정된 그룹이 없습니다</span>
               <span class="b2b-text-xs text-muted text-center">
-                좌측 트리에서 모델을 끌어다 놓거나,<br/>
+                좌측 트리에서 부모 행을 끌어다 놓거나,<br/>
                 체크 후 [체크 항목 배정] 버튼을 누르세요.
               </span>
             </div>
 
-            <!-- 배정 목록: 카테고리별 그룹. 대표 모델(라디오)은 그룹마다 1개 -->
+            <!-- 배정된 부모 카드. 클릭하면 자식까지 담긴 트리 팝업이 열린다 -->
             <div
-              v-for="group in groupedAssignments"
+              v-for="group in assignedGroups"
               :key="group.category"
-              class="div-group-block"
+              class="div-dropped-item"
+              :class="{ 'item-rep': group.category === repCategory }"
+              role="button"
+              tabindex="0"
+              :title="group.category + ' 그룹의 자식 모델 ' + group.models.length + '개를 트리 팝업으로 봅니다'"
+              @click="openCategoryPopup(group.category)"
+              @keydown.enter.prevent="openCategoryPopup(group.category)"
+              @keydown.space.prevent="openCategoryPopup(group.category)"
             >
-              <div class="div-group-head">
-                <span class="group-name b2b-text-xs fw-bold text-dark text-truncate">
+              <!--
+                대표 그룹 선택(전체에서 1개). 카드 클릭은 팝업 열기라서
+                라디오 클릭은 카드까지 번지지 않게 끊는다.
+              -->
+              <input
+                type="radio"
+                class="rep-radio"
+                name="treeGroupRepCategory"
+                :value="group.category"
+                :checked="group.category === repCategory"
+                :title="group.category + ' 그룹을 대표 그룹으로 지정합니다'"
+                @click.stop
+                @keydown.enter.stop
+                @keydown.space.stop
+                @change="setRepCategory(group.category)"
+              />
+
+              <span class="item-main">
+                <span class="item-name fw-bold b2b-text-sm text-dark text-truncate">
                   {{ group.category }}
                 </span>
-                <span class="group-count b2b-text-2xs badge bg-secondary-subtle text-secondary flex-shrink-0">
-                  {{ group.models.length }}
+                <span class="item-meta b2b-text-xs text-muted text-truncate">
+                  자식 {{ group.models.length }}개 · 대표 {{ group.repName || '미지정' }}
                 </span>
-              </div>
+              </span>
 
-              <label
-                v-for="item in group.models"
-                :key="item.modelId"
-                class="div-dropped-item"
-                :class="{ 'item-rep': item.modelId === repByCategory[group.category] }"
-                :title="item.modelId === repByCategory[group.category]
-                  ? group.category + ' 그룹의 대표 모델입니다'
-                  : item.modelName + ' 모델을 ' + group.category + ' 그룹의 대표로 지정합니다'"
+              <button
+                class="btn-return-grid"
+                title="트리로 되돌리기"
+                @click.stop="returnCategory(group.category)"
               >
-                <!-- 라디오 그룹을 카테고리마다 분리해야 그룹별로 하나씩 켜진다 -->
-                <input
-                  type="radio"
-                  class="rep-radio"
-                  :name="'treeGroupRep_' + group.category"
-                  :value="item.modelId"
-                  :checked="item.modelId === repByCategory[group.category]"
-                  @change="setRepresentative(group.category, item.modelId)"
-                />
-
-                <span class="item-main">
-                  <span class="item-name fw-bold b2b-text-sm text-dark text-truncate">
-                    {{ item.modelName }}
-                  </span>
-                  <span class="item-code b2b-text-2xs badge bg-light text-secondary border flex-shrink-0">
-                    {{ item.modelCode }}
-                  </span>
-                  <span class="item-dept b2b-text-xs text-muted flex-shrink-0">
-                    {{ item.grade }}
-                  </span>
-                </span>
-
-                <button
-                  class="btn-return-grid"
-                  title="트리로 되돌리기"
-                  @click.prevent.stop="returnToTree(item.modelId)"
-                >
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </label>
+                <i class="bi bi-x-lg"></i>
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- 부모 클릭 → 부모 + 자식을 한 트리로 보여주는 팝업 -->
+    <CategoryModelTreeModal
+      :is-open="!!openedGroup"
+      :category="openedGroup ? openedGroup.category : ''"
+      :models="openedGroup ? openedGroup.models : []"
+      :rep-model-id="openedGroup ? (repByCategory[openedGroup.category] || '') : ''"
+      @close="closeCategoryPopup"
+      @set-rep="onSetRepresentative"
+    />
   </div>
 </template>
 
 <script>
 import RealGridTreeJs from '@/components/RealGridTreeJs.vue'
+import CategoryModelTreeModal from '@/components/CategoryModelTreeModal.vue'
 import { showToast } from '@/utils/toastUtil.js'
 
 const CATEGORY_DEFS = [
@@ -239,110 +248,103 @@ const MODEL_NAMES = [
 
 export default {
   name: 'RealGridTreeToDivPage',
-  components: { RealGridTreeJs },
+  components: { RealGridTreeJs, CategoryModelTreeModal },
   data() {
     return {
       showGuideTooltip: false,
       isHoverDropZone: false,
       isBlockDrag: false,
       selectionStyle: 'block',
-      // 전체 모델 원본(평면). 트리는 이 목록에서 매번 다시 만든다.
+      // 전체 모델 원본(평면). 부모(카테고리)는 이 목록에서 매번 다시 묶는다.
       catalog: [],
-      // 우측 배정 목록(순서 유지)
-      groupModels: [],
-      // 대표 모델은 카테고리마다 1개 — { '센서/전자': 'M001', ... }
+      // 우측 배정 목록 — 옮긴 순서대로 담은 '부모 이름' 목록
+      assignedCategories: [],
+      // 대표 모델은 그룹마다 1개 — { '센서/전자': 'M001', ... }
       repByCategory: {},
+      // 대표 그룹은 배정 목록 전체에서 1개 (우측 패널의 라디오)
+      repCategory: null,
+      // 팝업으로 열어 둔 부모 이름 (null 이면 닫힘)
+      openedCategory: null,
       checkedCount: 0,
       gridFields: [
         { fieldName: 'nodeType', dataType: 'text' },
-        { fieldName: 'modelId', dataType: 'text' },
-        { fieldName: 'modelCode', dataType: 'text' },
-        { fieldName: 'modelName', dataType: 'text' },
         { fieldName: 'category', dataType: 'text' },
-        { fieldName: 'grade', dataType: 'text' },
-        { fieldName: 'manufacturer', dataType: 'text' }
+        { fieldName: 'modelCount', dataType: 'text' },
+        { fieldName: 'prefix', dataType: 'text' },
+        { fieldName: 'manufacturers', dataType: 'text' }
       ],
       gridColumns: [
-        { name: 'modelName', fieldName: 'modelName', width: 260, header: { text: '카테고리 / 모델명' }, styles: { textAlignment: 'near' } },
-        { name: 'modelCode', fieldName: 'modelCode', width: 120, header: { text: '모델 코드' }, styles: { textAlignment: 'center' } },
-        { name: 'grade', fieldName: 'grade', width: 90, header: { text: '등급' }, styles: { textAlignment: 'center' } },
-        { name: 'manufacturer', fieldName: 'manufacturer', width: 130, header: { text: '제조사' }, styles: { textAlignment: 'center' } }
+        { name: 'category', fieldName: 'category', width: 220, header: { text: '부모 그룹' }, styles: { textAlignment: 'near', fontBold: true } },
+        { name: 'modelCount', fieldName: 'modelCount', width: 110, header: { text: '자식 모델' }, styles: { textAlignment: 'center' } },
+        { name: 'prefix', fieldName: 'prefix', width: 90, header: { text: '코드' }, styles: { textAlignment: 'center' } },
+        { name: 'manufacturers', fieldName: 'manufacturers', width: 220, header: { text: '제조사' }, styles: { textAlignment: 'near' } }
       ]
     }
   },
   computed: {
-    catalogMap() {
+    /** 카테고리 이름 → 그 카테고리의 모델 목록 */
+    modelsByCategory() {
       const map = new Map()
-      this.catalog.forEach(m => map.set(m.modelId, m))
+      CATEGORY_DEFS.forEach(cat => map.set(cat.name, []))
+      this.catalog.forEach(m => {
+        if (!map.has(m.category)) map.set(m.category, [])
+        map.get(m.category).push(m)
+      })
       return map
     },
-    assignedIdSet() {
-      return new Set(this.groupModels.map(m => m.modelId))
+    assignedSet() {
+      return new Set(this.assignedCategories)
     },
-    poolModels() {
-      return this.catalog.filter(m => !this.assignedIdSet.has(m.modelId))
-    },
-    poolCount() {
-      return this.poolModels.length
-    },
-    /*
-     * 배정 목록을 카테고리별로 묶는다. 그룹 순서는 CATEGORY_DEFS 를 따라
-     * 좌측 트리와 같게 맞춘다. 대표 모델은 여기 담지 않는다 —
-     * repByCategory 를 참조하면 syncRepresentatives 가 자기 자신을 다시 계산하게 된다.
-     */
-    groupedAssignments() {
-      const byCategory = new Map()
-      this.groupModels.forEach(m => {
-        if (!byCategory.has(m.category)) byCategory.set(m.category, [])
-        byCategory.get(m.category).push(m)
+    /** 좌측에 남아 있는 부모. 모델이 하나도 없는 카테고리는 옮길 것이 없으니 빼둔다. */
+    poolCategories() {
+      return CATEGORY_DEFS.filter(cat => {
+        if (this.assignedSet.has(cat.name)) return false
+        const models = this.modelsByCategory.get(cat.name)
+        return !!(models && models.length)
       })
-      return CATEGORY_DEFS
-        .filter(cat => byCategory.has(cat.name))
-        .map(cat => ({ category: cat.name, models: byCategory.get(cat.name) }))
+    },
+    poolModelCount() {
+      return this.poolCategories.reduce((sum, cat) => sum + this.modelsByCategory.get(cat.name).length, 0)
     },
     /*
-     * 트리는 상태(전체 모델 - 배정 목록)에서 매번 통째로 다시 만든다.
-     * RealGrid 트리 노드를 직접 지우고 붙이면 부모가 빈 카테고리로 남거나
-     * dataRow 인덱스가 어긋나는데, 다시 만들면 그 경우의 수가 아예 없다.
-     * RealGridTreeJs 는 rows prop 을 deep watch 하므로 이 값만 바뀌면 트리가 갱신된다.
+     * 우측 배정 목록. 부모 단위이므로 카드 하나 = 카테고리 하나다.
+     * 자식(models)은 화면에 펼치지 않고 팝업에 넘겨주기 위해서만 들고 있다.
+     */
+    assignedGroups() {
+      return this.assignedCategories.map(name => {
+        const models = this.modelsByCategory.get(name) || []
+        const repId = this.repByCategory[name]
+        const rep = models.find(m => m.modelId === repId)
+        return { category: name, models, repName: rep ? rep.modelName : '' }
+      })
+    },
+    assignedModelCount() {
+      return this.assignedGroups.reduce((sum, g) => sum + g.models.length, 0)
+    },
+    openedGroup() {
+      if (!this.openedCategory) return null
+      return this.assignedGroups.find(g => g.category === this.openedCategory) || null
+    },
+    /*
+     * 좌측 트리는 상태(전체 카테고리 - 배정된 카테고리)에서 매번 통째로 다시 만든다.
+     * RealGrid 노드를 직접 지우고 붙이면 dataRow 인덱스가 어긋나는데,
+     * 다시 만들면 그 경우의 수가 아예 없다. RealGridTreeJs 는 rows prop 을
+     * deep watch 하므로 이 값만 바뀌면 트리가 갱신된다.
+     *
+     * 자식(모델)은 여기에 담지 않는다 — 좌측에서 다루는 단위는 부모뿐이고,
+     * children 키가 있으면 펼침 화살표가 생겨 "자식은 숨긴다"는 규칙이 깨진다.
      */
     treeRows() {
-      const byCategory = new Map()
-      this.poolModels.forEach(m => {
-        if (!byCategory.has(m.category)) byCategory.set(m.category, [])
-        byCategory.get(m.category).push(m)
-      })
-
-      const rows = []
-      CATEGORY_DEFS.forEach(cat => {
-        const models = byCategory.get(cat.name)
-        if (!models || models.length === 0) return
-        rows.push({
+      return this.poolCategories.map(cat => {
+        const models = this.modelsByCategory.get(cat.name)
+        return {
           nodeType: 'category',
-          modelId: '',
-          modelCode: `${models.length}개`,
-          modelName: cat.name,
           category: cat.name,
-          grade: '',
-          manufacturer: '',
-          /*
-           * 잎(모델) 노드에는 children 키를 아예 넣지 않는다.
-           * setNestedRows 의 childrenProp 은 '자식이 있는지를 지시하는 속성'이라
-           * 빈 배열 children: [] 도 "자식 있음"으로 읽혀 잎에까지 펼침 화살표가 그려진다.
-           * 키가 없어야 RealGrid 가 잎으로 보고 화살표 자리를 비운다.
-           */
-          children: models.map(m => ({
-            nodeType: 'model',
-            modelId: m.modelId,
-            modelCode: m.modelCode,
-            modelName: m.modelName,
-            category: m.category,
-            grade: m.grade,
-            manufacturer: m.manufacturer
-          }))
-        })
+          modelCount: `${models.length}개`,
+          prefix: cat.prefix,
+          manufacturers: cat.mfrs.join(', ')
+        }
       })
-      return rows
     }
   },
   mounted() {
@@ -383,7 +385,7 @@ export default {
       const newModels = this.generateModels(count, this.catalog.length)
       this.catalog = this.catalog.concat(newModels)
       this.resetCheckState()
-      showToast(`신규 모델 ${count}개가 트리에 추가되었습니다. (현재 미배정: ${this.poolCount}개)`, { type: 'success' })
+      showToast(`신규 모델 ${count}개가 각 그룹에 추가되었습니다. (미배정 그룹의 모델: ${this.poolModelCount}개)`, { type: 'success' })
     },
 
     onGridInit({ gridView, dataProvider }) {
@@ -395,17 +397,9 @@ export default {
         rowHoverType: 'row'
       })
 
-      // 카테고리 행을 한눈에 구분한다. RealGrid 는 클래스의 computed 스타일을 읽으므로
-      // 이 클래스는 전역(non-scoped) CSS 에 있어야 한다.
-      gridView.setRowStyleCallback((grid, item) => {
-        const info = this.nodeInfo(item && item.dataRow)
-        return info && info.nodeType === 'category' ? 'rg-tree-category-row' : undefined
-      })
-
       /*
-       * 배정 대상은 모델뿐이다. 카테고리는 분류 라벨이라 체크 자체를 막는다.
-       * 이렇게 해야 "고른 것 = 체크된 것"이 항상 일치한다. 부모를 체크 가능하게 두면
-       * 체크바가 2상태뿐이라 '일부만 체크'를 표현하지 못해 개수가 어긋나 보인다.
+       * 배정 대상은 부모(카테고리)뿐이다. 좌측 트리에는 부모 행만 있으므로
+       * "고른 것 = 체크된 것"이 언제나 화면 그대로다.
        */
       gridView.setCheckBar({
         visible: true,
@@ -414,7 +408,7 @@ export default {
         head: 'check',
         checkableCallback: (dataSource, item) => {
           const info = this.nodeInfo(item && item.dataRow)
-          return !!(info && info.nodeType === 'model')
+          return !!(info && info.nodeType === 'category')
         }
       })
 
@@ -446,28 +440,28 @@ export default {
     },
 
     /**
-     * dataRow 목록 → 실제로 옮길 모델 ID 목록.
-     * 배정 단위는 모델뿐이라 카테고리 행은 그냥 걸러낸다. 블록에 카테고리가
-     * 섞여 들어와도 개수가 늘지 않는다. 중복은 Set 으로 제거한다.
+     * dataRow 목록 → 실제로 옮길 부모(카테고리) 이름 목록.
+     * 좌측 트리에는 부모 행만 있지만, 판단은 nodeType 으로 한다.
+     * 중복은 Set 으로 제거한다.
      */
-    rowsToModelIds(dataRows) {
+    rowsToCategoryNames(dataRows) {
       if (!this.dataProvider) return []
-      const ids = []
+      const names = []
       const seen = new Set()
 
       ;(dataRows || []).forEach(row => {
         const info = this.nodeInfo(row)
-        if (!info || info.nodeType !== 'model' || !info.modelId) return
-        if (seen.has(info.modelId)) return
-        seen.add(info.modelId)
-        ids.push(info.modelId)
+        if (!info || info.nodeType !== 'category' || !info.category) return
+        if (seen.has(info.category)) return
+        seen.add(info.category)
+        names.push(info.category)
       })
 
-      return ids
+      return names
     },
 
     // ---------- 방식 2: 체크박스 + 버튼 ----------
-    checkedModelIds() {
+    checkedCategoryNames() {
       if (!this.gridView) return []
       let rows = []
       try {
@@ -476,11 +470,11 @@ export default {
       } catch (e) {
         rows = []
       }
-      return this.rowsToModelIds(rows)
+      return this.rowsToCategoryNames(rows)
     },
 
     syncCheckedCount() {
-      this.checkedCount = this.checkedModelIds().length
+      this.checkedCount = this.checkedCategoryNames().length
     },
 
     /** 트리를 다시 그리면 체크 상태는 사라진다. 카운트와 블록 기억도 같이 맞춘다. */
@@ -491,35 +485,41 @@ export default {
     },
 
     assignChecked() {
-      const ids = this.checkedModelIds()
-      if (!ids.length) {
-        showToast('배정할 모델을 좌측 트리에서 체크해 주세요.', { type: 'warning' })
+      const names = this.checkedCategoryNames()
+      if (!names.length) {
+        showToast('배정할 그룹을 좌측 트리에서 체크해 주세요.', { type: 'warning' })
         return
       }
-      this.assignModels(ids)
+      this.assignCategories(names)
     },
 
     // ---------- 공통 배정 ----------
-    assignModels(modelIds) {
+    /*
+     * 부모를 옮기면 그 아래 자식 모델도 통째로 따라간다.
+     * 자식을 따로 복사해 두지 않는 이유는, 소속(category)만 보면 언제든 다시
+     * 묶을 수 있어서다. 모델이 추가돼도 배정된 그룹의 자식 수가 저절로 맞는다.
+     */
+    assignCategories(names) {
       const added = []
-      modelIds.forEach(id => {
-        if (this.assignedIdSet.has(id)) return
-        const model = this.catalogMap.get(id)
-        if (model) {
-          this.groupModels.push(model)
-          added.push(model)
-        }
+      names.forEach(name => {
+        if (this.assignedSet.has(name)) return
+        const models = this.modelsByCategory.get(name)
+        if (!models || !models.length) return
+        this.assignedCategories.push(name)
+        added.push({ name, count: models.length })
       })
 
       if (!added.length) return 0
 
-      // 새로 생긴 카테고리 그룹에 대표를 채운다
+      // 새로 생긴 그룹의 대표 모델과, 목록 전체의 대표 그룹을 채운다
       this.syncRepresentatives()
+      this.syncRepCategory()
 
+      const modelSum = added.reduce((sum, a) => sum + a.count, 0)
       const summary = added.length <= 2
-        ? added.map(m => m.modelName).join(', ')
-        : `${added[0].modelName} 외 ${added.length - 1}개`
-      showToast(`${added.length}개 모델 (${summary})이 그룹 배정함으로 이동되었습니다.`, { type: 'success' })
+        ? added.map(a => a.name).join(', ')
+        : `${added[0].name} 외 ${added.length - 1}개`
+      showToast(`${added.length}개 그룹 (${summary})이 자식 모델 ${modelSum}개와 함께 배정되었습니다.`, { type: 'success' })
 
       if (this.gridView) {
         try { this.gridView.clearSelection() } catch (e) { /* noop */ }
@@ -528,50 +528,89 @@ export default {
       return added.length
     },
 
-    returnToTree(modelId) {
-      const idx = this.groupModels.findIndex(m => m.modelId === modelId)
+    returnCategory(name) {
+      const idx = this.assignedCategories.indexOf(name)
       if (idx < 0) return
-      const item = this.groupModels.splice(idx, 1)[0]
-      if (!item) return
+      this.assignedCategories.splice(idx, 1)
 
-      // 되돌린 항목이 그 그룹의 대표였다면 같은 그룹의 첫 모델로 승계한다.
-      // 그룹이 통째로 비었으면 대표 자리도 함께 사라진다. (syncRepresentatives)
+      // 되돌린 그룹이 열려 있었다면 팝업도 같이 닫는다
+      if (this.openedCategory === name) this.openedCategory = null
+
+      // 빠진 그룹의 대표 자리도 함께 정리된다 (syncRepresentatives)
       this.syncRepresentatives()
+      this.syncRepCategory()
       this.resetCheckState()
     },
 
     resetAll() {
-      if (!this.groupModels.length) {
-        showToast('그룹 영역에 배정된 모델이 없습니다.', { type: 'warning' })
+      if (!this.assignedCategories.length) {
+        showToast('그룹 영역에 배정된 그룹이 없습니다.', { type: 'warning' })
         return
       }
-      const count = this.groupModels.length
-      this.groupModels = []
+      const count = this.assignedCategories.length
+      this.assignedCategories = []
       this.repByCategory = {}
+      this.repCategory = null
+      this.openedCategory = null
       this.resetCheckState()
-      showToast(`${count}개 모델 배정이 모두 트리로 초기화되었습니다.`, { type: 'info' })
+      showToast(`${count}개 그룹 배정이 모두 트리로 초기화되었습니다.`, { type: 'info' })
+    },
+
+    /*
+     * 대표 그룹은 배정 목록 전체에서 1개다.
+     * 아직 없거나(첫 배정) 대표였던 그룹이 트리로 돌아갔으면 남은 첫 그룹이 이어받고,
+     * 목록이 비면 대표도 사라진다. '고를 수 있는데 아무것도 안 켜진 라디오'를 남기지 않는다.
+     */
+    syncRepCategory() {
+      if (!this.assignedCategories.length) {
+        this.repCategory = null
+        return
+      }
+      if (!this.assignedCategories.includes(this.repCategory)) {
+        this.repCategory = this.assignedCategories[0]
+      }
+    },
+
+    setRepCategory(name) {
+      if (!this.assignedCategories.includes(name) || this.repCategory === name) return
+      this.repCategory = name
+      showToast(`'${name}' 그룹이 대표 그룹으로 지정되었습니다.`, { type: 'success' })
     },
 
     /**
-     * 카테고리마다 대표가 정확히 1개 있도록 맞춘다.
-     * 기존 대표가 그 그룹에 그대로 남아있으면 유지하고, 빠졌거나 없으면 첫 모델로 채운다.
-     * 남은 모델이 없는 카테고리는 새 객체에 아예 담기지 않아 대표 자리도 같이 정리된다.
+     * 배정된 그룹마다 대표가 정확히 1개 있도록 맞춘다.
+     * 기존 대표가 그 그룹에 그대로 남아있으면 유지하고, 없으면 첫 모델로 채운다.
+     * 되돌린 그룹은 새 객체에 담기지 않아 대표 자리도 같이 사라진다.
      */
     syncRepresentatives() {
       const next = {}
-      this.groupedAssignments.forEach(group => {
-        const current = this.repByCategory[group.category]
-        const stillThere = current && group.models.some(m => m.modelId === current)
-        next[group.category] = stillThere ? current : group.models[0].modelId
+      this.assignedCategories.forEach(name => {
+        const models = this.modelsByCategory.get(name) || []
+        if (!models.length) return
+        const current = this.repByCategory[name]
+        const stillThere = current && models.some(m => m.modelId === current)
+        next[name] = stillThere ? current : models[0].modelId
       })
       this.repByCategory = next
     },
 
-    setRepresentative(category, modelId) {
-      const target = this.groupModels.find(m => m.modelId === modelId)
+    // ---------- 부모 클릭 → 자식 트리 팝업 ----------
+    openCategoryPopup(name) {
+      // 드래그로 카드 위에서 손을 뗀 직후의 클릭까지 팝업으로 받지 않는다
+      if (this._suppressCardClick) return
+      this.openedCategory = name
+    },
+
+    closeCategoryPopup() {
+      this.openedCategory = null
+    },
+
+    onSetRepresentative({ category, modelId }) {
+      const models = this.modelsByCategory.get(category) || []
+      const target = models.find(m => m.modelId === modelId)
       if (!target) return
       this.repByCategory = { ...this.repByCategory, [category]: modelId }
-      showToast(`'${target.modelName}' 모델이 ${category} 그룹의 대표 모델로 지정되었습니다.`, { type: 'success' })
+      showToast(`'${target.modelName}' 모델이 ${category} 그룹의 대표로 지정되었습니다.`, { type: 'success' })
     },
 
     // ---------- 방식 1: 트리 → DIV 마우스 드래그 ----------
@@ -700,18 +739,18 @@ export default {
 
         // 드래그 도중 늘어난 선택이 아니라, 누른 시점을 기준으로 대상 행을 확정한다
         const rows = this.resolveDragRows(this._press.preSelectedRows, this._press.preBlockRows)
-        const ids = this.rowsToModelIds(rows)
+        const names = this.rowsToCategoryNames(rows)
 
-        if (!ids.length) {
+        if (!names.length) {
           this.endDragListeners()
           this._press = null
           return
         }
 
         this._press.started = true
-        this._dragIds = ids
+        this._dragNames = names
         document.body.style.userSelect = 'none'
-        this.createGhost(ids)
+        this.createGhost(names)
       }
 
       this.moveGhost(e)
@@ -794,7 +833,7 @@ export default {
       // 체크바를 누른 제스처인가. (onGridPointerDown 에서 위치로 판별해 둔 값)
       const viaCheckbar = this._pressOnCheckbar
 
-      // 블록을 씌웠다 = 그 안의 모델이 고른 것
+      // 블록을 씌웠다 = 그 안의 그룹이 고른 것
       if (selected.length > 1) {
         this.syncChecksToBlock(selected)
         return
@@ -834,14 +873,13 @@ export default {
      *
      * 단, 단일 행 선택(그냥 클릭)에서는 호출되지 않는다. (rememberBlockFromGrid 의 length > 1)
      * 체크바를 직접 클릭하는 것도 한 행 선택이라, 여기서 지우면 수동 체크가 아예 불가능해진다.
-     * 카테고리 행은 체크 대상이 아니므로 걸러진다.
      */
     syncChecksToBlock(dataRows) {
       if (!this.gridView) return
       const items = []
       dataRows.forEach(row => {
         const info = this.nodeInfo(row)
-        if (!info || info.nodeType !== 'model') return
+        if (!info || info.nodeType !== 'category') return
         const itemIndex = this.gridView.getItemIndex(row)
         if (itemIndex >= 0) items.push(itemIndex)
       })
@@ -883,7 +921,6 @@ export default {
      * 드래그로 옮길 데이터 행 목록.
      * 판단 근거는 누르기 직전의 블록 선택과 누른 행뿐이다. 드래그하는 동안
      * RealGrid 가 블록을 아래로 늘리더라도 그 결과는 쓰지 않는다.
-     * (카테고리 노드를 하위 모델로 펼치는 일은 rowsToModelIds 가 맡는다)
      */
     resolveDragRows(preSelected = [], preBlock = []) {
       if (!this.gridView) return []
@@ -903,11 +940,19 @@ export default {
     },
 
     finishDrag(e) {
-      const ids = this._dragIds
-      this._dragIds = null
+      const names = this._dragNames
+      this._dragNames = null
       if (!this.checkIsOverDropZone(e.clientX, e.clientY)) return
-      if (!ids || !ids.length) return
-      this.assignModels(ids)
+      if (!names || !names.length) return
+
+      /*
+       * 드롭 지점이 이미 배정된 카드 위일 수 있다. 그 카드의 click 은 드롭 직후에
+       * 오므로, 손을 뗀 것만으로 팝업이 열리지 않게 한 박자 막아둔다.
+       */
+      this._suppressCardClick = true
+      this.$nextTick(() => { this._suppressCardClick = false })
+
+      this.assignCategories(names)
     },
 
     checkIsOverDropZone(x, y) {
@@ -915,17 +960,17 @@ export default {
       return !!(el && el.closest('.target-div-card'))
     },
 
-    createGhost(ids) {
+    createGhost(names) {
       const g = document.createElement('div')
       g.className = 'tree-to-div-ghost'
 
-      const first = this.catalogMap.get(ids[0])
-      const firstName = first ? first.modelName : '모델'
-      const labelText = ids.length === 1
-        ? `<strong>${firstName}</strong> (${first ? first.modelCode : ''})`
-        : `<strong>${firstName} 외 ${ids.length - 1}개</strong> (총 ${ids.length}개 모델)`
+      const first = names[0]
+      const modelSum = names.reduce((sum, name) => sum + (this.modelsByCategory.get(name) || []).length, 0)
+      const labelText = names.length === 1
+        ? `<strong>${first}</strong> (자식 ${modelSum}개)`
+        : `<strong>${first} 외 ${names.length - 1}개 그룹</strong> (자식 ${modelSum}개)`
 
-      g.innerHTML = `<i class="bi bi-diagram-3-fill me-1.5"></i><sup>모델 이동</sup> ${labelText}`
+      g.innerHTML = `<i class="bi bi-folder-fill me-1.5"></i><sup>그룹 이동</sup> ${labelText}`
       document.body.appendChild(g)
       this._ghost = g
     },
@@ -1042,34 +1087,7 @@ export default {
   padding: var(--b2b-space-5);
 }
 
-/* 카테고리 그룹 블록 */
-.div-group-block {
-  display: flex;
-  flex-direction: column;
-  gap: var(--b2b-space-1);
-}
-
-/* 스크롤해도 어느 그룹을 보고 있는지 놓치지 않도록 헤더를 고정한다 */
-.div-group-head {
-  position: sticky;
-  top: calc(var(--b2b-space-3) * -1);
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--b2b-space-2);
-  padding: var(--b2b-space-1) var(--b2b-space-2);
-  margin-bottom: 1px;
-  background: var(--b2b-color-bg-subcard, #f1f5f9);
-  border-left: 3px solid var(--b2b-color-primary, #3b82f6);
-  border-radius: 4px;
-}
-
-/* 그룹 안의 항목은 헤더 아래로 한 단 들여쓴다 */
-.div-group-block .div-dropped-item {
-  margin-left: var(--b2b-space-3);
-}
-
-/* Dropped Item Card (label 전체가 대표 선택 히트영역) */
+/* Dropped Parent Card (카드 전체가 팝업 열기 히트영역) */
 .div-dropped-item {
   position: relative;
   display: grid;
@@ -1087,24 +1105,16 @@ export default {
 }
 
 .div-dropped-item:hover {
-  border-color: var(--b2b-color-border-hover, #cbd5e1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-/* 키보드 포커스(방향키 이동) 시각화 */
-.div-dropped-item:focus-within {
   border-color: var(--b2b-color-primary, #3b82f6);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.14);
+  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.12);
 }
 
-.item-main {
-  display: flex;
-  align-items: center;
-  gap: var(--b2b-space-2);
-  min-width: 0;
+/* 대표 그룹은 목록에서 한눈에 찾을 수 있어야 한다 */
+.div-dropped-item.item-rep {
+  border-color: var(--b2b-color-primary, #3b82f6);
+  background: rgba(13, 110, 253, 0.05);
 }
 
-/* Representative Radio (single-select) */
 .rep-radio {
   width: 15px;
   height: 15px;
@@ -1112,8 +1122,24 @@ export default {
   cursor: pointer;
 }
 
-.div-dropped-item.item-rep {
-  cursor: default;
+/* 키보드 포커스(Tab 이동) 시각화 */
+.div-dropped-item:focus-visible {
+  outline: none;
+  border-color: var(--b2b-color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.14);
+}
+
+/* 카드 본문은 '이름 + 한 줄 요약'뿐이다. 아이콘·배지를 늘리면 카드마다
+ * 훑어야 할 것이 늘어 정작 이름이 눈에 안 들어온다. */
+.item-main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--b2b-space-2);
+  min-width: 0;
+}
+
+.item-meta {
+  min-width: 0;
 }
 
 .btn-return-grid {
@@ -1214,7 +1240,7 @@ export default {
 }
 </style>
 
-<!-- 전역(non-scoped) 스타일: 드래그 고스트 + RealGrid 행 스타일 콜백용 클래스 -->
+<!-- 전역(non-scoped) 스타일: 페이지 높이 보정 + 드래그 고스트 -->
 <style>
 /*
  * 이 페이지 한정 레이아웃 보정.
@@ -1226,16 +1252,6 @@ export default {
 .b2b-page-container:has(.tree-to-div-layout) {
   height: calc(100vh - 180px);
   min-height: 380px;
-}
-
-/*
- * RealGrid 는 setRowStyleCallback 이 돌려준 클래스명의 computed 스타일을 읽어
- * 캔버스에 그린다. 따라서 scoped 가 아닌 전역 클래스로 정의해야 한다.
- */
-.rg-tree-category-row {
-  background: #f1f5f9;
-  color: #0f172a;
-  font-weight: 700;
 }
 
 .tree-to-div-ghost {
