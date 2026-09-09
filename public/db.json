@@ -10,7 +10,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "C",
-    "skillScore": 71
+    "skillScore": 71,
+    "urgency": "NORMAL"
   },
   {
     "userId": "yebin.jang",
@@ -23,7 +24,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "D",
-    "skillScore": 96
+    "skillScore": 96,
+    "urgency": "NORMAL"
   },
   {
     "userId": "hayul.lee",
@@ -36,7 +38,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "C",
-    "skillScore": 55
+    "skillScore": 55,
+    "urgency": "LOW"
   },
   {
     "userId": "hyunwoo.yoon",
@@ -49,7 +52,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "A",
-    "skillScore": 63
+    "skillScore": 63,
+    "urgency": "NORMAL"
   },
   {
     "userId": "jiwoo.kim",
@@ -62,7 +66,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "S",
-    "skillScore": 97
+    "skillScore": 97,
+    "urgency": "HIGH"
   },
   {
     "userId": "hayul.lim",
@@ -75,7 +80,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 68
+    "skillScore": 68,
+    "urgency": "NORMAL"
   },
   {
     "userId": "daeun.park",
@@ -88,7 +94,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "B",
-    "skillScore": 85
+    "skillScore": 85,
+    "urgency": "HIGH"
   },
   {
     "userId": "yujin.yoon",
@@ -101,7 +108,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "D",
-    "skillScore": 91
+    "skillScore": 91,
+    "urgency": "NORMAL"
   },
   {
     "userId": "doyoon.lee",
@@ -114,7 +122,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "B",
-    "skillScore": 72
+    "skillScore": 72,
+    "urgency": "LOW"
   },
   {
     "userId": "harin.jo",
@@ -127,7 +136,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 96
+    "skillScore": 96,
+    "urgency": "NORMAL"
   },
   {
     "userId": "hyunwoo.han",
@@ -140,7 +150,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "D",
-    "skillScore": 90
+    "skillScore": 90,
+    "urgency": "HIGH"
   },
   {
     "userId": "yebin.kim",
@@ -153,7 +164,8 @@
     "workStatus": "퇴사",
     "employmentType": "파트타임",
     "evalGrade": "D",
-    "skillScore": 84
+    "skillScore": 84,
+    "urgency": "LOW"
   },
   {
     "userId": "gaeun.yoon",
@@ -166,7 +178,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "D",
-    "skillScore": 82
+    "skillScore": 82,
+    "urgency": "LOW"
   },
   {
     "userId": "jimin.jung",
@@ -179,7 +192,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 56
+    "skillScore": 56,
+    "urgency": "HIGH"
   },
   {
     "userId": "hyunwoo.jung",
@@ -192,7 +206,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "B",
-    "skillScore": 70
+    "skillScore": 70,
+    "urgency": "HIGH"
   },
   {
     "userId": "jihu.park",
@@ -205,7 +220,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 70
+    "skillScore": 70,
+    "urgency": "NORMAL"
   },
   {
     "userId": "gaeun.yoon2",
@@ -218,7 +234,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "C",
-    "skillScore": 67
+    "skillScore": 67,
+    "urgency": "NORMAL"
   },
   {
     "userId": "yujin.kim",
@@ -231,7 +248,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "D",
-    "skillScore": 65
+    "skillScore": 65,
+    "urgency": "NORMAL"
   },
   {
     "userId": "seoyun.lee",
@@ -244,7 +262,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 88
+    "skillScore": 88,
+    "urgency": "URGENT"
   },
   {
     "userId": "nayeon.lim",
@@ -257,7 +276,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "S",
-    "skillScore": 88
+    "skillScore": 88,
+    "urgency": "NORMAL"
   },
   {
     "userId": "jihu.jung",
@@ -270,7 +290,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "S",
-    "skillScore": 64
+    "skillScore": 64,
+    "urgency": "LOW"
   },
   {
     "userId": "jiwoo.jang",
@@ -283,7 +304,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "S",
-    "skillScore": 71
+    "skillScore": 71,
+    "urgency": "URGENT"
   },
   {
     "userId": "doyoon.choi",
@@ -296,7 +318,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 75
+    "skillScore": 75,
+    "urgency": "NORMAL"
   },
   {
     "userId": "jiwoo.park",
@@ -309,7 +332,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "C",
-    "skillScore": 57
+    "skillScore": 57,
+    "urgency": "URGENT"
   },
   {
     "userId": "gaeun.jung",
@@ -322,7 +346,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 57
+    "skillScore": 57,
+    "urgency": "HIGH"
   },
   {
     "userId": "hyunwoo.lim",
@@ -335,7 +360,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "D",
-    "skillScore": 98
+    "skillScore": 98,
+    "urgency": "URGENT"
   },
   {
     "userId": "siyoon.jo",
@@ -348,7 +374,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 60
+    "skillScore": 60,
+    "urgency": "HIGH"
   },
   {
     "userId": "suyeon.choi",
@@ -361,7 +388,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 72
+    "skillScore": 72,
+    "urgency": "LOW"
   },
   {
     "userId": "hyunwoo.park",
@@ -374,7 +402,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 98
+    "skillScore": 98,
+    "urgency": "NORMAL"
   },
   {
     "userId": "hyunwoo.choi",
@@ -387,7 +416,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 86
+    "skillScore": 86,
+    "urgency": "URGENT"
   },
   {
     "userId": "hayul.jang",
@@ -400,7 +430,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "C",
-    "skillScore": 81
+    "skillScore": 81,
+    "urgency": "HIGH"
   },
   {
     "userId": "jihu.yoon",
@@ -413,7 +444,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "D",
-    "skillScore": 87
+    "skillScore": 87,
+    "urgency": "LOW"
   },
   {
     "userId": "doyoon.choi2",
@@ -426,7 +458,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "B",
-    "skillScore": 89
+    "skillScore": 89,
+    "urgency": "NORMAL"
   },
   {
     "userId": "jimin.lim",
@@ -439,7 +472,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "S",
-    "skillScore": 73
+    "skillScore": 73,
+    "urgency": "LOW"
   },
   {
     "userId": "siyoon.kim",
@@ -452,7 +486,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "S",
-    "skillScore": 86
+    "skillScore": 86,
+    "urgency": "HIGH"
   },
   {
     "userId": "yebin.kim2",
@@ -465,7 +500,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 57
+    "skillScore": 57,
+    "urgency": "NORMAL"
   },
   {
     "userId": "yebin.lee",
@@ -478,7 +514,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 75
+    "skillScore": 75,
+    "urgency": "URGENT"
   },
   {
     "userId": "suhyun.jang",
@@ -491,7 +528,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "A",
-    "skillScore": 69
+    "skillScore": 69,
+    "urgency": "URGENT"
   },
   {
     "userId": "seoyun.choi",
@@ -504,7 +542,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 70
+    "skillScore": 70,
+    "urgency": "NORMAL"
   },
   {
     "userId": "gaeun.choi",
@@ -517,7 +556,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "B",
-    "skillScore": 82
+    "skillScore": 82,
+    "urgency": "NORMAL"
   },
   {
     "userId": "gaeun.yoon3",
@@ -530,7 +570,8 @@
     "workStatus": "퇴사",
     "employmentType": "파트타임",
     "evalGrade": "A",
-    "skillScore": 95
+    "skillScore": 95,
+    "urgency": "HIGH"
   },
   {
     "userId": "harin.jang",
@@ -543,7 +584,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 60
+    "skillScore": 60,
+    "urgency": "NORMAL"
   },
   {
     "userId": "hyunwoo.lim2",
@@ -556,7 +598,8 @@
     "workStatus": "재직",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 79
+    "skillScore": 79,
+    "urgency": "HIGH"
   },
   {
     "userId": "minjun.jang",
@@ -569,7 +612,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 59
+    "skillScore": 59,
+    "urgency": "HIGH"
   },
   {
     "userId": "hayul.lim2",
@@ -582,7 +626,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "D",
-    "skillScore": 88
+    "skillScore": 88,
+    "urgency": "LOW"
   },
   {
     "userId": "jiwoo.lee",
@@ -595,7 +640,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "C",
-    "skillScore": 78
+    "skillScore": 78,
+    "urgency": "LOW"
   },
   {
     "userId": "gaeun.jung2",
@@ -608,7 +654,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "D",
-    "skillScore": 87
+    "skillScore": 87,
+    "urgency": "NORMAL"
   },
   {
     "userId": "gaeun.jo",
@@ -621,7 +668,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "S",
-    "skillScore": 87
+    "skillScore": 87,
+    "urgency": "HIGH"
   },
   {
     "userId": "gaeun.jang",
@@ -634,7 +682,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 95
+    "skillScore": 95,
+    "urgency": "HIGH"
   },
   {
     "userId": "doyoon.han",
@@ -647,7 +696,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 77
+    "skillScore": 77,
+    "urgency": "HIGH"
   },
   {
     "userId": "doyoon.jo",
@@ -660,7 +710,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 95
+    "skillScore": 95,
+    "urgency": "URGENT"
   },
   {
     "userId": "daeun.lim",
@@ -673,7 +724,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "A",
-    "skillScore": 62
+    "skillScore": 62,
+    "urgency": "NORMAL"
   },
   {
     "userId": "seoyun.kim",
@@ -686,7 +738,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "C",
-    "skillScore": 97
+    "skillScore": 97,
+    "urgency": "NORMAL"
   },
   {
     "userId": "suhyun.lee",
@@ -699,7 +752,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "S",
-    "skillScore": 78
+    "skillScore": 78,
+    "urgency": "NORMAL"
   },
   {
     "userId": "seoyeon.yoon",
@@ -712,7 +766,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "C",
-    "skillScore": 81
+    "skillScore": 81,
+    "urgency": "TBD"
   },
   {
     "userId": "chaewon.lee",
@@ -725,7 +780,8 @@
     "workStatus": "퇴사",
     "employmentType": "파트타임",
     "evalGrade": "C",
-    "skillScore": 61
+    "skillScore": 61,
+    "urgency": "URGENT"
   },
   {
     "userId": "jiwoo.jo",
@@ -738,7 +794,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "S",
-    "skillScore": 97
+    "skillScore": 97,
+    "urgency": "TBD"
   },
   {
     "userId": "hyunwoo.lim3",
@@ -751,7 +808,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 89
+    "skillScore": 89,
+    "urgency": "NORMAL"
   },
   {
     "userId": "daeun.han",
@@ -764,7 +822,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "A",
-    "skillScore": 61
+    "skillScore": 61,
+    "urgency": "TBD"
   },
   {
     "userId": "jiwoo.lim",
@@ -777,7 +836,8 @@
     "workStatus": "재직",
     "employmentType": "계약직",
     "evalGrade": "C",
-    "skillScore": 65
+    "skillScore": 65,
+    "urgency": "HIGH"
   },
   {
     "userId": "hyunwoo.kim",
@@ -790,7 +850,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "B",
-    "skillScore": 80
+    "skillScore": 80,
+    "urgency": "URGENT"
   },
   {
     "userId": "jihu.jo",
@@ -803,7 +864,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "A",
-    "skillScore": 66
+    "skillScore": 66,
+    "urgency": "URGENT"
   },
   {
     "userId": "jiwoo.yoon",
@@ -816,7 +878,8 @@
     "workStatus": "재직",
     "employmentType": "계약직",
     "evalGrade": "C",
-    "skillScore": 64
+    "skillScore": 64,
+    "urgency": "NORMAL"
   },
   {
     "userId": "hyunwoo.lee",
@@ -829,7 +892,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 92
+    "skillScore": 92,
+    "urgency": "NORMAL"
   },
   {
     "userId": "jiwoo.park2",
@@ -842,7 +906,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "A",
-    "skillScore": 79
+    "skillScore": 79,
+    "urgency": "NORMAL"
   },
   {
     "userId": "gaeun.jung3",
@@ -855,7 +920,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "D",
-    "skillScore": 97
+    "skillScore": 97,
+    "urgency": "LOW"
   },
   {
     "userId": "yeonwoo.jang",
@@ -868,7 +934,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 93
+    "skillScore": 93,
+    "urgency": "URGENT"
   },
   {
     "userId": "seoyeon.lee",
@@ -881,7 +948,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 81
+    "skillScore": 81,
+    "urgency": "LOW"
   },
   {
     "userId": "seoyeon.yoon2",
@@ -894,7 +962,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 93
+    "skillScore": 93,
+    "urgency": "TBD"
   },
   {
     "userId": "gaeun.choi2",
@@ -907,7 +976,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 94
+    "skillScore": 94,
+    "urgency": "HIGH"
   },
   {
     "userId": "yujin.han",
@@ -920,7 +990,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "B",
-    "skillScore": 81
+    "skillScore": 81,
+    "urgency": "LOW"
   },
   {
     "userId": "suhyun.park",
@@ -933,7 +1004,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "D",
-    "skillScore": 93
+    "skillScore": 93,
+    "urgency": "HIGH"
   },
   {
     "userId": "harin.park",
@@ -946,7 +1018,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "D",
-    "skillScore": 66
+    "skillScore": 66,
+    "urgency": "NORMAL"
   },
   {
     "userId": "hayul.han",
@@ -959,7 +1032,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "S",
-    "skillScore": 75
+    "skillScore": 75,
+    "urgency": "LOW"
   },
   {
     "userId": "harin.park2",
@@ -972,7 +1046,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "D",
-    "skillScore": 94
+    "skillScore": 94,
+    "urgency": "HIGH"
   },
   {
     "userId": "hyunwoo.jung2",
@@ -985,7 +1060,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "S",
-    "skillScore": 76
+    "skillScore": 76,
+    "urgency": "TBD"
   },
   {
     "userId": "siyoon.jung",
@@ -998,7 +1074,8 @@
     "workStatus": "퇴사",
     "employmentType": "파트타임",
     "evalGrade": "D",
-    "skillScore": 79
+    "skillScore": 79,
+    "urgency": "NORMAL"
   },
   {
     "userId": "doyoon.choi3",
@@ -1011,7 +1088,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "B",
-    "skillScore": 67
+    "skillScore": 67,
+    "urgency": "LOW"
   },
   {
     "userId": "yujin.park",
@@ -1024,7 +1102,8 @@
     "workStatus": "퇴사",
     "employmentType": "파트타임",
     "evalGrade": "S",
-    "skillScore": 77
+    "skillScore": 77,
+    "urgency": "NORMAL"
   },
   {
     "userId": "daeun.kim",
@@ -1037,7 +1116,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 78
+    "skillScore": 78,
+    "urgency": "NORMAL"
   },
   {
     "userId": "jihu.lee",
@@ -1050,7 +1130,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 83
+    "skillScore": 83,
+    "urgency": "HIGH"
   },
   {
     "userId": "daeun.jang",
@@ -1063,7 +1144,8 @@
     "workStatus": "퇴사",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 89
+    "skillScore": 89,
+    "urgency": "NORMAL"
   },
   {
     "userId": "suhyun.lee2",
@@ -1076,7 +1158,8 @@
     "workStatus": "퇴사",
     "employmentType": "파트타임",
     "evalGrade": "A",
-    "skillScore": 77
+    "skillScore": 77,
+    "urgency": "HIGH"
   },
   {
     "userId": "doyoon.yoon",
@@ -1089,7 +1172,8 @@
     "workStatus": "휴직",
     "employmentType": "계약직",
     "evalGrade": "D",
-    "skillScore": 89
+    "skillScore": 89,
+    "urgency": "LOW"
   },
   {
     "userId": "yujin.choi",
@@ -1102,7 +1186,8 @@
     "workStatus": "재직",
     "employmentType": "계약직",
     "evalGrade": "A",
-    "skillScore": 70
+    "skillScore": 70,
+    "urgency": "HIGH"
   },
   {
     "userId": "yeonwoo.jo",
@@ -1115,7 +1200,8 @@
     "workStatus": "퇴사",
     "employmentType": "계약직",
     "evalGrade": "C",
-    "skillScore": 58
+    "skillScore": 58,
+    "urgency": "NORMAL"
   },
   {
     "userId": "suyeon.jung",
@@ -1128,7 +1214,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "A",
-    "skillScore": 84
+    "skillScore": 84,
+    "urgency": "LOW"
   },
   {
     "userId": "daeun.lee",
@@ -1141,7 +1228,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "A",
-    "skillScore": 68
+    "skillScore": 68,
+    "urgency": "NORMAL"
   },
   {
     "userId": "hayul.lee2",
@@ -1154,7 +1242,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "B",
-    "skillScore": 58
+    "skillScore": 58,
+    "urgency": "TBD"
   },
   {
     "userId": "doyoon.jung",
@@ -1167,7 +1256,8 @@
     "workStatus": "재직",
     "employmentType": "계약직",
     "evalGrade": "B",
-    "skillScore": 87
+    "skillScore": 87,
+    "urgency": "LOW"
   },
   {
     "userId": "seoyeon.jo",
@@ -1180,7 +1270,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "B",
-    "skillScore": 79
+    "skillScore": 79,
+    "urgency": "NORMAL"
   },
   {
     "userId": "seoyun.jung",
@@ -1193,7 +1284,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "S",
-    "skillScore": 64
+    "skillScore": 64,
+    "urgency": "NORMAL"
   },
   {
     "userId": "suhyun.park2",
@@ -1206,7 +1298,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 82
+    "skillScore": 82,
+    "urgency": "HIGH"
   },
   {
     "userId": "gaeun.lim",
@@ -1219,7 +1312,8 @@
     "workStatus": "퇴사",
     "employmentType": "파트타임",
     "evalGrade": "C",
-    "skillScore": 88
+    "skillScore": 88,
+    "urgency": "URGENT"
   },
   {
     "userId": "minjun.jo",
@@ -1232,7 +1326,8 @@
     "workStatus": "재직",
     "employmentType": "정규직",
     "evalGrade": "A",
-    "skillScore": 96
+    "skillScore": 96,
+    "urgency": "NORMAL"
   },
   {
     "userId": "nayeon.lee",
@@ -1245,7 +1340,8 @@
     "workStatus": "휴직",
     "employmentType": "파트타임",
     "evalGrade": "S",
-    "skillScore": 87
+    "skillScore": 87,
+    "urgency": "HIGH"
   },
   {
     "userId": "siyoon.lee",
@@ -1258,7 +1354,8 @@
     "workStatus": "재직",
     "employmentType": "파트타임",
     "evalGrade": "D",
-    "skillScore": 84
+    "skillScore": 84,
+    "urgency": "LOW"
   },
   {
     "userId": "yujin.jung",
@@ -1271,7 +1368,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "C",
-    "skillScore": 83
+    "skillScore": 83,
+    "urgency": "LOW"
   },
   {
     "userId": "seoyun.yoon",
@@ -1284,7 +1382,8 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "B",
-    "skillScore": 94
+    "skillScore": 94,
+    "urgency": "URGENT"
   },
   {
     "userId": "hyunwoo.han2",
@@ -1297,6 +1396,7 @@
     "workStatus": "휴직",
     "employmentType": "정규직",
     "evalGrade": "D",
-    "skillScore": 86
+    "skillScore": 86,
+    "urgency": "NORMAL"
   }
 ]

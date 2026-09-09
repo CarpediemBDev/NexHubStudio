@@ -1,0 +1,9 @@
+{
+  "URGENCY": [
+    { "code": "NORMAL", "label": "보통", "ord": 30 },
+    { "code": "TBD", "label": "미정", "ord": 50 },
+    { "code": "URGENT", "label": "긴급", "ord": 10 },
+    { "code": "LOW", "label": "낮음", "ord": 40 },
+    { "code": "HIGH", "label": "높음", "ord": 20 }
+  ]
+}

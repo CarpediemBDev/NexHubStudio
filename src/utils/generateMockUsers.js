@@ -97,6 +97,8 @@ export function generateMockUsers(count = 100, { seed = 1 } = {}) {
   const workStatuses = ['재직', '휴직', '퇴사']
   const employmentTypes = ['정규직', '계약직', '파트타임']
   const evalGrades = ['S', 'A', 'B', 'C', 'D']
+  // 긴급도: 공통코드(URGENCY) 코드값. 화면 표시용 라벨(긴급/높음/…)은 공통코드에서 온다.
+  const urgencies = ['URGENT', 'HIGH', 'NORMAL', 'LOW', 'TBD']
 
   const list = []
   for (let i = 0; i < count; i++) {
@@ -140,6 +142,7 @@ export function generateMockUsers(count = 100, { seed = 1 } = {}) {
       employmentType: employmentTypes[Math.floor(rnd() * employmentTypes.length)], // SelectBox (정규직/계약직/파트타임)
       evalGrade: evalGrades[Math.floor(rnd() * evalGrades.length)], // Badge (S/A/B/C/D)
       skillScore, // Energy Bar / Progress Bar (55~98)
+      urgency: urgencies[Math.floor(rnd() * urgencies.length)], // 공통코드 코드값 (라벨은 lookupDisplay)
     })
   }
   return list
