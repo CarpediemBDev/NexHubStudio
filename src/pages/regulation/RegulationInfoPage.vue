@@ -145,7 +145,7 @@
         </div>
       </div>
 
-      <!-- 국가 필터 디자인 비교 (임시). 하나로 정하면 이 줄과 안 쓰는 variant 를 지운다 -->
+      <!-- 국가 필터 디자인 전환: 사용자가 6가지 모양 중 골라 쓴다 (선택은 localStorage 에 기억) -->
       <div class="design-switch px-3 py-1 border-bottom">
         <span class="b2b-text-xs text-theme-secondary"><i class="bi bi-palette me-1"></i>국가 필터 디자인</span>
         <div class="ui-mode-toggle">
@@ -223,7 +223,7 @@ const STATUS_STYLE = {
 }
 
 const NO_COUNTRY = '__NONE__'
-// 국가 필터 디자인 후보. 같은 데이터·같은 그리드 필터를 모양만 바꿔 보여준다
+// 국가 필터 디자인 6종. 데이터와 그리드 필터는 같고 모양만 다르며, 사용자가 상단 스위치로 고른다
 const FILTER_VARIANTS = [
   { key: 'more', label: 'A 더보기', desc: '건수 상위 20개만 펼쳐 두고 나머지는 더보기로 연다' },
   { key: 'vscroll', label: 'B 세로 스크롤', desc: '2줄 높이로 고정하고 안에서 세로 스크롤' },
@@ -754,7 +754,7 @@ export default {
   font-weight: 600;
 }
 
-/* ---- 국가 필터 디자인 비교 스위치 (임시) ---- */
+/* ---- 국가 필터 디자인 전환 스위치 ---- */
 .design-switch {
   display: flex;
   flex-wrap: wrap;
