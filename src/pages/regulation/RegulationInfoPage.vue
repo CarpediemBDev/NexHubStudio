@@ -699,9 +699,9 @@ export default {
         selectedRegInfoId: this.selectedRegInfoId
       })
     },
-    goEditPage(name, params) {
+    goEditPage(name, params, query) {
       this.saveListContext()
-      this.$router.push({ name, params })
+      this.$router.push({ name, params, query })
     },
 
     /* ---------------- 등록/수정/상세 (전부 페이지로) ---------------- */
@@ -719,7 +719,7 @@ export default {
     /** 이력은 상세 화면 우측 패널에서 본다 */
     openHistory() {
       const r = this.selectedRecord
-      if (r) this.goEditPage('RegulationInfoView', { regInfoId: r.regInfoId })
+      if (r) this.goEditPage('RegulationInfoView', { regInfoId: r.regInfoId }, { tab: 'history' })
     },
     removeRecord() {
       const r = this.selectedRecord

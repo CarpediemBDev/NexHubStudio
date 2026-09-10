@@ -188,7 +188,19 @@ export const regulationCodes = [
   { code: 'RG_LABEL', name: '제품 표시·광고 규정(한글 표시)', levelNo: 1 },
   { code: 'RG_EU_LVD', name: 'EU 저전압지침 LVD 2014/35/EU', levelNo: 1 },
   { code: 'RG_EU_ELABEL', name: 'EU 에너지라벨 규정 2017/1369', levelNo: 1 },
-  { code: 'RG_EU_EMC', name: 'EU EMC 지침 2014/30/EU', levelNo: 1 }
+  { code: 'RG_EU_EMC', name: 'EU EMC 지침 2014/30/EU', levelNo: 1 },
+  // 권역별 해외 레코드(15~25)용
+  { code: 'RG_ASEAN_EMC', name: 'ASEAN 전기전자 EMC 상호인정협정(MRA)', levelNo: 1 },
+  { code: 'RG_JP_PSE', name: '일본 전기용품안전법(PSE)', levelNo: 1 },
+  { code: 'RG_CN_CCC', name: '중국 강제성제품인증(CCC)', levelNo: 1 },
+  { code: 'RG_EU_ROHS', name: 'EU RoHS 지침 2011/65/EU', levelNo: 1 },
+  { code: 'RG_UKCA', name: '영국 제품안전 규정(UKCA)', levelNo: 1 },
+  { code: 'RG_US_FCC', name: '미국 FCC Part 15 / 캐나다 ICES-003', levelNo: 1 },
+  { code: 'RG_MX_NOM', name: '멕시코 NOM 공식표준', levelNo: 1 },
+  { code: 'RG_LA_SAFE', name: '중남미 국가별 전기안전 인증', levelNo: 1 },
+  { code: 'RG_GCC', name: 'GCC 기술규정 / 중동·아프리카 수입 적합성', levelNo: 1 },
+  { code: 'RG_OCE_RCM', name: '호주·뉴질랜드 EESS / RCM', levelNo: 1 },
+  { code: 'RG_IECEE_CB', name: 'IECEE CB Scheme', levelNo: 1 }
 ]
 
 export const standardCodes = [
@@ -206,7 +218,18 @@ export const standardCodes = [
   { code: 'ST_KOR_LABEL', name: '전기용품 한글 표시사항 기준', parentCd: 'RG_LABEL', levelNo: 2 },
   { code: 'ST_EN62368', name: 'EN IEC 62368-1', parentCd: 'RG_EU_LVD', levelNo: 2 },
   { code: 'ST_EU_ELABEL', name: 'EU 2019/2013 (전자 디스플레이 에너지라벨)', parentCd: 'RG_EU_ELABEL', levelNo: 2 },
-  { code: 'ST_EN55032', name: 'EN 55032 / EN 55035', parentCd: 'RG_EU_EMC', levelNo: 2 }
+  { code: 'ST_EN55032', name: 'EN 55032 / EN 55035', parentCd: 'RG_EU_EMC', levelNo: 2 },
+  { code: 'ST_ASEAN_CISPR32', name: 'CISPR 32 (ASEAN 조화 EMC 방사 기준)', parentCd: 'RG_ASEAN_EMC', levelNo: 2 },
+  { code: 'ST_JP_J62368', name: 'J62368-1 (일본 AV·ICT 기기 안전)', parentCd: 'RG_JP_PSE', levelNo: 2 },
+  { code: 'ST_GB4943', name: 'GB 4943.1 (중국 AV·ICT 기기 안전)', parentCd: 'RG_CN_CCC', levelNo: 2 },
+  { code: 'ST_EN63000', name: 'EN IEC 63000 (RoHS 기술문서)', parentCd: 'RG_EU_ROHS', levelNo: 2 },
+  { code: 'ST_BS62368', name: 'BS EN IEC 62368-1', parentCd: 'RG_UKCA', levelNo: 2 },
+  { code: 'ST_FCC15B', name: 'FCC Part 15 Subpart B / ICES-003', parentCd: 'RG_US_FCC', levelNo: 2 },
+  { code: 'ST_NOM001', name: 'NOM-001-SCFI (전자기기 안전)', parentCd: 'RG_MX_NOM', levelNo: 2 },
+  { code: 'ST_IEC62368_LA', name: 'IEC 62368-1 국가 채택판 (NBR/IRAM 등)', parentCd: 'RG_LA_SAFE', levelNo: 2 },
+  { code: 'ST_GSO_IEC62368', name: 'GSO IEC 62368-1', parentCd: 'RG_GCC', levelNo: 2 },
+  { code: 'ST_ASNZS62368', name: 'AS/NZS 62368.1', parentCd: 'RG_OCE_RCM', levelNo: 2 },
+  { code: 'ST_CB62368', name: 'IEC 62368-1 (CB 시험 기준)', parentCd: 'RG_IECEE_CB', levelNo: 2 }
 ]
 
 export const statusCodes = [
@@ -811,7 +834,23 @@ export const regHistList = [
   { histId: 107, regInfoId: 4, versionNo: 4, changeType: 'UPDATE', changeNote: '온라인 상세페이지 표시 의무 문구 반영', regId: 'lee.energy', regDt: '2026-08-05 13:21' },
   { histId: 108, regInfoId: 12, versionNo: 1, changeType: 'INSERT', changeNote: '프랑스 특례 최초 등록', regId: 'yoon.eu', regDt: '2025-11-03 15:40' },
   { histId: 109, regInfoId: 12, versionNo: 2, changeType: 'CONFLICT_RESOLVE', changeNote: '유럽 공통 레코드 등록에 따른 예외(특례) 처리', regId: 'yoon.eu', regDt: '2026-01-20 17:02' },
-  { histId: 110, regInfoId: 9, versionNo: 2, changeType: 'UPDATE', changeNote: '재난경보(AEA) 수신 항목 추가', regId: 'jung.dev', regDt: '2026-08-11 10:15' }
+  { histId: 110, regInfoId: 9, versionNo: 2, changeType: 'UPDATE', changeNote: '재난경보(AEA) 수신 항목 추가', regId: 'jung.dev', regDt: '2026-08-11 10:15' },
+  // 권역별 해외 레코드(15~25)
+  { histId: 111, regInfoId: 15, versionNo: 1, changeType: 'INSERT', changeNote: 'ASEAN 권역 EMC 최초 등록', regId: 'lee.asia', regDt: '2026-06-18 10:12' },
+  { histId: 112, regInfoId: 16, versionNo: 1, changeType: 'INSERT', changeNote: '최초 등록', regId: 'lee.asia', regDt: '2026-02-10 09:30' },
+  { histId: 113, regInfoId: 17, versionNo: 1, changeType: 'INSERT', changeNote: '최초 등록', regId: 'lee.asia', regDt: '2025-12-01 14:00' },
+  { histId: 114, regInfoId: 17, versionNo: 2, changeType: 'UPDATE', changeNote: 'GB 4943.1-2022 전환에 따라 공장심사 보고서 추가', regId: 'lee.asia', regDt: '2026-07-02 11:20' },
+  { histId: 115, regInfoId: 18, versionNo: 1, changeType: 'INSERT', changeNote: '유럽 권역 공통 최초 등록', regId: 'yoon.eu', regDt: '2026-04-11 16:05' },
+  { histId: 116, regInfoId: 19, versionNo: 1, changeType: 'INSERT', changeNote: '작성중 등록', regId: 'yoon.eu', regDt: '2026-08-21 13:40' },
+  { histId: 117, regInfoId: 20, versionNo: 1, changeType: 'INSERT', changeNote: '최초 등록', regId: 'jung.na', regDt: '2025-05-01 09:00' },
+  { histId: 118, regInfoId: 20, versionNo: 2, changeType: 'UPDATE', changeNote: '캐나다 ICES-003 표기 문구 추가', regId: 'jung.na', regDt: '2026-01-30 15:10' },
+  { histId: 119, regInfoId: 21, versionNo: 1, changeType: 'INSERT', changeNote: '최초 등록', regId: 'jung.na', regDt: '2026-05-14 10:45' },
+  { histId: 120, regInfoId: 22, versionNo: 1, changeType: 'INSERT', changeNote: '중남미 권역 공통 최초 등록', regId: 'jung.na', regDt: '2026-07-28 17:30' },
+  { histId: 121, regInfoId: 23, versionNo: 1, changeType: 'INSERT', changeNote: '중동/아프리카 권역 공통 최초 등록', regId: 'han.mea', regDt: '2026-03-19 11:00' },
+  { histId: 122, regInfoId: 24, versionNo: 1, changeType: 'INSERT', changeNote: '오세아니아 권역 공통 최초 등록', regId: 'han.mea', regDt: '2026-02-26 14:25' },
+  { histId: 123, regInfoId: 25, versionNo: 1, changeType: 'INSERT', changeNote: '최초 등록', regId: 'park.cert', regDt: '2025-01-02 09:10' },
+  { histId: 124, regInfoId: 25, versionNo: 2, changeType: 'UPDATE', changeNote: 'IEC 62368-1 3판 기준으로 성적서 갱신', regId: 'park.cert', regDt: '2025-09-15 10:00' },
+  { histId: 125, regInfoId: 25, versionNo: 3, changeType: 'UPDATE', changeNote: '주요 판매국 목록 갱신', regId: 'park.cert', regDt: '2026-06-30 16:40' }
 ]
 
 /* ------------------------------------------------------------------ *
@@ -892,6 +931,30 @@ export const attachMock = {
     { fileId: 'F-031', fileNm: 'EU_DoC_LVD.pdf', size: '520KB' },
     { fileId: 'F-032', fileNm: 'FR_안전문구_번역본.docx', size: '96KB' },
     { fileId: 'F-033', fileNm: 'EN62368-1_TestReport.pdf', size: '4.2MB' }
+  ],
+  // 권역별 해외 레코드 — 목록의 첨부 건수(attachCnt)와 맞춘다
+  15: [{ fileId: 'F-151', fileNm: 'ASEAN_MRA_EMC_TestReport.pdf', size: '2.2MB' }],
+  16: [{ fileId: 'F-161', fileNm: 'PSE_自己確認_試験記録.pdf', size: '1.1MB' }],
+  17: [
+    { fileId: 'F-171', fileNm: 'CCC_Certificate.pdf', size: '640KB' },
+    { fileId: 'F-172', fileNm: 'CCC_Factory_Inspection.pdf', size: '1.8MB' }
+  ],
+  18: [{ fileId: 'F-181', fileNm: 'RoHS_Technical_File.pdf', size: '3.4MB' }],
+  20: [
+    { fileId: 'F-201', fileNm: 'FCC_SDoC_TestReport.pdf', size: '2.7MB' },
+    { fileId: 'F-202', fileNm: 'ICES-003_Label.pdf', size: '220KB' }
+  ],
+  21: [{ fileId: 'F-211', fileNm: 'NOM-001-SCFI_Certificado.pdf', size: '900KB' }],
+  22: [{ fileId: 'F-221', fileNm: 'INMETRO_IRAM_SEC_목록.xlsx', size: '75KB' }],
+  23: [
+    { fileId: 'F-231', fileNm: 'G-Mark_Certificate.pdf', size: '510KB' },
+    { fileId: 'F-232', fileNm: 'SASO_IECEE_CoC.pdf', size: '430KB' }
+  ],
+  24: [{ fileId: 'F-241', fileNm: 'EESS_Registration.pdf', size: '380KB' }],
+  25: [
+    { fileId: 'F-251', fileNm: 'CB_Certificate_IEC62368-1.pdf', size: '700KB' },
+    { fileId: 'F-252', fileNm: 'CB_TestReport_Ed3.pdf', size: '5.6MB' },
+    { fileId: 'F-253', fileNm: 'CB_National_Differences.pdf', size: '1.3MB' }
   ]
 }
 
@@ -935,7 +998,20 @@ export const certCodes = [
   { code: 'CT_EU_DOC', name: 'EU 적합성선언서(DoC)', parentCd: 'ST_EN62368', levelNo: 3 },
   { code: 'CT_EU_TEST', name: 'EN IEC 62368-1 시험성적서', parentCd: 'ST_EN62368', levelNo: 3 },
   { code: 'CT_EU_EPREL', name: 'EPREL 등록확인서', parentCd: 'ST_EU_ELABEL', levelNo: 3 },
-  { code: 'CT_EU_EMC_DOC', name: 'EMC 적합성선언서', parentCd: 'ST_EN55032', levelNo: 3 }
+  { code: 'CT_EU_EMC_DOC', name: 'EMC 적합성선언서', parentCd: 'ST_EN55032', levelNo: 3 },
+  { code: 'CT_ASEAN_EMC', name: 'ASEAN MRA 지정시험소 EMC 성적서', parentCd: 'ST_ASEAN_CISPR32', levelNo: 3 },
+  { code: 'CT_JP_PSE_SELF', name: 'PSE 자기확인 시험기록', parentCd: 'ST_JP_J62368', levelNo: 3 },
+  { code: 'CT_CN_CCC', name: 'CCC 인증서', parentCd: 'ST_GB4943', levelNo: 3 },
+  { code: 'CT_CN_FACTORY', name: 'CCC 공장심사 보고서', parentCd: 'ST_GB4943', levelNo: 3 },
+  { code: 'CT_EU_ROHS_DOC', name: 'RoHS 기술문서 / DoC', parentCd: 'ST_EN63000', levelNo: 3 },
+  { code: 'CT_UKCA_DOC', name: 'UK 적합성선언서(UK DoC)', parentCd: 'ST_BS62368', levelNo: 3 },
+  { code: 'CT_FCC_SDOC', name: 'FCC SDoC 시험성적서', parentCd: 'ST_FCC15B', levelNo: 3 },
+  { code: 'CT_NOM_CERT', name: 'NOM 인증서', parentCd: 'ST_NOM001', levelNo: 3 },
+  { code: 'CT_LA_CERT', name: '국가별 안전 인증서 (INMETRO/IRAM/SEC)', parentCd: 'ST_IEC62368_LA', levelNo: 3 },
+  { code: 'CT_GCC_GMARK', name: 'G-Mark 적합성 증명서', parentCd: 'ST_GSO_IEC62368', levelNo: 3 },
+  { code: 'CT_RCM_REG', name: 'EESS 등록 확인서', parentCd: 'ST_ASNZS62368', levelNo: 3 },
+  { code: 'CT_CB_CERT', name: 'CB 인증서', parentCd: 'ST_CB62368', levelNo: 3 },
+  { code: 'CT_CB_REPORT', name: 'CB 시험성적서', parentCd: 'ST_CB62368', levelNo: 3 }
 ]
 
 /**
@@ -985,5 +1061,17 @@ export const regItemList = [
   ...mkItems(11, 'RG_KREACH', { ST_KREACH_REG: ['CT_KREACH_NOTI'] }),
   ...mkItems(12, 'RG_EU_LVD', { ST_EN62368: ['CT_EU_DOC', 'CT_EU_TEST'] }),
   ...mkItems(13, 'RG_EU_ELABEL', { ST_EU_ELABEL: ['CT_EU_EPREL'] }),
-  ...mkItems(14, 'RG_EU_EMC', { ST_EN55032: ['CT_EU_EMC_DOC'] })
+  ...mkItems(14, 'RG_EU_EMC', { ST_EN55032: ['CT_EU_EMC_DOC'] }),
+  // 권역별 해외 레코드
+  ...mkItems(15, 'RG_ASEAN_EMC', { ST_ASEAN_CISPR32: ['CT_ASEAN_EMC'] }),
+  ...mkItems(16, 'RG_JP_PSE', { ST_JP_J62368: ['CT_JP_PSE_SELF'] }),
+  ...mkItems(17, 'RG_CN_CCC', { ST_GB4943: ['CT_CN_CCC', 'CT_CN_FACTORY'] }),
+  ...mkItems(18, 'RG_EU_ROHS', { ST_EN63000: ['CT_EU_ROHS_DOC'] }),
+  ...mkItems(19, 'RG_UKCA', { ST_BS62368: ['CT_UKCA_DOC'] }),
+  ...mkItems(20, 'RG_US_FCC', { ST_FCC15B: ['CT_FCC_SDOC'] }),
+  ...mkItems(21, 'RG_MX_NOM', { ST_NOM001: ['CT_NOM_CERT'] }),
+  ...mkItems(22, 'RG_LA_SAFE', { ST_IEC62368_LA: ['CT_LA_CERT'] }),
+  ...mkItems(23, 'RG_GCC', { ST_GSO_IEC62368: ['CT_GCC_GMARK'] }),
+  ...mkItems(24, 'RG_OCE_RCM', { ST_ASNZS62368: ['CT_RCM_REG'] }),
+  ...mkItems(25, 'RG_IECEE_CB', { ST_CB62368: ['CT_CB_CERT', 'CT_CB_REPORT'] })
 ]

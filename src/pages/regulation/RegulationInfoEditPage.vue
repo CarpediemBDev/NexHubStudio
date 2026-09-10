@@ -115,6 +115,7 @@
           :conflict-histories="conflictHistories"
           :change-histories="changeHistories"
           :hist-scope="histScope"
+          :hist-scope-label="histScopeLabel"
           :diff-hist-id="diffHistId"
           :readonly="readonly"
           @update:activeTab="insightTab = $event"
@@ -190,7 +191,7 @@
  *     '펼치기' 모드는 일괄편집·검색용 보조 모드로만 둔다.
  *  3) 충돌은 저장 직전이 아니라 입력하는 동안 실시간으로 판정한다.
  *     팝업을 페이지로 바꾸는 명분이 이것이다.
- *  4) 네비게이션=좌측, 인사이트=우측으로 고정. 등록 모드는 좌측 열만 빠진 같은 화면.
+ *  4) 네비게이션=좌측, 인사이트=우측으로 고정. 등록도 같은 3열 화면(이력 탭만 비활성).
  */
 
 import RegScopeTree from './components/RegScopeTree.vue'
@@ -394,11 +395,30 @@ export default {
     conflictHistories() {
       return this.routeId ? this.store.conflictsOf(this.routeId) : []
     },
+    /**
+     * '레코드 전체' 는 모든 이력, '이 항목' 은 왼쪽 트리에서 고른 노드를 건드린 이력만.
+     * 이력마다 저장 시점에 masterChanged / changedItemIds 를 남기므로 그것으로 거른다.
+     * 그 기록이 없는 과거 이력(목업)은 무엇을 바꿨는지 알 수 없어 '이 항목' 에서는 빠진다.
+     */
     changeHistories() {
       if (!this.routeId) return []
       const all = this.store.historiesOf(this.routeId)
-      // '이 항목' 스코프는 항목 단위 이력 테이블이 생기면 여기서 필터링한다.
-      return this.histScope === 'record' ? all : all.filter((h) => h.changeType !== 'CONFLICT_RESOLVE')
+      if (this.histScope === 'record') return all
+      const ids = this.scopeItemIds
+      return all.filter((h) => {
+        if (!Array.isArray(h.changedItemIds)) return false
+        return ids ? h.changedItemIds.some((id) => ids.includes(id)) : h.masterChanged
+      })
+    },
+    /** '이 항목' 범위: 기본정보면 null, 항목이면 그 항목(일괄 편집이면 체크된 항목들) id */
+    scopeItemIds() {
+      if (this.bulkMode) return [...this.checkedItemIds]
+      if (this.focusedNodeId === MASTER_NODE_ID) return null
+      return this.focusedItems.map((it) => it.itemId)
+    },
+    histScopeLabel() {
+      if (this.bulkMode) return `선택한 항목 ${this.checkedItemIds.length}개`
+      return this.showMaster ? '기본정보' : this.mainTitle
     },
     diffSnapshot() {
       if (!this.diffHistId) return null
@@ -498,7 +518,8 @@ export default {
       this.checkedItemIds = []
       this.resolvedKeys = []
       this.diffHistId = null
-      this.insightTab = 'predict'
+      // 목록의 [이력] 버튼은 ?tab=history 로 들어온다
+      this.insightTab = this.$route.query.tab === 'history' && this.mode !== 'create' ? 'history' : 'predict'
       this.restoreDraft()
       this.scheduleDetect(0)
     },
@@ -621,7 +642,17 @@ export default {
       })
     },
     onToggleDiff(h) {
+      if (!h.snapshotJson) {
+        showToast(`v${h.versionNo} 은 저장된 값이 없어 비교할 수 없습니다.`, { type: 'info' })
+        return
+      }
       this.diffHistId = this.diffHistId === h.histId ? null : h.histId
+      // 비교 표시는 기본정보 폼에 겹쳐지므로, 레코드 전체 범위에서 보고 있으면 폼을 기본정보로 돌린다.
+      // ('이 항목' 범위에서 돌리면 목록 기준이 바뀌어 누른 카드가 사라진다)
+      if (this.diffHistId && this.histScope === 'record' && !this.showMaster) {
+        this.focusedNodeId = MASTER_NODE_ID
+        this.checkedItemIds = []
+      }
     },
 
     /* ================= 저장 ================= */
@@ -668,7 +699,8 @@ export default {
           master: this.master,
           targets: this.masterAsRecord.targets,
           items: this.itemDrafts,
-          attachFiles: this.master.attachFiles
+          attachFiles: this.master.attachFiles,
+          changes: { masterChanged: this.masterDirty, changedItemIds: this.dirtyItemIds }
         },
         this.liveConflicts
       )
@@ -707,7 +739,9 @@ export default {
     moveRecord(id) {
       if (!id) return
       const name = this.mode === 'view' ? 'RegulationInfoView' : 'RegulationInfoEdit'
-      this.$router.push({ name, params: { regInfoId: id } })
+      // 이력을 보며 넘기는 중이면 다음 레코드도 이력 탭으로 연다
+      const query = this.insightTab === 'history' ? { tab: 'history' } : undefined
+      this.$router.push({ name, params: { regInfoId: id }, query })
     },
 
     /* ================= 임시저장 (페이지 전환의 대가) ================= */

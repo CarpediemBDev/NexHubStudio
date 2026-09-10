@@ -96,18 +96,29 @@
           </button>
         </div>
 
+        <div v-if="histScope === 'node'" class="ins-note mb-2">
+          <i class="bi bi-funnel me-1"></i><strong>{{ histScopeLabel }}</strong> 을(를) 바꾼 이력만 보입니다.
+          항목 단위 기록은 이 화면에서 저장한 이력부터 남습니다.
+        </div>
+
         <div v-if="!changeHistories.length" class="ins-empty">변경 이력이 없습니다.</div>
         <div
           v-for="h in changeHistories"
           :key="h.histId"
-          class="ins-card clickable"
-          :class="{ on: diffHistId === h.histId }"
+          class="ins-card"
+          :class="{ clickable: h.snapshotJson, on: diffHistId === h.histId }"
+          :title="h.snapshotJson ? '이 버전 값과 비교' : '이 버전은 저장된 값이 없어 비교할 수 없습니다'"
           @click="$emit('toggle-diff', h)"
         >
           <div class="d-flex align-items-center gap-1 mb-1">
             <span class="b2b-badge b2b-badge-secondary">v{{ h.versionNo }}</span>
             <span class="b2b-badge" :class="changeBadge(h.changeType)">{{ changeTypeName(h.changeType) }}</span>
-            <i class="bi bi-layers-half ms-auto text-muted" title="이 버전과 비교"></i>
+            <i
+              v-if="h.snapshotJson"
+              class="bi bi-layers-half ms-auto"
+              :class="diffHistId === h.histId ? 'text-primary' : 'text-muted'"
+            ></i>
+            <span v-else class="nodiff ms-auto">비교 불가</span>
           </div>
           <div class="note">{{ h.changeNote }}</div>
           <div class="meta">{{ h.regId }} · {{ h.regDt }}</div>
@@ -115,7 +126,7 @@
 
         <div v-if="diffHistId" class="ins-note mt-2">
           <i class="bi bi-info-circle me-1"></i>
-          폼에 해당 버전의 값이 회색 취소선으로 겹쳐 표시됩니다.
+          기본정보 폼에서 이 버전과 다른 값이 회색 취소선으로 함께 표시됩니다.
         </div>
       </template>
     </div>
@@ -137,6 +148,8 @@ export default {
     conflictHistories: { type: Array, default: () => [] },
     changeHistories: { type: Array, default: () => [] },
     histScope: { type: String, default: 'record' },
+    /** '이 항목' 범위일 때 무엇으로 거르는지 (기본정보 / 항목명 / 선택 n개) */
+    histScopeLabel: { type: String, default: '' },
     diffHistId: { type: [Number, String], default: null },
     readonly: { type: Boolean, default: false }
   },
@@ -309,6 +322,11 @@ export default {
 
 .note {
   line-height: 1.5;
+}
+
+.nodiff {
+  font-size: 10px;
+  color: var(--b2b-color-text-secondary, #adb5bd);
 }
 
 .meta {

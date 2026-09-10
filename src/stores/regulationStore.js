@@ -34,11 +34,45 @@ const dateOnly = (v) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+/**
+ * 변경이력 비교용 스냅샷 = 그 버전의 기본정보 값.
+ * 편집 폼(master)과 같은 모양으로 남겨야 폼 옆에 그대로 겹쳐 비교할 수 있다.
+ */
+export function snapshotOf(record) {
+  const codes = (type) => (record.targets || []).filter((tg) => tg.targetType === type).map((tg) => tg.targetCd)
+  return {
+    title: record.title,
+    fieldCd: record.fieldCd,
+    markNm: record.markNm || '',
+    authority: record.authority || '',
+    url: record.url || '',
+    summary: record.summary || '',
+    statusCd: record.statusCd,
+    effectiveDt: dateOnly(record.effectiveDt),
+    divisionCds: codes('DIVISION'),
+    productGroupCds: codes('PRODUCT_GROUP'),
+    productCds: codes('PRODUCT'),
+    regionCds: codes('REGION'),
+    countryCds: codes('COUNTRY')
+  }
+}
+
+/**
+ * 각 레코드의 최신 버전 이력에 현재 값을 스냅샷으로 붙인다(= 그 버전의 실제 값).
+ * 목업의 과거 버전은 값이 없으므로 비교 불가로 남고, 이후 저장분부터는 저장 시점에 채워진다.
+ */
+function withLatestSnapshots(hists, records) {
+  return hists.map((h) => {
+    const r = records.find((x) => x.regInfoId === h.regInfoId)
+    return r && r.versionNo === h.versionNo ? { ...h, snapshotJson: JSON.stringify(snapshotOf(r)) } : { ...h }
+  })
+}
+
 export const useRegulationStore = defineStore('regulation', {
   state: () => ({
     records: regInfoList.map((r) => ({ ...r, targets: [...r.targets] })),
     items: regItemList.map((it) => ({ ...it })),
-    histories: [...regHistList],
+    histories: withLatestSnapshots(regHistList, regInfoList),
     conflicts: [...regConflictList],
     attachments: JSON.parse(JSON.stringify(attachMock)),
 
@@ -110,12 +144,13 @@ export const useRegulationStore = defineStore('regulation', {
     /**
      * 레코드 1건 저장. 수정은 새 버전으로 올린다.
      * 항목(regItem)은 레코드에 종속되므로 여기서 함께 커밋한다.
-     * @param {object} payload   { master, targets, items, attachFiles }
+     * @param {object} payload   { master, targets, items, attachFiles, changes }
+     *                           changes = { masterChanged, changedItemIds } (변경이력 '이 항목' 범위용)
      * @param {Array}  decisions 충돌 조치 목록
      * @returns {object} 저장된 레코드
      */
     saveRecord(payload, decisions = []) {
-      const { master, targets, items, attachFiles } = payload
+      const { master, targets, items, attachFiles, changes } = payload
       const stamp = stampNow()
       const isNew = !master.regInfoId
 
@@ -142,6 +177,8 @@ export const useRegulationStore = defineStore('regulation', {
         this.records.push(saved)
       } else {
         const idx = this.records.findIndex((r) => r.regInfoId === master.regInfoId)
+        // 덮어쓰기 전에 직전 버전 값을 그 버전 이력에 남긴다 (스냅샷 없이 들어온 이력 대비)
+        this.fillSnapshot(this.records[idx])
         saved = {
           ...this.records[idx],
           title: master.title,
@@ -161,7 +198,7 @@ export const useRegulationStore = defineStore('regulation', {
         this.records.splice(idx, 1, saved)
       }
 
-      this.replaceItems(saved.regInfoId, items || [])
+      const idMap = this.replaceItems(saved.regInfoId, items || [])
       this.attachments[saved.regInfoId] = [...(attachFiles || [])]
 
       this.histories.push({
@@ -175,7 +212,15 @@ export const useRegulationStore = defineStore('regulation', {
             ? '최초 등록'
             : '내용 수정',
         regId: 'me',
-        regDt: stamp
+        regDt: stamp,
+        // 이 버전의 기본정보 값. 변경이력 카드를 누르면 폼에 겹쳐 비교한다
+        snapshotJson: JSON.stringify(snapshotOf(saved)),
+        // 무엇이 바뀌었는지. 변경이력 '이 항목' 범위가 이것으로 거른다.
+        // 신규 항목은 저장하면서 id 가 바뀌므로 채번 결과로 옮겨 적는다.
+        masterChanged: isNew || !!changes?.masterChanged,
+        changedItemIds: isNew
+          ? [...idMap.values()]
+          : (changes?.changedItemIds || []).map((id) => idMap.get(id)).filter((id) => id != null)
       })
 
       this.pushConflictHistory(decisions, null, saved, stamp)
@@ -202,6 +247,13 @@ export const useRegulationStore = defineStore('regulation', {
         regInfoId
       }))
       this.items = this.items.filter((it) => it.regInfoId !== regInfoId).concat(next)
+      return idMap
+    },
+
+    /** 레코드 현재 버전의 이력에 스냅샷이 없으면 지금 값으로 채운다 */
+    fillSnapshot(record) {
+      const h = this.histories.find((x) => x.regInfoId === record.regInfoId && x.versionNo === record.versionNo)
+      if (h && !h.snapshotJson) h.snapshotJson = JSON.stringify(snapshotOf(record))
     },
 
     /* ---------------- 충돌 이력 ---------------- */
@@ -233,6 +285,7 @@ export const useRegulationStore = defineStore('regulation', {
         if (c.decisionCd === 'MERGE') {
           const idx = this.records.findIndex((r) => r.regInfoId === c.existRecord.regInfoId)
           if (idx < 0) return
+          this.fillSnapshot(this.records[idx])
           const merged = {
             ...this.records[idx],
             statusCd: 'EXPIRED',
@@ -247,7 +300,10 @@ export const useRegulationStore = defineStore('regulation', {
             changeType: 'CONFLICT_RESOLVE',
             changeNote: `${saved.regNo} 로 흡수되어 폐지 처리`,
             regId: 'me',
-            regDt: stamp
+            regDt: stamp,
+            snapshotJson: JSON.stringify(snapshotOf(merged)),
+            masterChanged: true,
+            changedItemIds: []
           })
         } else if (c.decisionCd === 'KEEP_BOTH') {
           this.histories.push({
@@ -268,15 +324,20 @@ export const useRegulationStore = defineStore('regulation', {
       const idx = this.records.findIndex((r) => r.regInfoId === regInfoId)
       if (idx < 0) return
       const r = this.records[idx]
-      this.records.splice(idx, 1, { ...r, statusCd: 'EXPIRED', versionNo: r.versionNo + 1 })
+      const next = { ...r, statusCd: 'EXPIRED', versionNo: r.versionNo + 1 }
+      this.fillSnapshot(r)
+      this.records.splice(idx, 1, next)
       this.histories.push({
         histId: Date.now(),
         regInfoId,
-        versionNo: r.versionNo + 1,
+        versionNo: next.versionNo,
         changeType: 'DELETE',
         changeNote: '사용자 요청으로 폐지',
         regId: 'me',
-        regDt: stampNow()
+        regDt: stampNow(),
+        snapshotJson: JSON.stringify(snapshotOf(next)),
+        masterChanged: true,
+        changedItemIds: []
       })
     }
   }

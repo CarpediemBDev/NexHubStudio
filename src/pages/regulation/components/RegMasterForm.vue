@@ -4,13 +4,14 @@
       <div class="col-12 col-md-8">
         <label class="form-label-sm">규제 제목 <span class="text-danger">*</span></label>
         <input v-model="form.title" :readonly="readonly" class="form-control form-control-sm" placeholder="예: KC 안전확인 (전기용품 및 생활용품 안전관리법)" />
-        <div v-if="diff && diff.title !== form.title" class="diff-old">{{ diff.title }}</div>
+        <div v-if="diffOf('title')" class="diff-old">{{ diffOf('title') }}</div>
       </div>
       <div class="col-6 col-md-4">
         <label class="form-label-sm">분야 <span class="text-danger">*</span></label>
         <select v-model="form.fieldCd" :disabled="readonly" class="form-select form-select-sm">
           <option v-for="f in fieldCodes" :key="f.code" :value="f.code">{{ f.name }}</option>
         </select>
+        <div v-if="diffOf('fieldCd')" class="diff-old">{{ diffOf('fieldCd') }}</div>
       </div>
 
       <!--
@@ -28,10 +29,12 @@
             <div class="col-12 col-md-6">
               <label class="form-label-sm">권역 <span class="text-muted">(멀티)</span></label>
               <MultiSelect v-model="form.regionCds" :options="regionCodes" label-key="name" value-key="code" placeholder="권역 선택" :disabled="readonly" />
+              <div v-if="diffOf('regionCds')" class="diff-old">{{ diffOf('regionCds') }}</div>
             </div>
             <div class="col-12 col-md-6">
               <label class="form-label-sm">국가 <span class="text-muted">(미선택 시 권역 전체)</span></label>
               <MultiSelect v-model="form.countryCds" :options="countryOptions" label-key="name" value-key="code" placeholder="국가 선택" :disabled="readonly" />
+              <div v-if="diffOf('countryCds')" class="diff-old">{{ diffOf('countryCds') }}</div>
             </div>
           </div>
         </div>
@@ -48,14 +51,17 @@
             <div class="col-12 col-md-4">
               <label class="form-label-sm">사업부</label>
               <MultiSelect v-model="form.divisionCds" :options="divisionCodes" label-key="name" value-key="code" placeholder="사업부 선택" :disabled="readonly" />
+              <div v-if="diffOf('divisionCds')" class="diff-old">{{ diffOf('divisionCds') }}</div>
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label-sm">제품군</label>
               <MultiSelect v-model="form.productGroupCds" :options="productGroupOptions" label-key="name" value-key="code" placeholder="제품군 선택" :disabled="readonly" />
+              <div v-if="diffOf('productGroupCds')" class="diff-old">{{ diffOf('productGroupCds') }}</div>
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label-sm">제품 <span class="text-muted">(미선택 시 전체)</span></label>
               <MultiSelect v-model="form.productCds" :options="productOptions" label-key="name" value-key="code" placeholder="제품 선택" :disabled="readonly" />
+              <div v-if="diffOf('productCds')" class="diff-old">{{ diffOf('productCds') }}</div>
             </div>
           </div>
         </div>
@@ -65,10 +71,12 @@
       <div class="col-12 col-md-6">
         <label class="form-label-sm">인증마크 / 표시</label>
         <input v-model="form.markNm" :readonly="readonly" class="form-control form-control-sm" placeholder="예: KC 마크 + 안전확인신고번호" />
+        <div v-if="diffOf('markNm')" class="diff-old">{{ diffOf('markNm') }}</div>
       </div>
       <div class="col-12 col-md-6">
         <label class="form-label-sm">소관 기관</label>
         <input v-model="form.authority" :readonly="readonly" class="form-control form-control-sm" placeholder="예: 국가기술표준원(KATS)" />
+        <div v-if="diffOf('authority')" class="diff-old">{{ diffOf('authority') }}</div>
       </div>
 
       <div class="col-12">
@@ -78,22 +86,26 @@
           <input v-model="form.url" :readonly="readonly" class="form-control form-control-sm" placeholder="https://" />
           <button type="button" class="btn btn-outline-secondary" :disabled="!form.url" @click="openUrl(form.url)">열기</button>
         </div>
+        <div v-if="diffOf('url')" class="diff-old">{{ diffOf('url') }}</div>
       </div>
 
       <div class="col-12 col-md-6">
         <label class="form-label-sm">시행일</label>
         <B2bDatePicker v-model="form.effectiveDt" placeholder="YYYY-MM-DD" :enable-time-picker="false" :show-presets="true" :disabled="readonly" />
+        <div v-if="diffOf('effectiveDt')" class="diff-old">{{ diffOf('effectiveDt') }}</div>
       </div>
       <div class="col-12 col-md-6">
         <label class="form-label-sm">상태</label>
         <select v-model="form.statusCd" :disabled="readonly" class="form-select form-select-sm">
           <option v-for="s in statusCodes" :key="s.code" :value="s.code">{{ s.name }}</option>
         </select>
+        <div v-if="diffOf('statusCd')" class="diff-old">{{ diffOf('statusCd') }}</div>
       </div>
 
       <div class="col-12">
         <label class="form-label-sm">요약 / 준수 요건</label>
         <textarea v-model="form.summary" :readonly="readonly" rows="3" class="form-control form-control-sm" placeholder="시험 → 신고 → 표시 등 실무 절차 요약"></textarea>
+        <div v-if="diffOf('summary')" class="diff-old">{{ diffOf('summary') }}</div>
       </div>
 
       <div class="col-12">
@@ -125,6 +137,30 @@ import {
   countryCodes,
   statusCodes
 } from '@/data/regulationMock'
+
+// 변경이력 비교에서 코드값을 이름으로 보여줄 마스터
+const DIFF_CODES = {
+  fieldCd: fieldCodes,
+  statusCd: statusCodes,
+  regionCds: regionCodes,
+  countryCds: countryCodes,
+  divisionCds: divisionCodes,
+  productGroupCds: productGroupCodes,
+  productCds: productCodes
+}
+
+const nameOf = (list, cd) => (list.find((c) => c.code === cd) || {}).name || cd
+
+const pad = (n) => String(n).padStart(2, '0')
+
+/** 날짜 선택기는 Date 를, 스냅샷은 'YYYY-MM-DD' 를 들고 있으므로 같은 모양으로 맞춰 비교한다 */
+const dateOnly = (v) => {
+  if (!v) return ''
+  if (typeof v === 'string') return v.slice(0, 10)
+  const d = new Date(v)
+  if (Number.isNaN(d.getTime())) return ''
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
 
 export default {
   name: 'RegMasterForm',
@@ -170,6 +206,26 @@ export default {
     },
     openUrl(url) {
       if (url) window.open(url, '_blank', 'noopener')
+    },
+    /**
+     * 변경이력에서 고른 버전의 값이 지금 폼과 다르면 그 옛 값을 표시용 문자열로 돌려준다.
+     * 같거나 비교 대상이 없으면 '' → 템플릿은 v-if 로 숨긴다.
+     */
+    diffOf(key) {
+      if (!this.diff || !(key in this.diff)) return ''
+      const norm = (v) => {
+        if (Array.isArray(v)) return [...v].sort().join(',')
+        if (key === 'effectiveDt') return dateOnly(v)
+        return String(v ?? '')
+      }
+      if (norm(this.diff[key]) === norm(this.form[key])) return ''
+
+      const old = this.diff[key]
+      const src = DIFF_CODES[key]
+      if (Array.isArray(old)) return old.length ? old.map((cd) => nameOf(src, cd)).join(', ') : '(없음)'
+      if (key === 'effectiveDt') return dateOnly(old) || '(없음)'
+      if (src) return nameOf(src, old)
+      return old || '(없음)'
     }
   }
 }
