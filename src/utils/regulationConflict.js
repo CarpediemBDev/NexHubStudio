@@ -15,6 +15,8 @@
  */
 
 import {
+  fieldCodes,
+  certCodes,
   regionCodes,
   countryCodes,
   divisionCodes,
@@ -24,14 +26,23 @@ import {
   standardCodes
 } from '@/data/regulationMock'
 
-/** 축 정의: 상위 타입 → 하위 타입 순서. 마지막 타입이 leaf */
+/**
+ * 축 정의: 상위 타입 → 하위 타입 순서. 마지막 타입이 leaf.
+ *
+ * GEO / ORG 는 적용대상 테이블(REG_INFO_TARGET)에서,
+ * RULE 은 정보관리항목 테이블(REG_INFO_ITEM)에서 값을 읽는다.
+ * 소스가 다르므로 축에 source 를 명시한다.
+ */
 export const AXES = [
-  { key: 'GEO', name: '지역', types: ['REGION', 'COUNTRY'] },
-  { key: 'ORG', name: '제품', types: ['DIVISION', 'PRODUCT_GROUP', 'PRODUCT'] },
-  { key: 'RULE', name: '규제/규격', types: ['REGULATION', 'STANDARD'] }
+  { key: 'GEO', name: '지역', source: 'target', types: ['REGION', 'COUNTRY'] },
+  { key: 'ORG', name: '제품', source: 'target', types: ['DIVISION', 'PRODUCT_GROUP', 'PRODUCT'] },
+  { key: 'RULE', name: '규제/규격/인증서', source: 'item', types: ['REGULATION', 'STANDARD', 'CERT'] }
 ]
 
 const CODE_SET = {
+  // FIELD 는 축(AXES)에 속하지 않지만 codeName() 으로 이름을 얻기 위해 함께 등록한다.
+  FIELD: fieldCodes,
+  CERT: certCodes,
   REGION: regionCodes,
   COUNTRY: countryCodes,
   DIVISION: divisionCodes,
@@ -63,6 +74,22 @@ export function targetNames(record, targetType) {
   return targetCodes(record, targetType).map((cd) => codeName(targetType, cd))
 }
 
+/** 정보관리항목(REG_INFO_ITEM) 에서 구분별 코드 뽑기 */
+export function itemCodes(record, itemTypeCd) {
+  return (record.items || [])
+    .filter((it) => it.itemTypeCd === itemTypeCd)
+    .map((it) => it.itemCd)
+}
+
+/** 축의 source 에 따라 적용대상 / 항목 중 맞는 쪽에서 코드를 읽는다 */
+export function axisCodes(record, axis, type) {
+  return axis.source === 'item' ? itemCodes(record, type) : targetCodes(record, type)
+}
+
+export function axisNames(record, axis, type) {
+  return axisCodes(record, axis, type).map((cd) => codeName(type, cd))
+}
+
 /** 상위 코드 하나를 leaf 코드 집합으로 전개 */
 function expandToLeaf(axis, targetType, code) {
   const leafType = axis.types[axis.types.length - 1]
@@ -86,13 +113,13 @@ function expandToLeaf(axis, targetType, code) {
  */
 export function leafScope(record, axis) {
   const leafType = axis.types[axis.types.length - 1]
-  const leafSelected = targetCodes(record, leafType)
+  const leafSelected = axisCodes(record, axis, leafType)
   if (leafSelected.length > 0) return new Set(leafSelected)
 
   const set = new Set()
   for (let i = axis.types.length - 2; i >= 0; i -= 1) {
     const type = axis.types[i]
-    const codes = targetCodes(record, type)
+    const codes = axisCodes(record, axis, type)
     if (codes.length > 0) {
       codes.forEach((code) => expandToLeaf(axis, type, code).forEach((leaf) => set.add(leaf)))
       return set
@@ -121,7 +148,7 @@ function relate(a, b) {
 export function scopeText(record, axis) {
   const parts = []
   axis.types.forEach((type) => {
-    const names = targetNames(record, type)
+    const names = axisNames(record, axis, type)
     if (names.length > 0) parts.push(names.join(', '))
   })
   return parts.length ? parts.join(' > ') : '전체'

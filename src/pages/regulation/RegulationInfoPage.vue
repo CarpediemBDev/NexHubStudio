@@ -118,12 +118,15 @@
         <span class="fw-bold text-theme-primary">
           <i class="bi bi-shield-check text-primary me-1"></i>규제 정보 목록
         </span>
-        <span class="b2b-badge b2b-badge-secondary">{{ gridRows.length }}건</span>
+        <span class="b2b-badge b2b-badge-secondary">{{ gridCount }}건</span>
         <span v-if="selectedRecord" class="b2b-text-xs text-muted ms-1">
           선택: <strong>{{ selectedRecord.regNo }}</strong> · v{{ selectedRecord.versionNo }}
         </span>
 
         <div class="ms-auto d-flex align-items-center gap-2">
+          <button class="btn-b2b-action" :disabled="!selectedRecord" @click="openDetail">
+            <i class="bi bi-file-text text-secondary me-1"></i>상세
+          </button>
           <button class="btn-b2b-action" @click="openCreate">
             <i class="bi bi-plus-lg text-success me-1"></i>신규 등록
           </button>
@@ -141,6 +144,34 @@
           </button>
         </div>
       </div>
+
+      <!-- 국가 필터 디자인 비교 (임시). 하나로 정하면 이 줄과 안 쓰는 variant 를 지운다 -->
+      <div class="design-switch px-3 py-1 border-bottom">
+        <span class="b2b-text-xs text-theme-secondary"><i class="bi bi-palette me-1"></i>국가 필터 디자인</span>
+        <div class="ui-mode-toggle">
+          <button
+            v-for="v in FILTER_VARIANTS"
+            :key="v.key"
+            type="button"
+            :class="{ on: filterVariant === v.key }"
+            :title="v.desc"
+            @click="setFilterVariant(v.key)"
+          >
+            {{ v.label }}
+          </button>
+        </div>
+        <span class="b2b-text-xs text-muted d-none d-lg-inline">{{ currentVariantDesc }}</span>
+      </div>
+
+      <!-- 국가별 필터: 그리드 국가 컬럼의 컬럼 필터를 켜고 끈다 (다중 선택, 헤더 필터와 동기화) -->
+      <CountryFilterBar
+        :variant="filterVariant"
+        :options="countryChipOptions"
+        :selected="countryChips"
+        :total-count="filteredRecords.length"
+        :regions="regionCodes"
+        @update:selected="setCountryChips"
+      />
 
       <div class="b2b-card-body p-2">
         <RealGridCommonJs
@@ -162,296 +193,13 @@
       </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- 등록/수정 모달                                                 -->
-    <!-- ============================================================ -->
-    <div v-if="formOpen" class="modal-mask" @click.self="formOpen = false">
-      <div class="modal-box modal-lg-box">
-        <div class="modal-head">
-          <i class="bi bi-shield-plus text-primary me-2"></i>
-          <span class="fw-bold">{{ form.regInfoId ? '규제 정보 수정' : '규제 정보 신규 등록' }}</span>
-          <span v-if="form.regInfoId" class="b2b-badge b2b-badge-secondary ms-2">v{{ form.versionNo }} → v{{ form.versionNo + 1 }}</span>
-          <button class="btn-b2b-action btn-compact ms-auto" @click="fillEuScenario">
-            <i class="bi bi-magic text-warning me-1"></i>충돌 시나리오 채우기
-          </button>
-          <button class="btn-close ms-2" @click="formOpen = false"></button>
-        </div>
-
-        <div class="modal-body-scroll">
-          <div class="row gx-3 gy-3">
-            <div class="col-12 col-md-8">
-              <label class="form-label-sm">규제 제목 <span class="text-danger">*</span></label>
-              <input v-model="form.title" class="form-control form-control-sm" placeholder="예: KC 안전확인 (전기용품 및 생활용품 안전관리법)" />
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label-sm">분야 <span class="text-danger">*</span></label>
-              <select v-model="form.fieldCd" class="form-select form-select-sm">
-                <option v-for="f in fieldCodes" :key="f.code" :value="f.code">{{ f.name }}</option>
-              </select>
-            </div>
-
-            <div class="col-12 col-md-6">
-              <label class="form-label-sm">규제 <span class="text-muted">(멀티)</span></label>
-              <MultiSelect v-model="form.regulationCds" :options="regulationCodes" label-key="name" value-key="code" placeholder="규제 선택" />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label-sm">규격 <span class="text-muted">(멀티 · 선택한 규제의 하위)</span></label>
-              <MultiSelect v-model="form.standardCds" :options="formStandardOptions" label-key="name" value-key="code" placeholder="규격 선택" />
-            </div>
-
-            <div class="col-12 col-md-4">
-              <label class="form-label-sm">사업부 <span class="text-muted">(멀티)</span></label>
-              <MultiSelect v-model="form.divisionCds" :options="divisionCodes" label-key="name" value-key="code" placeholder="사업부 선택" />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label-sm">제품군 <span class="text-muted">(멀티)</span></label>
-              <MultiSelect v-model="form.productGroupCds" :options="formProductGroupOptions" label-key="name" value-key="code" placeholder="제품군 선택" />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label-sm">제품 <span class="text-muted">(멀티 · 미선택 시 제품군 전체)</span></label>
-              <MultiSelect v-model="form.productCds" :options="formProductOptions" label-key="name" value-key="code" placeholder="제품 선택" />
-            </div>
-
-            <div class="col-12 col-md-6">
-              <label class="form-label-sm">권역 <span class="text-muted">(멀티)</span></label>
-              <MultiSelect v-model="form.regionCds" :options="regionCodes" label-key="name" value-key="code" placeholder="권역 선택" />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label-sm">국가 <span class="text-muted">(멀티 · 미선택 시 권역 전체)</span></label>
-              <MultiSelect v-model="form.countryCds" :options="formCountryOptions" label-key="name" value-key="code" placeholder="국가 선택" />
-            </div>
-
-            <div class="col-12 col-md-6">
-              <label class="form-label-sm">인증마크 / 표시</label>
-              <input v-model="form.markNm" class="form-control form-control-sm" placeholder="예: KC 마크 + 안전확인신고번호" />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label-sm">소관 기관</label>
-              <input v-model="form.authority" class="form-control form-control-sm" placeholder="예: 국가기술표준원(KATS)" />
-            </div>
-
-            <div class="col-12">
-              <label class="form-label-sm">근거 URL</label>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                <input v-model="form.url" class="form-control form-control-sm" placeholder="https://" />
-                <button class="btn btn-outline-secondary" :disabled="!form.url" @click.prevent="openUrl(form.url)">열기</button>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-6">
-              <label class="form-label-sm">시행일</label>
-              <B2bDatePicker v-model="form.effectiveDt" placeholder="YYYY-MM-DD" :enable-time-picker="false" :show-presets="true" />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label-sm">상태</label>
-              <select v-model="form.statusCd" class="form-select form-select-sm">
-                <option v-for="s in statusCodes" :key="s.code" :value="s.code">{{ s.name }}</option>
-              </select>
-            </div>
-
-            <div class="col-12">
-              <label class="form-label-sm">요약 / 준수 요건</label>
-              <textarea v-model="form.summary" rows="3" class="form-control form-control-sm" placeholder="시험 → 신고 → 표시 등 실무 절차 요약"></textarea>
-            </div>
-
-            <div class="col-12">
-              <label class="form-label-sm">첨부 <span class="text-muted">(파일 관리 모듈의 파일그룹으로 연계)</span></label>
-              <div class="attach-box">
-                <div v-for="file in form.attachFiles" :key="file.fileId" class="attach-chip">
-                  <i class="bi bi-paperclip me-1"></i>{{ file.fileNm }}
-                  <span class="text-muted ms-1">{{ file.size }}</span>
-                  <i class="bi bi-x ms-1 text-danger" @click="removeAttach(file.fileId)"></i>
-                </div>
-                <button class="btn-b2b-action btn-compact" @click.prevent="addAttach">
-                  <i class="bi bi-upload me-1"></i>파일 추가
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-foot">
-          <span class="b2b-text-xs text-muted">
-            <i class="bi bi-info-circle me-1"></i>저장을 누르면 기존 레코드와의 상·하위 충돌을 먼저 검사합니다.
-          </span>
-          <div class="ms-auto d-flex gap-2">
-            <button class="btn-b2b-action" @click="formOpen = false">취소</button>
-            <button class="btn-b2b-primary" @click="checkAndSave">
-              <i class="bi bi-shield-check me-1"></i>충돌 검사 후 저장
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============================================================ -->
-    <!-- 충돌 확인 모달 (저장 직전)                                      -->
-    <!-- ============================================================ -->
-    <div v-if="conflictOpen" class="modal-mask" @click.self="conflictOpen = false">
-      <div class="modal-box modal-lg-box">
-        <div class="modal-head">
-          <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-          <span class="fw-bold">충돌 검사 결과</span>
-          <span class="b2b-badge b2b-badge-danger ms-2">{{ pendingConflicts.length }}건 충돌</span>
-          <button class="btn-close ms-auto" @click="conflictOpen = false"></button>
-        </div>
-
-        <div class="modal-body-scroll">
-          <div class="conflict-summary mb-3">
-            <div class="fw-semibold mb-1">
-              <i class="bi bi-box-arrow-in-down me-1 text-primary"></i>저장하려는 레코드
-            </div>
-            <div class="b2b-text-sm text-theme-secondary">
-              <span class="b2b-badge b2b-badge-outline me-1">{{ fieldName(form.fieldCd) }}</span>
-              <strong>{{ form.title || '(제목 없음)' }}</strong>
-              <div class="mt-1">
-                지역: <strong>{{ scopeOf(formAsRecord, 'GEO') }}</strong> ·
-                제품: <strong>{{ scopeOf(formAsRecord, 'ORG') }}</strong> ·
-                규제/규격: <strong>{{ scopeOf(formAsRecord, 'RULE') }}</strong>
-              </div>
-            </div>
-          </div>
-
-          <table class="table table-sm align-middle conflict-table">
-            <thead>
-              <tr>
-                <th style="width: 120px">충돌 유형</th>
-                <th style="width: 130px">기존 규제번호</th>
-                <th>기존 범위</th>
-                <th>신규 범위</th>
-                <th style="width: 200px">조치</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(c, idx) in pendingConflicts" :key="idx">
-                <td>
-                  <span class="b2b-badge" :class="conflictBadge(c.conflictType)">{{ conflictName(c.conflictType) }}</span>
-                  <div class="b2b-text-xs text-muted mt-1">{{ c.mainAxis.axisName }} 축</div>
-                </td>
-                <td>
-                  <div class="fw-semibold">{{ c.existRecord.regNo }}</div>
-                  <div class="b2b-text-xs text-muted text-truncate" :title="c.existRecord.title">{{ c.existRecord.title }}</div>
-                </td>
-                <td class="b2b-text-xs">
-                  <div v-for="d in c.axisDetails" :key="d.axisKey">
-                    <span class="text-muted">{{ d.axisName }}:</span> {{ d.existScopeTxt }}
-                  </div>
-                </td>
-                <td class="b2b-text-xs">
-                  <div v-for="d in c.axisDetails" :key="d.axisKey">
-                    <span class="text-muted">{{ d.axisName }}:</span>
-                    <span :class="relationClass(d.relation)">{{ d.newScopeTxt }}</span>
-                  </div>
-                </td>
-                <td>
-                  <select v-model="c.decisionCd" class="form-select form-select-sm">
-                    <option v-for="d in decisionCodes" :key="d.code" :value="d.code">{{ d.name }}</option>
-                  </select>
-                  <div class="b2b-text-xs text-muted mt-1">{{ c.recommend.text }}</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="alert alert-light border b2b-text-xs mb-0">
-            <strong>판정 규칙</strong> — 권역&gt;국가, 사업부&gt;제품군&gt;제품, 규제&gt;규격 계층을 최하위 단위로 전개해 비교합니다.
-            신규가 기존을 포함하면 <span class="b2b-badge b2b-badge-warning">신규가 상위(PARENT)</span>,
-            기존이 신규를 포함하면 <span class="b2b-badge b2b-badge-primary">신규가 하위(CHILD)</span>,
-            완전히 같으면 <span class="b2b-badge b2b-badge-danger">동일범위(SAME)</span>,
-            일부만 겹치면 <span class="b2b-badge b2b-badge-secondary">부분중복(OVERLAP)</span> 입니다.
-          </div>
-        </div>
-
-        <div class="modal-foot">
-          <span class="b2b-text-xs text-muted">
-            선택한 조치는 <strong>충돌 이력 테이블</strong>에 그대로 적재됩니다.
-          </span>
-          <div class="ms-auto d-flex gap-2">
-            <button class="btn-b2b-action" @click="conflictOpen = false">돌아가서 수정</button>
-            <button class="btn-b2b-danger" @click="cancelSave">등록 취소</button>
-            <button class="btn-b2b-primary" @click="commitSave">
-              <i class="bi bi-check2 me-1"></i>조치 반영 후 저장
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============================================================ -->
-    <!-- 이력 모달                                                      -->
-    <!-- ============================================================ -->
-    <div v-if="historyOpen" class="modal-mask" @click.self="historyOpen = false">
-      <div class="modal-box">
-        <div class="modal-head">
-          <i class="bi bi-clock-history text-warning me-2"></i>
-          <span class="fw-bold">{{ selectedRecord?.regNo }} 이력</span>
-          <div class="btn-group btn-group-sm ms-3">
-            <button class="btn btn-sm" :class="historyTab === 'change' ? 'btn-primary' : 'btn-outline-secondary'" @click="historyTab = 'change'">
-              변경 이력
-            </button>
-            <button class="btn btn-sm" :class="historyTab === 'conflict' ? 'btn-primary' : 'btn-outline-secondary'" @click="historyTab = 'conflict'">
-              충돌 이력
-            </button>
-          </div>
-          <button class="btn-close ms-auto" @click="historyOpen = false"></button>
-        </div>
-
-        <div class="modal-body-scroll">
-          <table v-if="historyTab === 'change'" class="table table-sm align-middle">
-            <thead>
-              <tr><th style="width:70px">버전</th><th style="width:130px">구분</th><th>변경 사유</th><th style="width:110px">변경자</th><th style="width:140px">변경일시</th></tr>
-            </thead>
-            <tbody>
-              <tr v-for="h in recordHistories" :key="h.histId">
-                <td><span class="b2b-badge b2b-badge-secondary">v{{ h.versionNo }}</span></td>
-                <td><span class="b2b-badge" :class="changeBadge(h.changeType)">{{ changeTypeName(h.changeType) }}</span></td>
-                <td>{{ h.changeNote }}</td>
-                <td>{{ h.regId }}</td>
-                <td class="b2b-text-xs text-muted">{{ h.regDt }}</td>
-              </tr>
-              <tr v-if="recordHistories.length === 0"><td colspan="5" class="text-center text-muted py-4">변경 이력이 없습니다.</td></tr>
-            </tbody>
-          </table>
-
-          <table v-else class="table table-sm align-middle">
-            <thead>
-              <tr><th style="width:110px">유형</th><th style="width:130px">상대 레코드</th><th>범위 비교</th><th style="width:170px">조치</th><th style="width:140px">판정일시</th></tr>
-            </thead>
-            <tbody>
-              <tr v-for="c in recordConflicts" :key="c.conflictId">
-                <td><span class="b2b-badge" :class="conflictBadge(c.conflictType)">{{ conflictName(c.conflictType) }}</span></td>
-                <td class="b2b-text-xs">
-                  <div>신규 {{ c.newRegNo }}</div>
-                  <div class="text-muted">기존 {{ c.existRegNo }}</div>
-                </td>
-                <td class="b2b-text-xs">
-                  <div><span class="text-muted">신규:</span> {{ c.newScopeTxt }}</div>
-                  <div><span class="text-muted">기존:</span> {{ c.existScopeTxt }}</div>
-                </td>
-                <td class="b2b-text-xs">
-                  <div class="fw-semibold">{{ decisionName(c.decisionCd) }}</div>
-                  <div class="text-muted">{{ c.decisionNote }}</div>
-                </td>
-                <td class="b2b-text-xs text-muted">{{ c.detectDt }}</td>
-              </tr>
-              <tr v-if="recordConflicts.length === 0"><td colspan="5" class="text-center text-muted py-4">충돌 이력이 없습니다.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="modal-foot">
-          <div class="ms-auto"><button class="btn-b2b-action" @click="historyOpen = false">닫기</button></div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
-import MultiSelect from '@/components/MultiSelect.vue'
 import B2bDatePicker from '@/components/common/B2bDatePicker.vue'
+import CountryFilterBar from './components/CountryFilterBar.vue'
 import { showToast } from '@/utils/toastUtil.js'
 import {
   fieldCodes,
@@ -461,16 +209,11 @@ import {
   regionCodes,
   countryCodes,
   regulationCodes,
-  standardCodes,
-  statusCodes,
-  conflictTypes,
-  decisionCodes,
-  regInfoList,
-  regHistList,
-  regConflictList,
-  attachMock
+  statusCodes
 } from '@/data/regulationMock'
-import { detectConflicts, AXES, scopeText, targetNames } from '@/utils/regulationConflict'
+import { targetNames } from '@/utils/regulationConflict'
+import { useRegulationStore } from '@/stores/regulationStore'
+import { itemSummary } from '@/utils/regulationTree'
 
 const STATUS_STYLE = {
   ACTIVE: ['#198754', '#fff'],
@@ -479,31 +222,40 @@ const STATUS_STYLE = {
   EXPIRED: ['#adb5bd', '#fff']
 }
 
-const emptyForm = () => ({
-  regInfoId: null,
-  regNo: '',
-  title: '',
-  fieldCd: 'SAFETY',
-  markNm: '',
-  authority: '',
-  url: '',
-  summary: '',
-  statusCd: 'DRAFT',
-  versionNo: 0,
-  effectiveDt: '',
-  regulationCds: [],
-  standardCds: [],
-  divisionCds: [],
-  productGroupCds: [],
-  productCds: [],
-  regionCds: [],
-  countryCds: [],
-  attachFiles: []
-})
+const NO_COUNTRY = '__NONE__'
+// 국가 필터 디자인 후보. 같은 데이터·같은 그리드 필터를 모양만 바꿔 보여준다
+const FILTER_VARIANTS = [
+  { key: 'more', label: 'A 더보기', desc: '건수 상위 20개만 펼쳐 두고 나머지는 더보기로 연다' },
+  { key: 'vscroll', label: 'B 세로 스크롤', desc: '2줄 높이로 고정하고 안에서 세로 스크롤' },
+  { key: 'hscroll', label: 'C 가로 스크롤', desc: '한 줄 고정, 휠로 가로 이동, 양끝이 흐려져 더 있음을 알림' },
+  { key: 'carousel', label: 'D 캐러셀', desc: '한 줄 고정, ◀ ▶ 로 한 화면씩 넘기고 페이지 표시' },
+  { key: 'region', label: 'E 권역 탭', desc: '권역 탭을 고르면 그 권역 국가만. 선택 수는 탭에 배지로' },
+  { key: 'panel', label: 'F 드롭다운', desc: '버튼 하나 + 권역별 체크박스 패널. 선택한 국가는 태그로' }
+]
+const VARIANT_KEY = 'regInfo.countryFilterVariant'
+
+function loadVariant() {
+  try {
+    const v = localStorage.getItem(VARIANT_KEY)
+    return FILTER_VARIANTS.some((it) => it.key === v) ? v : 'more'
+  } catch (e) {
+    return 'more'
+  }
+}
+// 국가 필터를 거는 컬럼. 화면엔 "한국 외 1" 요약이 보이고, 판정은 countryCds 필드로 한다.
+const COUNTRY_COL = 'countryTxt'
+
+// 컬럼 헤더 묶음. gridColumns 의 컬럼 이름을 그대로 배치한다.
+const COLUMN_LAYOUT = [
+  'statusCd', 'regNo', 'title', 'itemTxt', 'itemCnt', 'fieldNm', 'markNm',
+  { name: 'orgGroup', direction: 'horizontal', header: { text: '적용 제품' }, items: ['divisionTxt', 'productGroupTxt', 'productTxt'] },
+  { name: 'geoGroup', direction: 'horizontal', header: { text: '적용 지역' }, items: ['regionTxt', COUNTRY_COL] },
+  'url', 'attachCnt', 'conflictCnt', 'versionNo', 'effectiveDt', 'modDt'
+]
 
 export default {
   name: 'RegulationInfoPage',
-  components: { RealGridCommonJs, MultiSelect, B2bDatePicker },
+  components: { RealGridCommonJs, B2bDatePicker, CountryFilterBar },
   data() {
     return {
       fieldCodes,
@@ -513,13 +265,10 @@ export default {
       regionCodes,
       countryCodes,
       regulationCodes,
-      standardCodes,
       statusCodes,
-      decisionCodes,
 
-      records: regInfoList.map((r) => ({ ...r, targets: [...r.targets] })),
-      histories: [...regHistList],
-      conflicts: [...regConflictList],
+      // 데이터는 등록/수정 페이지와 공유해야 하므로 스토어를 단일 출처로 쓴다.
+      store: useRegulationStore(),
 
       filters: {
         keyword: '',
@@ -536,26 +285,24 @@ export default {
         onlyConflict: false
       },
       appliedFilters: null,
+      // 국가 칩 선택값 = 국가 컬럼에서 활성화된 필터 이름. 비어 있으면 전체
+      countryChips: [],
+      FILTER_VARIANTS,
+      filterVariant: loadVariant(),
+      // 그리드 필터까지 적용된 뒤 화면에 보이는 건수
+      gridCount: 0,
 
       gridView: null,
       dataProvider: null,
       selectedRegInfoId: null,
-
-      formOpen: false,
-      form: emptyForm(),
-      pendingConflicts: [],
-      conflictOpen: false,
-
-      historyOpen: false,
-      historyTab: 'change',
 
       gridFields: [
         { fieldName: 'regInfoId', dataType: 'number' },
         { fieldName: 'statusCd', dataType: 'text' },
         { fieldName: 'regNo', dataType: 'text' },
         { fieldName: 'title', dataType: 'text' },
-        { fieldName: 'regulationTxt', dataType: 'text' },
-        { fieldName: 'standardTxt', dataType: 'text' },
+        { fieldName: 'itemTxt', dataType: 'text' },
+        { fieldName: 'itemCnt', dataType: 'number' },
         { fieldName: 'fieldNm', dataType: 'text' },
         { fieldName: 'markNm', dataType: 'text' },
         { fieldName: 'divisionTxt', dataType: 'text' },
@@ -563,6 +310,8 @@ export default {
         { fieldName: 'productTxt', dataType: 'text' },
         { fieldName: 'regionTxt', dataType: 'text' },
         { fieldName: 'countryTxt', dataType: 'text' },
+        // 적용 국가 코드 목록 '|KR|FR|' (미지정은 '|__NONE__|'). 국가 컬럼 필터가 이 값으로 판정한다.
+        { fieldName: 'countryCds', dataType: 'text' },
         { fieldName: 'url', dataType: 'text' },
         { fieldName: 'attachCnt', dataType: 'number' },
         { fieldName: 'conflictCnt', dataType: 'number' },
@@ -573,6 +322,15 @@ export default {
     }
   },
   computed: {
+    records() {
+      return this.store.records
+    },
+    histories() {
+      return this.store.histories
+    },
+    conflicts() {
+      return this.store.conflicts
+    },
     gridColumns() {
       return [
         {
@@ -593,28 +351,17 @@ export default {
         },
         { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' } },
         { name: 'title', fieldName: 'title', width: '260', header: { text: '규제명' }, styles: { textAlignment: 'near' } },
-        { name: 'standardTxt', fieldName: 'standardTxt', width: '210', header: { text: '규격' }, styles: { textAlignment: 'near' } },
+        { name: 'itemTxt', fieldName: 'itemTxt', width: '280', header: { text: '정보관리항목' }, styles: { textAlignment: 'near' } },
+        { name: 'itemCnt', fieldName: 'itemCnt', width: '70', header: { text: '항목수' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
         { name: 'fieldNm', fieldName: 'fieldNm', width: '100', header: { text: '분야' }, styles: { textAlignment: 'center' } },
         { name: 'markNm', fieldName: 'markNm', width: '170', header: { text: '인증마크/표시' }, styles: { textAlignment: 'near' } },
-        {
-          name: 'orgGroup',
-          header: { text: '적용 제품' },
-          direction: 'horizontal',
-          columns: [
-            { name: 'divisionTxt', fieldName: 'divisionTxt', width: '110', header: { text: '사업부' }, styles: { textAlignment: 'center' } },
-            { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '100', header: { text: '제품군' }, styles: { textAlignment: 'center' } },
-            { name: 'productTxt', fieldName: 'productTxt', width: '130', header: { text: '제품' }, styles: { textAlignment: 'center' } }
-          ]
-        },
-        {
-          name: 'geoGroup',
-          header: { text: '적용 지역' },
-          direction: 'horizontal',
-          columns: [
-            { name: 'regionTxt', fieldName: 'regionTxt', width: '100', header: { text: '권역' }, styles: { textAlignment: 'center' } },
-            { name: 'countryTxt', fieldName: 'countryTxt', width: '120', header: { text: '국가' }, styles: { textAlignment: 'center' } }
-          ]
-        },
+        // RealGrid2 는 columns 안에 columns 를 넣는 그룹을 만들지 않는다(자식 컬럼이 아예 안 생긴다).
+        // 컬럼은 평평하게 두고, "적용 제품 / 적용 지역" 헤더 묶음은 onGridInit 의 setColumnLayout 이 만든다.
+        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '110', header: { text: '사업부' }, styles: { textAlignment: 'center' } },
+        { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '100', header: { text: '제품군' }, styles: { textAlignment: 'center' } },
+        { name: 'productTxt', fieldName: 'productTxt', width: '130', header: { text: '제품' }, styles: { textAlignment: 'center' } },
+        { name: 'regionTxt', fieldName: 'regionTxt', width: '100', header: { text: '권역' }, styles: { textAlignment: 'center' } },
+        { name: 'countryTxt', fieldName: 'countryTxt', width: '120', header: { text: '국가' }, styles: { textAlignment: 'center' } },
         {
           name: 'url',
           fieldName: 'url',
@@ -660,7 +407,7 @@ export default {
             }
           }
         },
-        { name: 'versionNo', fieldName: 'versionNo', width: '70', header: { text: '버전' }, styles: { textAlignment: 'center' } },
+        { name: 'versionNo', fieldName: 'versionNo', width: '70', header: { text: '버전' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
         { name: 'effectiveDt', fieldName: 'effectiveDt', width: '100', header: { text: '시행일' }, styles: { textAlignment: 'center' } },
         { name: 'modDt', fieldName: 'modDt', width: '110', header: { text: '최종수정일' }, styles: { textAlignment: 'center' } }
       ]
@@ -676,8 +423,7 @@ export default {
             r.regNo,
             r.title,
             r.markNm,
-            ...targetNames(r, 'REGULATION'),
-            ...targetNames(r, 'STANDARD')
+            itemSummary(this.store.itemsOf(r.regInfoId))
           ].join(' ').toLowerCase()
           if (!hay.includes(kw)) return false
         }
@@ -685,7 +431,7 @@ export default {
         if (f.statusCd && r.statusCd !== f.statusCd) return false
         if (f.regionCd && !this.hasTarget(r, 'REGION', f.regionCd)) return false
         if (f.countryCd && !this.hasTarget(r, 'COUNTRY', f.countryCd)) return false
-        if (f.regulationCd && !this.hasTarget(r, 'REGULATION', f.regulationCd)) return false
+        if (f.regulationCd && !this.hasItem(r, 'REGULATION', f.regulationCd)) return false
         if (f.divisionCd && !this.hasTarget(r, 'DIVISION', f.divisionCd)) return false
         if (f.productGroupCd && !this.hasTarget(r, 'PRODUCT_GROUP', f.productGroupCd)) return false
         if (f.productCd && !this.hasTarget(r, 'PRODUCT', f.productCd)) return false
@@ -695,14 +441,41 @@ export default {
         return true
       })
     },
+    /**
+     * 칩 목록은 조회 결과(filteredRecords) 기준 건수로 만든다.
+     * 한 레코드가 여러 국가에 걸치면 각 국가에 한 번씩 센다.
+     * 재조회로 0건이 된 칩도 선택돼 있으면 남겨서 해제할 수 있게 한다.
+     */
+    countryChipOptions() {
+      const counts = {}
+      let noneCnt = 0
+      this.filteredRecords.forEach((r) => {
+        const codes = (r.targets || []).filter((tg) => tg.targetType === 'COUNTRY').map((tg) => tg.targetCd)
+        if (codes.length === 0) noneCnt++
+        new Set(codes).forEach((cd) => { counts[cd] = (counts[cd] || 0) + 1 })
+      })
+      const opts = countryCodes
+        .filter((c) => counts[c.code] || this.countryChips.includes(c.code))
+        .map((c) => ({ code: c.code, name: c.name, count: counts[c.code] || 0, parentCd: c.parentCd }))
+        // 건수 많은 순. 같으면 코드 테이블 순서(권역별)를 유지한다(sort 는 안정 정렬)
+        .sort((a, b) => b.count - a.count)
+      // parentCd 가 없으므로 필터 바는 이 칩을 '국가' 로 세지 않고 '미지정' 묶음에 둔다
+      if (noneCnt || this.countryChips.includes(NO_COUNTRY)) {
+        opts.push({ code: NO_COUNTRY, name: '국가 미지정', count: noneCnt, parentCd: null })
+      }
+      return opts
+    },
+    currentVariantDesc() {
+      return (FILTER_VARIANTS.find((v) => v.key === this.filterVariant) || {}).desc
+    },
     gridRows() {
       return this.filteredRecords.map((r) => ({
         regInfoId: r.regInfoId,
         statusCd: r.statusCd,
         regNo: r.regNo,
         title: r.title,
-        regulationTxt: this.summarize(targetNames(r, 'REGULATION')),
-        standardTxt: this.summarize(targetNames(r, 'STANDARD')),
+        itemTxt: itemSummary(this.store.itemsOf(r.regInfoId)),
+        itemCnt: this.store.itemsOf(r.regInfoId).length,
         fieldNm: this.fieldName(r.fieldCd),
         markNm: r.markNm,
         divisionTxt: this.summarize(targetNames(r, 'DIVISION')),
@@ -710,6 +483,7 @@ export default {
         productTxt: this.summarize(targetNames(r, 'PRODUCT')) || '전체',
         regionTxt: this.summarize(targetNames(r, 'REGION')),
         countryTxt: this.summarize(targetNames(r, 'COUNTRY')) || '전체',
+        countryCds: this.countryCdsOf(r),
         url: r.url,
         attachCnt: r.attachCnt,
         conflictCnt: this.conflictCountOf(r.regInfoId),
@@ -743,36 +517,23 @@ export default {
     filteredProductCodes() {
       if (!this.filters.productGroupCd) return productCodes
       return productCodes.filter((p) => p.parentCd === this.filters.productGroupCd)
-    },
-    formStandardOptions() {
-      if (!this.form.regulationCds.length) return standardCodes
-      return standardCodes.filter((s) => this.form.regulationCds.includes(s.parentCd))
-    },
-    formProductGroupOptions() {
-      if (!this.form.divisionCds.length) return productGroupCodes
-      return productGroupCodes.filter((pg) => this.form.divisionCds.includes(pg.parentCd))
-    },
-    formProductOptions() {
-      if (!this.form.productGroupCds.length) return productCodes
-      return productCodes.filter((p) => this.form.productGroupCds.includes(p.parentCd))
-    },
-    formCountryOptions() {
-      if (!this.form.regionCds.length) return countryCodes
-      return countryCodes.filter((c) => this.form.regionCds.includes(c.parentCd))
-    },
-    /** 폼 입력값을 REG_INFO + REG_INFO_TARGET 형태로 변환 (충돌 검사 입력) */
-    formAsRecord() {
-      const targets = []
-      const push = (targetType, codes) => codes.forEach((targetCd) => targets.push({ targetType, targetCd }))
-      push('REGULATION', this.form.regulationCds)
-      push('STANDARD', this.form.standardCds)
-      push('DIVISION', this.form.divisionCds)
-      push('PRODUCT_GROUP', this.form.productGroupCds)
-      push('PRODUCT', this.form.productCds)
-      push('REGION', this.form.regionCds)
-      push('COUNTRY', this.form.countryCds)
-      return { ...this.form, targets }
     }
+  },
+  watch: {
+    // 재조회로 행이 바뀌면 그리드가 setRows 한 뒤(필터 재적용 후) 건수를 다시 센다
+    gridRows() {
+      this.$nextTick(() => this.syncGridCount())
+    }
+  },
+  created() {
+    // 수정 페이지에서 돌아온 경우 검색조건을 복원한다
+    const ctx = this.store.listContext
+    if (ctx.filters) {
+      this.filters = { ...ctx.filters }
+      this.appliedFilters = { ...ctx.filters }
+      this.selectedRegInfoId = ctx.selectedRegInfoId
+    }
+    if (ctx.countryChips) this.countryChips = [...ctx.countryChips]
   },
   methods: {
     /* ---------------- 그리드 ---------------- */
@@ -783,7 +544,9 @@ export default {
       this.gridView = gridView
       this.dataProvider = dataProvider
 
-      gridView.setDisplayOptions({ rowHeight: 30 })
+      // 행 높이는 RealGridCommonJs 의 rowHeight prop 이 정한다(기본 32).
+      // 예전엔 여기서 30 으로 덮었는데, CSS 가 만든 셀 높이와 어긋나 셀렉터가 밀렸다.
+      // 바꿔야 하면 <RealGridCommonJs :row-height="..."> 로 준다.
       gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
         const row = dataProvider.getJsonRow(newRow)
         this.selectedRegInfoId = row ? row.regInfoId : null
@@ -791,6 +554,67 @@ export default {
       gridView.onCellDblClicked = () => {
         if (this.selectedRegInfoId) this.openEdit()
       }
+
+      gridView.setColumnLayout(COLUMN_LAYOUT)
+
+      this.setupCountryFilters()
+      // 헤더 필터 드롭다운에서 바꿔도 칩이 따라오게 한다
+      gridView.onFilteringChanged = (grid, column) => {
+        if (this.applyingChips || column?.name !== COUNTRY_COL) return
+        this.countryChips = grid.getActiveColumnFilters(COUNTRY_COL).map((f) => f.name)
+        this.syncGridCount()
+      }
+      // 목록에서 돌아온 경우 복원된 칩을 그리드에 반영
+      this.applyCountryChips()
+    },
+    /**
+     * 국가마다 컬럼 필터를 하나씩 등록해 둔다(기본 비활성).
+     * 같은 컬럼의 필터끼리는 OR 이라 여러 국가를 켜면 "이 중 하나라도 적용" 이 된다.
+     */
+    setupCountryFilters() {
+      const defs = [
+        ...countryCodes.map((c) => ({ name: c.code, text: c.name })),
+        { name: NO_COUNTRY, text: '국가 미지정' }
+      ]
+      this.gridView.setColumnFilters(
+        COUNTRY_COL,
+        defs.map((d) => ({
+          ...d,
+          callback: (ds, dataRow) => String(ds.getValue(dataRow, 'countryCds') || '').includes(`|${d.name}|`)
+        }))
+      )
+    },
+    applyCountryChips() {
+      const gv = this.gridView
+      if (!gv) return
+      const codes = [...this.countryChips]
+      // activate 호출이 onFilteringChanged 를 부르더라도 칩을 되덮지 않게 막는다
+      this.applyingChips = true
+      try {
+        gv.activateAllColumnFilters(COUNTRY_COL, false)
+        if (codes.length) gv.activateColumnFilters(COUNTRY_COL, codes, true)
+      } finally {
+        this.applyingChips = false
+      }
+      this.syncGridCount()
+    },
+    /** 필터·정렬이 반영된 화면 순서대로 regInfoId 를 뽑는다 (그룹 헤더 행은 제외) */
+    visibleRegInfoIds() {
+      const gv = this.gridView
+      if (!gv) return this.gridRows.map((r) => r.regInfoId)
+      const ids = []
+      for (let i = 0, n = gv.getItemCount(); i < n; i++) {
+        const dataRow = gv.getDataRow(i)
+        if (dataRow >= 0) ids.push(this.dataProvider.getValue(dataRow, 'regInfoId'))
+      }
+      return ids
+    },
+    syncGridCount() {
+      this.gridCount = this.visibleRegInfoIds().length
+    },
+    countryCdsOf(record) {
+      const codes = (record.targets || []).filter((tg) => tg.targetType === 'COUNTRY').map((tg) => tg.targetCd)
+      return `|${(codes.length ? codes : [NO_COUNTRY]).join('|')}|`
     },
     exportExcel() {
       if (!this.gridView) return
@@ -809,9 +633,28 @@ export default {
         effectiveFrom: '', effectiveTo: '', onlyConflict: false
       }
       this.appliedFilters = null
+      this.countryChips = []
+      this.applyCountryChips()
+    },
+    /** 필터 바가 넘긴 선택값을 그대로 그리드 컬럼 필터에 반영 */
+    setCountryChips(codes) {
+      this.countryChips = [...codes]
+      this.applyCountryChips()
+    },
+    setFilterVariant(key) {
+      this.filterVariant = key
+      try {
+        localStorage.setItem(VARIANT_KEY, key)
+      } catch (e) { /* 저장 못 해도 이번 화면에서는 동작 */ }
     },
     hasTarget(record, targetType, code) {
       return (record.targets || []).some((tg) => tg.targetType === targetType && tg.targetCd === code)
+    },
+    /** 규제/규격/인증서는 적용대상이 아니라 정보관리항목에 있다 */
+    hasItem(record, itemTypeCd, code) {
+      return this.store
+        .itemsOf(record.regInfoId)
+        .some((it) => it.itemTypeCd === itemTypeCd && it.itemCd === code)
     },
     conflictCountOf(regInfoId) {
       return this.conflicts.filter((c) => c.newRegInfoId === regInfoId || c.existRegInfoId === regInfoId).length
@@ -834,292 +677,92 @@ export default {
     fieldName(code) {
       return (fieldCodes.find((f) => f.code === code) || {}).name || code
     },
-    conflictName(code) {
-      return (conflictTypes.find((c) => c.code === code) || {}).name || code
-    },
-    decisionName(code) {
-      return (decisionCodes.find((d) => d.code === code) || {}).name || code
-    },
-    changeTypeName(code) {
-      return { INSERT: '신규 등록', UPDATE: '수정', DELETE: '삭제', CONFLICT_RESOLVE: '충돌 조치' }[code] || code
-    },
-    changeBadge(code) {
-      return {
-        INSERT: 'b2b-badge-success',
-        UPDATE: 'b2b-badge-primary',
-        DELETE: 'b2b-badge-danger',
-        CONFLICT_RESOLVE: 'b2b-badge-warning'
-      }[code] || 'b2b-badge-secondary'
-    },
-    conflictBadge(code) {
-      return {
-        SAME: 'b2b-badge-danger',
-        PARENT: 'b2b-badge-warning',
-        CHILD: 'b2b-badge-primary',
-        OVERLAP: 'b2b-badge-secondary'
-      }[code] || 'b2b-badge-secondary'
-    },
-    relationClass(rel) {
-      if (rel === 'SUPERSET') return 'text-warning fw-semibold'
-      if (rel === 'SUBSET') return 'text-primary fw-semibold'
-      if (rel === 'OVERLAP') return 'text-danger fw-semibold'
-      return ''
-    },
-    scopeOf(record, axisKey) {
-      const axis = AXES.find((a) => a.key === axisKey)
-      return scopeText(record, axis)
-    },
     openUrl(url) {
       if (url) window.open(url, '_blank', 'noopener')
     },
 
-    /* ---------------- 등록/수정 ---------------- */
+    /* ---------------- 목록 컨텍스트 ---------------- */
+    /**
+     * 페이지로 넘어가기 전에 목록의 상태를 스토어에 남긴다.
+     * 팝업일 때는 공짜로 유지되던 것들이라 페이지 전환에서는 직접 넘겨야 한다.
+     *   - filters       : 뒤로가기 시 검색조건 복원
+     *   - orderedIds    : 수정 화면의 "◀ 12 / 47 ▶" 레코드 이동
+     *
+     * 수정 화면 좌측 트리의 계층(규제 > 규격 > 인증서)은 PARENT_ITEM_ID 로
+     * 데이터에 들어 있으므로, 그룹핑 축을 따로 넘겨줄 필요가 없다.
+     */
+    saveListContext() {
+      this.store.setListContext({
+        filters: { ...this.filters },
+        countryChips: [...this.countryChips],
+        orderedIds: this.visibleRegInfoIds(),
+        selectedRegInfoId: this.selectedRegInfoId
+      })
+    },
+    goEditPage(name, params) {
+      this.saveListContext()
+      this.$router.push({ name, params })
+    },
+
+    /* ---------------- 등록/수정/상세 (전부 페이지로) ---------------- */
     openCreate() {
-      this.form = emptyForm()
-      this.formOpen = true
+      this.goEditPage('RegulationInfoCreate')
+    },
+    openDetail() {
+      const r = this.selectedRecord
+      if (r) this.goEditPage('RegulationInfoView', { regInfoId: r.regInfoId })
     },
     openEdit() {
       const r = this.selectedRecord
-      if (!r) return
-      const codes = (type) => (r.targets || []).filter((tg) => tg.targetType === type).map((tg) => tg.targetCd)
-      this.form = {
-        ...emptyForm(),
-        regInfoId: r.regInfoId,
-        regNo: r.regNo,
-        title: r.title,
-        fieldCd: r.fieldCd,
-        markNm: r.markNm,
-        authority: r.authority,
-        url: r.url,
-        summary: r.summary,
-        statusCd: r.statusCd,
-        versionNo: r.versionNo,
-        effectiveDt: r.effectiveDt,
-        regulationCds: codes('REGULATION'),
-        standardCds: codes('STANDARD'),
-        divisionCds: codes('DIVISION'),
-        productGroupCds: codes('PRODUCT_GROUP'),
-        productCds: codes('PRODUCT'),
-        regionCds: codes('REGION'),
-        countryCds: codes('COUNTRY'),
-        attachFiles: [...(attachMock[r.regInfoId] || [])]
-      }
-      this.formOpen = true
+      if (r) this.goEditPage('RegulationInfoEdit', { regInfoId: r.regInfoId })
     },
-    /** 데모용: "기존 프랑스 TV" vs "신규 유럽 TV" 충돌 시나리오 자동 입력 */
-    fillEuScenario() {
-      this.form = {
-        ...emptyForm(),
-        title: 'CE 저전압지침(LVD) - 유럽 공통',
-        fieldCd: 'SAFETY',
-        markNm: 'CE 마크',
-        authority: 'EU Commission',
-        url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014L0035',
-        summary: '유럽 전 권역 공통 LVD 대응으로 통합 관리.',
-        statusCd: 'REVIEW',
-        effectiveDt: '2026-09-01',
-        regulationCds: ['RG_EU_LVD'],
-        standardCds: ['ST_EN62368'],
-        divisionCds: ['VD'],
-        productGroupCds: ['PG_TV'],
-        regionCds: ['R_EU']
-      }
-      showToast('기존 "프랑스 특례"와 충돌하는 신규 유럽 레코드를 채웠습니다.', { type: 'info', duration: 2600 })
-    },
-    addAttach() {
-      const seq = this.form.attachFiles.length + 1
-      this.form.attachFiles.push({ fileId: `NEW-${Date.now()}`, fileNm: `첨부문서_${seq}.pdf`, size: '1.2MB' })
-    },
-    removeAttach(fileId) {
-      this.form.attachFiles = this.form.attachFiles.filter((f) => f.fileId !== fileId)
-    },
-
-    /* ---------------- 저장 (충돌 검사 → 확정) ---------------- */
-    checkAndSave() {
-      if (!this.form.title.trim()) {
-        showToast('규제 제목을 입력하세요.', { type: 'error' })
-        return
-      }
-      if (!this.form.regulationCds.length) {
-        showToast('규제를 1개 이상 선택하세요.', { type: 'error' })
-        return
-      }
-      if (!this.form.regionCds.length && !this.form.countryCds.length) {
-        showToast('권역 또는 국가를 선택하세요.', { type: 'error' })
-        return
-      }
-
-      const found = detectConflicts(this.formAsRecord, this.records)
-      if (found.length === 0) {
-        this.persist([])
-        return
-      }
-      this.pendingConflicts = found.map((c) => ({ ...c, decisionCd: c.recommend.decisionCd }))
-      this.conflictOpen = true
-    },
-    cancelSave() {
-      // 취소도 이력으로 남긴다 (누가 무엇 때문에 등록을 포기했는지 추적)
-      this.recordConflictHistory(this.pendingConflicts, 'CANCEL', null)
-      this.pendingConflicts = []
-      this.conflictOpen = false
-      this.formOpen = false
-      showToast('등록을 취소했습니다. 충돌 이력은 남았습니다.', { type: 'info' })
-    },
-    commitSave() {
-      const decisions = this.pendingConflicts
-      this.conflictOpen = false
-      this.persist(decisions)
-    },
-    persist(decisions) {
-      const now = new Date()
-      const pad = (n) => String(n).padStart(2, '0')
-      const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
-      const isNew = !this.form.regInfoId
-      const record = this.formAsRecord
-
-      let saved
-      if (isNew) {
-        const newId = Math.max(...this.records.map((r) => r.regInfoId)) + 1
-        saved = {
-          regInfoId: newId,
-          regNo: `REG-${now.getFullYear()}-${String(9000 + newId).slice(-4)}`,
-          title: record.title,
-          fieldCd: record.fieldCd,
-          markNm: record.markNm,
-          authority: record.authority,
-          url: record.url,
-          summary: record.summary,
-          statusCd: record.statusCd,
-          versionNo: 1,
-          effectiveDt: this.toDateStr(record.effectiveDt),
-          modDt: this.toDateStr(now),
-          modId: 'me',
-          attachCnt: this.form.attachFiles.length,
-          targets: record.targets
-        }
-        this.records.push(saved)
-      } else {
-        const idx = this.records.findIndex((r) => r.regInfoId === this.form.regInfoId)
-        saved = {
-          ...this.records[idx],
-          title: record.title,
-          fieldCd: record.fieldCd,
-          markNm: record.markNm,
-          authority: record.authority,
-          url: record.url,
-          summary: record.summary,
-          statusCd: record.statusCd,
-          versionNo: this.records[idx].versionNo + 1,
-          effectiveDt: this.toDateStr(record.effectiveDt),
-          modDt: this.toDateStr(now),
-          modId: 'me',
-          attachCnt: this.form.attachFiles.length,
-          targets: record.targets
-        }
-        this.records.splice(idx, 1, saved)
-      }
-
-      // 변경 이력: 수정 = 새 버전 INSERT
-      this.histories.push({
-        histId: Date.now(),
-        regInfoId: saved.regInfoId,
-        versionNo: saved.versionNo,
-        changeType: isNew ? 'INSERT' : 'UPDATE',
-        changeNote: decisions.length ? `충돌 ${decisions.length}건 조치 후 저장` : (isNew ? '최초 등록' : '내용 수정'),
-        regId: 'me',
-        regDt: stamp
-      })
-
-      this.recordConflictHistory(decisions, null, saved)
-      this.applyDecisionSideEffects(decisions, saved, stamp)
-
-      this.selectedRegInfoId = saved.regInfoId
-      this.pendingConflicts = []
-      this.formOpen = false
-      showToast(`${saved.regNo} 저장 완료${decisions.length ? ` (충돌 ${decisions.length}건 조치)` : ''}`, { type: 'success' })
-    },
-    recordConflictHistory(list, forcedDecision, saved) {
-      const now = new Date()
-      const pad = (n) => String(n).padStart(2, '0')
-      const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
-      list.forEach((c, i) => {
-        this.conflicts.push({
-          conflictId: Date.now() + i,
-          newRegNo: saved ? saved.regNo : '(등록취소)',
-          newRegInfoId: saved ? saved.regInfoId : null,
-          existRegNo: c.existRecord.regNo,
-          existRegInfoId: c.existRecord.regInfoId,
-          conflictType: c.conflictType,
-          conflictAxis: c.mainAxis.axisKey,
-          newScopeTxt: c.mainAxis.newScopeTxt,
-          existScopeTxt: c.mainAxis.existScopeTxt,
-          decisionCd: forcedDecision || c.decisionCd,
-          decisionNote: c.recommend.text,
-          detectDt: stamp,
-          decideId: 'me',
-          decideDt: stamp,
-          statusCd: forcedDecision === 'CANCEL' ? 'IGNORED' : 'RESOLVED'
-        })
-      })
-    },
-    /** 조치 코드에 따른 기존 레코드 처리 */
-    applyDecisionSideEffects(decisions, saved, stamp) {
-      decisions.forEach((c) => {
-        if (c.decisionCd === 'MERGE') {
-          const idx = this.records.findIndex((r) => r.regInfoId === c.existRecord.regInfoId)
-          if (idx < 0) return
-          const merged = { ...this.records[idx], statusCd: 'EXPIRED', versionNo: this.records[idx].versionNo + 1, modDt: this.toDateStr(new Date()) }
-          this.records.splice(idx, 1, merged)
-          this.histories.push({
-            histId: Date.now() + Math.random(),
-            regInfoId: merged.regInfoId,
-            versionNo: merged.versionNo,
-            changeType: 'CONFLICT_RESOLVE',
-            changeNote: `${saved.regNo} 로 흡수되어 폐지 처리`,
-            regId: 'me',
-            regDt: stamp
-          })
-        } else if (c.decisionCd === 'KEEP_BOTH') {
-          this.histories.push({
-            histId: Date.now() + Math.random(),
-            regInfoId: c.existRecord.regInfoId,
-            versionNo: c.existRecord.versionNo,
-            changeType: 'CONFLICT_RESOLVE',
-            changeNote: `${saved.regNo} 등록에 따라 하위 예외(특례)로 유지`,
-            regId: 'me',
-            regDt: stamp
-          })
-        }
-      })
+    /** 이력은 상세 화면 우측 패널에서 본다 */
+    openHistory() {
+      const r = this.selectedRecord
+      if (r) this.goEditPage('RegulationInfoView', { regInfoId: r.regInfoId })
     },
     removeRecord() {
       const r = this.selectedRecord
       if (!r) return
       if (!window.confirm(`${r.regNo} 를 폐지 처리하시겠습니까? (물리 삭제 없이 상태만 변경)`)) return
-      const idx = this.records.findIndex((x) => x.regInfoId === r.regInfoId)
-      this.records.splice(idx, 1, { ...r, statusCd: 'EXPIRED', versionNo: r.versionNo + 1 })
-      this.histories.push({
-        histId: Date.now(),
-        regInfoId: r.regInfoId,
-        versionNo: r.versionNo + 1,
-        changeType: 'DELETE',
-        changeNote: '사용자 요청으로 폐지',
-        regId: 'me',
-        regDt: this.toDateStr(new Date())
-      })
+      this.store.expireRecord(r.regInfoId)
       showToast(`${r.regNo} 폐지 처리`, { type: 'success' })
-    },
-
-    /* ---------------- 이력 ---------------- */
-    openHistory() {
-      this.historyTab = 'change'
-      this.historyOpen = true
     }
   }
 }
 </script>
 
 <style scoped>
+.ui-mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--b2b-color-border, #dee2e6);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.ui-mode-toggle button {
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+  padding: 3px 9px;
+  color: var(--b2b-color-text-secondary, #6c757d);
+}
+
+.ui-mode-toggle button.on {
+  background: var(--b2b-color-primary, #0d6efd);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---- 국가 필터 디자인 비교 스위치 (임시) ---- */
+.design-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  background: var(--b2b-color-bg-subcard, #f8f9fa);
+}
+
 .reg-page :deep(.multi-select) {
   width: 100%;
 }

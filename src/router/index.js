@@ -125,7 +125,11 @@ const routes = [
         name: "RegulationGroup",
         meta: { title: "규격/규제 관리", icon: "bi-shield-check" },
         children: [
-          { path: "info", name: "RegulationInfo", component: () => import("../pages/regulation/RegulationInfoPage.vue"), meta: { title: "규제 정보 관리", icon: "bi-clipboard-check" } }
+          { path: "info", name: "RegulationInfo", component: () => import("../pages/regulation/RegulationInfoPage.vue"), meta: { title: "규제 정보 관리", icon: "bi-clipboard-check", keepAlive: true } },
+          // 등록/수정/상세는 한 컴포넌트의 3모드. 메뉴에는 노출하지 않는다(hidden).
+          { path: "info/new", name: "RegulationInfoCreate", component: () => import("../pages/regulation/RegulationInfoEditPage.vue"), meta: { title: "규제 정보 신규 등록", icon: "bi-plus-square", hidden: true } },
+          { path: "info/:regInfoId(\\d+)", name: "RegulationInfoView", component: () => import("../pages/regulation/RegulationInfoEditPage.vue"), meta: { title: "규제 정보 상세", icon: "bi-file-text", hidden: true } },
+          { path: "info/:regInfoId(\\d+)/edit", name: "RegulationInfoEdit", component: () => import("../pages/regulation/RegulationInfoEditPage.vue"), meta: { title: "규제 정보 수정", icon: "bi-pencil-square", hidden: true } }
         ]
       },
 
