@@ -1,0 +1,681 @@
+<!--
+  느린 ORDER BY 진단서 — Artifact 소스 겸 단독 열람용.
+  Artifact 로 게시할 때는 런타임이 doctype/html/head/body 를 감싸므로 여기 넣지 않는다.
+  charset 만 선언해 두면 레포에서 파일을 직접 열어도 한글이 깨지지 않는다.
+-->
+<meta charset="utf-8">
+<title>느린 ORDER BY 진단서</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@0,500;0,600;1,500&family=Noto+Serif+KR:wght@600&display=swap">
+<style>
+:root{
+  --paper:#eff3f3;
+  --surface:#ffffff;
+  --surface-2:#e5ecec;
+  --ink:#0f1a1b;
+  --ink-2:#3b4b4c;
+  --ink-3:#6d7e7e;
+  --rule:#d3dede;
+  --rule-2:#b7c6c6;
+  --accent:#0a6a67;
+  --accent-2:#075451;
+  --accent-soft:#dcebea;
+  --ok:#1a7549;
+  --ok-soft:#dceee5;
+  --warn:#8d5c07;
+  --warn-soft:#f4e9d5;
+  --bad:#a93718;
+  --bad-soft:#f6e3dd;
+  --readout-bg:#0a1213;
+  --readout-ink:#c5d3d2;
+  --readout-dim:#68807f;
+  --readout-key:#79cec5;
+  --readout-num:#d8b070;
+  --shadow:0 1px 2px rgba(15,26,27,.05), 0 10px 28px -16px rgba(15,26,27,.28);
+  --measure:66ch;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0a1112; --surface:#101a1b; --surface-2:#182425;
+    --ink:#e2eceb; --ink-2:#a9b9b8; --ink-3:#7b8d8c;
+    --rule:#243334; --rule-2:#334647;
+    --accent:#48c6bc; --accent-2:#6edcd2; --accent-soft:#0f2f2d;
+    --ok:#4ab77c; --ok-soft:#112a20;
+    --warn:#d3a24a; --warn-soft:#2a2317;
+    --bad:#e07a5f; --bad-soft:#2c1b17;
+    --readout-bg:#060d0e;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0a1112; --surface:#101a1b; --surface-2:#182425;
+  --ink:#e2eceb; --ink-2:#a9b9b8; --ink-3:#7b8d8c;
+  --rule:#243334; --rule-2:#334647;
+  --accent:#48c6bc; --accent-2:#6edcd2; --accent-soft:#0f2f2d;
+  --ok:#4ab77c; --ok-soft:#112a20;
+  --warn:#d3a24a; --warn-soft:#2a2317;
+  --bad:#e07a5f; --bad-soft:#2c1b17;
+  --readout-bg:#060d0e;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Sans KR', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size:16px;
+  line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:1060px;margin:0 auto;padding:0 clamp(18px,4vw,44px) 96px}
+
+/* ---------- header ---------- */
+.masthead{padding:clamp(48px,9vw,88px) 0 0}
+.eyebrow{
+  font-family:'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);font-weight:500;margin:0 0 18px;
+}
+h1{
+  font-family:'Newsreader','Noto Serif KR',Georgia,serif;
+  font-weight:600;font-size:clamp(2.1rem,5.6vw,3.15rem);
+  line-height:1.12;letter-spacing:-.015em;text-wrap:balance;
+  margin:0 0 20px;
+}
+.lede{font-size:1.08rem;color:var(--ink-2);max-width:var(--measure);margin:0 0 28px}
+.facts{
+  display:flex;flex-wrap:wrap;gap:0;
+  border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2);
+  margin:0 0 40px;
+}
+.fact{padding:14px 26px 14px 0;margin-right:26px;border-right:1px solid var(--rule)}
+.fact:last-child{border-right:0;margin-right:0;padding-right:0}
+.fact dt{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 3px;
+}
+.fact dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums}
+
+/* ---------- premise ---------- */
+.premise{
+  background:var(--surface);border:1px solid var(--rule);
+  border-left:3px solid var(--accent);
+  padding:22px 26px;margin:0 0 44px;box-shadow:var(--shadow);
+}
+.premise p{margin:0;max-width:var(--measure)}
+.premise p + p{margin-top:10px;color:var(--ink-2)}
+.premise strong{color:var(--accent-2)}
+
+/* ---------- toc ---------- */
+.toc{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);margin:0 0 64px;
+}
+.toc a{
+  background:var(--surface);padding:16px 18px;text-decoration:none;color:var(--ink);
+  display:flex;flex-direction:column;gap:4px;transition:background .15s;
+}
+.toc a:hover,.toc a:focus-visible{background:var(--accent-soft)}
+.toc a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.toc .n{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.68rem;letter-spacing:.1em;color:var(--accent);font-weight:500;
+}
+.toc .t{font-weight:500;font-size:.95rem}
+
+/* ---------- sections ---------- */
+section{margin:0 0 72px;scroll-margin-top:24px}
+.sechead{display:flex;align-items:baseline;gap:14px;margin:0 0 8px;
+  padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.sechead .step{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.78rem;font-weight:500;color:var(--accent);letter-spacing:.08em;
+  white-space:nowrap;
+}
+h2{
+  font-family:'Newsreader','Noto Serif KR',Georgia,serif;
+  font-weight:600;font-size:clamp(1.5rem,3.4vw,1.95rem);line-height:1.2;
+  letter-spacing:-.01em;margin:0;text-wrap:balance;
+}
+.subline{color:var(--ink-3);font-size:.95rem;max-width:var(--measure);margin:14px 0 26px}
+h3{
+  font-family:'IBM Plex Sans KR',sans-serif;
+  font-weight:600;font-size:1.04rem;letter-spacing:-.005em;
+  margin:36px 0 10px;color:var(--ink);
+}
+h3 .idx{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  color:var(--accent);font-weight:500;margin-right:8px;font-size:.94em;
+}
+p,li{max-width:var(--measure)}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:1.35em}
+li{margin:0 0 7px}
+li::marker{color:var(--ink-3)}
+strong{font-weight:600}
+a{color:var(--accent-2)}
+
+/* ---------- code: SQL (light inset) ---------- */
+.sql{
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  overflow-x:auto;margin:0 0 20px;
+}
+.sql pre{
+  margin:0;padding:16px 20px;
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.855rem;line-height:1.68;color:var(--ink);
+}
+.sql .c{color:var(--ink-3);font-style:italic}
+.sql .k{color:var(--accent-2);font-weight:500}
+
+/* ---------- code: plan readout (always dark) ---------- */
+figure.readout{margin:0 0 22px}
+.readout .bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--readout-bg);border-bottom:1px solid rgba(255,255,255,.09);
+  padding:9px 16px;
+}
+.readout .who{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--readout-dim);
+}
+.chip{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;
+  padding:3px 9px;border-radius:2px;white-space:nowrap;
+}
+.chip.bad{background:#3a1a12;color:#f0937a}
+.chip.good{background:#0f2f27;color:#6ed3a5}
+.readout .scroll{background:var(--readout-bg);overflow-x:auto}
+.readout pre{
+  margin:0;padding:16px 0;display:inline-block;min-width:100%;
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.79rem;line-height:1.62;color:var(--readout-ink);
+}
+.readout pre > span{display:block;padding:0 18px}
+.readout .hit{background:rgba(224,122,95,.13);box-shadow:inset 3px 0 0 #e07a5f}
+.readout .win{background:rgba(110,211,165,.11);box-shadow:inset 3px 0 0 #6ed3a5}
+.readout .dim{color:var(--readout-dim)}
+.readout .kw{color:var(--readout-key)}
+.readout .mark{color:#e07a5f;font-weight:500}
+figcaption{
+  font-size:.85rem;color:var(--ink-3);margin-top:10px;max-width:var(--measure);
+}
+
+/* ---------- reading table ---------- */
+.tablewrap{overflow-x:auto;margin:0 0 24px;border:1px solid var(--rule);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:.9rem}
+th,td{padding:12px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule)}
+th{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--surface-2);
+  border-bottom:1px solid var(--rule-2);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:.84rem;color:var(--ink)}
+td.flag{color:var(--bad)}
+code{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.88em;background:var(--surface-2);padding:1px 5px;border-radius:2px;
+  color:var(--ink);
+}
+td code,th code{background:transparent;padding:0}
+
+/* ---------- case cards ---------- */
+.case{
+  background:var(--surface);border:1px solid var(--rule);
+  padding:26px clamp(18px,3vw,30px);margin:0 0 26px;box-shadow:var(--shadow);
+}
+.casehead{display:flex;align-items:flex-start;gap:16px;margin:0 0 6px}
+.badge{
+  flex:none;width:38px;height:38px;display:grid;place-items:center;
+  font-family:'Newsreader',Georgia,serif;font-size:1.3rem;font-weight:600;
+  background:var(--accent);color:var(--surface);border-radius:50%;
+}
+:root[data-theme="dark"] .badge{color:#06100f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .badge{color:#06100f}}
+.casehead h3{margin:4px 0 0;font-size:1.12rem}
+.casenote{color:var(--ink-3);font-size:.9rem;margin:0 0 18px 54px}
+.case > .body{margin-left:54px}
+@media (max-width:640px){
+  .casenote,.case > .body{margin-left:0}
+}
+.label{
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;margin:22px 0 8px;
+}
+.rx{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent-soft);color:var(--accent-2);
+  border-left:3px solid var(--accent);
+  padding:9px 14px;font-size:.9rem;font-weight:500;margin-top:6px;
+}
+.rx .arrow{font-family:'IBM Plex Mono',monospace}
+
+/* ---------- callouts ---------- */
+.note{
+  border-left:3px solid var(--warn);background:var(--warn-soft);
+  padding:14px 18px;margin:0 0 20px;font-size:.93rem;
+}
+.note p{margin:0;max-width:none}
+.note p + p{margin-top:8px}
+.note .h{font-weight:600;color:var(--warn)}
+
+/* ---------- don't list ---------- */
+.dont{list-style:none;padding:0;margin:0;max-width:none}
+.dont li{
+  max-width:none;display:grid;grid-template-columns:auto 1fr;gap:14px;
+  padding:13px 0;border-bottom:1px solid var(--rule);margin:0;
+}
+.dont li:last-child{border-bottom:0}
+.dont .x{
+  font-family:'IBM Plex Mono',monospace;color:var(--bad);font-weight:500;
+  line-height:1.72;
+}
+.dont .txt{max-width:var(--measure)}
+
+/* ---------- prompt block ---------- */
+.prompt{
+  background:var(--readout-bg);overflow-x:auto;box-shadow:var(--shadow);
+}
+.prompt pre{
+  margin:0;padding:22px;
+  font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  font-size:.82rem;line-height:1.7;color:var(--readout-ink);
+}
+.prompt .fld{color:var(--readout-key);font-weight:500}
+.prompt .ph{color:var(--readout-num)}
+
+footer{
+  border-top:1px solid var(--rule-2);padding-top:20px;margin-top:12px;
+  font-size:.85rem;color:var(--ink-3);max-width:var(--measure);
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="page">
+
+<header class="masthead">
+  <p class="eyebrow">PostgreSQL · Query Plan Runbook</p>
+  <h1>느린 ORDER BY 진단서</h1>
+  <p class="lede">200만 건 테이블에서 수정일 정렬이 느릴 때, 추측 대신 실행계획으로 원인을 판정하고 처방하는 순서. 수집 → 판독 → 판정 → 처방 → 검증.</p>
+  <dl class="facts">
+    <div class="fact"><dt>대상 행 수</dt><dd>약 2,000,000</dd></div>
+    <div class="fact"><dt>정렬 기준</dt><dd>modified_date DESC</dd></div>
+    <div class="fact"><dt>현황</dt><dd>복합 인덱스에 포함됨</dd></div>
+    <div class="fact"><dt>판정 케이스</dt><dd>A – F</dd></div>
+  </dl>
+</header>
+
+<div class="premise">
+  <p><strong>전제 한 줄.</strong> 인덱스에 컬럼이 들어있는 것과, 그 인덱스로 정렬이 되는 것은 다르다.</p>
+  <p>복합 인덱스가 정렬을 대신하려면 <code>modified_date</code>보다 앞에 있는 모든 컬럼이 WHERE에서 <code>=</code>로 고정돼야 한다. 아래 순서는 그것부터 확인한다.</p>
+</div>
+
+<nav class="toc" aria-label="목차">
+  <a href="#s1"><span class="n">1단계</span><span class="t">수집</span></a>
+  <a href="#s2"><span class="n">2단계</span><span class="t">판독</span></a>
+  <a href="#s3"><span class="n">3단계</span><span class="t">판정 · 케이스 A–F</span></a>
+  <a href="#s4"><span class="n">4단계</span><span class="t">처방</span></a>
+  <a href="#s5"><span class="n">5단계</span><span class="t">검증</span></a>
+  <a href="#dont"><span class="n">부록 I</span><span class="t">하지 말 것</span></a>
+  <a href="#prompt"><span class="n">부록 II</span><span class="t">AI 지시문</span></a>
+</nav>
+
+<!-- ============ 1 ============ -->
+<section id="s1">
+  <div class="sechead"><span class="step">1단계</span><h2>수집</h2></div>
+  <p class="subline">판단에 필요한 정보. 이게 없으면 진단이 아니라 추측이 된다.</p>
+
+  <h3><span class="idx">1-1</span>버전과 설정</h3>
+  <div class="sql"><pre><span class="k">SELECT</span> version();
+<span class="k">SHOW</span> work_mem;
+<span class="k">SHOW</span> effective_cache_size;
+<span class="k">SHOW</span> random_page_cost;
+<span class="k">SHOW</span> enable_incremental_sort;   <span class="c">-- PG 13+</span></pre></div>
+  <p>PG 13 미만이면 Incremental Sort가 없고, PG 12 미만이면 CTE가 항상 실체화된다. 버전이 처방을 가른다.</p>
+
+  <h3><span class="idx">1-2</span>테이블과 인덱스 정의</h3>
+  <div class="sql"><pre>\d+ orders
+
+<span class="k">SELECT</span> indexname, indexdef
+<span class="k">FROM</span>   pg_indexes
+<span class="k">WHERE</span>  tablename = 'orders';</pre></div>
+  <p><strong>여기서 확인할 것:</strong> <code>modified_date</code>가 각 인덱스에서 <strong>몇 번째 컬럼</strong>인가. 정렬 방향(<code>DESC</code>)과 <code>NULLS FIRST/LAST</code>가 명시돼 있는가. 컬럼 타입이 <code>timestamptz</code>인가 <code>text</code>인가.</p>
+
+  <h3><span class="idx">1-3</span>통계와 vacuum 상태</h3>
+  <div class="sql"><pre><span class="k">SELECT</span> relname, n_live_tup, n_dead_tup,
+       last_vacuum, last_autovacuum, last_analyze, last_autoanalyze
+<span class="k">FROM</span>   pg_stat_user_tables
+<span class="k">WHERE</span>  relname = 'orders';</pre></div>
+  <p><code>n_dead_tup</code>이 <code>n_live_tup</code>의 10%를 넘거나 <code>last_autovacuum</code>이 오래됐으면 Index Only Scan이 막히고 플래너 추정도 틀어진다.</p>
+
+  <h3><span class="idx">1-4</span>인덱스가 실제로 쓰이는지</h3>
+  <div class="sql"><pre><span class="k">SELECT</span> indexrelname, idx_scan,
+       pg_size_pretty(pg_relation_size(indexrelid)) <span class="k">AS</span> size
+<span class="k">FROM</span>   pg_stat_user_indexes
+<span class="k">WHERE</span>  relname = 'orders'
+<span class="k">ORDER BY</span> idx_scan;</pre></div>
+  <p><code>idx_scan = 0</code>인 인덱스는 쓰이지 않으면서 쓰기 비용만 먹고 있다. 새 인덱스를 만들기 전에 여기부터 본다.</p>
+
+  <h3><span class="idx">1-5</span>실행 계획</h3>
+  <div class="sql"><pre><span class="k">EXPLAIN</span> (ANALYZE, BUFFERS, SETTINGS, VERBOSE) &lt;느린 쿼리&gt;;</pre></div>
+  <ul>
+    <li><code>ANALYZE</code> 없는 <code>EXPLAIN</code>은 추정치일 뿐이다. 반드시 붙인다.</li>
+    <li><code>ANALYZE</code>는 쿼리를 <strong>실제로 실행한다.</strong> INSERT/UPDATE/DELETE라면 <code>BEGIN; … ROLLBACK;</code>으로 감싼다.</li>
+    <li>캐시 효과를 걷어내려면 <strong>연속 2회 실행</strong>하고 두 번째 결과를 기준으로 본다.</li>
+  </ul>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="s2">
+  <div class="sechead"><span class="step">2단계</span><h2>판독</h2></div>
+  <p class="subline">실행 계획에서 볼 것은 이 일곱 가지다.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>지표</th><th>어디에</th><th>무슨 뜻</th><th>위험 신호</th></tr></thead>
+      <tbody>
+        <tr><td>Sort 노드</td><td>계획 트리</td><td>인덱스로 정렬을 못 해 별도 정렬 수행</td><td class="flag"><strong>존재 자체가 신호</strong></td></tr>
+        <tr><td>Sort Method</td><td>Sort 노드 하위</td><td>정렬 수행 방식</td><td class="flag"><code>external merge&nbsp;&nbsp;Disk:</code> → work_mem 초과</td></tr>
+        <tr><td>Rows Removed by Filter</td><td>스캔 노드</td><td>읽고 버린 행 수</td><td class="flag">최종 반환 행의 100배 이상</td></tr>
+        <tr><td>rows= vs actual rows=</td><td>모든 노드</td><td>플래너 추정의 정확도</td><td class="flag">10배 이상 벌어짐</td></tr>
+        <tr><td>Heap Fetches</td><td>Index Only Scan</td><td>힙을 다시 읽은 횟수</td><td class="flag">0에서 크게 벗어남 → vacuum 필요</td></tr>
+        <tr><td>Buffers: read=</td><td>BUFFERS 옵션</td><td>캐시에 없어 디스크에서 읽은 블록</td><td class="flag">수만 이상 → I/O 병목</td></tr>
+        <tr><td>Limit 하위의 actual rows</td><td>Limit 바로 아래</td><td>실제로 만들어낸 행 수</td><td class="flag">Limit 20인데 하위가 수십만 → 깊은 OFFSET</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>읽는 순서는 <strong>안쪽(들여쓰기 깊은 곳)부터 바깥으로.</strong> <code>actual time</code>은 누적값이므로, 한 노드의 순수 소요는 <code>자기 actual time − 자식 actual time</code>이다.</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="s3">
+  <div class="sechead"><span class="step">3단계</span><h2>판정</h2></div>
+  <p class="subline">여섯 가지 케이스. 각 케이스의 처방 번호는 4단계로 이어진다.</p>
+
+  <!-- A -->
+  <article class="case">
+    <div class="casehead"><span class="badge">A</span><h3>인덱스가 정렬에 쓰이지 않음 — <code>Sort</code> 노드 등장</h3></div>
+    <p class="casenote">가장 흔하다. 200만 건에서 "느리다"의 대부분이 여기다.</p>
+    <div class="body">
+      <figure class="readout">
+        <div class="bar"><span class="who">EXPLAIN (ANALYZE, BUFFERS)</span><span class="chip bad">문제 있는 계획</span></div>
+        <div class="scroll"><pre><span>Limit  (cost=181240.55..181240.60 rows=20 width=248) (actual time=2841.113..2841.121 rows=20 loops=1)</span><span class="dim">  Buffers: shared hit=1024 read=64891, temp read=33064 written=33102</span><span class="hit">  -&gt;  <span class="kw">Sort</span>  (cost=181240.55..186236.60 rows=1998420 width=248) (actual time=2841.111..2841.116 rows=20 loops=1)   <span class="mark">&lt;- (1)</span></span><span class="hit">        Sort Key: modified_date DESC <span class="kw">NULLS LAST</span>                                                        <span class="mark">&lt;- (2)</span></span><span class="hit">        Sort Method: <span class="kw">external merge  Disk: 264512kB</span>                                                  <span class="mark">&lt;- (3)</span></span><span class="dim">        Buffers: shared hit=1024 read=64891, temp read=33064 written=33102</span><span>        -&gt;  Seq Scan on orders  (cost=0.00..96891.00 rows=1998420 width=248) (actual time=0.011..412.883 rows=1998420 loops=1)</span><span>              Filter: (status = 'Y'::text)</span><span class="dim">              Rows Removed by Filter: 1580</span><span class="dim">              Buffers: shared hit=1024 read=64891</span><span>Planning Time: 0.142 ms</span><span>Execution Time: <span class="mark">2903.447 ms</span></span></pre></div>
+      </figure>
+
+      <p class="label">판정 근거</p>
+      <ol>
+        <li><code>Sort</code> 노드가 존재한다 → 인덱스가 정렬 순서를 제공하지 못했다.</li>
+        <li><code>Sort Key</code>에 <code>NULLS LAST</code>가 명시돼 있다. PG 기본값은 <code>ASC → NULLS LAST</code>, <code>DESC → NULLS FIRST</code>. 일반 오름차순 인덱스를 역방향 스캔하면 <code>DESC NULLS FIRST</code>가 나오므로, 쿼리가 <code>DESC NULLS LAST</code>를 요구하면 <strong>인덱스가 있어도 못 쓴다.</strong></li>
+        <li>20건만 필요한데 199만 건을 전부 정렬하고 264MB를 디스크에 썼다.</li>
+      </ol>
+
+      <p class="label">원인 후보 · 이 순서로 확인</p>
+      <ol>
+        <li>복합 인덱스에서 <code>modified_date</code> 앞 컬럼이 WHERE에 <code>=</code>로 고정되지 않음. 범위 조건(<code>&gt;</code>, <code>BETWEEN</code>, <code>LIKE 'x%'</code>, <code>IN</code>)도 그 뒤 컬럼의 순서를 깬다.</li>
+        <li><code>NULLS FIRST/LAST</code> 불일치 (위 예시)</li>
+        <li>정렬 방향 혼합: <code>ORDER BY a ASC, modified_date DESC</code>는 <code>(a ASC, modified_date DESC)</code> 인덱스가 있어야 한다. 방향이 전부 같거나 전부 반대일 때만 기존 인덱스를 정·역방향 스캔으로 커버한다.</li>
+        <li><code>ORDER BY</code>에 함수·형변환: <code>modified_date::date</code>, <code>to_char(modified_date,'YYYYMMDD')</code> → 동일한 표현식 인덱스가 없으면 무조건 Sort</li>
+        <li>조인 상대 테이블의 컬럼으로 정렬 → 케이스 F</li>
+      </ol>
+
+      <p class="rx"><span class="arrow">→</span> 처방 4-1</p>
+
+      <p class="label">고친 뒤 이 형태가 나와야 한다</p>
+      <figure class="readout">
+        <div class="bar"><span class="who">동일 쿼리 · 인덱스 적용 후</span><span class="chip good">목표 계획</span></div>
+        <div class="scroll"><pre><span class="win">Limit  (cost=0.43..2.14 rows=20 width=248) (actual time=0.038..0.061 rows=20 loops=1)</span><span class="dim">  Buffers: shared hit=24</span><span class="win">  -&gt;  <span class="kw">Index Scan</span> using idx_orders_status_mod on orders  (cost=0.43..170338.21 rows=1998420 width=248) (actual time=0.036..0.056 rows=20 loops=1)</span><span>        Index Cond: (status = 'Y'::text)</span><span class="dim">        Buffers: shared hit=24</span><span>Planning Time: 0.211 ms</span><span>Execution Time: <span class="kw">0.092 ms</span></span></pre></div>
+        <figcaption><code>Sort</code>가 사라지고 <code>Buffers</code>가 64,891 → 24로 떨어졌다.</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <!-- B -->
+  <article class="case">
+    <div class="casehead"><span class="badge">B</span><h3>정렬은 하는데 디스크로 흘러넘침</h3></div>
+    <p class="casenote"><code>Sort Method: external merge&nbsp;&nbsp;Disk: 264512kB</code> — work_mem 초과다.</p>
+    <div class="body">
+      <p>세션 한정으로 올려서 확인한다. <code>quicksort</code> 또는 <code>top-N heapsort</code>로 바뀌면 확인된 것.</p>
+      <div class="sql"><pre><span class="k">BEGIN</span>;
+<span class="k">SET LOCAL</span> work_mem = '256MB';
+<span class="k">EXPLAIN</span> (ANALYZE, BUFFERS) &lt;쿼리&gt;;
+<span class="k">ROLLBACK</span>;</pre></div>
+      <div class="note">
+        <p><span class="h">주의 1.</span> work_mem은 쿼리 하나가 아니라 <strong>정렬·해시 노드 하나당</strong> 할당된다. 동시 접속 수 × 노드 수만큼 곱해져 메모리를 먹으므로 전역 상향은 위험하다.</p>
+        <p><span class="h">주의 2.</span> 이건 완화책이다. 근본은 케이스 A·C를 없애 애초에 200만 건을 정렬하지 않게 만드는 것.</p>
+      </div>
+      <p><code>ORDER BY … LIMIT n</code>에서 <code>Sort Method: top-N heapsort</code>가 뜨는 건 정상이다. 전체 정렬이 아니라 상위 n개만 유지한다.</p>
+      <p class="rx"><span class="arrow">→</span> 처방 4-6 (완화) · 4-1 (근본)</p>
+    </div>
+  </article>
+
+  <!-- C -->
+  <article class="case">
+    <div class="casehead"><span class="badge">C</span><h3>깊은 OFFSET</h3></div>
+    <p class="casenote">첫 페이지 테스트로는 절대 잡히지 않는다.</p>
+    <div class="body">
+      <figure class="readout">
+        <div class="bar"><span class="who">LIMIT 20 OFFSET 500000</span><span class="chip bad">문제 있는 계획</span></div>
+        <div class="scroll"><pre><span>Limit  (cost=42618.90..42620.60 rows=20 width=248) (actual time=1284.402..1284.418 <span class="kw">rows=20</span> loops=1)</span><span class="dim">  Buffers: shared hit=12043 read=488210</span><span class="hit">  -&gt;  Index Scan using idx_orders_status_mod on orders  (cost=0.43..170338.21 rows=1998420 width=248) (actual time=0.041..1247.336 <span class="mark">rows=500020</span> loops=1)   <span class="mark">&lt;- (1)</span></span><span>        Index Cond: (status = 'Y'::text)</span><span class="dim">        Buffers: shared hit=12043 read=488210</span></pre></div>
+      </figure>
+      <p class="label">판정 근거</p>
+      <p>(1) <code>Sort</code>도 없고 인덱스도 제대로 탔는데 1.2초다. <code>Limit</code>은 20을 반환했지만 <strong>하위 노드의 <code>actual rows</code>가 500,020이다.</strong> 앞 50만 행을 만들어서 버렸다는 뜻. 페이지 번호가 커질수록 선형으로 느려진다.</p>
+      <p class="rx"><span class="arrow">→</span> 처방 4-2 (키셋 페이징) · 번호 페이징을 유지해야 한다면 4-4</p>
+    </div>
+  </article>
+
+  <!-- D -->
+  <article class="case">
+    <div class="casehead"><span class="badge">D</span><h3>abort-early 플랜 — 가끔만 극단적으로 느림</h3></div>
+    <p class="casenote">"평소엔 괜찮은데 가끔 느려요"의 정체가 대개 이것이다.</p>
+    <div class="body">
+      <figure class="readout">
+        <div class="bar"><span class="who">ORDER BY … LIMIT 20 + 선택도 낮은 필터</span><span class="chip bad">문제 있는 계획</span></div>
+        <div class="scroll"><pre><span>Limit  (cost=0.43..<span class="kw">118.42</span> rows=20 width=248) (actual time=4127.885..4127.902 rows=20 loops=1)</span><span class="dim">  Buffers: shared hit=8912 read=61044</span><span>  -&gt;  Index Scan Backward using idx_orders_modified on orders  (cost=0.43..11803.55 <span class="kw">rows=2000</span> width=248) (actual time=4127.883..4127.897 rows=20 loops=1)</span><span>        Filter: (status = 'PENDING'::text)</span><span class="hit">        Rows Removed by Filter: <span class="mark">1994310</span>                                              <span class="mark">&lt;- (1)</span></span><span class="dim">        Buffers: shared hit=8912 read=61044</span><span>Planning Time: 0.176 ms</span><span>Execution Time: <span class="mark">4127.940 ms</span></span></pre></div>
+      </figure>
+      <p class="label">판정 근거</p>
+      <ol>
+        <li><code>Rows Removed by Filter</code>가 199만. 20건 뽑으려고 199만 건을 읽고 버렸다.</li>
+        <li>추정 cost는 118인데 실제는 4.1초. 플래너는 "최신순으로 훑다 보면 금방 20건 찾겠지"라고 판단했지만, <code>PENDING</code> 행이 전부 오래된 데이터라 인덱스 끝까지 갔다.</li>
+      </ol>
+      <p>이 플랜의 특징은 <strong>조건 값에 따라 성능이 극과 극</strong>이라는 것. 흔한 status는 빠르고 드문 status는 수 초 걸린다.</p>
+      <p class="rx"><span class="arrow">→</span> 처방 4-1 · 4-3 (부분 인덱스) · 4-5 (확장 통계)</p>
+    </div>
+  </article>
+
+  <!-- E -->
+  <article class="case">
+    <div class="casehead"><span class="badge">E</span><h3>Index Only Scan인데 Heap Fetches가 큼</h3></div>
+    <p class="casenote">커버링 인덱스를 만들었는데 효과가 없을 때.</p>
+    <div class="body">
+      <figure class="readout">
+        <div class="bar"><span class="who">커버링 인덱스 적용 후에도 느림</span><span class="chip bad">문제 있는 계획</span></div>
+        <div class="scroll"><pre><span>  -&gt;  Index Only Scan using idx_orders_cov on orders  (actual time=0.044..982.113 rows=500020 loops=1)</span><span>        Index Cond: (status = 'Y'::text)</span><span class="hit">        Heap Fetches: <span class="mark">499980</span>                                                        <span class="mark">&lt;- (1)</span></span><span class="dim">        Buffers: shared hit=8210 read=241033</span></pre></div>
+      </figure>
+      <p class="label">판정 근거</p>
+      <p>(1) 커버링 인덱스를 만들었는데도 힙을 거의 매번 다시 읽고 있다. PG의 Index Only Scan은 <strong>visibility map이 최신일 때만</strong> 힙 접근을 생략한다. autovacuum이 밀리면 이 최적화가 통째로 무효가 된다.</p>
+      <p class="rx"><span class="arrow">→</span> 처방 4-5</p>
+    </div>
+  </article>
+
+  <!-- F -->
+  <article class="case">
+    <div class="casehead"><span class="badge">F</span><h3>조인 상대 테이블 컬럼으로 정렬</h3></div>
+    <p class="casenote">조인 결과에는 인덱스 순서가 남아있지 않다.</p>
+    <div class="body">
+      <figure class="readout">
+        <div class="bar"><span class="who">orders ⋈ customers, ORDER BY o.modified_date</span><span class="chip bad">문제 있는 계획</span></div>
+        <div class="scroll"><pre><span>Limit  (actual time=3312.221..3312.240 rows=20 loops=1)</span><span class="hit">  -&gt;  <span class="kw">Sort</span>  (actual time=3312.204..3312.219 rows=20 loops=1)</span><span class="hit">        Sort Key: o.modified_date DESC</span><span class="hit">        Sort Method: <span class="kw">external merge  Disk: 198432kB</span></span><span>        -&gt;  Hash Join  (actual time=214.882..2410.553 <span class="mark">rows=1998420</span> loops=1)</span><span>              Hash Cond: (o.customer_id = c.id)</span><span>              -&gt;  Seq Scan on orders o  (actual time=0.008..389.114 rows=1998420 loops=1)</span><span>              -&gt;  Hash  (actual time=213.902..213.903 rows=48210 loops=1)</span><span class="dim">                    -&gt;  Seq Scan on customers c  …</span></pre></div>
+      </figure>
+      <p class="label">판정 근거</p>
+      <p>조인 결과 전체 199만 행을 만든 뒤에 정렬한다. 정렬·페이징을 <strong>한 테이블 안에서 먼저 끝내고</strong> 그 결과 20건에만 조인을 붙여야 한다.</p>
+      <p class="rx"><span class="arrow">→</span> 처방 4-4</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="s4">
+  <div class="sechead"><span class="step">4단계</span><h2>처방</h2></div>
+  <p class="subline">3단계에서 판정한 케이스 번호를 따라온다.</p>
+
+  <h3><span class="idx">4-1</span>정렬 전용 복합 인덱스 <span style="color:var(--ink-3);font-weight:400">· 케이스 A, B, D</span></h3>
+  <p>원칙: <strong><code>(등치 조건 컬럼들, 정렬 컬럼, 타이브레이커 PK)</code></strong> 순서.</p>
+  <div class="sql"><pre><span class="k">CREATE INDEX CONCURRENTLY</span> idx_orders_status_mod
+  <span class="k">ON</span> orders (status, modified_date <span class="k">DESC</span>, id <span class="k">DESC</span>);
+
+<span class="k">ANALYZE</span> orders;</pre></div>
+  <ul>
+    <li>운영 중이면 <code>CONCURRENTLY</code> 필수. 없으면 생성 동안 테이블에 쓰기 락이 걸린다. (트랜잭션 블록 안에서는 사용 불가)</li>
+    <li>쿼리가 <code>NULLS LAST</code>를 쓴다면 인덱스에도 명시한다: <code>modified_date DESC NULLS LAST</code></li>
+    <li><code>modified_date</code>는 중복이 생기므로 <strong>PK를 타이브레이커로 반드시 붙인다.</strong> 없으면 정렬 결과가 실행마다 달라지고, 페이징에서 행이 누락·중복된다.</li>
+    <li>새로 만들기 전에 <strong>기존 인덱스를 확장·재정의할 수 있는지</strong> 먼저 본다.</li>
+  </ul>
+
+  <h3><span class="idx">4-2</span>키셋(커서) 페이징 — OFFSET 제거 <span style="color:var(--ink-3);font-weight:400">· 케이스 C</span></h3>
+  <div class="sql"><pre><span class="c">-- 1페이지</span>
+<span class="k">SELECT</span> id, status, modified_date, …
+<span class="k">FROM</span>   orders
+<span class="k">WHERE</span>  status = 'Y'
+<span class="k">ORDER BY</span> modified_date <span class="k">DESC</span>, id <span class="k">DESC</span>
+<span class="k">LIMIT</span>  20;
+
+<span class="c">-- 다음 페이지: 직전 페이지 마지막 행의 (modified_date, id)를 커서로 전달</span>
+<span class="k">SELECT</span> id, status, modified_date, …
+<span class="k">FROM</span>   orders
+<span class="k">WHERE</span>  status = 'Y'
+  <span class="k">AND</span>  (modified_date, id) &lt; (:last_modified_date, :last_id)
+<span class="k">ORDER BY</span> modified_date <span class="k">DESC</span>, id <span class="k">DESC</span>
+<span class="k">LIMIT</span>  20;</pre></div>
+  <p>PG의 행 비교(row-wise comparison)는 <code>(status, modified_date DESC, id DESC)</code> 인덱스를 그대로 탄다. <code>Index Cond</code>에 튜플 조건이 올라가는지 EXPLAIN으로 확인할 것.</p>
+  <div class="note"><p><span class="h">주의.</span> <code>(a, b) &lt; (x, y)</code>를 <code>a &lt; x OR (a = x AND b &lt; y)</code>로 풀어 쓰면 인덱스 활용이 나빠질 수 있다. 튜플 형태를 유지한다.</p></div>
+
+  <h3><span class="idx">4-3</span>부분 인덱스 <span style="color:var(--ink-3);font-weight:400">· 케이스 D</span></h3>
+  <div class="sql"><pre><span class="k">CREATE INDEX CONCURRENTLY</span> idx_orders_pending_mod
+  <span class="k">ON</span> orders (modified_date <span class="k">DESC</span>, id <span class="k">DESC</span>)
+  <span class="k">WHERE</span> status = 'PENDING';</pre></div>
+  <p>인덱스 크기를 크게 줄일 수 있어 abort-early 플랜에 특히 효과적이다. 단, 쿼리의 WHERE 절이 인덱스의 <code>WHERE</code> 조건을 <strong>포함</strong>해야 플래너가 쓴다.</p>
+
+  <h3><span class="idx">4-4</span>deferred join — 번호 페이징 유지 / 조인이 있을 때 <span style="color:var(--ink-3);font-weight:400">· 케이스 C, F</span></h3>
+  <div class="sql"><pre><span class="k">SELECT</span> o.*, c.name
+<span class="k">FROM</span> (
+  <span class="k">SELECT</span> id, modified_date
+  <span class="k">FROM</span>   orders
+  <span class="k">WHERE</span>  status = 'Y'
+  <span class="k">ORDER BY</span> modified_date <span class="k">DESC</span>, id <span class="k">DESC</span>
+  <span class="k">LIMIT</span> 20 <span class="k">OFFSET</span> 500000
+) k
+<span class="k">JOIN</span> orders    o <span class="k">ON</span> o.id = k.id
+<span class="k">JOIN</span> customers c <span class="k">ON</span> c.id = o.customer_id
+<span class="k">ORDER BY</span> k.modified_date <span class="k">DESC</span>, k.id <span class="k">DESC</span>;</pre></div>
+  <p>서브쿼리는 커버링 인덱스만으로 처리되므로 버려질 50만 행에 대해 힙을 읽지 않는다. 조인도 최종 20건에만 걸린다. OFFSET 자체의 비용은 남지만 행당 비용이 크게 줄어든다.</p>
+
+  <h3><span class="idx">4-5</span>vacuum과 통계 <span style="color:var(--ink-3);font-weight:400">· 케이스 D, E</span></h3>
+  <div class="sql"><pre><span class="k">VACUUM</span> (ANALYZE) orders;
+
+<span class="c">-- 200만 건 테이블에 기본 scale_factor 0.2는 너무 느슨하다.</span>
+<span class="c">-- 40만 건이 변경돼야 autovacuum이 돈다는 뜻.</span>
+<span class="k">ALTER TABLE</span> orders <span class="k">SET</span> (
+  autovacuum_vacuum_scale_factor  = 0.02,
+  autovacuum_analyze_scale_factor = 0.01
+);</pre></div>
+  <p>컬럼 간 상관관계로 추정이 틀어진다면 — 케이스 D의 근본 원인일 수 있다:</p>
+  <div class="sql"><pre><span class="k">CREATE STATISTICS</span> st_orders_status_mod (dependencies, mcv)
+  <span class="k">ON</span> status, modified_date <span class="k">FROM</span> orders;
+<span class="k">ANALYZE</span> orders;
+
+<span class="c">-- 정렬 컬럼의 통계 해상도 상향</span>
+<span class="k">ALTER TABLE</span> orders <span class="k">ALTER COLUMN</span> modified_date <span class="k">SET STATISTICS</span> 500;
+<span class="k">ANALYZE</span> orders;</pre></div>
+
+  <h3><span class="idx">4-6</span>work_mem — 완화책 <span style="color:var(--ink-3);font-weight:400">· 케이스 B</span></h3>
+  <div class="sql"><pre><span class="c">-- 애플리케이션에서 해당 쿼리 직전에만</span>
+<span class="k">SET LOCAL</span> work_mem = '128MB';
+
+<span class="c">-- 또는 배치 전용 롤에만</span>
+<span class="k">ALTER ROLE</span> batch_user <span class="k">SET</span> work_mem = '256MB';</pre></div>
+
+  <h3><span class="idx">4-7</span>총건수 COUNT 분리</h3>
+  <p>페이징 화면이 느린 원인이 <code>ORDER BY</code> 쿼리가 아니라 같은 화면에서 도는 <code>SELECT COUNT(*)</code>인 경우가 흔하다. <strong>두 쿼리의 소요 시간을 따로 재고 시작한다.</strong> 대안은 <code>LIMIT 21</code>로 조회해 "다음 페이지 있음"만 판단하거나, 근사치를 쓰는 것:</p>
+  <div class="sql"><pre><span class="k">SELECT</span> reltuples::bigint <span class="k">AS</span> approx_rows
+<span class="k">FROM</span>   pg_class <span class="k">WHERE</span> relname = 'orders';</pre></div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="s5">
+  <div class="sechead"><span class="step">5단계</span><h2>검증</h2></div>
+  <p class="subline">고쳤다고 말하기 전에 이 여섯 개를 확인한다.</p>
+  <ol>
+    <li><code>Sort</code> 노드가 사라졌는가 — 또는 <code>top-N heapsort</code>로 축소됐는가</li>
+    <li><code>Buffers: read=</code>가 줄었는가. <strong>실행 시간보다 이 수치가 신뢰할 만하다.</strong> 캐시 상태에 덜 흔들린다.</li>
+    <li><code>Rows Removed by Filter</code>가 반환 행 수 수준으로 내려왔는가</li>
+    <li>페이징이라면 <strong>마지막 페이지</strong>로 테스트했는가. 첫 페이지는 어떤 방식이든 빠르다.</li>
+    <li>새 인덱스가 실제로 쓰이는지 며칠 뒤 <code>pg_stat_user_indexes.idx_scan</code>으로 확인</li>
+    <li>인덱스 추가 후 INSERT/UPDATE 지연이 늘지 않았는지 확인</li>
+  </ol>
+</section>
+
+<!-- ============ dont ============ -->
+<section id="dont">
+  <div class="sechead"><span class="step">부록 I</span><h2>하지 말 것</h2></div>
+  <p class="subline">진단을 망치거나 운영을 위험하게 하는 것들.</p>
+  <ul class="dont">
+    <li><span class="x">×</span><span class="txt"><strong><code>ANALYZE</code> 없는 <code>EXPLAIN</code>으로 결론 내기.</strong> 추정치일 뿐이고, 이 문제의 핵심은 추정과 실제의 괴리다.</span></li>
+    <li><span class="x">×</span><span class="txt"><strong>실행 시간 1회 측정으로 판단하기.</strong> 캐시 상태에 따라 10배씩 흔들린다. 2회 실행 후 <code>Buffers</code>를 함께 본다.</span></li>
+    <li><span class="x">×</span><span class="txt"><strong>운영 DB에 <code>CONCURRENTLY</code> 없이 인덱스 생성.</strong> 생성이 끝날 때까지 쓰기가 막힌다.</span></li>
+    <li><span class="x">×</span><span class="txt"><strong><code>work_mem</code> 전역 상향.</strong> 접속 수 × 정렬 노드 수만큼 곱해진다.</span></li>
+    <li><span class="x">×</span><span class="txt"><strong>인덱스 무한 추가.</strong> 200만 건 테이블은 인덱스 하나당 쓰기 비용과 수십~수백 MB가 붙는다.</span></li>
+    <li><span class="x">×</span><span class="txt"><strong>OFFSET을 그대로 두고 인덱스만 추가.</strong> 깊은 페이지는 여전히 느리다.</span></li>
+    <li><span class="x">×</span><span class="txt"><strong><code>ORDER BY</code>에 함수·형변환 남기기.</strong> <code>modified_date</code> 컬럼 타입이 <code>text</code>라면 그것부터 고친다.</span></li>
+    <li><span class="x">×</span><span class="txt"><strong><code>SELECT *</code> 유지.</strong> 정렬 대상 행 폭(<code>width=</code>)과 정렬 후 힙 랜덤 액세스를 동시에 키운다.</span></li>
+  </ul>
+</section>
+
+<!-- ============ prompt ============ -->
+<section id="prompt">
+  <div class="sechead"><span class="step">부록 II</span><h2>AI에게 넘길 지시문</h2></div>
+  <p class="subline">꺾쇠 부분만 채워서 그대로 붙여넣는다.</p>
+  <div class="prompt"><pre>아래 조건에서 PostgreSQL의 느린 ORDER BY 쿼리를 진단해줘.
+
+<span class="fld">[환경]</span>
+- PostgreSQL <span class="ph">&lt;버전&gt;</span>
+- 테이블: <span class="ph">&lt;테이블명&gt;</span>, 약 200만 건
+- 정렬 기준: <span class="ph">&lt;수정일 컬럼&gt;</span> DESC
+- 기존 인덱스 정의:
+<span class="ph">&lt;\d+ 또는 pg_indexes 출력 붙여넣기&gt;</span>
+
+<span class="fld">[쿼리]</span>
+<span class="ph">&lt;SQL 붙여넣기&gt;</span>
+
+<span class="fld">[실행계획]</span>
+<span class="ph">&lt;EXPLAIN (ANALYZE, BUFFERS, SETTINGS) 결과 붙여넣기&gt;</span>
+
+<span class="fld">[요청]</span>
+1. 계획 트리에서 병목 노드를 지목하고, 그렇게 판단한 근거를 계획의 실제 수치로
+   제시할 것. (Sort Method / Rows Removed by Filter / Heap Fetches / Buffers /
+   추정 rows 대비 actual rows)
+2. 아래 중 어느 케이스인지 판정할 것:
+   A) 인덱스가 정렬에 사용되지 않음 (Sort 노드 존재)
+   B) 정렬이 work_mem을 초과해 디스크로 흐름
+   C) 깊은 OFFSET
+   D) abort-early 플랜 (LIMIT + 선택도 낮은 필터)
+   E) Index Only Scan인데 Heap Fetches가 큼
+   F) 조인 상대 테이블 컬럼으로 정렬
+3. 처방을 제시할 것. 인덱스라면 CREATE INDEX 문 전체를 쓰고 컬럼 순서를 그렇게
+   정한 이유를 밝힐 것. 정렬 컬럼 뒤에 PK 타이브레이커를 반드시 포함할 것.
+   운영 DB 전제이므로 CONCURRENTLY를 붙일 것.
+4. 쿼리 수정이 필요하면 수정 전/후 SQL을 모두 제시할 것.
+5. 적용 후 실행계획이 어떻게 바뀌어야 성공인지 명시할 것.
+   (사라져야 할 노드, 줄어야 할 수치)
+6. 추측하지 말 것. 판단에 필요한 정보가 부족하면 무엇이 더 필요한지 먼저 물을 것.</pre></div>
+</section>
+
+<footer>
+  예시 계획의 수치는 200만 건 테이블에서 나타나는 전형적인 형태를 재구성한 것으로, 판독 지점을 보여주기 위한 것이다. 실제 판정은 대상 DB의 <code>EXPLAIN (ANALYZE, BUFFERS)</code> 출력으로 한다.
+</footer>
+
+</div>
