@@ -74,6 +74,7 @@ import 'realgrid/dist/realgrid-white.css'
 import { showToast } from '@/utils/toastUtil.js'
 import { useTabStore } from '@/stores/tabStore.js'
 import { captureViewState, applyViewState } from '@/utils/realgridOps'
+import { GRID_ROW_HEIGHT, buildRowHeightOptions, warnIfRowHeightMismatch } from '@/utils/realgridRowHeight'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
 export default {
@@ -105,6 +106,13 @@ export default {
     useFooter: { type: Boolean, default: undefined },
     commitWhenLeave: { type: Boolean, default: undefined },
     rowResizable: { type: Boolean, default: undefined },
+    /**
+     * 행 높이(px). 행 높이는 반드시 이 prop 으로 정한다 — CSS 로 만들면 그리드가
+     * 모르는 높이가 생겨 셀 선택 표시가 행과 어긋난다(realgridRowHeight.js 참고).
+     *  -1 : 셀 내용에 맞춰 행마다 자동(이미지·버튼·여러 줄 텍스트가 있는 그리드)
+     *   0 : 폰트/padding 기준으로 그리드가 계산한 값으로 고정
+     */
+    rowHeight: { type: Number, default: GRID_ROW_HEIGHT },
     summaryMode: { type: String, default: undefined },
     groupPanelVisible: { type: Boolean, default: undefined },
     fitStyle: { type: String, default: 'evenFill' },
@@ -681,8 +689,12 @@ export default {
       this.applyControlBars(customOpts)
       this.gridView.setFooter({ visible: this.resolvedUseFooter, ...(customOpts.footer || {}) })
 
+      // 행 높이는 반드시 그리드에 알린다. CSS 로 행을 키우면 그리드가 모르는 높이가 생겨
+      // 셀 선택 표시가 행과 어긋난다(realgridRowHeight.js 참고).
+      const rowHeightOpts = buildRowHeightOptions(this.rowHeight)
+
       if (this.resolvedGroupPanelVisible) {
-        this.gridView.setDisplayOptions({ columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ ...rowHeightOpts, columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
         // 2단 상하 배치: 1단 상단 서브 툴바와 2단 RealGrid 순수 groupPanel이 각각 100% 가로 폭으로 독립 표출되도록 visible: true 적용
         this.gridView.setGroupPanel({ visible: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupPanel || {}) })
         this.gridView.setGroupingOptions({ enabled: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupingOptions || {}) })
@@ -694,7 +706,7 @@ export default {
           ...(customOpts.rowGroup || {})
         })
       } else {
-        this.gridView.setDisplayOptions({ fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ ...rowHeightOpts, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
       }
 
       if (this.gridId) {
@@ -706,6 +718,10 @@ export default {
       this.applyCellMerging()
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
+
+      // 개발 모드에서만: CSS 가 몰래 행을 키우고 있으면 경고한다. 이 어긋남은 조용해서
+      // (에러도 안 나고 행이 적으면 눈에도 안 띈다) 그냥 두면 한참 뒤에 발견된다.
+      warnIfRowHeightMismatch(this.gridView, this.$el, 'RealGridCommonVue')
     }
   }
 }
