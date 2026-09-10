@@ -65,16 +65,10 @@ export default {
     this.fetchPosts()
   },
   activated() {
-    // keep-alive 사용 시 페이지 재진입할 때마다 목록 새로고침
-    this.fetchPosts()
-  },
-  watch: {
-    // 라우트 변경 감지하여 목록 새로고침
-    $route(to, from) {
-      if (to.path === '/posts' && from.path.startsWith('/posts/')) {
-        this.fetchPosts()
-      }
-    },
+    // keep-alive 캐시에서 다시 꺼내질 때마다 목록 새로고침 (상세/작성에서 돌아온 경우 등).
+    // activated 는 최초 마운트 직후에도 한 번 불리는데, 그때는 mounted 가 이미 조회했다.
+    if (this.activatedOnce) this.fetchPosts()
+    this.activatedOnce = true
   },
   methods: {
     formatDate,
