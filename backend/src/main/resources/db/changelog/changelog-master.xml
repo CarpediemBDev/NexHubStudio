@@ -11,6 +11,7 @@
     <include file="db/changelog/ddl/v1.2-add-parent-id-to-common-code.xml"/>
     <include file="db/changelog/ddl/v20251204-add-is-public-to-posts.xml"/>
     <include file="db/changelog/v20251204-change-is-public-to-string.xml"/>
+    <include file="db/changelog/ddl/v20260913-create-regulation-tables.xml"/>
 
     <!-- DML: 공통코드 초기 데이터 (운영 필수) -->
     <include file="db/changelog/dml/seed-common-codes.xml"/>
@@ -18,5 +19,6 @@
 
     <!-- DML: 샘플 데이터 (개발/테스트 환경만) -->
     <include file="db/changelog/dml/seed-sample-data.xml"/>
+    <include file="db/changelog/dml/seed-regulation-sample.xml"/>
 
 </databaseChangeLog>

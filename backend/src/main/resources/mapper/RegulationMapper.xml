@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 규격/규제 정보. 컬럼 → 필드는 mapUnderscoreToCamelCase 로 매핑 -->
+<mapper namespace="com.nexhubstudio.backend.mapper.RegulationMapper">
+
+    <!-- ================= 스냅샷 조회 ================= -->
+
+    <select id="findAllRecords" resultType="RegInfo">
+        SELECT * FROM reg_info ORDER BY reg_info_id
+    </select>
+
+    <select id="findAllTargets" resultType="RegInfoTarget">
+        SELECT * FROM reg_info_target ORDER BY reg_info_id, target_type, level_no, target_cd
+    </select>
+
+    <select id="findAllItems" resultType="RegInfoItem">
+        SELECT * FROM reg_info_item ORDER BY reg_info_id, level_no, sort_order, item_id
+    </select>
+
+    <select id="findAllHistories" resultType="RegInfoHist">
+        SELECT * FROM reg_info_hist ORDER BY hist_id
+    </select>
+
+    <select id="findAllConflicts" resultType="RegConflictHist">
+        SELECT * FROM reg_conflict_hist ORDER BY conflict_id
+    </select>
+
+    <select id="findAllAttachments" resultType="RegAttachFile">
+        SELECT r.reg_info_id,
+               f.id            AS file_id,
+               f.original_name,
+               f.file_size
+          FROM reg_info r
+          JOIN files f
+            ON f.file_group_id = r.attach_group_id
+           AND f.del_yn = 'N'
+         ORDER BY r.reg_info_id, f.id
+    </select>
+
+    <!-- ================= 레코드 ================= -->
+
+    <select id="findRecordById" parameterType="long" resultType="RegInfo">
+        SELECT * FROM reg_info WHERE reg_info_id = #{regInfoId}
+    </select>
+
+    <insert id="insertRecord" parameterType="RegInfo" useGeneratedKeys="true" keyProperty="regInfoId" keyColumn="reg_info_id">
+        INSERT INTO reg_info (
+            reg_no, title, field_cd, mark_nm, authority, url, summary,
+            status_cd, version_no, effective_dt, attach_group_id,
+            created_by, created_at, updated_by, updated_at
+        ) VALUES (
+            #{regNo}, #{title}, #{fieldCd}, #{markNm}, #{authority}, #{url}, #{summary},
+            #{statusCd}, #{versionNo}, #{effectiveDt}, #{attachGroupId},
+            #{createdBy}, CURRENT_TIMESTAMP, #{updatedBy}, CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 버전 증가를 UPDATE 한 문장 안에서 해서 동시 수정 시에도 번호가 겹치지 않게 한다 -->
+    <update id="updateRecordAsNewVersion" parameterType="RegInfo">
+        UPDATE reg_info
+           SET title           = #{title},
+               field_cd        = #{fieldCd},
+               mark_nm         = #{markNm},
+               authority       = #{authority},
+               url             = #{url},
+               summary         = #{summary},
+               status_cd       = #{statusCd},
+               effective_dt    = #{effectiveDt},
+               attach_group_id = #{attachGroupId},
+               version_no      = version_no + 1,
+               updated_by      = #{updatedBy},
+               updated_at      = CURRENT_TIMESTAMP
+         WHERE reg_info_id = #{regInfoId}
+    </update>
+
+    <update id="expireRecord">
+        UPDATE reg_info
+           SET status_cd  = 'EXPIRED',
+               version_no = version_no + 1,
+               updated_by = #{userId},
+               updated_at = CURRENT_TIMESTAMP
+         WHERE reg_info_id = #{regInfoId}
+    </update>
+
+    <!-- ================= 적용 대상 ================= -->
+
+    <select id="findTargetsByRecord" parameterType="long" resultType="RegInfoTarget">
+        SELECT * FROM reg_info_target
+         WHERE reg_info_id = #{regInfoId}
+         ORDER BY target_type, level_no, target_cd
+    </select>
+
+    <delete id="deleteTargetsByRecord" parameterType="long">
+        DELETE FROM reg_info_target WHERE reg_info_id = #{regInfoId}
+    </delete>
+
+    <insert id="insertTargets">
+        INSERT INTO reg_info_target (reg_info_id, target_type, target_cd, level_no, exclude_yn)
+        VALUES
+        <foreach collection="targets" item="t" separator=",">
+            (#{t.regInfoId}, #{t.targetType}, #{t.targetCd}, #{t.levelNo}, #{t.excludeYn})
+        </foreach>
+    </insert>
+
+    <!-- ================= 정보관리항목 ================= -->
+
+    <select id="findItemsByRecord" parameterType="long" resultType="RegInfoItem">
+        SELECT * FROM reg_info_item WHERE reg_info_id = #{regInfoId}
+    </select>
+
+    <insert id="insertItem" parameterType="RegInfoItem" useGeneratedKeys="true" keyProperty="itemId" keyColumn="item_id">
+        INSERT INTO reg_info_item (
+            reg_info_id, parent_item_id, item_type_cd, item_cd, level_no, mandatory_yn, remark, sort_order
+        ) VALUES (
+            #{regInfoId}, #{parentItemId}, #{itemTypeCd}, #{itemCd}, #{levelNo}, #{mandatoryYn}, #{remark}, #{sortOrder}
+        )
+    </insert>
+
+    <update id="updateItem" parameterType="RegInfoItem">
+        UPDATE reg_info_item
+           SET parent_item_id = #{parentItemId},
+               item_type_cd   = #{itemTypeCd},
+               item_cd        = #{itemCd},
+               level_no       = #{levelNo},
+               mandatory_yn   = #{mandatoryYn},
+               remark         = #{remark},
+               sort_order     = #{sortOrder}
+         WHERE item_id = #{itemId}
+           AND reg_info_id = #{regInfoId}
+    </update>
+
+    <delete id="deleteItem" parameterType="long">
+        DELETE FROM reg_info_item WHERE item_id = #{itemId}
+    </delete>
+
+    <!-- ================= 이력 ================= -->
+
+    <insert id="insertHistory" parameterType="RegInfoHist" useGeneratedKeys="true" keyProperty="histId" keyColumn="hist_id">
+        INSERT INTO reg_info_hist (
+            reg_info_id, version_no, change_type, change_note, snapshot_json,
+            master_changed_yn, changed_item_ids, reg_id, reg_dt
+        ) VALUES (
+            #{regInfoId}, #{versionNo}, #{changeType}, #{changeNote}, #{snapshotJson},
+            #{masterChangedYn}, #{changedItemIds}, #{regId}, CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!--
+        덮어쓰기 직전 버전 값을 그 버전 이력에 남긴다(스냅샷 없이 이관된 과거 이력 대비).
+        같은 버전에 KEEP_BOTH 이력이 뒤따라 붙을 수 있으므로 그 버전의 "첫" 이력에만 채운다.
+    -->
+    <update id="fillSnapshotIfEmpty">
+        UPDATE reg_info_hist
+           SET snapshot_json = #{snapshotJson}
+         WHERE hist_id = (
+                   SELECT MIN(h.hist_id)
+                     FROM reg_info_hist h
+                    WHERE h.reg_info_id = #{regInfoId}
+                      AND h.version_no = #{versionNo}
+               )
+           AND snapshot_json IS NULL
+    </update>
+
+    <insert id="insertConflict" parameterType="RegConflictHist" useGeneratedKeys="true" keyProperty="conflictId" keyColumn="conflict_id">
+        INSERT INTO reg_conflict_hist (
+            new_reg_info_id, new_reg_no, exist_reg_info_id, exist_reg_no,
+            conflict_type, conflict_axis, new_scope_txt, exist_scope_txt,
+            decision_cd, decision_note, detect_dt, decide_id, decide_dt, status_cd
+        ) VALUES (
+            #{newRegInfoId}, #{newRegNo}, #{existRegInfoId}, #{existRegNo},
+            #{conflictType}, #{conflictAxis}, #{newScopeTxt}, #{existScopeTxt},
+            #{decisionCd}, #{decisionNote}, #{detectDt}, #{decideId}, #{decideDt}, #{statusCd}
+        )
+    </insert>
+
+    <!-- ================= 규제번호 채번 ================= -->
+
+    <update id="increaseRegNoSeq" parameterType="int">
+        UPDATE reg_no_seq SET last_no = last_no + 1 WHERE seq_year = #{seqYear}
+    </update>
+
+    <insert id="insertRegNoSeq" parameterType="int">
+        INSERT INTO reg_no_seq (seq_year, last_no) VALUES (#{seqYear}, 1)
+    </insert>
+
+    <select id="findRegNoSeq" parameterType="int" resultType="int">
+        SELECT last_no FROM reg_no_seq WHERE seq_year = #{seqYear}
+    </select>
+
+    <!-- ================= 첨부 연계 ================= -->
+
+    <select id="countFilesInGroup" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM files WHERE file_group_id = #{fileGroupId} AND del_yn = 'N'
+    </select>
+
+    <update id="attachFilesToGroup">
+        UPDATE files
+           SET file_group_id = #{fileGroupId}, del_yn = 'N'
+         WHERE id IN
+        <foreach collection="fileIds" item="fid" open="(" separator="," close=")">
+            #{fid}
+        </foreach>
+    </update>
+
+    <update id="detachFilesNotIn">
+        UPDATE files
+           SET del_yn = 'Y'
+         WHERE file_group_id = #{fileGroupId}
+           AND del_yn = 'N'
+        <if test="fileIds != null and fileIds.size() > 0">
+           AND id NOT IN
+            <foreach collection="fileIds" item="fid" open="(" separator="," close=")">
+                #{fid}
+            </foreach>
+        </if>
+    </update>
+
+</mapper>

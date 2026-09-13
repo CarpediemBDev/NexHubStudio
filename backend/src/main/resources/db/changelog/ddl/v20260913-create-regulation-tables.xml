@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        규격/규제 정보 관리 (설계: docs/규격규제_정보관리_설계.md)
+
+        reg_info ─┬─< reg_info_target      적용 대상 (사업부·제품군·제품·권역·국가)
+                  ├─< reg_info_item        정보관리항목 (규제 › 규격 › 인증서, 자기참조)
+                  ├─< reg_info_hist        변경이력 (append-only, 스냅샷)
+                  └─< reg_conflict_hist    충돌 판정 + 조치
+        reg_no_seq                          연도별 규제번호 채번 (보조)
+
+        첨부는 별도 테이블 없이 files.file_group_id 로 연계한다.
+        코드값(분야·사업부·권역·국가·규제·규격·인증서)은 common_code 로 옮길 예정이라 FK 를 걸지 않는다.
+    -->
+
+    <!-- 정보 레코드: 항상 현재 값만. 수정은 UPDATE + version_no 증가, 과거 값은 reg_info_hist 스냅샷에 -->
+    <changeSet id="20260913-1-create-reg-info" author="dev">
+        <createTable tableName="reg_info">
+            <column name="reg_info_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="reg_no" type="varchar(20)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_reg_info_reg_no"/>
+            </column>
+            <column name="title" type="varchar(300)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- 분야는 단일 값. 충돌 판정의 1차 필터로 쓴다 -->
+            <column name="field_cd" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mark_nm" type="varchar(300)"/>
+            <column name="authority" type="varchar(300)"/>
+            <column name="url" type="varchar(1000)"/>
+            <column name="summary" type="text"/>
+            <!-- DRAFT / REVIEW / ACTIVE / EXPIRED. 폐지는 물리 삭제 없이 EXPIRED -->
+            <column name="status_cd" type="varchar(20)" defaultValue="DRAFT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_no" type="int" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="effective_dt" type="date"/>
+            <column name="attach_group_id" type="varchar(50)"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_by" type="varchar(50)"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+
+        <createIndex tableName="reg_info" indexName="idx_reg_info_field">
+            <column name="field_cd"/>
+        </createIndex>
+        <createIndex tableName="reg_info" indexName="idx_reg_info_status">
+            <column name="status_cd"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 적용 대상 멀티셀렉트. 저장 단위는 레코드 전체라 전량 DELETE → INSERT -->
+    <changeSet id="20260913-2-create-reg-info-target" author="dev">
+        <createTable tableName="reg_info_target">
+            <column name="reg_info_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <!-- DIVISION / PRODUCT_GROUP / PRODUCT / REGION / COUNTRY -->
+            <column name="target_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_cd" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- 축 안에서의 깊이. GEO: 권역1 > 국가2, ORG: 사업부1 > 제품군2 > 제품3. 충돌 판정이 본다 -->
+            <column name="level_no" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <!-- 충돌 조치 EXCLUDE 의 결과 ("유럽 전체, 단 프랑스 제외") -->
+            <column name="exclude_yn" type="char(1)" defaultValue="N">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="reg_info_target"
+                       columnNames="reg_info_id, target_type, target_cd"
+                       constraintName="pk_reg_info_target"/>
+
+        <addForeignKeyConstraint baseTableName="reg_info_target" baseColumnNames="reg_info_id"
+                                 referencedTableName="reg_info" referencedColumnNames="reg_info_id"
+                                 constraintName="fk_reg_target_info" onDelete="CASCADE"/>
+
+        <!-- "이 국가에 걸린 규제" 역조회 -->
+        <createIndex tableName="reg_info_target" indexName="idx_reg_target_cd">
+            <column name="target_type"/>
+            <column name="target_cd"/>
+        </createIndex>
+    </changeSet>
+
+    <!--
+        정보관리항목: 규제(1) > 규격(2) > 인증서(3) 트리.
+        저장은 upsert(기존 id UPDATE / 신규 INSERT / 빠진 id DELETE).
+        전량 DELETE → INSERT 로 하면 id 가 바뀌어 reg_info_hist.changed_item_ids 가 끊긴다.
+    -->
+    <changeSet id="20260913-3-create-reg-info-item" author="dev">
+        <createTable tableName="reg_info_item">
+            <column name="item_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="reg_info_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_item_id" type="bigint"/>
+            <!-- REGULATION / STANDARD / CERT -->
+            <column name="item_type_cd" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_cd" type="varchar(50)"/>
+            <column name="level_no" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mandatory_yn" type="char(1)" defaultValue="Y">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remark" type="varchar(1000)"/>
+            <column name="sort_order" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="reg_info_item" baseColumnNames="reg_info_id"
+                                 referencedTableName="reg_info" referencedColumnNames="reg_info_id"
+                                 constraintName="fk_reg_item_info" onDelete="CASCADE"/>
+
+        <!-- 부모 삭제 시 자식은 서비스가 먼저 지운다(leaf 부터). DB 에서 CASCADE 로 조용히 지우지 않는다 -->
+        <addForeignKeyConstraint baseTableName="reg_info_item" baseColumnNames="parent_item_id"
+                                 referencedTableName="reg_info_item" referencedColumnNames="item_id"
+                                 constraintName="fk_reg_item_parent"/>
+
+        <createIndex tableName="reg_info_item" indexName="idx_reg_item_info">
+            <column name="reg_info_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!--
+        변경이력: append-only.
+        (reg_info_id, version_no) 에 유니크를 걸지 않는다 — 충돌 조치 KEEP_BOTH 는
+        기존 레코드의 버전을 올리지 않고 CONFLICT_RESOLVE 이력만 남기므로 같은 버전이 두 줄 생긴다.
+    -->
+    <changeSet id="20260913-4-create-reg-info-hist" author="dev">
+        <createTable tableName="reg_info_hist">
+            <column name="hist_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="reg_info_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_no" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <!-- INSERT / UPDATE / DELETE / CONFLICT_RESOLVE -->
+            <column name="change_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="change_note" type="varchar(1000)"/>
+            <!-- 그 버전의 기본정보 값(편집 폼과 같은 모양). 타겟이 멀티행이라 컬럼 diff 로는 복원 불가 -->
+            <column name="snapshot_json" type="text"/>
+            <!-- '이 항목' 이력 필터용. 과거 이관분은 NULL(=알 수 없음) -->
+            <column name="master_changed_yn" type="char(1)"/>
+            <!-- 변경된 항목 id JSON 배열. 한 레코드 이력 안에서만 거르므로 별도 테이블로 빼지 않는다 -->
+            <column name="changed_item_ids" type="varchar(4000)"/>
+            <column name="reg_id" type="varchar(50)"/>
+            <column name="reg_dt" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="reg_info_hist" baseColumnNames="reg_info_id"
+                                 referencedTableName="reg_info" referencedColumnNames="reg_info_id"
+                                 constraintName="fk_reg_hist_info"/>
+
+        <createIndex tableName="reg_info_hist" indexName="idx_reg_hist_info_ver">
+            <column name="reg_info_id"/>
+            <column name="version_no"/>
+        </createIndex>
+    </changeSet>
+
+    <!--
+        충돌 판정 이력. 등록을 취소해도 행을 남긴다(new_reg_info_id = NULL, status_cd = IGNORED).
+        왜 등록하지 않았는지가 감사 대상이다.
+    -->
+    <changeSet id="20260913-5-create-reg-conflict-hist" author="dev">
+        <createTable tableName="reg_conflict_hist">
+            <column name="conflict_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="new_reg_info_id" type="bigint"/>
+            <column name="new_reg_no" type="varchar(20)"/>
+            <column name="exist_reg_info_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exist_reg_no" type="varchar(20)"/>
+            <!-- SAME / PARENT / CHILD / OVERLAP -->
+            <column name="conflict_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- GEO / ORG / RULE -->
+            <column name="conflict_axis" type="varchar(20)"/>
+            <column name="new_scope_txt" type="varchar(1000)"/>
+            <column name="exist_scope_txt" type="varchar(1000)"/>
+            <column name="decision_cd" type="varchar(20)"/>
+            <column name="decision_note" type="varchar(1000)"/>
+            <column name="detect_dt" type="timestamp"/>
+            <column name="decide_id" type="varchar(50)"/>
+            <column name="decide_dt" type="timestamp"/>
+            <!-- RESOLVED / IGNORED -->
+            <column name="status_cd" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="reg_conflict_hist" baseColumnNames="new_reg_info_id"
+                                 referencedTableName="reg_info" referencedColumnNames="reg_info_id"
+                                 constraintName="fk_reg_conflict_new"/>
+        <addForeignKeyConstraint baseTableName="reg_conflict_hist" baseColumnNames="exist_reg_info_id"
+                                 referencedTableName="reg_info" referencedColumnNames="reg_info_id"
+                                 constraintName="fk_reg_conflict_exist"/>
+
+        <createIndex tableName="reg_conflict_hist" indexName="idx_reg_conflict_new">
+            <column name="new_reg_info_id"/>
+        </createIndex>
+        <createIndex tableName="reg_conflict_hist" indexName="idx_reg_conflict_exist">
+            <column name="exist_reg_info_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!--
+        규제번호 채번: REG-{연도}-{연도별 4자리 순번}.
+        MAX(reg_no)+1 은 동시 저장 시 같은 번호가 나오고, PostgreSQL 은 집계에 FOR UPDATE 를 못 건다.
+        연도 행을 UPDATE 로 잠그고 올리는 방식이라 DB 종류와 무관하게 안전하다.
+    -->
+    <changeSet id="20260913-6-create-reg-no-seq" author="dev">
+        <createTable tableName="reg_no_seq">
+            <column name="seq_year" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="last_no" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

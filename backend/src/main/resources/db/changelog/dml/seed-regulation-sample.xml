@@ -1,0 +1,3405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        규격/규제 샘플 데이터 (개발/테스트용)
+        프론트 목업 src/data/regulationMock.js 와 동일한 데이터다. 목업 모드와 실제 모드에서 같은 화면이 나오게 한다.
+        손으로 고치지 말고 목업을 고친 뒤 재생성할 것.
+    -->
+
+    <changeSet id="20260913-seed-1-reg-info" author="dev">
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="reg_no" value="REG-2026-0001"/>
+            <column name="title" value="KC 안전확인 (전기용품 및 생활용품 안전관리법)"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="KC 마크 + 안전확인신고번호"/>
+            <column name="authority" value="국가기술표준원(KATS) / 지정 시험기관"/>
+            <column name="url" value="https://www.law.go.kr/법령/전기용품및생활용품안전관리법"/>
+            <column name="summary" value="TV는 안전확인대상 전기용품. 지정 시험기관 시험 후 안전확인신고 → KC 마크와 신고번호를 제품·포장·설명서에 표시."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="3"/>
+            <column name="effective_dt" valueDate="2026-01-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_1"/>
+            <column name="created_by" value="kim.reg"/>
+            <column name="created_at" valueDate="2026-07-14T00:00:00"/>
+            <column name="updated_by" value="kim.reg"/>
+            <column name="updated_at" valueDate="2026-07-14T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="reg_no" value="REG-2026-0002"/>
+            <column name="title" value="방송통신기자재 적합성평가(적합등록) - EMC"/>
+            <column name="field_cd" value="EMC"/>
+            <column name="mark_nm" value="KC 마크 + 적합성평가 식별부호"/>
+            <column name="authority" value="국립전파연구원(RRA)"/>
+            <column name="url" value="https://www.rra.go.kr"/>
+            <column name="summary" value="KN 32(방사) / KN 35(내성) 시험 후 적합등록. 식별부호를 제품 라벨에 표기해야 판매 가능."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="effective_dt" valueDate="2025-07-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_2"/>
+            <column name="created_by" value="kim.reg"/>
+            <column name="created_at" valueDate="2026-03-02T00:00:00"/>
+            <column name="updated_by" value="kim.reg"/>
+            <column name="updated_at" valueDate="2026-03-02T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="reg_no" value="REG-2026-0003"/>
+            <column name="title" value="무선설비 적합인증 (Wi-Fi / Bluetooth 내장 모델)"/>
+            <column name="field_cd" value="RF"/>
+            <column name="mark_nm" value="KC 마크 + 적합인증 식별부호"/>
+            <column name="authority" value="국립전파연구원(RRA)"/>
+            <column name="url" value="https://www.rra.go.kr/ko/license/A_b_popup.do"/>
+            <column name="summary" value="무선 모듈 내장 TV는 EMC 적합등록과 별도로 무선설비 적합인증 필요. 모듈 인증 승계 시 서류 심사."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-04-01"/>
+            <column name="created_by" value="park.cert"/>
+            <column name="created_at" valueDate="2025-12-11T00:00:00"/>
+            <column name="updated_by" value="park.cert"/>
+            <column name="updated_at" valueDate="2025-12-11T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="reg_no" value="REG-2026-0004"/>
+            <column name="title" value="에너지소비효율등급 표시 (효율관리기자재)"/>
+            <column name="field_cd" value="ENERGY"/>
+            <column name="mark_nm" value="에너지소비효율등급 라벨(1~5등급)"/>
+            <column name="authority" value="한국에너지공단"/>
+            <column name="url" value="https://eep.energy.or.kr"/>
+            <column name="summary" value="TV는 효율관리기자재. 신고 후 등급 라벨을 제품 전면·포장·온라인 상세페이지에 표시. 최저효율기준 미달 시 판매 금지."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="4"/>
+            <column name="effective_dt" valueDate="2026-04-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_4"/>
+            <column name="created_by" value="lee.energy"/>
+            <column name="created_at" valueDate="2026-08-05T00:00:00"/>
+            <column name="updated_by" value="lee.energy"/>
+            <column name="updated_at" valueDate="2026-08-05T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="reg_no" value="REG-2026-0005"/>
+            <column name="title" value="대기전력저감프로그램 (경고표지/에너지절약마크)"/>
+            <column name="field_cd" value="ENERGY"/>
+            <column name="mark_nm" value="에너지절약마크 또는 대기전력 경고표지"/>
+            <column name="authority" value="한국에너지공단"/>
+            <column name="url" value="https://eep.energy.or.kr/standby/standby_intro.aspx"/>
+            <column name="summary" value="대기전력저감대상제품. 기준 만족 시 에너지절약마크, 미달 시 경고표지 부착 의무."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-01-01"/>
+            <column name="created_by" value="lee.energy"/>
+            <column name="created_at" valueDate="2025-09-22T00:00:00"/>
+            <column name="updated_by" value="lee.energy"/>
+            <column name="updated_at" valueDate="2025-09-22T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="reg_no" value="REG-2026-0006"/>
+            <column name="title" value="K-RoHS 유해물질 사용제한"/>
+            <column name="field_cd" value="ENV"/>
+            <column name="mark_nm" value="해당 없음(자료 보관 의무)"/>
+            <column name="authority" value="환경부 / 한국환경산업기술원"/>
+            <column name="url" value="https://www.law.go.kr/법령/전기전자제품및자동차의자원순환에관한법률"/>
+            <column name="summary" value="납·카드뮴·수은·6가크롬·PBB·PBDE 6종 함유 제한. 시험성적서와 물질 정보를 보관·제출."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="effective_dt" valueDate="2025-01-01"/>
+            <column name="created_by" value="choi.env"/>
+            <column name="created_at" valueDate="2026-02-17T00:00:00"/>
+            <column name="updated_by" value="choi.env"/>
+            <column name="updated_at" valueDate="2026-02-17T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="reg_no" value="REG-2026-0007"/>
+            <column name="title" value="생산자책임재활용(EPR) 분담금 납부"/>
+            <column name="field_cd" value="RECYCLE"/>
+            <column name="mark_nm" value="해당 없음"/>
+            <column name="authority" value="한국전자제품자원순환공제조합"/>
+            <column name="url" value="https://www.15782114.or.kr"/>
+            <column name="summary" value="출고량 기준 재활용의무량 산정 후 분담금 납부. 미이행 시 재활용부과금."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-01-01"/>
+            <column name="created_by" value="choi.env"/>
+            <column name="created_at" valueDate="2025-11-30T00:00:00"/>
+            <column name="updated_by" value="choi.env"/>
+            <column name="updated_at" valueDate="2025-11-30T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="reg_no" value="REG-2026-0008"/>
+            <column name="title" value="분리배출 표시 의무"/>
+            <column name="field_cd" value="LABEL"/>
+            <column name="mark_nm" value="분리배출 표시(재질별 삼각 마크)"/>
+            <column name="authority" value="환경부"/>
+            <column name="url" value="https://www.me.go.kr"/>
+            <column name="summary" value="포장재 재질별 분리배출 마크를 표시. 표시 위치·크기 규격 준수."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2024-01-01"/>
+            <column name="created_by" value="choi.env"/>
+            <column name="created_at" valueDate="2025-06-18T00:00:00"/>
+            <column name="updated_by" value="choi.env"/>
+            <column name="updated_at" valueDate="2025-06-18T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="reg_no" value="REG-2026-0009"/>
+            <column name="title" value="지상파 UHD(ATSC 3.0) 수신 규격 대응"/>
+            <column name="field_cd" value="BROADCAST"/>
+            <column name="mark_nm" value="UHD 수신 적합 표시(권고)"/>
+            <column name="authority" value="과학기술정보통신부 / TTA"/>
+            <column name="url" value="https://www.tta.or.kr"/>
+            <column name="summary" value="국내 판매 TV의 지상파 UHD 수신 규격. 튜너·자막·재난경보(AEA) 수신 기능 확인."/>
+            <column name="status_cd" value="REVIEW"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="effective_dt" valueDate="2026-09-01"/>
+            <column name="created_by" value="jung.dev"/>
+            <column name="created_at" valueDate="2026-08-11T00:00:00"/>
+            <column name="updated_by" value="jung.dev"/>
+            <column name="updated_at" valueDate="2026-08-11T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="reg_no" value="REG-2026-0010"/>
+            <column name="title" value="한글 표시사항 / 제품안전정보 표시"/>
+            <column name="field_cd" value="LABEL"/>
+            <column name="mark_nm" value="한글 표시 라벨"/>
+            <column name="authority" value="국가기술표준원 / 공정거래위원회"/>
+            <column name="url" value="https://www.safetykorea.kr"/>
+            <column name="summary" value="모델명, 정격, 제조자, 수입자, A/S 연락처, 제조연월 등 한글 표시 의무."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2024-07-01"/>
+            <column name="created_by" value="kim.reg"/>
+            <column name="created_at" valueDate="2025-08-01T00:00:00"/>
+            <column name="updated_by" value="kim.reg"/>
+            <column name="updated_at" valueDate="2025-08-01T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="reg_no" value="REG-2026-0011"/>
+            <column name="title" value="K-REACH 등록·신고 (화학물질)"/>
+            <column name="field_cd" value="CHEM"/>
+            <column name="mark_nm" value="해당 없음"/>
+            <column name="authority" value="환경부 / 화학물질관리협회"/>
+            <column name="url" value="https://kreach.me.go.kr"/>
+            <column name="summary" value="연간 1톤 이상 신규/기존 화학물질 사용 시 등록. TV는 부품 소재 기준 확인 필요."/>
+            <column name="status_cd" value="DRAFT"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2026-01-01"/>
+            <column name="created_by" value="choi.env"/>
+            <column name="created_at" valueDate="2026-06-09T00:00:00"/>
+            <column name="updated_by" value="choi.env"/>
+            <column name="updated_at" valueDate="2026-06-09T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="reg_no" value="REG-2025-0087"/>
+            <column name="title" value="CE 저전압지침(LVD) - 프랑스 특례"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="CE 마크"/>
+            <column name="authority" value="EU Commission / 프랑스 DGCCRF"/>
+            <column name="url" value="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014L0035"/>
+            <column name="summary" value="프랑스 판매 모델 대상 LVD 대응. 프랑스어 안전 문구 및 현지 A/S 정보 추가 표시."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="effective_dt" valueDate="2025-11-03"/>
+            <column name="attach_group_id" value="FG_REG_SEED_12"/>
+            <column name="created_by" value="yoon.eu"/>
+            <column name="created_at" valueDate="2026-01-20T00:00:00"/>
+            <column name="updated_by" value="yoon.eu"/>
+            <column name="updated_at" valueDate="2026-01-20T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="reg_no" value="REG-2025-0091"/>
+            <column name="title" value="EU 에너지라벨 (전자 디스플레이)"/>
+            <column name="field_cd" value="ENERGY"/>
+            <column name="mark_nm" value="EU 에너지라벨 + QR(EPREL)"/>
+            <column name="authority" value="EU Commission"/>
+            <column name="url" value="https://eprel.ec.europa.eu"/>
+            <column name="summary" value="EPREL DB 등록 후 라벨·제품정보시트 제공. 라벨 QR 코드 필수."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-03-01"/>
+            <column name="created_by" value="yoon.eu"/>
+            <column name="created_at" valueDate="2025-10-15T00:00:00"/>
+            <column name="updated_by" value="yoon.eu"/>
+            <column name="updated_at" valueDate="2025-10-15T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="reg_no" value="REG-2026-0021"/>
+            <column name="title" value="EU EMC 지침 (EN 55032/55035)"/>
+            <column name="field_cd" value="EMC"/>
+            <column name="mark_nm" value="CE 마크"/>
+            <column name="authority" value="EU Commission"/>
+            <column name="url" value="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014L0030"/>
+            <column name="summary" value="유럽 전 권역 공통 EMC 요구사항. DoC 문서 보관 의무."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2026-02-01"/>
+            <column name="created_by" value="yoon.eu"/>
+            <column name="created_at" valueDate="2026-05-26T00:00:00"/>
+            <column name="updated_by" value="yoon.eu"/>
+            <column name="updated_at" valueDate="2026-05-26T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="reg_no" value="REG-2026-0031"/>
+            <column name="title" value="ASEAN EMC 상호인정협정(MRA) 적합성"/>
+            <column name="field_cd" value="EMC"/>
+            <column name="mark_nm" value="국가별 EMC 인증 마크"/>
+            <column name="authority" value="ASEAN 전기전자 협의체(ACCSQ)"/>
+            <column name="url" value="https://asean.org"/>
+            <column name="summary" value="ASEAN MRA 지정 시험소 성적서로 회원국 EMC 인증을 받는다. 한·중·일 외 아시아 권역 판매 모델 공통."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2026-03-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_15"/>
+            <column name="created_by" value="lee.asia"/>
+            <column name="created_at" valueDate="2026-06-18T00:00:00"/>
+            <column name="updated_by" value="lee.asia"/>
+            <column name="updated_at" valueDate="2026-06-18T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="reg_no" value="REG-2026-0032"/>
+            <column name="title" value="일본 PSE (전기용품안전법)"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="PSE 마크(원형)"/>
+            <column name="authority" value="일본 경제산업성(METI)"/>
+            <column name="url" value="https://www.meti.go.jp"/>
+            <column name="summary" value="TV는 비특정전기용품. 자기확인 후 원형 PSE 마크와 사업자명 표시."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-09-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_16"/>
+            <column name="created_by" value="lee.asia"/>
+            <column name="created_at" valueDate="2026-02-10T00:00:00"/>
+            <column name="updated_by" value="lee.asia"/>
+            <column name="updated_at" valueDate="2026-02-10T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="reg_no" value="REG-2026-0033"/>
+            <column name="title" value="중국 CCC 강제인증"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="CCC 마크"/>
+            <column name="authority" value="중국 국가인증인가감독관리위원회(CNCA)"/>
+            <column name="url" value="https://www.cnca.gov.cn"/>
+            <column name="summary" value="지정 인증기관 형식시험 + 공장심사 후 CCC 마크 부착. 매년 사후 공장심사."/>
+            <column name="status_cd" value="REVIEW"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="effective_dt" valueDate="2026-01-15"/>
+            <column name="attach_group_id" value="FG_REG_SEED_17"/>
+            <column name="created_by" value="lee.asia"/>
+            <column name="created_at" valueDate="2026-07-02T00:00:00"/>
+            <column name="updated_by" value="lee.asia"/>
+            <column name="updated_at" valueDate="2026-07-02T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="reg_no" value="REG-2026-0034"/>
+            <column name="title" value="EU RoHS 2 (2011/65/EU) 유해물질 제한"/>
+            <column name="field_cd" value="ENV"/>
+            <column name="mark_nm" value="CE 마크"/>
+            <column name="authority" value="EU Commission"/>
+            <column name="url" value="https://eur-lex.europa.eu/eli/dir/2011/65/oj"/>
+            <column name="summary" value="납·수은·카드뮴 등 10종 물질 함유 한도. 기술문서와 DoC 에 RoHS 적합 명시. 유럽 권역 전체."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-06-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_18"/>
+            <column name="created_by" value="yoon.eu"/>
+            <column name="created_at" valueDate="2026-04-11T00:00:00"/>
+            <column name="updated_by" value="yoon.eu"/>
+            <column name="updated_at" valueDate="2026-04-11T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="reg_no" value="REG-2026-0035"/>
+            <column name="title" value="영국 UKCA 표시"/>
+            <column name="field_cd" value="LABEL"/>
+            <column name="mark_nm" value="UKCA 마크"/>
+            <column name="authority" value="영국 OPSS"/>
+            <column name="url" value="https://www.gov.uk/guidance/using-the-ukca-marking"/>
+            <column name="summary" value="영국(GB) 판매 모델에 UKCA 표시. UK DoC 별도 작성."/>
+            <column name="status_cd" value="DRAFT"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2026-10-01"/>
+            <column name="created_by" value="yoon.eu"/>
+            <column name="created_at" valueDate="2026-08-21T00:00:00"/>
+            <column name="updated_by" value="yoon.eu"/>
+            <column name="updated_at" valueDate="2026-08-21T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="reg_no" value="REG-2026-0036"/>
+            <column name="title" value="FCC Part 15 / ISED ICES-003 EMC"/>
+            <column name="field_cd" value="EMC"/>
+            <column name="mark_nm" value="FCC SDoC 표시 / ISED 표기"/>
+            <column name="authority" value="미국 FCC / 캐나다 ISED"/>
+            <column name="url" value="https://www.fcc.gov"/>
+            <column name="summary" value="비의도적 방사기기 SDoC. 캐나다는 ICES-003 적합 문구를 라벨·설명서에 표기."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="effective_dt" valueDate="2025-05-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_20"/>
+            <column name="created_by" value="jung.na"/>
+            <column name="created_at" valueDate="2026-01-30T00:00:00"/>
+            <column name="updated_by" value="jung.na"/>
+            <column name="updated_at" valueDate="2026-01-30T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="reg_no" value="REG-2026-0037"/>
+            <column name="title" value="멕시코 NOM-001-SCFI 전자기기 안전"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="NOM 마크"/>
+            <column name="authority" value="멕시코 경제부(SE)"/>
+            <column name="url" value="https://www.gob.mx/se"/>
+            <column name="summary" value="현지 인증기관 시험 후 NOM 인증서 발급. 스페인어 라벨 필수."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-12-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_21"/>
+            <column name="created_by" value="jung.na"/>
+            <column name="created_at" valueDate="2026-05-14T00:00:00"/>
+            <column name="updated_by" value="jung.na"/>
+            <column name="updated_at" valueDate="2026-05-14T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="reg_no" value="REG-2026-0038"/>
+            <column name="title" value="중남미 전기안전 인증 (INMETRO / IRAM / SEC 등)"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="국가별 안전 인증 마크"/>
+            <column name="authority" value="각국 인증기관"/>
+            <column name="url" value="https://www.gov.br/inmetro"/>
+            <column name="summary" value="브라질 INMETRO, 아르헨티나 IRAM, 칠레 SEC 등 국가별 인증. 중남미 권역 공통 관리."/>
+            <column name="status_cd" value="REVIEW"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2026-04-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_22"/>
+            <column name="created_by" value="jung.na"/>
+            <column name="created_at" valueDate="2026-07-28T00:00:00"/>
+            <column name="updated_by" value="jung.na"/>
+            <column name="updated_at" valueDate="2026-07-28T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="reg_no" value="REG-2026-0039"/>
+            <column name="title" value="GCC 적합성 (G-Mark) / 중동·아프리카 수입 적합성"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="G-Mark / 국가별 적합성 마크"/>
+            <column name="authority" value="GCC 표준화기구(GSO) / 각국 표준청"/>
+            <column name="url" value="https://www.gso.org.sa"/>
+            <column name="summary" value="GCC 6개국 G-Mark 와 SASO·SONCAP 등 국가별 수입 적합성 증명. 중동/아프리카 권역 공통."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-08-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_23"/>
+            <column name="created_by" value="han.mea"/>
+            <column name="created_at" valueDate="2026-03-19T00:00:00"/>
+            <column name="updated_by" value="han.mea"/>
+            <column name="updated_at" valueDate="2026-03-19T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="reg_no" value="REG-2026-0040"/>
+            <column name="title" value="RCM 전기안전·EMC (오세아니아)"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="RCM 마크"/>
+            <column name="authority" value="호주 ERAC / 뉴질랜드 EnergySafety"/>
+            <column name="url" value="https://www.eess.gov.au"/>
+            <column name="summary" value="EESS 등록 후 RCM 표시. 도서국은 호주·뉴질랜드 인증을 준용."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="effective_dt" valueDate="2025-10-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_24"/>
+            <column name="created_by" value="han.mea"/>
+            <column name="created_at" valueDate="2026-02-26T00:00:00"/>
+            <column name="updated_by" value="han.mea"/>
+            <column name="updated_at" valueDate="2026-02-26T00:00:00"/>
+        </insert>
+        <insert tableName="reg_info">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="reg_no" value="REG-2026-0041"/>
+            <column name="title" value="IECEE CB Scheme 국제 안전 시험성적서"/>
+            <column name="field_cd" value="SAFETY"/>
+            <column name="mark_nm" value="CB 성적서(마크 없음)"/>
+            <column name="authority" value="IECEE"/>
+            <column name="url" value="https://www.iecee.org"/>
+            <column name="summary" value="IEC 62368-1 CB 성적서로 회원국 국가 인증 시 시험 중복을 줄인다. 주요 판매국 기준으로 관리."/>
+            <column name="status_cd" value="ACTIVE"/>
+            <column name="version_no" valueNumeric="3"/>
+            <column name="effective_dt" valueDate="2025-01-01"/>
+            <column name="attach_group_id" value="FG_REG_SEED_25"/>
+            <column name="created_by" value="park.cert"/>
+            <column name="created_at" valueDate="2026-06-30T00:00:00"/>
+            <column name="updated_by" value="park.cert"/>
+            <column name="updated_at" valueDate="2026-06-30T00:00:00"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260913-seed-2-reg-info-target" author="dev">
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_MON"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_MON"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_SIGN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_EU"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="FR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_EU"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="DE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="FR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IT"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_EU"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="VN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="TW"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="HK"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="MO"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="SG"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="TH"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="MY"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="ID"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="PH"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="BN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="MM"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KH"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="LA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="BD"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="PK"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="LK"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="NP"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="MN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KZ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="UZ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="JP"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_EU"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="FR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="DE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IT"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="ES"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="PL"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="GB"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="NL"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="BE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="LU"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="AT"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CH"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="SE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="NO"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="DK"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="FI"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IS"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="PT"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="GR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CY"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="MT"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CZ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="SK"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="HU"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="RO"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="BG"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="HR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="SI"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="RS"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="EE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="LV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="LT"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="UA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="TR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_EU"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="GB"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_NA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="US"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_NA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="MX"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_LA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="BR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="AR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CL"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CO"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="PE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="EC"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="UY"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="PY"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="BO"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="VE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="PA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="GT"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="DO"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_MEA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="AE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="SA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="QA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KW"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="BH"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="OM"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IL"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="JO"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IQ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="EG"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="MA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="TN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="DZ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="NG"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="GH"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="ET"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="TZ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="ZA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_OCE"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="AU"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="NZ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="FJ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="PG"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="NC"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="DIVISION"/>
+            <column name="target_cd" value="VD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT_GROUP"/>
+            <column name="target_cd" value="PG_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_ASIA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_EU"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_NA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_LA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_MEA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="REGION"/>
+            <column name="target_cd" value="R_OCE"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="KR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="JP"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IN"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="SG"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="DE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="FR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="GB"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="IT"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="NL"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="SE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CH"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="US"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="CA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="MX"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="BR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="AR"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="SA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="AE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="ZA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="AU"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="COUNTRY"/>
+            <column name="target_cd" value="NZ"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260913-seed-3-reg-info-item" author="dev">
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6001"/>
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_KC_SAFE"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6005"/>
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_RADIO"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6011"/>
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_RADIO"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6014"/>
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_ENERGY"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6017"/>
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_STANDBY"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6020"/>
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_EPR"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6023"/>
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_EPR"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6026"/>
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_EPR"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6029"/>
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_BCAST"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6032"/>
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_LABEL"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6035"/>
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_KREACH"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6038"/>
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_EU_LVD"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6042"/>
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_EU_ELABEL"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6045"/>
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_EU_EMC"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6048"/>
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_ASEAN_EMC"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6051"/>
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_JP_PSE"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6054"/>
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_CN_CCC"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6058"/>
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_EU_ROHS"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6061"/>
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_UKCA"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6064"/>
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_US_FCC"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6067"/>
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_MX_NOM"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6070"/>
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_LA_SAFE"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6073"/>
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_GCC"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6076"/>
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_OCE_RCM"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6079"/>
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="item_type_cd" value="REGULATION"/>
+            <column name="item_cd" value="RG_IECEE_CB"/>
+            <column name="level_no" valueNumeric="1"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6002"/>
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="parent_item_id" valueNumeric="6001"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_62368"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6006"/>
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="parent_item_id" valueNumeric="6005"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_KN32"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6009"/>
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="parent_item_id" valueNumeric="6005"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_KN35"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="2"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6012"/>
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="parent_item_id" valueNumeric="6011"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_RF_WIFI"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6015"/>
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="parent_item_id" valueNumeric="6014"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_EFF_TV"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6018"/>
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="parent_item_id" valueNumeric="6017"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_STANDBY"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6021"/>
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="parent_item_id" valueNumeric="6020"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_KROHS"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6024"/>
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="parent_item_id" valueNumeric="6023"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_EPR_RATE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6027"/>
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="parent_item_id" valueNumeric="6026"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_SEPARATE"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6030"/>
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="parent_item_id" valueNumeric="6029"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_ATSC3"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6033"/>
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="parent_item_id" valueNumeric="6032"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_KOR_LABEL"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6036"/>
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="parent_item_id" valueNumeric="6035"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_KREACH_REG"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6039"/>
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="parent_item_id" valueNumeric="6038"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_EN62368"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6043"/>
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="parent_item_id" valueNumeric="6042"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_EU_ELABEL"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6046"/>
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="parent_item_id" valueNumeric="6045"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_EN55032"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6049"/>
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="parent_item_id" valueNumeric="6048"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_ASEAN_CISPR32"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6052"/>
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="parent_item_id" valueNumeric="6051"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_JP_J62368"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6055"/>
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="parent_item_id" valueNumeric="6054"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_GB4943"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6059"/>
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="parent_item_id" valueNumeric="6058"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_EN63000"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6062"/>
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="parent_item_id" valueNumeric="6061"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_BS62368"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6065"/>
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="parent_item_id" valueNumeric="6064"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_FCC15B"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6068"/>
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="parent_item_id" valueNumeric="6067"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_NOM001"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6071"/>
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="parent_item_id" valueNumeric="6070"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_IEC62368_LA"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6074"/>
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="parent_item_id" valueNumeric="6073"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_GSO_IEC62368"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6077"/>
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="parent_item_id" valueNumeric="6076"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_ASNZS62368"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6080"/>
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="parent_item_id" valueNumeric="6079"/>
+            <column name="item_type_cd" value="STANDARD"/>
+            <column name="item_cd" value="ST_CB62368"/>
+            <column name="level_no" valueNumeric="2"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6003"/>
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="parent_item_id" valueNumeric="6002"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_SAFE_DECL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6004"/>
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="parent_item_id" valueNumeric="6002"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_SAFE_TEST"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="N"/>
+            <column name="sort_order" valueNumeric="2"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6007"/>
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="parent_item_id" valueNumeric="6006"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_RF_REG"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6008"/>
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="parent_item_id" valueNumeric="6006"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_RF_TEST"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="N"/>
+            <column name="sort_order" valueNumeric="2"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6010"/>
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="parent_item_id" valueNumeric="6009"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_RF_IMM"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6013"/>
+            <column name="reg_info_id" valueNumeric="3"/>
+            <column name="parent_item_id" valueNumeric="6012"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_WIFI_CERT"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6016"/>
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="parent_item_id" valueNumeric="6015"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_EFF_DECL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6019"/>
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="parent_item_id" valueNumeric="6018"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_STBY_DECL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6022"/>
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="parent_item_id" valueNumeric="6021"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_ROHS_ANAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6025"/>
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="parent_item_id" valueNumeric="6024"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_EPR_CERT"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6028"/>
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="parent_item_id" valueNumeric="6027"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_SEP_MARK"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6031"/>
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="parent_item_id" valueNumeric="6030"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_ATSC_TEST"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6034"/>
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="parent_item_id" valueNumeric="6033"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_LABEL_CHK"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6037"/>
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="parent_item_id" valueNumeric="6036"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_KREACH_NOTI"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6040"/>
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="parent_item_id" valueNumeric="6039"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_EU_DOC"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6041"/>
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="parent_item_id" valueNumeric="6039"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_EU_TEST"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="N"/>
+            <column name="sort_order" valueNumeric="2"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6044"/>
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="parent_item_id" valueNumeric="6043"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_EU_EPREL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6047"/>
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="parent_item_id" valueNumeric="6046"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_EU_EMC_DOC"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6050"/>
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="parent_item_id" valueNumeric="6049"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_ASEAN_EMC"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6053"/>
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="parent_item_id" valueNumeric="6052"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_JP_PSE_SELF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6056"/>
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="parent_item_id" valueNumeric="6055"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_CN_CCC"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6057"/>
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="parent_item_id" valueNumeric="6055"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_CN_FACTORY"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="N"/>
+            <column name="sort_order" valueNumeric="2"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6060"/>
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="parent_item_id" valueNumeric="6059"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_EU_ROHS_DOC"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6063"/>
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="parent_item_id" valueNumeric="6062"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_UKCA_DOC"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6066"/>
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="parent_item_id" valueNumeric="6065"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_FCC_SDOC"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6069"/>
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="parent_item_id" valueNumeric="6068"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_NOM_CERT"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6072"/>
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="parent_item_id" valueNumeric="6071"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_LA_CERT"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6075"/>
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="parent_item_id" valueNumeric="6074"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_GCC_GMARK"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6078"/>
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="parent_item_id" valueNumeric="6077"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_RCM_REG"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6081"/>
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="parent_item_id" valueNumeric="6080"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_CB_CERT"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="Y"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        <insert tableName="reg_info_item">
+            <column name="item_id" valueNumeric="6082"/>
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="parent_item_id" valueNumeric="6080"/>
+            <column name="item_type_cd" value="CERT"/>
+            <column name="item_cd" value="CT_CB_REPORT"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="mandatory_yn" value="N"/>
+            <column name="sort_order" valueNumeric="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260913-seed-4-reg-info-hist" author="dev">
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="101"/>
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="최초 등록"/>
+            <column name="reg_id" value="kim.reg"/>
+            <column name="reg_dt" valueDate="2024-03-11T09:20:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="102"/>
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="적용 규격 KC 60065 → KC 62368-1 전환"/>
+            <column name="reg_id" value="kim.reg"/>
+            <column name="reg_dt" valueDate="2025-08-02T14:05:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="103"/>
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="version_no" valueNumeric="3"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="2026 시행 개정문 URL/첨부 교체"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;KC 안전확인 (전기용품 및 생활용품 안전관리법)&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;KC 마크 + 안전확인신고번호&quot;,&quot;authority&quot;:&quot;국가기술표준원(KATS) / 지정 시험기관&quot;,&quot;url&quot;:&quot;https://www.law.go.kr/법령/전기용품및생활용품안전관리법&quot;,&quot;summary&quot;:&quot;TV는 안전확인대상 전기용품. 지정 시험기관 시험 후 안전확인신고 → KC 마크와 신고번호를 제품·포장·설명서에 표시.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2026-01-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_ASIA&quot;],&quot;countryCds&quot;:[&quot;KR&quot;]}"/>
+            <column name="reg_id" value="kim.reg"/>
+            <column name="reg_dt" valueDate="2026-07-14T11:32:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="104"/>
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="최초 등록"/>
+            <column name="reg_id" value="park.cert"/>
+            <column name="reg_dt" valueDate="2024-05-20T10:00:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="105"/>
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="KN 35 내성 기준 추가"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;방송통신기자재 적합성평가(적합등록) - EMC&quot;,&quot;fieldCd&quot;:&quot;EMC&quot;,&quot;markNm&quot;:&quot;KC 마크 + 적합성평가 식별부호&quot;,&quot;authority&quot;:&quot;국립전파연구원(RRA)&quot;,&quot;url&quot;:&quot;https://www.rra.go.kr&quot;,&quot;summary&quot;:&quot;KN 32(방사) / KN 35(내성) 시험 후 적합등록. 식별부호를 제품 라벨에 표기해야 판매 가능.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-07-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_ASIA&quot;],&quot;countryCds&quot;:[&quot;KR&quot;]}"/>
+            <column name="reg_id" value="kim.reg"/>
+            <column name="reg_dt" valueDate="2026-03-02T16:48:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="106"/>
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="version_no" valueNumeric="3"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="최저효율기준 상향(2026-04-01 시행)"/>
+            <column name="reg_id" value="lee.energy"/>
+            <column name="reg_dt" valueDate="2026-04-01T09:00:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="107"/>
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="version_no" valueNumeric="4"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="온라인 상세페이지 표시 의무 문구 반영"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;에너지소비효율등급 표시 (효율관리기자재)&quot;,&quot;fieldCd&quot;:&quot;ENERGY&quot;,&quot;markNm&quot;:&quot;에너지소비효율등급 라벨(1~5등급)&quot;,&quot;authority&quot;:&quot;한국에너지공단&quot;,&quot;url&quot;:&quot;https://eep.energy.or.kr&quot;,&quot;summary&quot;:&quot;TV는 효율관리기자재. 신고 후 등급 라벨을 제품 전면·포장·온라인 상세페이지에 표시. 최저효율기준 미달 시 판매 금지.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2026-04-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_ASIA&quot;],&quot;countryCds&quot;:[&quot;KR&quot;]}"/>
+            <column name="reg_id" value="lee.energy"/>
+            <column name="reg_dt" valueDate="2026-08-05T13:21:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="108"/>
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="프랑스 특례 최초 등록"/>
+            <column name="reg_id" value="yoon.eu"/>
+            <column name="reg_dt" valueDate="2025-11-03T15:40:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="109"/>
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="change_type" value="CONFLICT_RESOLVE"/>
+            <column name="change_note" value="유럽 공통 레코드 등록에 따른 예외(특례) 처리"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;CE 저전압지침(LVD) - 프랑스 특례&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;CE 마크&quot;,&quot;authority&quot;:&quot;EU Commission / 프랑스 DGCCRF&quot;,&quot;url&quot;:&quot;https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014L0035&quot;,&quot;summary&quot;:&quot;프랑스 판매 모델 대상 LVD 대응. 프랑스어 안전 문구 및 현지 A/S 정보 추가 표시.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-11-03&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_EU&quot;],&quot;countryCds&quot;:[&quot;FR&quot;]}"/>
+            <column name="reg_id" value="yoon.eu"/>
+            <column name="reg_dt" valueDate="2026-01-20T17:02:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="110"/>
+            <column name="reg_info_id" valueNumeric="9"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="재난경보(AEA) 수신 항목 추가"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;지상파 UHD(ATSC 3.0) 수신 규격 대응&quot;,&quot;fieldCd&quot;:&quot;BROADCAST&quot;,&quot;markNm&quot;:&quot;UHD 수신 적합 표시(권고)&quot;,&quot;authority&quot;:&quot;과학기술정보통신부 / TTA&quot;,&quot;url&quot;:&quot;https://www.tta.or.kr&quot;,&quot;summary&quot;:&quot;국내 판매 TV의 지상파 UHD 수신 규격. 튜너·자막·재난경보(AEA) 수신 기능 확인.&quot;,&quot;statusCd&quot;:&quot;REVIEW&quot;,&quot;effectiveDt&quot;:&quot;2026-09-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[&quot;P_NEO&quot;,&quot;P_8K&quot;],&quot;regionCds&quot;:[&quot;R_ASIA&quot;],&quot;countryCds&quot;:[&quot;KR&quot;]}"/>
+            <column name="reg_id" value="jung.dev"/>
+            <column name="reg_dt" valueDate="2026-08-11T10:15:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="111"/>
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="ASEAN 권역 EMC 최초 등록"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;ASEAN EMC 상호인정협정(MRA) 적합성&quot;,&quot;fieldCd&quot;:&quot;EMC&quot;,&quot;markNm&quot;:&quot;국가별 EMC 인증 마크&quot;,&quot;authority&quot;:&quot;ASEAN 전기전자 협의체(ACCSQ)&quot;,&quot;url&quot;:&quot;https://asean.org&quot;,&quot;summary&quot;:&quot;ASEAN MRA 지정 시험소 성적서로 회원국 EMC 인증을 받는다. 한·중·일 외 아시아 권역 판매 모델 공통.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2026-03-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_ASIA&quot;],&quot;countryCds&quot;:[&quot;VN&quot;,&quot;IN&quot;,&quot;TW&quot;,&quot;HK&quot;,&quot;MO&quot;,&quot;SG&quot;,&quot;TH&quot;,&quot;MY&quot;,&quot;ID&quot;,&quot;PH&quot;,&quot;BN&quot;,&quot;MM&quot;,&quot;KH&quot;,&quot;LA&quot;,&quot;BD&quot;,&quot;PK&quot;,&quot;LK&quot;,&quot;NP&quot;,&quot;MN&quot;,&quot;KZ&quot;,&quot;UZ&quot;]}"/>
+            <column name="reg_id" value="lee.asia"/>
+            <column name="reg_dt" valueDate="2026-06-18T10:12:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="112"/>
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="최초 등록"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;일본 PSE (전기용품안전법)&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;PSE 마크(원형)&quot;,&quot;authority&quot;:&quot;일본 경제산업성(METI)&quot;,&quot;url&quot;:&quot;https://www.meti.go.jp&quot;,&quot;summary&quot;:&quot;TV는 비특정전기용품. 자기확인 후 원형 PSE 마크와 사업자명 표시.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-09-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_ASIA&quot;],&quot;countryCds&quot;:[&quot;JP&quot;]}"/>
+            <column name="reg_id" value="lee.asia"/>
+            <column name="reg_dt" valueDate="2026-02-10T09:30:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="113"/>
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="최초 등록"/>
+            <column name="reg_id" value="lee.asia"/>
+            <column name="reg_dt" valueDate="2025-12-01T14:00:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="114"/>
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="GB 4943.1-2022 전환에 따라 공장심사 보고서 추가"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;중국 CCC 강제인증&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;CCC 마크&quot;,&quot;authority&quot;:&quot;중국 국가인증인가감독관리위원회(CNCA)&quot;,&quot;url&quot;:&quot;https://www.cnca.gov.cn&quot;,&quot;summary&quot;:&quot;지정 인증기관 형식시험 + 공장심사 후 CCC 마크 부착. 매년 사후 공장심사.&quot;,&quot;statusCd&quot;:&quot;REVIEW&quot;,&quot;effectiveDt&quot;:&quot;2026-01-15&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_ASIA&quot;],&quot;countryCds&quot;:[&quot;CN&quot;]}"/>
+            <column name="reg_id" value="lee.asia"/>
+            <column name="reg_dt" valueDate="2026-07-02T11:20:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="115"/>
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="유럽 권역 공통 최초 등록"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;EU RoHS 2 (2011/65/EU) 유해물질 제한&quot;,&quot;fieldCd&quot;:&quot;ENV&quot;,&quot;markNm&quot;:&quot;CE 마크&quot;,&quot;authority&quot;:&quot;EU Commission&quot;,&quot;url&quot;:&quot;https://eur-lex.europa.eu/eli/dir/2011/65/oj&quot;,&quot;summary&quot;:&quot;납·수은·카드뮴 등 10종 물질 함유 한도. 기술문서와 DoC 에 RoHS 적합 명시. 유럽 권역 전체.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-06-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_EU&quot;],&quot;countryCds&quot;:[&quot;FR&quot;,&quot;DE&quot;,&quot;IT&quot;,&quot;ES&quot;,&quot;PL&quot;,&quot;GB&quot;,&quot;NL&quot;,&quot;BE&quot;,&quot;LU&quot;,&quot;AT&quot;,&quot;CH&quot;,&quot;SE&quot;,&quot;NO&quot;,&quot;DK&quot;,&quot;FI&quot;,&quot;IS&quot;,&quot;IE&quot;,&quot;PT&quot;,&quot;GR&quot;,&quot;CY&quot;,&quot;MT&quot;,&quot;CZ&quot;,&quot;SK&quot;,&quot;HU&quot;,&quot;RO&quot;,&quot;BG&quot;,&quot;HR&quot;,&quot;SI&quot;,&quot;RS&quot;,&quot;EE&quot;,&quot;LV&quot;,&quot;LT&quot;,&quot;UA&quot;,&quot;TR&quot;]}"/>
+            <column name="reg_id" value="yoon.eu"/>
+            <column name="reg_dt" valueDate="2026-04-11T16:05:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="116"/>
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="작성중 등록"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;영국 UKCA 표시&quot;,&quot;fieldCd&quot;:&quot;LABEL&quot;,&quot;markNm&quot;:&quot;UKCA 마크&quot;,&quot;authority&quot;:&quot;영국 OPSS&quot;,&quot;url&quot;:&quot;https://www.gov.uk/guidance/using-the-ukca-marking&quot;,&quot;summary&quot;:&quot;영국(GB) 판매 모델에 UKCA 표시. UK DoC 별도 작성.&quot;,&quot;statusCd&quot;:&quot;DRAFT&quot;,&quot;effectiveDt&quot;:&quot;2026-10-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_EU&quot;],&quot;countryCds&quot;:[&quot;GB&quot;]}"/>
+            <column name="reg_id" value="yoon.eu"/>
+            <column name="reg_dt" valueDate="2026-08-21T13:40:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="117"/>
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="최초 등록"/>
+            <column name="reg_id" value="jung.na"/>
+            <column name="reg_dt" valueDate="2025-05-01T09:00:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="118"/>
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="캐나다 ICES-003 표기 문구 추가"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;FCC Part 15 / ISED ICES-003 EMC&quot;,&quot;fieldCd&quot;:&quot;EMC&quot;,&quot;markNm&quot;:&quot;FCC SDoC 표시 / ISED 표기&quot;,&quot;authority&quot;:&quot;미국 FCC / 캐나다 ISED&quot;,&quot;url&quot;:&quot;https://www.fcc.gov&quot;,&quot;summary&quot;:&quot;비의도적 방사기기 SDoC. 캐나다는 ICES-003 적합 문구를 라벨·설명서에 표기.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-05-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_NA&quot;],&quot;countryCds&quot;:[&quot;US&quot;,&quot;CA&quot;]}"/>
+            <column name="reg_id" value="jung.na"/>
+            <column name="reg_dt" valueDate="2026-01-30T15:10:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="119"/>
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="최초 등록"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;멕시코 NOM-001-SCFI 전자기기 안전&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;NOM 마크&quot;,&quot;authority&quot;:&quot;멕시코 경제부(SE)&quot;,&quot;url&quot;:&quot;https://www.gob.mx/se&quot;,&quot;summary&quot;:&quot;현지 인증기관 시험 후 NOM 인증서 발급. 스페인어 라벨 필수.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-12-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_NA&quot;],&quot;countryCds&quot;:[&quot;MX&quot;]}"/>
+            <column name="reg_id" value="jung.na"/>
+            <column name="reg_dt" valueDate="2026-05-14T10:45:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="120"/>
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="중남미 권역 공통 최초 등록"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;중남미 전기안전 인증 (INMETRO / IRAM / SEC 등)&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;국가별 안전 인증 마크&quot;,&quot;authority&quot;:&quot;각국 인증기관&quot;,&quot;url&quot;:&quot;https://www.gov.br/inmetro&quot;,&quot;summary&quot;:&quot;브라질 INMETRO, 아르헨티나 IRAM, 칠레 SEC 등 국가별 인증. 중남미 권역 공통 관리.&quot;,&quot;statusCd&quot;:&quot;REVIEW&quot;,&quot;effectiveDt&quot;:&quot;2026-04-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_LA&quot;],&quot;countryCds&quot;:[&quot;BR&quot;,&quot;AR&quot;,&quot;CL&quot;,&quot;CO&quot;,&quot;PE&quot;,&quot;EC&quot;,&quot;UY&quot;,&quot;PY&quot;,&quot;BO&quot;,&quot;VE&quot;,&quot;CR&quot;,&quot;PA&quot;,&quot;GT&quot;,&quot;DO&quot;]}"/>
+            <column name="reg_id" value="jung.na"/>
+            <column name="reg_dt" valueDate="2026-07-28T17:30:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="121"/>
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="중동/아프리카 권역 공통 최초 등록"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;GCC 적합성 (G-Mark) / 중동·아프리카 수입 적합성&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;G-Mark / 국가별 적합성 마크&quot;,&quot;authority&quot;:&quot;GCC 표준화기구(GSO) / 각국 표준청&quot;,&quot;url&quot;:&quot;https://www.gso.org.sa&quot;,&quot;summary&quot;:&quot;GCC 6개국 G-Mark 와 SASO·SONCAP 등 국가별 수입 적합성 증명. 중동/아프리카 권역 공통.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-08-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_MEA&quot;],&quot;countryCds&quot;:[&quot;AE&quot;,&quot;SA&quot;,&quot;QA&quot;,&quot;KW&quot;,&quot;BH&quot;,&quot;OM&quot;,&quot;IL&quot;,&quot;JO&quot;,&quot;IQ&quot;,&quot;IR&quot;,&quot;EG&quot;,&quot;MA&quot;,&quot;TN&quot;,&quot;DZ&quot;,&quot;NG&quot;,&quot;GH&quot;,&quot;KE&quot;,&quot;ET&quot;,&quot;TZ&quot;,&quot;ZA&quot;]}"/>
+            <column name="reg_id" value="han.mea"/>
+            <column name="reg_dt" valueDate="2026-03-19T11:00:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="122"/>
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="오세아니아 권역 공통 최초 등록"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;RCM 전기안전·EMC (오세아니아)&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;RCM 마크&quot;,&quot;authority&quot;:&quot;호주 ERAC / 뉴질랜드 EnergySafety&quot;,&quot;url&quot;:&quot;https://www.eess.gov.au&quot;,&quot;summary&quot;:&quot;EESS 등록 후 RCM 표시. 도서국은 호주·뉴질랜드 인증을 준용.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-10-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_OCE&quot;],&quot;countryCds&quot;:[&quot;AU&quot;,&quot;NZ&quot;,&quot;FJ&quot;,&quot;PG&quot;,&quot;NC&quot;]}"/>
+            <column name="reg_id" value="han.mea"/>
+            <column name="reg_dt" valueDate="2026-02-26T14:25:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="123"/>
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="version_no" valueNumeric="1"/>
+            <column name="change_type" value="INSERT"/>
+            <column name="change_note" value="최초 등록"/>
+            <column name="reg_id" value="park.cert"/>
+            <column name="reg_dt" valueDate="2025-01-02T09:10:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="124"/>
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="version_no" valueNumeric="2"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="IEC 62368-1 3판 기준으로 성적서 갱신"/>
+            <column name="reg_id" value="park.cert"/>
+            <column name="reg_dt" valueDate="2025-09-15T10:00:00"/>
+        </insert>
+        <insert tableName="reg_info_hist">
+            <column name="hist_id" valueNumeric="125"/>
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="version_no" valueNumeric="3"/>
+            <column name="change_type" value="UPDATE"/>
+            <column name="change_note" value="주요 판매국 목록 갱신"/>
+            <column name="snapshot_json" value="{&quot;title&quot;:&quot;IECEE CB Scheme 국제 안전 시험성적서&quot;,&quot;fieldCd&quot;:&quot;SAFETY&quot;,&quot;markNm&quot;:&quot;CB 성적서(마크 없음)&quot;,&quot;authority&quot;:&quot;IECEE&quot;,&quot;url&quot;:&quot;https://www.iecee.org&quot;,&quot;summary&quot;:&quot;IEC 62368-1 CB 성적서로 회원국 국가 인증 시 시험 중복을 줄인다. 주요 판매국 기준으로 관리.&quot;,&quot;statusCd&quot;:&quot;ACTIVE&quot;,&quot;effectiveDt&quot;:&quot;2025-01-01&quot;,&quot;divisionCds&quot;:[&quot;VD&quot;],&quot;productGroupCds&quot;:[&quot;PG_TV&quot;],&quot;productCds&quot;:[],&quot;regionCds&quot;:[&quot;R_ASIA&quot;,&quot;R_EU&quot;,&quot;R_NA&quot;,&quot;R_LA&quot;,&quot;R_MEA&quot;,&quot;R_OCE&quot;],&quot;countryCds&quot;:[&quot;KR&quot;,&quot;JP&quot;,&quot;CN&quot;,&quot;IN&quot;,&quot;SG&quot;,&quot;DE&quot;,&quot;FR&quot;,&quot;GB&quot;,&quot;IT&quot;,&quot;NL&quot;,&quot;SE&quot;,&quot;CH&quot;,&quot;US&quot;,&quot;CA&quot;,&quot;MX&quot;,&quot;BR&quot;,&quot;AR&quot;,&quot;SA&quot;,&quot;AE&quot;,&quot;ZA&quot;,&quot;AU&quot;,&quot;NZ&quot;]}"/>
+            <column name="reg_id" value="park.cert"/>
+            <column name="reg_dt" valueDate="2026-06-30T16:40:00"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260913-seed-5-reg-conflict-hist" author="dev">
+        <insert tableName="reg_conflict_hist">
+            <column name="conflict_id" valueNumeric="9001"/>
+            <column name="new_reg_info_id" valueNumeric="14"/>
+            <column name="new_reg_no" value="REG-2026-0021"/>
+            <column name="exist_reg_info_id" valueNumeric="12"/>
+            <column name="exist_reg_no" value="REG-2025-0087"/>
+            <column name="conflict_type" value="PARENT"/>
+            <column name="conflict_axis" value="GEO"/>
+            <column name="new_scope_txt" value="유럽(권역 전체)"/>
+            <column name="exist_scope_txt" value="유럽 &gt; 프랑스"/>
+            <column name="decision_cd" value="KEEP_BOTH"/>
+            <column name="decision_note" value="프랑스 현지 표시 요건이 별도라 특례 레코드 유지"/>
+            <column name="detect_dt" valueDate="2026-02-01T09:12:00"/>
+            <column name="decide_id" value="yoon.eu"/>
+            <column name="decide_dt" valueDate="2026-02-01T09:20:00"/>
+            <column name="status_cd" value="RESOLVED"/>
+        </insert>
+        <insert tableName="reg_conflict_hist">
+            <column name="conflict_id" valueNumeric="9002"/>
+            <column name="new_reg_info_id" valueNumeric="13"/>
+            <column name="new_reg_no" value="REG-2025-0091"/>
+            <column name="exist_reg_info_id" valueNumeric="12"/>
+            <column name="exist_reg_no" value="REG-2025-0087"/>
+            <column name="conflict_type" value="OVERLAP"/>
+            <column name="conflict_axis" value="GEO"/>
+            <column name="new_scope_txt" value="독일, 프랑스, 이탈리아"/>
+            <column name="exist_scope_txt" value="유럽 &gt; 프랑스"/>
+            <column name="decision_cd" value="KEEP_BOTH"/>
+            <column name="decision_note" value="분야(에너지/안전)가 달라 병행 관리"/>
+            <column name="detect_dt" valueDate="2025-03-01T11:02:00"/>
+            <column name="decide_id" value="yoon.eu"/>
+            <column name="decide_dt" valueDate="2025-03-01T11:30:00"/>
+            <column name="status_cd" value="RESOLVED"/>
+        </insert>
+        <insert tableName="reg_conflict_hist">
+            <column name="conflict_id" valueNumeric="9003"/>
+            <column name="new_reg_info_id" valueNumeric="3"/>
+            <column name="new_reg_no" value="REG-2026-0003"/>
+            <column name="exist_reg_info_id" valueNumeric="2"/>
+            <column name="exist_reg_no" value="REG-2026-0002"/>
+            <column name="conflict_type" value="CHILD"/>
+            <column name="conflict_axis" value="RULE"/>
+            <column name="new_scope_txt" value="전파법 &gt; 무선설비규칙 5GHz WLAN"/>
+            <column name="exist_scope_txt" value="전파법(규제 전체)"/>
+            <column name="decision_cd" value="KEEP_BOTH"/>
+            <column name="decision_note" value="동일 법령 내 별도 인증 절차로 하위 레코드 유지"/>
+            <column name="detect_dt" valueDate="2025-04-01T10:44:00"/>
+            <column name="decide_id" value="park.cert"/>
+            <column name="decide_dt" valueDate="2025-04-01T10:50:00"/>
+            <column name="status_cd" value="RESOLVED"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260913-seed-6-reg-attach-files" author="dev">
+        <insert tableName="files">
+            <column name="original_name" value="안전확인신고증명서_2026.pdf"/>
+            <column name="stored_name" value="seed-reg-1-1"/>
+            <column name="file_path" value="seed/regulation/1/안전확인신고증명서_2026.pdf"/>
+            <column name="file_size" valueNumeric="862208"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_1"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="KC62368-1_시험성적서.pdf"/>
+            <column name="stored_name" value="seed-reg-1-2"/>
+            <column name="file_path" value="seed/regulation/1/KC62368-1_시험성적서.pdf"/>
+            <column name="file_size" valueNumeric="3250586"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_1"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="KN32_방사시험성적서.pdf"/>
+            <column name="stored_name" value="seed-reg-2-1"/>
+            <column name="file_path" value="seed/regulation/2/KN32_방사시험성적서.pdf"/>
+            <column name="file_size" valueNumeric="2516582"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_2"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="KN35_내성시험성적서.pdf"/>
+            <column name="stored_name" value="seed-reg-2-2"/>
+            <column name="file_path" value="seed/regulation/2/KN35_내성시험성적서.pdf"/>
+            <column name="file_size" valueNumeric="1992294"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_2"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="적합등록필증.pdf"/>
+            <column name="stored_name" value="seed-reg-2-3"/>
+            <column name="file_path" value="seed/regulation/2/적합등록필증.pdf"/>
+            <column name="file_size" valueNumeric="419840"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_2"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="효율등급_신고확인서.pdf"/>
+            <column name="stored_name" value="seed-reg-4-1"/>
+            <column name="file_path" value="seed/regulation/4/효율등급_신고확인서.pdf"/>
+            <column name="file_size" valueNumeric="634880"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_4"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="2026_최저효율기준_개정고시.hwp"/>
+            <column name="stored_name" value="seed-reg-4-2"/>
+            <column name="file_path" value="seed/regulation/4/2026_최저효율기준_개정고시.hwp"/>
+            <column name="file_size" valueNumeric="184320"/>
+            <column name="content_type" value="application/x-hwp"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_4"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="EU_DoC_LVD.pdf"/>
+            <column name="stored_name" value="seed-reg-12-1"/>
+            <column name="file_path" value="seed/regulation/12/EU_DoC_LVD.pdf"/>
+            <column name="file_size" valueNumeric="532480"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_12"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="FR_안전문구_번역본.docx"/>
+            <column name="stored_name" value="seed-reg-12-2"/>
+            <column name="file_path" value="seed/regulation/12/FR_안전문구_번역본.docx"/>
+            <column name="file_size" valueNumeric="98304"/>
+            <column name="content_type" value="application/octet-stream"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_12"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="EN62368-1_TestReport.pdf"/>
+            <column name="stored_name" value="seed-reg-12-3"/>
+            <column name="file_path" value="seed/regulation/12/EN62368-1_TestReport.pdf"/>
+            <column name="file_size" valueNumeric="4404019"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_12"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="ASEAN_MRA_EMC_TestReport.pdf"/>
+            <column name="stored_name" value="seed-reg-15-1"/>
+            <column name="file_path" value="seed/regulation/15/ASEAN_MRA_EMC_TestReport.pdf"/>
+            <column name="file_size" valueNumeric="2306867"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_15"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="PSE_自己確認_試験記録.pdf"/>
+            <column name="stored_name" value="seed-reg-16-1"/>
+            <column name="file_path" value="seed/regulation/16/PSE_自己確認_試験記録.pdf"/>
+            <column name="file_size" valueNumeric="1153434"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_16"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="CCC_Certificate.pdf"/>
+            <column name="stored_name" value="seed-reg-17-1"/>
+            <column name="file_path" value="seed/regulation/17/CCC_Certificate.pdf"/>
+            <column name="file_size" valueNumeric="655360"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_17"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="CCC_Factory_Inspection.pdf"/>
+            <column name="stored_name" value="seed-reg-17-2"/>
+            <column name="file_path" value="seed/regulation/17/CCC_Factory_Inspection.pdf"/>
+            <column name="file_size" valueNumeric="1887437"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_17"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="RoHS_Technical_File.pdf"/>
+            <column name="stored_name" value="seed-reg-18-1"/>
+            <column name="file_path" value="seed/regulation/18/RoHS_Technical_File.pdf"/>
+            <column name="file_size" valueNumeric="3565158"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_18"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="FCC_SDoC_TestReport.pdf"/>
+            <column name="stored_name" value="seed-reg-20-1"/>
+            <column name="file_path" value="seed/regulation/20/FCC_SDoC_TestReport.pdf"/>
+            <column name="file_size" valueNumeric="2831155"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_20"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="ICES-003_Label.pdf"/>
+            <column name="stored_name" value="seed-reg-20-2"/>
+            <column name="file_path" value="seed/regulation/20/ICES-003_Label.pdf"/>
+            <column name="file_size" valueNumeric="225280"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_20"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="NOM-001-SCFI_Certificado.pdf"/>
+            <column name="stored_name" value="seed-reg-21-1"/>
+            <column name="file_path" value="seed/regulation/21/NOM-001-SCFI_Certificado.pdf"/>
+            <column name="file_size" valueNumeric="921600"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_21"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="INMETRO_IRAM_SEC_목록.xlsx"/>
+            <column name="stored_name" value="seed-reg-22-1"/>
+            <column name="file_path" value="seed/regulation/22/INMETRO_IRAM_SEC_목록.xlsx"/>
+            <column name="file_size" valueNumeric="76800"/>
+            <column name="content_type" value="application/octet-stream"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_22"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="G-Mark_Certificate.pdf"/>
+            <column name="stored_name" value="seed-reg-23-1"/>
+            <column name="file_path" value="seed/regulation/23/G-Mark_Certificate.pdf"/>
+            <column name="file_size" valueNumeric="522240"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_23"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="SASO_IECEE_CoC.pdf"/>
+            <column name="stored_name" value="seed-reg-23-2"/>
+            <column name="file_path" value="seed/regulation/23/SASO_IECEE_CoC.pdf"/>
+            <column name="file_size" valueNumeric="440320"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_23"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="EESS_Registration.pdf"/>
+            <column name="stored_name" value="seed-reg-24-1"/>
+            <column name="file_path" value="seed/regulation/24/EESS_Registration.pdf"/>
+            <column name="file_size" valueNumeric="389120"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_24"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="CB_Certificate_IEC62368-1.pdf"/>
+            <column name="stored_name" value="seed-reg-25-1"/>
+            <column name="file_path" value="seed/regulation/25/CB_Certificate_IEC62368-1.pdf"/>
+            <column name="file_size" valueNumeric="716800"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_25"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="CB_TestReport_Ed3.pdf"/>
+            <column name="stored_name" value="seed-reg-25-2"/>
+            <column name="file_path" value="seed/regulation/25/CB_TestReport_Ed3.pdf"/>
+            <column name="file_size" valueNumeric="5872026"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_25"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+        <insert tableName="files">
+            <column name="original_name" value="CB_National_Differences.pdf"/>
+            <column name="stored_name" value="seed-reg-25-3"/>
+            <column name="file_path" value="seed/regulation/25/CB_National_Differences.pdf"/>
+            <column name="file_size" valueNumeric="1363149"/>
+            <column name="content_type" value="application/pdf"/>
+            <column name="uploader_id" value="user04"/>
+            <column name="file_group_id" value="FG_REG_SEED_25"/>
+            <column name="del_yn" value="N"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260913-seed-7-reg-sequences" author="dev">
+        <insert tableName="reg_no_seq">
+            <column name="seq_year" valueNumeric="2025"/>
+            <column name="last_no" valueNumeric="91"/>
+        </insert>
+        <insert tableName="reg_no_seq">
+            <column name="seq_year" valueNumeric="2026"/>
+            <column name="last_no" valueNumeric="41"/>
+        </insert>
+        <sql>ALTER TABLE reg_info ALTER COLUMN reg_info_id RESTART WITH 26</sql>
+        <sql>ALTER TABLE reg_info_item ALTER COLUMN item_id RESTART WITH 6083</sql>
+        <sql>ALTER TABLE reg_info_hist ALTER COLUMN hist_id RESTART WITH 126</sql>
+        <sql>ALTER TABLE reg_conflict_hist ALTER COLUMN conflict_id RESTART WITH 9004</sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -68,6 +68,12 @@ public enum ErrorCode {
     CODE_GROUP_CODE_REQUIRED(HttpStatus.BAD_REQUEST, "G003", "그룹 코드는 필수입니다."),
     CODE_GROUP_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "G004", "그룹명은 필수입니다."),
 
+    // 규격/규제 정보 관련 에러 (R001~R099) - Regulation
+    REGULATION_NOT_FOUND(HttpStatus.NOT_FOUND, "R001", "규제 정보를 찾을 수 없습니다."),
+    REGULATION_TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "R002", "규제 제목은 필수입니다."),
+    REGULATION_FIELD_REQUIRED(HttpStatus.BAD_REQUEST, "R003", "분야는 필수입니다."),
+    REGULATION_ALREADY_EXPIRED(HttpStatus.BAD_REQUEST, "R004", "이미 폐지된 규제 정보입니다."),
+
     // 외부 API 관련 에러 (X001~X099)
     EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "X001", "외부 시스템 연동 중 오류가 발생했습니다.");
 
