@@ -27,6 +27,9 @@ build/
 .env
 .env.*
 !.env.example
+# 실행 모드 선택용(VITE_USE_MOCK)만 들어있어 비밀값이 없다. 없으면 dev/dev:api 모드가 동작하지 않는다
+!.env.mock
+!.env.api
 
 # --- Tests / coverage / reports ---
 coverage/
