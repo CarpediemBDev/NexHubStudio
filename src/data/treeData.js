@@ -47,9 +47,11 @@ export const departmentTree = [
           { deptCode: '3200', deptName: '해외영업팀', manager: '신해외', rank: '팀장', headcount: 32, status: '운영', createdAt: '2021-10-01', useYn: 'Y' }
         ]
       },
+      // 하위 조직이 없는 노드는 children 키를 아예 넣지 않는다.
+      // setNestedRows 의 childrenProp 은 '자식이 있는지를 지시하는 속성'이라
+      // 빈 배열 children: [] 도 "자식 있음"으로 읽혀 펼침 화살표가 그려진다.
       {
-        deptCode: '9000', deptName: '미래전략TF', manager: '임전략', rank: 'TF장', headcount: 10, status: '한시조직', createdAt: '2024-06-01', useYn: 'Y',
-        children: []
+        deptCode: '9000', deptName: '미래전략TF', manager: '임전략', rank: 'TF장', headcount: 10, status: '한시조직', createdAt: '2024-06-01', useYn: 'Y'
       }
     ]
   }

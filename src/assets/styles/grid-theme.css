@@ -72,12 +72,19 @@
   color: var(--text-secondary);
 }
 
-/* 행 높이 — RealGrid 기본(~21px)이 JqxGrid(~33px)보다 촘촘 → line-height 로 여유있게 통일.
-   RealGrid 2.10.0 은 바디/행바를 HTML <table> 로 렌더하므로 셀 line-height 가 곧 행 높이가 됨.
-   데이터 셀과 제어열(No./state/check) 모두 동일 높이로 맞춰 정렬 유지. */
+/* 행 높이 — ⚠ 여기서 만들지 않는다. realgridOps.js 의 GRID_ROW_HEIGHT 가 유일한 기준이고,
+   각 그리드 컴포넌트가 setDisplayOptions({ rowHeight }) 로 그리드에 알린다.
+
+   이유: RealGrid 는 셀을 <table> 로 그리지만 선택/포커스 오버레이는 DOM 을 안 보고
+   displayOptions.rowHeight 로 좌표를 계산한다. 예전엔 이 자리에서 `line-height: 32px`
+   로 행을 키웠는데, 그리드가 아는 높이는 기본 계산값(폰트 14px × 1.5em ≒ 21px)이라
+   행당 11px 씩 어긋났다 → 셀렉터 박스가 행 사이에 걸치는 버그.
+
+   그래서 CSS 는 '높이'가 아니라 '정렬'만 담당한다. line-height 는 RealGrid 기본
+   1.5em 을 그대로 두고(=텍스트 줄간격), 남는 공간은 vertical-align 으로 가운데 정렬. */
 .rg-data-cell,
 .rg-rowbarcontainer .rg-table tr td {
-  line-height: 32px !important;
+  vertical-align: middle !important;
 }
 
 /* ==========================================================================

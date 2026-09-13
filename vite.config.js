@@ -12,7 +12,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // 프론트의 /api 호출을 로컬 백엔드(Spring Boot, HTTPS 8443)로 프록시
+      // 프론트의 /api 호출을 로컬 백엔드(Spring Boot, HTTPS 8443)로 프록시한다.
+      // 목업 모드(npm run dev)에서는 MSW 가 먼저 가로채므로 여기까지 오지 않는다.
       // 백엔드가 mkcert 자체서명 인증서라 secure:false 로 검증 생략
       '/api': {
         target: 'https://localhost:8443',

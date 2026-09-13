@@ -93,6 +93,12 @@ export default {
     QuickSearchBar,
     SavedViewsBar
   },
+  created() {
+    // 긴급도 공통코드의 순위표(코드값 → ord). 반응형일 이유가 없어서 data() 밖에 둔다.
+    // 아래 setDataComparer 에 넘긴 비교 함수가 이 Map "객체"를 클로저로 붙잡으므로
+    // 절대 재할당하면 안 된다. 코드가 도착하면 clear() + set() 으로 내용만 갈아넣는다.
+    this.urgencyOrder = new Map()
+  },
   data() {
     return {
       searchResult: { count: 0, current: 0 },
@@ -107,6 +113,7 @@ export default {
         { fieldName: 'workStatus', dataType: 'text' },
         { fieldName: 'employmentType', dataType: 'text' },
         { fieldName: 'evalGrade', dataType: 'text' },
+        { fieldName: 'urgency', dataType: 'text' },
         { fieldName: 'skillScore', dataType: 'number' },
         { fieldName: 'region', dataType: 'text' },
         { fieldName: 'salary', dataType: 'number' },
@@ -180,6 +187,15 @@ export default {
             if (v === '소속') return 'rg-emp-dept'
             return ''
           }
+        },
+        {
+          // 공통코드(URGENCY) 연동 컬럼. values/labels/lookupDisplay 는 여기 쓰지 않는다.
+          // 공통코드가 도착한 뒤 loadCommonCodes() 가 setColumn 으로 넣는다.
+          name: 'urgency',
+          fieldName: 'urgency',
+          width: '90',
+          header: { text: '긴급도 (공통코드)' },
+          styles: { textAlignment: 'center' }
         },
         {
           name: 'evalGrade',
@@ -325,15 +341,72 @@ export default {
         }
       }
 
+      // 긴급도는 데이터에 코드값(URGENT/HIGH/...)이 들어있고 화면에는 라벨(긴급/높음/...)을 쓴다.
+      //
+      // 헤더 클릭 정렬은 GridView 가 아니라 DataProvider 가 "필드 원본 값"으로 수행한다.
+      // 그래서 그냥 두면 코드 사전순(높음→낮음→보통→미정→긴급)이 되고, 컬럼의
+      // sortByLabel 을 켜면 라벨 가나다순(긴급→낮음→높음→미정→보통)이 된다. 둘 다 틀렸다.
+      // 이 필드의 비교 함수만 공통코드 ord 기준으로 갈아끼우면 헤더 클릭 흐름은 그대로
+      // 타면서(정렬 화살표·오름/내림 토글·다중 정렬이 따라온다) 기준만 우선순위가 된다.
+      // 오름/내림은 RealGrid 가 결과를 뒤집어 처리하므로 여기서 방향을 보지 않는다.
+      //
+      // 코드 목록이 아직 안 왔어도 지금 등록해 둔다. 비교 함수는 정렬이 일어나는
+      // 시점에 호출되고, 그때는 loadCommonCodes() 가 순위표를 채운 뒤다.
+      dataProvider.setDataComparer('urgency', (field, row1, row2) => {
+        const a = this.urgencyOrder.get(dataProvider.getValue(row1, field)) ?? Number.MAX_SAFE_INTEGER
+        const b = this.urgencyOrder.get(dataProvider.getValue(row2, field)) ?? Number.MAX_SAFE_INTEGER
+        return a === b ? 0 : a < b ? -1 : 1
+      })
+      this.loadCommonCodes()
+
       // 우클릭 행/열 고정 메뉴는 RealGridCommonJs 컴포넌트가 내부에서 처리(refs 불필요)
+    },
+
+    // 공통코드 조회. 실제 화면에서는 /api/common-codes/{group} 을 부르는 자리다.
+    async loadCommonCodes() {
+      try {
+        const url = (import.meta.env?.BASE_URL ?? '/') + 'commonCodes.json'
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('Fetch failed')
+        const data = await res.json()
+
+        // ord 로 미리 정렬해 둔다. 아래 values/labels 순서가 드롭다운 에디터와 컬럼 필터
+        // 목록에 그대로 노출되므로, 여기서 맞춰 두면 그쪽도 우선순위 순으로 보인다.
+        const codes = (data.URGENCY || [])
+          .map((c, i) => ({
+            code: c.code,
+            label: c.label ?? c.code,
+            ord: Number.isFinite(Number(c.ord)) ? Number(c.ord) : i
+          }))
+          .filter((c) => c.code != null)
+          .sort((a, b) => a.ord - b.ord)
+
+        // 순위표는 내용만 갈아넣는다 (created() 주석 참고).
+        this.urgencyOrder.clear()
+        codes.forEach((c) => this.urgencyOrder.set(c.code, c.ord))
+
+        // values/labels 는 setColumnProperty 로 바꿀 수 없다. 컬럼을 통째로 재지정해야 한다.
+        const col = this.gridView?.columnByName('urgency')
+        if (col) {
+          this.gridView.setColumn({
+            ...col,
+            values: codes.map((c) => c.code),
+            labels: codes.map((c) => c.label),
+            lookupDisplay: true,
+            sortByLabel: false
+          })
+        }
+      } catch (error) {
+        console.warn('공통코드 조회 실패, 긴급도는 코드값 기준으로 표시·정렬됩니다:', error)
+      }
     },
 
     async loadUsers() {
       const defaultUsers = [
-        { userId: 'minjun.park', name: '박민준', dept: '경영지원', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 88, region: '서울', salary: 5240, joinDate: '2019-04-12' },
-        { userId: 'suhyun.lee', name: '이수현', dept: '경영지원', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 95, region: '대전', salary: 9520, joinDate: '2024-01-15' },
-        { userId: 'minjun.han', name: '한민준', dept: '디자인팀', role: 'DevOps', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 72, region: '광주', salary: 8900, joinDate: '2021-08-20' },
-        { userId: 'jihoon.kim', name: '김지훈', dept: '개발팀', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 84, region: '서울', salary: 7200, joinDate: '2020-03-09' }
+        { userId: 'minjun.park', name: '박민준', dept: '경영지원', role: 'Security', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 88, region: '서울', salary: 5240, joinDate: '2019-04-12', urgency: 'URGENT' },
+        { userId: 'suhyun.lee', name: '이수현', dept: '경영지원', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'S', skillScore: 95, region: '대전', salary: 9520, joinDate: '2024-01-15', urgency: 'NORMAL' },
+        { userId: 'minjun.han', name: '한민준', dept: '디자인팀', role: 'DevOps', workStatus: '휴직', employmentType: '계약직', evalGrade: 'B', skillScore: 72, region: '광주', salary: 8900, joinDate: '2021-08-20', urgency: 'LOW' },
+        { userId: 'jihoon.kim', name: '김지훈', dept: '개발팀', role: 'PM', workStatus: '재직', employmentType: '정규직', evalGrade: 'A', skillScore: 84, region: '서울', salary: 7200, joinDate: '2020-03-09', urgency: 'HIGH' }
       ]
       try {
         const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
@@ -356,6 +429,7 @@ export default {
         name: '신규 사용자',
         dept: '개발팀',
         role: 'PM',
+        urgency: 'NORMAL',
         workStatus: '재직',
         employmentType: '정규직',
         evalGrade: 'B',

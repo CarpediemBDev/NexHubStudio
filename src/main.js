@@ -33,10 +33,26 @@ if (typeof RealGrid?.setLicenseKey === 'function') {
 // showToast를 전역으로 노출
 window.showToast = showToast
 
-const app = createApp(App)
-const pinia = createPinia()
-app.use(pinia)
-app.use(router)
-app.directive('validation', vValidation)
-app.directive('validated-form', vValidatedForm)
-app.mount('#app')
+/**
+ * 목업 모드(npm run dev)에서는 MSW 가 axios 요청을 네트워크 단계에서 가로채
+ * src/mocks/handlers 가 응답한다. 화면과 src/api 코드는 두 모드에서 동일하다.
+ *
+ * 실제 모드(npm run dev:api)와 빌드에서는 이 블록을 통째로 건너뛴다.
+ * 동적 import 라서 msw 가 실서비스 번들에 포함되지 않는다.
+ */
+async function enableMocking() {
+  if (import.meta.env.VITE_USE_MOCK !== 'true') return
+  const { worker } = await import('./mocks/browser')
+  await worker.start({ onUnhandledRequest: 'bypass' })
+}
+
+// 워커가 뜨기 전에 화면이 먼저 요청을 날리면 그 요청은 가로채지지 않으므로 mount 를 뒤로 미룬다
+enableMocking().then(() => {
+  const app = createApp(App)
+  const pinia = createPinia()
+  app.use(pinia)
+  app.use(router)
+  app.directive('validation', vValidation)
+  app.directive('validated-form', vValidatedForm)
+  app.mount('#app')
+})

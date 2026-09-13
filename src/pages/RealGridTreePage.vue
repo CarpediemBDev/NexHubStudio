@@ -119,8 +119,12 @@ function buildDeptTreeFromUsers(users) {
       headcount: 1,
       region: u.region || '서울',
       salary: u.salary,
-      joinDate: u.joinDate,
-      children: []
+      joinDate: u.joinDate
+      /*
+       * 잎(사원) 노드에는 children 키를 넣지 않는다.
+       * setNestedRows 의 childrenProp 은 '자식이 있는지를 지시하는 속성'이라
+       * 빈 배열 children: [] 도 "자식 있음"으로 읽혀 잎에까지 펼침 화살표가 그려진다.
+       */
     }))
 
     treeRows.push({

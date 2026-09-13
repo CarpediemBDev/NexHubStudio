@@ -183,6 +183,8 @@ export default {
       this.$emit('change', newValue)
     },
     removeItem(item) {
+      // disabled 일 때는 뱃지의 x 로도 해제되면 안 된다
+      if (this.disabled) return
       const value = this.getItemValue(item)
       const newValue = this.modelValue.filter((v) => v !== value)
       this.$emit('update:modelValue', newValue)
