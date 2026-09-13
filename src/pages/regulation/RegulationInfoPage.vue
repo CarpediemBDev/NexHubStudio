@@ -526,6 +526,9 @@ export default {
     }
   },
   created() {
+    // 서버 스냅샷 적재. 그리드 행은 store.records 를 보고 있으므로 도착하면 알아서 그려진다
+    this.store.ensureLoaded()
+
     // 수정 페이지에서 돌아온 경우 검색조건을 복원한다
     const ctx = this.store.listContext
     if (ctx.filters) {
@@ -721,11 +724,11 @@ export default {
       const r = this.selectedRecord
       if (r) this.goEditPage('RegulationInfoView', { regInfoId: r.regInfoId }, { tab: 'history' })
     },
-    removeRecord() {
+    async removeRecord() {
       const r = this.selectedRecord
       if (!r) return
       if (!window.confirm(`${r.regNo} 를 폐지 처리하시겠습니까? (물리 삭제 없이 상태만 변경)`)) return
-      this.store.expireRecord(r.regInfoId)
+      await this.store.expireRecord(r.regInfoId)
       showToast(`${r.regNo} 폐지 처리`, { type: 'success' })
     }
   }

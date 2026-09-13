@@ -477,7 +477,10 @@ export default {
 
   methods: {
     /* ================= 적재 ================= */
-    load() {
+    async load() {
+      // 상세로 바로 진입(북마크·새로고침)해도 스냅샷이 있어야 recordById 가 성립한다
+      await this.store.ensureLoaded()
+
       const id = this.routeId
       if (!id) {
         this.master = emptyMaster()
@@ -692,9 +695,9 @@ export default {
       }
       this.commitSave()
     },
-    commitSave() {
+    async commitSave() {
       this.confirmOpen = false
-      const saved = this.store.saveRecord(
+      const saved = await this.store.saveRecord(
         {
           master: this.master,
           targets: this.masterAsRecord.targets,
@@ -712,8 +715,8 @@ export default {
       )
       this.$router.replace({ name: 'RegulationInfoView', params: { regInfoId: saved.regInfoId } })
     },
-    cancelWithHistory() {
-      this.store.pushConflictHistory(this.unresolvedConflicts, 'CANCEL', null)
+    async cancelWithHistory() {
+      await this.store.pushConflictHistory(this.unresolvedConflicts, 'CANCEL')
       this.confirmOpen = false
       this.clearDraft()
       this.savedAndLeaving = true
