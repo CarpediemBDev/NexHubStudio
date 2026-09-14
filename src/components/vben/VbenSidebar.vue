@@ -101,7 +101,7 @@
 
           <!-- 2-Level Submenu (Clean Text Only, No Distracting Icons) -->
           <ul v-if="(!isCollapsed || currentToggleStyle === 'hover') && menu.children && isExpanded(menu.path)" class="nav flex-column submenu-list gap-0.5">
-            <li v-for="child in menu.children" :key="child.path" class="nav-item">
+            <li v-for="child in visibleChildren(menu)" :key="child.path" class="nav-item">
               <div 
                 class="nav-link menu-item-sub d-flex align-items-center rounded-2 cursor-pointer"
                 :class="{ 'sub-active': isActive(menu.path + '/' + child.path) }"
@@ -167,11 +167,18 @@ const currentToggleStyle = computed(() => tabStore.sidebarToggleStyle || 'inline
 const isCollapsed = computed(() => tabStore.sidebarCollapsed);
 const expandedGroups = ref(['system', 'grid-studio', 'user-group']);
 
+// 메뉴에 보이지 않는 라우트: hidden 이거나 파라미터(:id)가 필요한 화면.
+// 파라미터 라우트를 메뉴로 누르면 ':regInfoId(\d+)' 문자열이 그대로 주소가 되어 매칭되지 않고 흰 화면이 된다.
+const isMenuVisible = (r) => !r.meta?.hidden && !r.path.includes(':');
+
 const menus = computed(() => {
   const mainRoute = router.options.routes.find(r => r.path === '/');
   if (!mainRoute || !mainRoute.children) return [];
-  return mainRoute.children.filter(c => !c.meta?.hidden && !c.path.includes(':'));
+  return mainRoute.children.filter(isMenuVisible);
 });
+
+// 2단계 메뉴에도 같은 기준을 적용한다 (규제 정보 상세/수정/신규 등록은 목록 버튼으로만 들어간다)
+const visibleChildren = (menu) => (menu.children || []).filter(isMenuVisible);
 
 const isActive = (path) => {
   if (!path && route.path === '/') return true;

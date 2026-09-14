@@ -41,13 +41,21 @@ window.showToast = showToast
  * 동적 import 라서 msw 가 실서비스 번들에 포함되지 않는다.
  */
 async function enableMocking() {
-  if (import.meta.env.VITE_USE_MOCK !== 'true') return
-  const { worker } = await import('./mocks/browser')
-  await worker.start({ onUnhandledRequest: 'bypass' })
+  if (import.meta.env.VITE_USE_MOCK !== 'true') return true
+  try {
+    const { worker } = await import('./mocks/browser')
+    await worker.start({ onUnhandledRequest: 'bypass' })
+    return true
+  } catch (e) {
+    // 서비스워커를 못 쓰는 환경(일부 내장 브라우저, 사이트 데이터 차단 등)에서도 화면은 떠야 한다.
+    // 실패를 삼키면 요청이 조용히 프록시(백엔드)로 나가 "목업인 줄 알았는데 실데이터"가 되므로 반드시 알린다.
+    console.error('[MSW] 목업 모드 시작 실패 — /api 요청이 vite 프록시(백엔드)로 나갑니다.', e)
+    return false
+  }
 }
 
 // 워커가 뜨기 전에 화면이 먼저 요청을 날리면 그 요청은 가로채지지 않으므로 mount 를 뒤로 미룬다
-enableMocking().then(() => {
+enableMocking().then((mocked) => {
   const app = createApp(App)
   const pinia = createPinia()
   app.use(pinia)
@@ -55,4 +63,7 @@ enableMocking().then(() => {
   app.directive('validation', vValidation)
   app.directive('validated-form', vValidatedForm)
   app.mount('#app')
+  if (!mocked) {
+    showToast('목업 모드를 시작하지 못했습니다. 데이터 요청이 백엔드로 전송됩니다.', { type: 'error', duration: 6000 })
+  }
 })
