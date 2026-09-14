@@ -105,7 +105,23 @@ JS를 수정할 수 없는 경우에만 쓴다. **전역 CSS**에 넣는다.
 
 ---
 
-## 5. 다른 시도가 실패하는 흔한 원인 (하지 말 것)
+## 5. 다크모드 — 색은 신경 쓸 필요 없다
+
+1번·4번 방식은 **색을 지정하는 게 아니라 줄무늬만 없앤다.**
+행은 원래 투명이라 뒤의 그리드 본문 색이 보이고, 그 색은 테마가 정한다.
+그래서 라이트에선 흰색, 다크에선 어두운 색으로 **자동으로 따라간다.** 다크모드 동작은 줄무늬 끄기 전과 똑같다.
+
+**하지 말 것: "단일색"을 "흰색으로 칠하기"로 구현**
+
+```css
+/* ❌ 다크모드에서 흰 배경에 흰 글자가 되어 내용이 안 보인다 */
+.rg-data-row, .rg-alternate-row { background: #fff; }
+.rg-data-cell { background-color: white !important; }
+```
+
+---
+
+## 6. 다른 시도가 실패하는 흔한 원인 (하지 말 것)
 
 | 시도 | 왜 안 되나 |
 |---|---|
@@ -118,7 +134,7 @@ JS를 수정할 수 없는 경우에만 쓴다. **전역 CSS**에 넣는다.
 
 ---
 
-## 6. 검증 방법
+## 7. 검증 방법
 
 브라우저 개발자도구 콘솔에서:
 
@@ -132,14 +148,16 @@ document.querySelectorAll('.rg-alternate-row').length
 4번(CSS) 방식을 썼다면 클래스는 남아 있으니 배경색으로 확인:
 
 ```js
-[...document.querySelectorAll('.rg-body tr.rg-data-row')].slice(0, 4)
+[...document.querySelectorAll('.rg-body .rg-data-row')].slice(0, 4)
   .map(tr => getComputedStyle(tr).backgroundColor)
 // 네 값이 모두 같으면 성공
 ```
 
+다크모드로 바꿨을 때 행이 흰색으로 남아 있으면, 누군가 흰색을 직접 칠한 것(5장의 "하지 말 것")이다.
+
 ---
 
-## 7. 참고
+## 8. 참고
 
 - `rowStyleCallback` 으로 행에 `styleName` 을 돌려주는 행에는 RealGrid가 원래 `rg-alternate-row` 를 붙이지 않는다. 그래서 조건부 행 색은 이 설정과 충돌하지 않는다.
 - 줄무늬를 **다시 켜고** 색만 바꾸고 싶다면 옵션은 기본값(true)으로 두고 전역 CSS에서 `.rg-root .rg-body .rg-alternate-row { background: 원하는색; }` 로 덮는다.
