@@ -132,6 +132,7 @@
           :fields="gridFields"
           :columns="gridColumns"
           :rows="mockData"
+          pageable
           :sortable="true"
           :filterable="true"
           :checkable="true"
@@ -148,7 +149,7 @@
           :use-footer="true"
           :soft-deletable="true"
           :summary-mode="'aggregate'"
-          :fit-style="'none'"
+          fit-style="fill"
           :toast="gridToast"
           @init="onGridInit"
         />
@@ -376,12 +377,8 @@ export default {
         if (!res.ok) throw new Error('db.json fetch 실패')
         const data = await res.json()
         const rows = Array.isArray(data) ? data : (data.users || [])
-        if (rows.length) {
-          this.mockData = rows
-          if (this.dataProvider) {
-            this.dataProvider.setRows(this.mockData)
-          }
-        }
+        // 그리드 반영은 RealGridCommonJs 의 rows 감시가 한다(pageable 이면 현재 페이지만)
+        if (rows.length) this.mockData = rows
       } catch (e) {
         console.warn('[PivotAltA] db.json 로드 실패 → 폴백 데이터 사용:', e)
       }

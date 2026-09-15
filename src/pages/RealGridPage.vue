@@ -42,6 +42,7 @@
           :fields="gridFields"
           :columns="gridColumns"
           :rows="users"
+          pageable
           :sortable="true"
           :filterable="true"
           :checkable="true"

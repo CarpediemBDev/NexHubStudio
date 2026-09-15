@@ -1,5 +1,5 @@
 <template>
-  <div class="realgrid-tree-wrapper w-100 border rounded-2 overflow-hidden shadow-sm" :style="{ height: height }">
+  <div class="realgrid-tree-wrapper w-100 d-flex flex-column border rounded-2 overflow-hidden shadow-sm" :style="{ height: height }">
     <!-- 1단: 상단 내장 서브 툴바 (컬럼 팝오버 + 뷰 저장 + 내 뷰 칩스) -->
     <div v-if="showColumnPicker || showSavedViews" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
       <!-- Left: Column Picker & Save View Buttons -->
@@ -47,7 +47,8 @@
     </div>
 
     <!-- Tree Canvas Element -->
-    <div ref="treeElement" class="w-100" :style="{ height: (showColumnPicker || showSavedViews) ? 'calc(100% - 38px)' : '100%' }"></div>
+    <!-- 툴바를 뺀 나머지 높이를 flex 로 채운다 (툴바 높이를 숫자로 빼면 실제 높이와 어긋난다) -->
+    <div ref="treeElement" class="w-100 rg-grid-area"></div>
 
     <!-- 컬럼 표시/숨기기 설정 팝업 -->
     <ColumnPickerModal
@@ -96,7 +97,7 @@ export default {
     columns: { type: Array, default: () => [] },
     rows: { type: Array, default: () => [] },
     gridId: { type: String, default: '' },
-    height: { type: String, default: '580px' },
+    height: { type: String, default: '500px' },
 
     // ---- 🔖 [뷰 저장 내장 캡슐화 Props] ----
     showSavedViews: { type: Boolean, default: true },
@@ -1457,6 +1458,13 @@ export default {
 <style scoped>
 .realgrid-tree-wrapper {
   position: relative;
+}
+.b2b-grid-inner-toolbar {
+  flex-shrink: 0;
+}
+.rg-grid-area {
+  flex: 1 1 0;
+  min-height: 0;
 }
 </style>
 

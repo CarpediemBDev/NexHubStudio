@@ -1,7 +1,7 @@
 <template>
-  <div class="realgrid-vue-wrapper w-100 border rounded-2 overflow-hidden shadow-sm" :style="{ height: height }">
+  <div class="realgrid-vue-wrapper w-100 d-flex flex-column border rounded-2 overflow-hidden shadow-sm" :style="{ height: height }">
     <!-- 1단: 상단 내장 서브 툴바 (컬럼 팝오버 + 뷰 저장 + 내 뷰 칩스) -->
-    <div v-if="showColumnPicker || showSavedViews" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
+    <div v-if="showToolbar" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
       <!-- Left: Column Picker & Save View Buttons -->
       <div class="d-flex align-items-center gap-2">
         <!-- 1. [컬럼 설정] 버튼 → 팝업(ColumnPickerModal) -->
@@ -28,21 +28,32 @@
         </button>
       </div>
 
-      <!-- Right: Dynamic [내 뷰] Chips (독립 우측 분리) -->
-      <div v-if="showSavedViews && savedViews.length > 0" class="d-flex align-items-center gap-1.5 ms-auto flex-wrap">
-        <span v-if="savedViews.length > 0" class="b2b-text-xs text-muted fw-semibold me-1">
-          <i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:
-        </span>
-        <div
-          v-for="view in savedViews"
-          :key="view.id"
-          class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal b2b-text-xs"
-          :class="activeViewId === view.id ? 'bg-primary text-white shadow-sm' : 'bg-theme-card text-theme-primary border-theme'"
-          @click="applySavedView(view)"
-        >
-          <span>{{ view.name }}</span>
-          <i class="bi bi-x ms-1 text-danger opacity-75 hover-opacity-100" @click.stop="deleteSavedView(view.id)" title="뷰 삭제"></i>
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <!-- Right: Dynamic [내 뷰] Chips (독립 우측 분리) -->
+        <div v-if="showSavedViews && savedViews.length > 0" class="d-flex align-items-center gap-1.5 flex-wrap">
+          <span v-if="savedViews.length > 0" class="b2b-text-xs text-muted fw-semibold me-1">
+            <i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:
+          </span>
+          <div
+            v-for="view in savedViews"
+            :key="view.id"
+            class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal b2b-text-xs"
+            :class="activeViewId === view.id ? 'bg-primary text-white shadow-sm' : 'bg-theme-card text-theme-primary border-theme'"
+            @click="applySavedView(view)"
+          >
+            <span>{{ view.name }}</span>
+            <i class="bi bi-x ms-1 text-danger opacity-75 hover-opacity-100" @click.stop="deleteSavedView(view.id)" title="뷰 삭제"></i>
+          </div>
         </div>
+
+        <!-- 페이지당 행 수 (pageable) — 페이지 보정은 하단 Pagination 이 맡는다 -->
+        <PageSizeSelect
+          v-if="pageable"
+          size="sm"
+          :model-value="currentPageSize"
+          :options="pageSizeOptions"
+          @update:model-value="$refs.pager.changeSize($event)"
+        />
       </div>
     </div>
 
@@ -50,12 +61,25 @@
     <RealGridVue
       ref="realGridComp"
       :autoGenerateField="false"
-      :rows="rows"
-      :style="{ width: '100%', height: (showColumnPicker || showSavedViews) ? 'calc(100% - 38px)' : '100%' }"
+      :rows="pagedRows"
+      class="rg-grid-area"
+      :style="{ width: '100%' }"
       @onInitialized="initGrid"
     >
       <slot></slot>
     </RealGridVue>
+
+    <!-- 3단: 페이지네이션 (pageable 일 때만) -->
+    <Pagination
+      v-if="pageable"
+      ref="pager"
+      v-model:page="currentPage"
+      v-model:page-size="currentPageSize"
+      :total="(rows || []).length"
+      :page-size-options="pageSizeOptions"
+      :show-size-select="false"
+      @change="$emit('page-change', $event)"
+    />
 
     <!-- 컬럼 표시/숨기기 설정 팝업 -->
     <ColumnPickerModal
@@ -76,19 +100,23 @@ import { useTabStore } from '@/stores/tabStore.js'
 import { captureViewState, applyViewState } from '@/utils/realgridOps'
 import { GRID_ROW_HEIGHT, buildRowHeightOptions, warnIfRowHeightMismatch } from '@/utils/realgridRowHeight'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
+import Pagination from '@/components/Pagination.vue'
+import PageSizeSelect from '@/components/PageSizeSelect.vue'
 
 export default {
   name: 'RealGridCommonVue',
   components: {
     RealGridVue,
-    ColumnPickerModal
+    ColumnPickerModal,
+    Pagination,
+    PageSizeSelect
   },
   props: {
     fields: { type: Array, default: () => [] },
     columns: { type: Array, default: () => [] },
     rows: { type: Array, default: () => [] },
     gridId: { type: String, default: '' },
-    height: { type: String, default: '580px' },
+    height: { type: String, default: '500px' },
     editable: { type: Boolean, default: true },
     hideDeletedRows: { type: Boolean, default: false },
     showColumnPicker: { type: Boolean, default: true },
@@ -124,8 +152,17 @@ export default {
     exclusiveSelectable: { type: Boolean, default: false },
     pinnable: { type: Boolean, default: undefined },
     options: { type: Object, default: () => ({}) },
-    gridOptions: { type: Object, default: () => ({}) }
+    gridOptions: { type: Object, default: () => ({}) },
+    /**
+     * 클라이언트 페이징. rows 를 잘라 현재 페이지 행만 그리드에 넣는다.
+     * ⚠ 조회 전용 그리드에만 쓴다 — 페이지를 넘기면 setRows 로 데이터를 갈아끼우므로
+     *   수정/추가/삭제 상태, 체크가 사라지고 정렬·필터·그룹도 현재 페이지 안에서만 동작한다.
+     */
+    pageable: { type: Boolean, default: false },
+    pageSize: { type: Number, default: 20 },
+    pageSizeOptions: { type: Array, default: () => [10, 20, 30, 50, 100] }
   },
+  emits: ['init', 'page-change'],
   data() {
     return {
       gridView: null,
@@ -133,7 +170,9 @@ export default {
       savedViews: [],
       activeViewId: null,
       columnItems: [],
-      showColumnModal: false
+      showColumnModal: false,
+      currentPage: 1,
+      currentPageSize: this.pageSize
     }
   },
   created() {
@@ -154,6 +193,18 @@ export default {
     }
   },
   computed: {
+    pagedRows() {
+      const rows = this.rows || []
+      if (!this.pageable) return rows
+      const start = (this.currentPage - 1) * this.currentPageSize
+      return rows.slice(start, start + this.currentPageSize)
+    },
+    pageRowOffset() {
+      return this.pageable ? (this.currentPage - 1) * this.currentPageSize : 0
+    },
+    showToolbar() {
+      return this.showColumnPicker || this.showSavedViews || this.pageable
+    },
     columnPickerCols() {
       return this.columnItems.map(c => ({
         name: c.name,
@@ -227,9 +278,42 @@ export default {
     },
     gridId() {
       this.loadSavedViews()
+    },
+    // 배열 자체가 바뀌면(재조회) 1페이지로, 내부 변경이면 범위만 보정
+    rows(newRows, oldRows) {
+      if (this.pageable && newRows !== oldRows) this.currentPage = 1
+    },
+    'rows.length'() {
+      this.clampPage()
+    },
+    pageSize(size) {
+      this.currentPageSize = size
+      this.clampPage()
+    },
+    pageable() {
+      this.currentPage = 1
+      // 페이저가 생기거나 없어지면 그리드 영역 높이가 바뀐다
+      this.$nextTick(() => this.gridView && this.gridView.resetSize())
+    },
+    // 행 번호가 페이지를 넘어 전체 기준(21, 22…)으로 이어지게 한다
+    pageRowOffset() {
+      this.applyPageRowOffset()
     }
   },
   methods: {
+    clampPage() {
+      const total = (this.rows || []).length
+      const last = Math.max(1, Math.ceil(total / this.currentPageSize))
+      if (this.currentPage > last) this.currentPage = last
+    },
+
+    applyPageRowOffset() {
+      if (!this.gridView) return
+      try {
+        this.gridView.setRowIndicator({ indexOffset: this.pageRowOffset })
+      } catch (e) { /* noop */ }
+    },
+
     openColumnModal() {
       this.syncColumnItems()
       this.showColumnModal = true
@@ -716,6 +800,7 @@ export default {
       this.initContextMenu()
       this.syncColumnItems()
       this.applyCellMerging()
+      if (this.pageable) this.applyPageRowOffset()
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
       this.applyGridTheme(this.$tabStore?.sidebarTheme || 'light')
 
@@ -732,6 +817,12 @@ export default {
   position: relative;
 }
 .b2b-grid-inner-toolbar {
+  flex-shrink: 0;
   background-color: var(--b2b-color-bg-subcard, #f8fafc);
+}
+/* 툴바·페이저를 뺀 나머지 높이를 flex 로 채운다 (툴바 높이를 숫자로 빼면 실제 높이와 어긋난다) */
+.rg-grid-area {
+  flex: 1 1 0;
+  min-height: 0;
 }
 </style>
