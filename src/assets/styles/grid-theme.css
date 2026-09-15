@@ -72,8 +72,8 @@
   color: var(--text-secondary);
 }
 
-/* 행 높이 — ⚠ 여기서 만들지 않는다. realgridOps.js 의 GRID_ROW_HEIGHT 가 유일한 기준이고,
-   각 그리드 컴포넌트가 setDisplayOptions({ rowHeight }) 로 그리드에 알린다.
+/* 행 높이 — ⚠ 여기서 만들지 않는다. 각 그리드 컴포넌트의 rowHeight prop 이 유일한 기준이고,
+   컴포넌트가 setDisplayOptions({ rowHeight }) 로 그리드에 알린다.
 
    이유: RealGrid 는 셀을 <table> 로 그리지만 선택/포커스 오버레이는 DOM 을 안 보고
    displayOptions.rowHeight 로 좌표를 계산한다. 예전엔 이 자리에서 `line-height: 32px`

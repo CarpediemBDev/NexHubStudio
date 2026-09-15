@@ -106,6 +106,7 @@
           :fields="gridFields"
           :columns="gridColumns"
           :rows="members"
+          :visible-rows="0"
           :sortable="true"
           :filterable="true"
           :checkable="true"

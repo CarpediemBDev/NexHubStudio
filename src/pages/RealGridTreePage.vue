@@ -51,7 +51,7 @@
           grid-id="realgrid-tree-page"
           :fields="fields"
           :columns="columns"
-          :rows="rows"
+          :rows="pagedRows"
           children-field="children"
           :draggable="enableDnd"
           :auto-expand-all="true"
@@ -65,7 +65,13 @@
           @init="onGridInit"
           @node-moved="onNodeMoved"
           @parent-changed="onParentChanged"
-        />
+        >
+          <template #toolbar-right>
+            <PageSizeSelect v-model="pageSize" size="sm" />
+          </template>
+        </RealGridTreeJs>
+        <!-- 부서는 8개뿐이라 부서 단위로 나누면 한 페이지로 끝난다 → 사원 기준으로 나누고, 그 페이지 사원을 부서로 묶어 보여준다 -->
+        <Pagination v-model:page="page" v-model:page-size="pageSize" :total="users.length" :show-size-select="false" />
       </div>
     </div>
 
@@ -84,9 +90,22 @@ import RealGridTreeJs from '@/components/RealGridTreeJs.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import SavedViewsBar from '@/components/SavedViewsBar.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
+import Pagination from '@/components/Pagination.vue'
+import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import { showToast } from '@/utils/toastUtil.js'
 
-function buildDeptTreeFromUsers(users) {
+/** 같은 부서끼리 붙여 둔다(부서는 처음 나온 순서, 부서 안에서는 원래 순서). 페이지를 잘라도 부서가 흩어지지 않게 */
+function sortUsersByDept(users) {
+  const order = new Map()
+  users.forEach((u) => {
+    const dept = u.dept || '미지정'
+    if (!order.has(dept)) order.set(dept, order.size)
+  })
+  return [...users].sort((a, b) => order.get(a.dept || '미지정') - order.get(b.dept || '미지정'))
+}
+
+/** headcounts: 부서별 전체 인원. 페이지 단위로 트리를 만들어도 부서 인원은 전체 기준으로 보여준다 */
+function buildDeptTreeFromUsers(users, headcounts) {
   if (!Array.isArray(users) || users.length === 0) return []
 
   const deptMap = new Map()
@@ -103,7 +122,7 @@ function buildDeptTreeFromUsers(users) {
 
   deptMap.forEach((userList, deptName) => {
     const deptCode = `DEPT-0${deptIdx++}`
-    const headcount = userList.length
+    const headcount = headcounts ? headcounts[deptName] : userList.length
     const pmUser = userList.find(u => u.role === 'PM' || u.role === 'Manager') || userList[0]
     const managerName = pmUser ? `${pmUser.name} (${pmUser.role})` : '미정'
 
@@ -153,7 +172,9 @@ export default {
     RealGridTreeJs,
     QuickSearchBar,
     SavedViewsBar,
-    ColumnPickerModal
+    ColumnPickerModal,
+    Pagination,
+    PageSizeSelect
   },
   data() {
     return {
@@ -285,12 +306,27 @@ export default {
           }
         }
       ],
-      rows: []
+      users: [], // 부서순으로 정렬된 사원 목록(페이징 단위)
+      page: 1,
+      pageSize: 20
     }
   },
   computed: {
+    /** 현재 페이지 사원만 부서로 묶어 트리로 만든다. 페이지를 넘기면 트리를 다시 넣으므로 편집·이동 상태는 사라진다 */
+    pagedRows() {
+      const start = (this.page - 1) * this.pageSize
+      return buildDeptTreeFromUsers(this.users.slice(start, start + this.pageSize), this.deptHeadcounts)
+    },
+    deptHeadcounts() {
+      const counts = {}
+      this.users.forEach((u) => {
+        const dept = u.dept || '미지정'
+        counts[dept] = (counts[dept] || 0) + 1
+      })
+      return counts
+    },
     nodeCount() {
-      return this.countNodes(this.rows)
+      return this.countNodes(this.pagedRows)
     }
   },
   async created() {
@@ -311,11 +347,10 @@ export default {
         if (!res.ok) throw new Error('db.json fetch failed')
         const data = await res.json()
         const users = Array.isArray(data) ? data : data.users || []
-        const userList = users.length > 0 ? users : defaultUsers
-        this.rows = buildDeptTreeFromUsers(userList)
+        this.users = sortUsersByDept(users.length > 0 ? users : defaultUsers)
       } catch (error) {
         console.warn('[RealGridTreePage] Using fallback mock users for tree:', error)
-        this.rows = buildDeptTreeFromUsers(defaultUsers)
+        this.users = sortUsersByDept(defaultUsers)
       }
     },
 
@@ -448,8 +483,9 @@ export default {
       showToast('모든 노드가 접혔습니다.', { type: 'info' })
     },
 
+    /** 화면엔 현재 페이지 트리만 있으므로, 전체 사원으로 만든 트리를 넘겨 내보낸다 */
     exportExcel() {
-      this.$refs.treeComp?.exportToExcel('RealGrid_Org_Tree.xlsx')
+      this.$refs.treeComp?.exportRowsToExcel(buildDeptTreeFromUsers(this.users, this.deptHeadcounts), 'RealGrid_Org_Tree.xlsx')
     },
 
     openColumnPicker() {
