@@ -180,8 +180,7 @@
           height="520px"
           :fields="gridFields"
           :columns="gridColumns"
-          :rows="listRows"
-          pageable
+          :rows="pagedRows"
           :editable="false"
           :checkable="true"
           :sortable="true"
@@ -190,7 +189,12 @@
           fit-style="evenFill"
           :toast="gridToast"
           @init="onGridInit"
-        />
+        >
+          <template #toolbar-right>
+            <PageSizeSelect v-model="pageSize" size="sm" />
+          </template>
+        </RealGridCommonJs>
+        <Pagination v-model:page="page" v-model:page-size="pageSize" :total="listRows.length" :show-size-select="false" />
       </div>
     </div>
 
@@ -199,6 +203,8 @@
 
 <script>
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
+import Pagination from '@/components/Pagination.vue'
+import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import B2bDatePicker from '@/components/common/B2bDatePicker.vue'
 import CountryFilterBar from './components/CountryFilterBar.vue'
 import { showToast } from '@/utils/toastUtil.js'
@@ -256,7 +262,7 @@ const COLUMN_LAYOUT = [
 
 export default {
   name: 'RegulationInfoPage',
-  components: { RealGridCommonJs, B2bDatePicker, CountryFilterBar },
+  components: { RealGridCommonJs, Pagination, PageSizeSelect, B2bDatePicker, CountryFilterBar },
   data() {
     return {
       fieldCodes,
@@ -290,6 +296,8 @@ export default {
       countryChips: [],
       FILTER_VARIANTS,
       filterVariant: loadVariant(),
+      page: 1,
+      pageSize: 20,
 
       gridView: null,
       dataProvider: null,
@@ -492,13 +500,19 @@ export default {
       }))
     },
     /**
-     * 그리드에 넘기는 전체 목록 = 조회 결과 + 국가 칩.
-     * 그리드가 페이지 단위로 잘라 넣으므로(pageable) 국가 필터를 그리드 컬럼 필터에만 맡기면
+     * 전체 목록 = 조회 결과 + 국가 칩.
+     * 그리드엔 현재 페이지(pagedRows)만 들어가므로 국가 필터를 그리드 컬럼 필터에만 맡기면
      * 현재 페이지 안에서만 걸린다. 그래서 여기서 먼저 거르고, 컬럼 필터는 헤더 드롭다운 표시용으로 같이 켠다.
      */
     listRows() {
       if (!this.countryChips.length) return this.gridRows
       return this.gridRows.filter((r) => this.countryChips.some((cd) => r.countryCds.includes(`|${cd}|`)))
+    },
+    pagedRows() {
+      return this.listRows.slice(this.pageOffset, this.pageOffset + this.pageSize)
+    },
+    pageOffset() {
+      return (this.page - 1) * this.pageSize
     },
     selectedRecord() {
       return this.records.find((r) => r.regInfoId === this.selectedRegInfoId) || null
@@ -525,6 +539,16 @@ export default {
     filteredProductCodes() {
       if (!this.filters.productGroupCd) return productCodes
       return productCodes.filter((p) => p.parentCd === this.filters.productGroupCd)
+    }
+  },
+  watch: {
+    // 재조회·국가 칩 변경으로 목록이 바뀌면 1페이지부터
+    listRows() {
+      this.page = 1
+    },
+    // 행 번호가 페이지를 넘어 전체 기준(21, 22…)으로 이어지게 한다
+    pageOffset(offset) {
+      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: offset })
     }
   },
   created() {

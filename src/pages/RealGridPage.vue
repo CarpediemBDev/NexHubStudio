@@ -41,8 +41,7 @@
           grid-id="realgrid-main-page"
           :fields="gridFields"
           :columns="gridColumns"
-          :rows="users"
-          pageable
+          :rows="pagedUsers"
           :sortable="true"
           :filterable="true"
           :checkable="true"
@@ -64,7 +63,12 @@
           :fixed-row-count="0"
           :toast="gridToast"
           @init="onGridInit"
-        />
+        >
+          <template #toolbar-right>
+            <PageSizeSelect v-model="pageSize" size="sm" />
+          </template>
+        </RealGridCommonJs>
+        <Pagination v-model:page="page" v-model:page-size="pageSize" :total="users.length" :show-size-select="false" />
       </div>
     </div>
 
@@ -83,6 +87,8 @@ import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import SavedViewsBar from '@/components/SavedViewsBar.vue'
+import Pagination from '@/components/Pagination.vue'
+import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import { showToast } from '@/utils/toastUtil.js'
 import { searchGrid } from '@/utils/realgridOps'
 
@@ -92,7 +98,9 @@ export default {
     RealGridCommonJs,
     ColumnPickerModal,
     QuickSearchBar,
-    SavedViewsBar
+    SavedViewsBar,
+    Pagination,
+    PageSizeSelect
   },
   created() {
     // 긴급도 공통코드의 순위표(코드값 → ord). 반응형일 이유가 없어서 data() 밖에 둔다.
@@ -106,6 +114,8 @@ export default {
       isColumnPickerOpen: false,
       columnPickerCols: [],
       users: [],
+      page: 1,
+      pageSize: 20,
       gridFields: [
         { fieldName: 'userId', dataType: 'text' },
         { fieldName: 'name', dataType: 'text' },
@@ -298,6 +308,21 @@ export default {
           }
         }
       ]
+    }
+  },
+  computed: {
+    /** 현재 페이지 행만 그리드에 넘긴다. 페이지를 넘기면 그리드가 setRows 로 갈아끼우므로 편집 상태·체크는 사라진다 */
+    pagedUsers() {
+      return this.users.slice(this.pageOffset, this.pageOffset + this.pageSize)
+    },
+    pageOffset() {
+      return (this.page - 1) * this.pageSize
+    }
+  },
+  watch: {
+    // 행 번호가 페이지를 넘어 전체 기준(21, 22…)으로 이어지게 한다
+    pageOffset(offset) {
+      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: offset })
     }
   },
   mounted() {
@@ -497,7 +522,7 @@ export default {
       if (!gv) return
       gv.commit(true)
 
-      const start = gv.getRowIndicator().indexOffset || 0 // 현재 페이지 첫 행의 전체 기준 위치
+      const start = this.pageOffset // 현재 페이지 첫 행의 전체 기준 위치
       const addedCnt = dp.getStateRows('created').length + dp.getStateRows('createAndDeleted').length
       const pageCnt = dp.getRowCount() - addedCnt // 원본(users) 중 현재 페이지에 있는 행 수
       const head = this.users.slice(0, start)

@@ -43,7 +43,7 @@
         v-if="showSizeSelect"
         :model-value="pageSize"
         :options="pageSizeOptions"
-        @update:model-value="changeSize"
+        @update:model-value="$emit('update:pageSize', $event)"
       />
     </div>
   </nav>
@@ -57,7 +57,7 @@
  * <Pagination v-model:page="page" v-model:page-size="size" :total="rows.length" />
  *
  * 페이지 크기 셀렉트를 다른 위치(예: 그리드 툴바)에 둘 때는 :show-size-select="false" 로 숨기고
- * 그 자리에 PageSizeSelect 를 두되, 크기 변경 시 페이지 보정은 이 컴포넌트의 changeSize 로 한다.
+ * 그 자리에 <PageSizeSelect v-model="size" /> 를 둔다. 크기가 어디서 바뀌든 페이지 보정은 이 컴포넌트가 한다.
  */
 import PageSizeSelect from '@/components/PageSizeSelect.vue'
 
@@ -73,7 +73,21 @@ export default {
     /** 가운데에 보일 페이지 번호 버튼 수(첫/끝 페이지 포함) */
     maxButtons: { type: Number, default: 7 }
   },
-  emits: ['update:page', 'update:pageSize', 'change'],
+  emits: ['update:page', 'update:pageSize'],
+  created() {
+    // 페이지당 개수나 건수가 바뀌면 page 를 다시 잡는다. 둘이 같이 바뀔 수 있어 한 감시로 계산한다.
+    this.$watch(
+      () => [this.total, this.pageSize],
+      ([, size], [, oldSize]) => {
+        let next = this.page
+        // 보고 있던 첫 행이 새 페이지 크기에서도 보이도록
+        if (size !== oldSize) next = Math.floor(((this.page - 1) * oldSize) / size) + 1
+        // 건수가 줄어 현재 페이지가 없어지면 마지막 페이지로
+        next = Math.min(next, this.totalPages)
+        if (next !== this.page) this.$emit('update:page', next)
+      }
+    )
+  },
   computed: {
     totalPages() {
       return Math.max(1, Math.ceil(this.total / this.pageSize))
@@ -115,19 +129,7 @@ export default {
   methods: {
     go(p) {
       const next = Math.min(Math.max(1, p), this.totalPages)
-      if (next === this.page) return
-      this.$emit('update:page', next)
-      this.$emit('change', { page: next, pageSize: this.pageSize })
-    },
-    changeSize(value) {
-      const size = Number(value)
-      if (size === this.pageSize) return
-      // 보고 있던 첫 행이 새 페이지 크기에서도 보이도록 페이지를 다시 잡는다
-      const firstRow = (this.page - 1) * this.pageSize
-      const next = Math.floor(firstRow / size) + 1
-      this.$emit('update:pageSize', size)
-      this.$emit('update:page', next)
-      this.$emit('change', { page: next, pageSize: size })
+      if (next !== this.page) this.$emit('update:page', next)
     }
   }
 }

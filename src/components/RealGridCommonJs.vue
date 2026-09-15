@@ -46,32 +46,14 @@
           </div>
         </div>
 
-        <!-- 페이지당 행 수 (pageable) — 페이지 보정은 하단 Pagination 이 맡는다 -->
-        <PageSizeSelect
-          v-if="pageable"
-          size="sm"
-          :model-value="currentPageSize"
-          :options="pageSizeOptions"
-          @update:model-value="$refs.pager.changeSize($event)"
-        />
+        <!-- 화면이 넣는 툴바 우측 영역 (예: 페이지당 행 수 셀렉트) -->
+        <slot name="toolbar-right"></slot>
       </div>
     </div>
 
     <!-- 2단: RealGrid Canvas Container (하단 100% 가로 폭 그룹핑 패널 포함) -->
-    <!-- 툴바·페이저를 뺀 나머지 높이를 flex 로 채운다 (툴바 높이를 숫자로 빼면 실제 높이와 어긋난다) -->
+    <!-- 툴바를 뺀 나머지 높이를 flex 로 채운다 (툴바 높이를 숫자로 빼면 실제 높이와 어긋난다) -->
     <div ref="gridElement" class="w-100 rg-grid-area"></div>
-
-    <!-- 3단: 페이지네이션 (pageable 일 때만) -->
-    <Pagination
-      v-if="pageable"
-      ref="pager"
-      v-model:page="currentPage"
-      v-model:page-size="currentPageSize"
-      :total="(rows || []).length"
-      :page-size-options="pageSizeOptions"
-      :show-size-select="false"
-      @change="onPageChange"
-    />
 
     <!-- 컬럼 표시/숨기기 설정 팝업 -->
     <ColumnPickerModal
@@ -90,12 +72,10 @@ import { markRaw } from 'vue'
 import { captureViewState, applyViewState } from '@/utils/realgridOps'
 import { GRID_ROW_HEIGHT, buildRowHeightOptions, warnIfRowHeightMismatch } from '@/utils/realgridRowHeight'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
-import Pagination from '@/components/Pagination.vue'
-import PageSizeSelect from '@/components/PageSizeSelect.vue'
 
 export default {
   name: 'RealGridCommonJs',
-  components: { ColumnPickerModal, Pagination, PageSizeSelect },
+  components: { ColumnPickerModal },
   props: {
     fields: { type: Array, default: () => [] },
     columns: { type: Array, default: () => [] },
@@ -139,36 +119,20 @@ export default {
     options: { type: Object, default: () => ({}) },
     gridOptions: { type: Object, default: () => ({}) },
     theme: { type: String, default: '' },
-    toast: { type: Function, default: null },
-    /**
-     * 클라이언트 페이징. rows 를 잘라 현재 페이지 행만 그리드에 넣는다.
-     * ⚠ 조회 전용 그리드에만 쓴다 — 페이지를 넘기면 setRows 로 데이터를 갈아끼우므로
-     *   수정/추가/삭제 상태, 체크가 사라지고 정렬·필터·그룹도 현재 페이지 안에서만 동작한다.
-     */
-    pageable: { type: Boolean, default: false },
-    pageSize: { type: Number, default: 20 },
-    pageSizeOptions: { type: Array, default: () => [10, 20, 30, 50, 100] }
+    toast: { type: Function, default: null }
   },
-  emits: ['init', 'notify', 'page-change'],
+  emits: ['init', 'notify'],
   data() {
     return {
       savedViews: [],
       activeViewId: null,
       columnItems: [],
-      showColumnModal: false,
-      currentPage: 1,
-      currentPageSize: this.pageSize
+      showColumnModal: false
     }
   },
   computed: {
-    pagedRows() {
-      const rows = this.rows || []
-      if (!this.pageable) return rows
-      const start = (this.currentPage - 1) * this.currentPageSize
-      return rows.slice(start, start + this.currentPageSize)
-    },
     showToolbar() {
-      return this.showColumnPicker || this.showSavedViews || this.pageable
+      return this.showColumnPicker || this.showSavedViews || !!this.$slots['toolbar-right']
     },
     columnPickerCols() {
       return this.columnItems.map(c => ({
@@ -243,27 +207,9 @@ export default {
     },
     rows: {
       deep: true,
-      handler(newRows, oldRows) {
-        if (this.pageable) {
-          // 배열 자체가 바뀌면(재조회) 1페이지로, 내부 변경이면 범위만 보정
-          if (newRows !== oldRows) this.currentPage = 1
-          this.clampPage()
-          this.applyPageRows()
-          return
-        }
+      handler(newRows) {
         if (this.dataProvider) this.dataProvider.setRows(newRows || [])
       }
-    },
-    pageSize(size) {
-      this.currentPageSize = size
-      this.clampPage()
-      this.applyPageRows()
-    },
-    pageable() {
-      this.currentPage = 1
-      this.applyPageRows()
-      // 페이저가 생기거나 없어지면 그리드 영역 높이가 바뀐다
-      this.$nextTick(() => this.gridView && this.gridView.resetSize())
     },
     fields: {
       deep: true,
@@ -725,31 +671,6 @@ export default {
       }
     },
 
-    // =========================================================
-    // 📄 클라이언트 페이징 (pageable)
-    // =========================================================
-    clampPage() {
-      const total = (this.rows || []).length
-      const last = Math.max(1, Math.ceil(total / this.currentPageSize))
-      if (this.currentPage > last) this.currentPage = last
-    },
-
-    /** 현재 페이지 행을 그리드에 넣고, 행 번호가 전체 기준(21, 22…)으로 이어지게 한다. */
-    applyPageRows() {
-      if (!this.dataProvider || !this.gridView) return
-      this.dataProvider.setRows(this.pagedRows)
-      const offset = this.pageable ? (this.currentPage - 1) * this.currentPageSize : 0
-      try {
-        this.gridView.setRowIndicator({ indexOffset: offset })
-      } catch (e) { /* noop */ }
-    },
-
-    // v-model(update:page / update:pageSize)은 change 보다 먼저 동기로 반영돼 있다
-    onPageChange({ page, pageSize }) {
-      this.applyPageRows()
-      this.$emit('page-change', { page, pageSize })
-    },
-
     destroyGrid() {
       if (this.gridView) {
         try { this.gridView.destroy() } catch (e) { /* noop */ }
@@ -825,9 +746,7 @@ export default {
         this.gridView.setColumns(this.columns)
       }
 
-      if (this.pageable) {
-        this.applyPageRows()
-      } else if (this.rows && this.rows.length > 0) {
+      if (this.rows && this.rows.length > 0) {
         this.dataProvider.setRows(this.rows)
       }
 

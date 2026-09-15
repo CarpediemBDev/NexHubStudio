@@ -131,8 +131,7 @@
           grid-id="pivot-alt-a-v3"
           :fields="gridFields"
           :columns="gridColumns"
-          :rows="mockData"
-          pageable
+          :rows="pagedRows"
           :sortable="true"
           :filterable="true"
           :checkable="true"
@@ -152,7 +151,12 @@
           fit-style="fill"
           :toast="gridToast"
           @init="onGridInit"
-        />
+        >
+          <template #toolbar-right>
+            <PageSizeSelect v-model="pageSize" size="sm" />
+          </template>
+        </RealGridCommonJs>
+        <Pagination v-model:page="page" v-model:page-size="pageSize" :total="mockData.length" :show-size-select="false" />
       </div>
     </div>
 
@@ -171,6 +175,8 @@ import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import Pagination from '@/components/Pagination.vue'
+import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import { showToast } from '@/utils/toastUtil.js'
 import { searchGrid, captureViewState, applyViewState } from '@/utils/realgridOps'
 
@@ -180,7 +186,9 @@ export default {
     PageHeader,
     RealGridCommonJs,
     ColumnPickerModal,
-    QuickSearchBar
+    QuickSearchBar,
+    Pagination,
+    PageSizeSelect
   },
   props: {
     initialGroup: {
@@ -203,6 +211,8 @@ export default {
         { id: 'preset_eval_grade', name: '평가등급 ➔ 부서별', fields: ['evalGrade', 'dept'], icon: 'bi-award' }
       ],
       userSavedViews: [],
+      page: 1,
+      pageSize: 20,
       gridFields: [
         { fieldName: 'userId', dataType: 'text' },
         { fieldName: 'name', dataType: 'text' },
@@ -353,7 +363,20 @@ export default {
       ]
     }
   },
+  watch: {
+    // 행 번호가 페이지를 넘어 전체 기준(21, 22…)으로 이어지게 한다
+    pageOffset(offset) {
+      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: offset })
+    }
+  },
   computed: {
+    /** 현재 페이지 행만 그리드에 넘긴다. 페이지를 넘기면 그리드가 setRows 로 갈아끼우므로 편집 상태·체크는 사라진다 */
+    pagedRows() {
+      return this.mockData.slice(this.pageOffset, this.pageOffset + this.pageSize)
+    },
+    pageOffset() {
+      return (this.page - 1) * this.pageSize
+    },
     isGrouped() {
       return this.activeHasGroup
     },
@@ -377,7 +400,7 @@ export default {
         if (!res.ok) throw new Error('db.json fetch 실패')
         const data = await res.json()
         const rows = Array.isArray(data) ? data : (data.users || [])
-        // 그리드 반영은 RealGridCommonJs 의 rows 감시가 한다(pageable 이면 현재 페이지만)
+        // 그리드 반영은 pagedRows → RealGridCommonJs 의 rows 감시가 한다
         if (rows.length) this.mockData = rows
       } catch (e) {
         console.warn('[PivotAltA] db.json 로드 실패 → 폴백 데이터 사용:', e)
@@ -708,7 +731,7 @@ export default {
       if (!gv) return
       gv.commit(true)
 
-      const start = gv.getRowIndicator().indexOffset || 0 // 현재 페이지 첫 행의 전체 기준 위치
+      const start = this.pageOffset // 현재 페이지 첫 행의 전체 기준 위치
       const addedCnt = dp.getStateRows('created').length + dp.getStateRows('createAndDeleted').length
       const pageCnt = dp.getRowCount() - addedCnt // 원본(mockData) 중 현재 페이지에 있는 행 수
       const head = this.mockData.slice(0, start)
