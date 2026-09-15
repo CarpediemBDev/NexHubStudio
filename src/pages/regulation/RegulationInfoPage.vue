@@ -118,7 +118,7 @@
         <span class="fw-bold text-theme-primary">
           <i class="bi bi-shield-check text-primary me-1"></i>규제 정보 목록
         </span>
-        <span class="b2b-badge b2b-badge-secondary">{{ gridCount }}건</span>
+        <span class="b2b-badge b2b-badge-secondary">{{ listRows.length }}건</span>
         <span v-if="selectedRecord" class="b2b-text-xs text-muted ms-1">
           선택: <strong>{{ selectedRecord.regNo }}</strong> · v{{ selectedRecord.versionNo }}
         </span>
@@ -163,7 +163,7 @@
         <span class="b2b-text-xs text-muted d-none d-lg-inline">{{ currentVariantDesc }}</span>
       </div>
 
-      <!-- 국가별 필터: 그리드 국가 컬럼의 컬럼 필터를 켜고 끈다 (다중 선택, 헤더 필터와 동기화) -->
+      <!-- 국가별 필터: 선택 국가로 목록 행을 거르고(listRows), 헤더 필터 드롭다운과도 동기화한다 -->
       <CountryFilterBar
         :variant="filterVariant"
         :options="countryChipOptions"
@@ -180,7 +180,8 @@
           height="520px"
           :fields="gridFields"
           :columns="gridColumns"
-          :rows="gridRows"
+          :rows="listRows"
+          pageable
           :editable="false"
           :checkable="true"
           :sortable="true"
@@ -289,8 +290,6 @@ export default {
       countryChips: [],
       FILTER_VARIANTS,
       filterVariant: loadVariant(),
-      // 그리드 필터까지 적용된 뒤 화면에 보이는 건수
-      gridCount: 0,
 
       gridView: null,
       dataProvider: null,
@@ -492,6 +491,15 @@ export default {
         modDt: r.modDt
       }))
     },
+    /**
+     * 그리드에 넘기는 전체 목록 = 조회 결과 + 국가 칩.
+     * 그리드가 페이지 단위로 잘라 넣으므로(pageable) 국가 필터를 그리드 컬럼 필터에만 맡기면
+     * 현재 페이지 안에서만 걸린다. 그래서 여기서 먼저 거르고, 컬럼 필터는 헤더 드롭다운 표시용으로 같이 켠다.
+     */
+    listRows() {
+      if (!this.countryChips.length) return this.gridRows
+      return this.gridRows.filter((r) => this.countryChips.some((cd) => r.countryCds.includes(`|${cd}|`)))
+    },
     selectedRecord() {
       return this.records.find((r) => r.regInfoId === this.selectedRegInfoId) || null
     },
@@ -517,12 +525,6 @@ export default {
     filteredProductCodes() {
       if (!this.filters.productGroupCd) return productCodes
       return productCodes.filter((p) => p.parentCd === this.filters.productGroupCd)
-    }
-  },
-  watch: {
-    // 재조회로 행이 바뀌면 그리드가 setRows 한 뒤(필터 재적용 후) 건수를 다시 센다
-    gridRows() {
-      this.$nextTick(() => this.syncGridCount())
     }
   },
   created() {
@@ -565,7 +567,6 @@ export default {
       gridView.onFilteringChanged = (grid, column) => {
         if (this.applyingChips || column?.name !== COUNTRY_COL) return
         this.countryChips = grid.getActiveColumnFilters(COUNTRY_COL).map((f) => f.name)
-        this.syncGridCount()
       }
       // 목록에서 돌아온 경우 복원된 칩을 그리드에 반영
       this.applyCountryChips()
@@ -599,21 +600,6 @@ export default {
       } finally {
         this.applyingChips = false
       }
-      this.syncGridCount()
-    },
-    /** 필터·정렬이 반영된 화면 순서대로 regInfoId 를 뽑는다 (그룹 헤더 행은 제외) */
-    visibleRegInfoIds() {
-      const gv = this.gridView
-      if (!gv) return this.gridRows.map((r) => r.regInfoId)
-      const ids = []
-      for (let i = 0, n = gv.getItemCount(); i < n; i++) {
-        const dataRow = gv.getDataRow(i)
-        if (dataRow >= 0) ids.push(this.dataProvider.getValue(dataRow, 'regInfoId'))
-      }
-      return ids
-    },
-    syncGridCount() {
-      this.gridCount = this.visibleRegInfoIds().length
     },
     countryCdsOf(record) {
       const codes = (record.targets || []).filter((tg) => tg.targetType === 'COUNTRY').map((tg) => tg.targetCd)
@@ -621,7 +607,16 @@ export default {
     },
     exportExcel() {
       if (!this.gridView) return
-      this.gridView.exportGrid({ type: 'excel', target: 'local', fileName: '규제정보_목록.xlsx' })
+      // 그리드엔 현재 페이지 행만 있으므로 전체 목록을 잠시 넣고 내보낸 뒤 보던 페이지로 되돌린다
+      const pageRows = this.dataProvider.getJsonRows()
+      const restore = () => this.dataProvider.setRows(pageRows)
+      this.dataProvider.setRows(this.listRows)
+      try {
+        this.gridView.exportGrid({ type: 'excel', target: 'local', fileName: '규제정보_목록.xlsx', done: restore })
+      } catch (e) {
+        restore()
+        throw e
+      }
     },
 
     /* ---------------- 검색 ---------------- */
@@ -698,7 +693,8 @@ export default {
       this.store.setListContext({
         filters: { ...this.filters },
         countryChips: [...this.countryChips],
-        orderedIds: this.visibleRegInfoIds(),
+        // 페이지를 넘나들며 이동해야 하므로 현재 페이지가 아닌 전체 목록 순서
+        orderedIds: this.listRows.map((r) => r.regInfoId),
         selectedRegInfoId: this.selectedRegInfoId
       })
     },
