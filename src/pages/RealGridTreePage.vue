@@ -104,9 +104,33 @@ function sortUsersByDept(users) {
   return [...users].sort((a, b) => order.get(a.dept || '미지정') - order.get(b.dept || '미지정'))
 }
 
-/** headcounts: 부서별 전체 인원. 페이지 단위로 트리를 만들어도 부서 인원은 전체 기준으로 보여준다 */
-function buildDeptTreeFromUsers(users, headcounts) {
+/**
+ * 부서별 코드·전체 인원·책임자를 "전체 사원" 기준으로 만든다.
+ * 페이지 트리도 이 값을 써야 페이지마다 부서 코드(DEPT-0N)·인원·책임자가 달라지지 않는다.
+ */
+function buildDeptInfo(users) {
+  const members = {}
+  users.forEach((u) => {
+    const dept = u.dept || '미지정'
+    ;(members[dept] = members[dept] || []).push(u)
+  })
+  const info = {}
+  Object.keys(members).forEach((dept, i) => {
+    const list = members[dept]
+    const pmUser = list.find(u => u.role === 'PM' || u.role === 'Manager') || list[0]
+    info[dept] = {
+      code: `DEPT-0${i + 1}`,
+      headcount: list.length,
+      manager: pmUser ? `${pmUser.name} (${pmUser.role})` : '미정'
+    }
+  })
+  return info
+}
+
+/** deptInfo: buildDeptInfo(전체 사원). 없으면 넘겨받은 users 기준으로 만든다 */
+function buildDeptTreeFromUsers(users, deptInfo) {
   if (!Array.isArray(users) || users.length === 0) return []
+  const info = deptInfo || buildDeptInfo(users)
 
   const deptMap = new Map()
   users.forEach((user) => {
@@ -118,13 +142,9 @@ function buildDeptTreeFromUsers(users, headcounts) {
   })
 
   const treeRows = []
-  let deptIdx = 1
 
   deptMap.forEach((userList, deptName) => {
-    const deptCode = `DEPT-0${deptIdx++}`
-    const headcount = headcounts ? headcounts[deptName] : userList.length
-    const pmUser = userList.find(u => u.role === 'PM' || u.role === 'Manager') || userList[0]
-    const managerName = pmUser ? `${pmUser.name} (${pmUser.role})` : '미정'
+    const { code: deptCode, headcount, manager: managerName } = info[deptName]
 
     const children = userList.map((u) => ({
       deptName: u.name,
@@ -315,15 +335,10 @@ export default {
     /** 현재 페이지 사원만 부서로 묶어 트리로 만든다. 페이지를 넘기면 트리를 다시 넣으므로 편집·이동 상태는 사라진다 */
     pagedRows() {
       const start = (this.page - 1) * this.pageSize
-      return buildDeptTreeFromUsers(this.users.slice(start, start + this.pageSize), this.deptHeadcounts)
+      return buildDeptTreeFromUsers(this.users.slice(start, start + this.pageSize), this.deptInfo)
     },
-    deptHeadcounts() {
-      const counts = {}
-      this.users.forEach((u) => {
-        const dept = u.dept || '미지정'
-        counts[dept] = (counts[dept] || 0) + 1
-      })
-      return counts
+    deptInfo() {
+      return buildDeptInfo(this.users)
     },
     nodeCount() {
       return this.countNodes(this.pagedRows)
@@ -483,9 +498,37 @@ export default {
       showToast('모든 노드가 접혔습니다.', { type: 'info' })
     },
 
-    /** 화면엔 현재 페이지 트리만 있으므로, 전체 사원으로 만든 트리를 넘겨 내보낸다 */
+    /**
+     * 화면엔 현재 페이지 트리만 있으므로 전체 트리를 만들어 내보낸다. 현재 페이지 부분은 화면의 트리(수정분 반영)로 바꿔 끼운다.
+     *  1) 전체 사원으로 원본 트리를 만든다
+     *  2) 부서마다 현재 페이지 사원을 빼고, 그 자리에 화면에서 같은 부서(deptCode) 노드의 자식들을 넣는다
+     *     → 값 수정, 추가한 사원, 페이지 안에서 다른 부서로 옮긴 사원, 부서 행 자체의 수정이 반영된다
+     *  3) 화면에서 새로 만든 최상위 노드(원본에 없는 deptCode)는 맨 뒤에 붙인다
+     * 사원은 부서순으로 정렬돼 있어 한 부서 안에서 현재 페이지 사원은 연속으로 붙어 있다.
+     */
     exportExcel() {
-      this.$refs.treeComp?.exportRowsToExcel(buildDeptTreeFromUsers(this.users, this.deptHeadcounts), 'RealGrid_Org_Tree.xlsx')
+      const comp = this.$refs.treeComp
+      if (!comp) return
+      const start = (this.page - 1) * this.pageSize
+      const pageUserIds = new Set(this.users.slice(start, start + this.pageSize).map(u => u.userId))
+      const pageDepts = new Map(comp.getTreeRows().map(node => [node.deptCode, node]))
+
+      const rows = buildDeptTreeFromUsers(this.users, this.deptInfo).map((dept) => {
+        const pageDept = pageDepts.get(dept.deptCode)
+        if (!pageDept) return dept // 현재 페이지에 없는 부서는 원본 그대로
+        pageDepts.delete(dept.deptCode)
+        const before = []
+        const after = []
+        let passedPage = false
+        dept.children.forEach((member) => {
+          if (pageUserIds.has(member.deptCode)) passedPage = true
+          else (passedPage ? after : before).push(member)
+        })
+        return { ...pageDept, children: [...before, ...(pageDept.children || []), ...after] }
+      })
+      rows.push(...pageDepts.values())
+
+      comp.exportRowsToExcel(rows, 'RealGrid_Org_Tree.xlsx')
     },
 
     openColumnPicker() {

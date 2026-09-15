@@ -883,6 +883,22 @@ export default {
       }
     },
 
+    /**
+     * 지금 트리의 모습(수정값·추가 노드·이동 결과 반영)을 rows prop 과 같은 중첩 JSON 으로 돌려준다.
+     * 편집 중인 셀도 커밋해서 넣는다. RealGrid 가 붙이는 __rowId·iconIndex 와 잎 노드의 빈 자식 속성은 뺀다.
+     */
+    getTreeRows() {
+      if (!this.dataProvider) return []
+      this.commit()
+      const field = this.childrenField
+      const clean = (node) => {
+        const { __rowId, iconIndex, [field]: children, ...values } = node
+        if (Array.isArray(children) && children.length > 0) values[field] = children.map(clean)
+        return values
+      }
+      return (this.dataProvider.getJsonRows(-1, true, field) || []).map(clean)
+    },
+
     // =========================================================
     // 소멸
     // =========================================================
