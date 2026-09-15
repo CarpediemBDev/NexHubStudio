@@ -141,12 +141,12 @@
           :state-bar-width="20"
           :check-bar-width="36"
           :pinnable="true"
-          :group-panel-visible="true"
+          :group-panel-visible="false"
           :merge-mode="true"
           :column-hideable="false"
           :exclusive-selectable="false"
           :commit-when-leave="true"
-          :use-footer="true"
+          :use-footer="false"
           :soft-deletable="true"
           :summary-mode="'aggregate'"
           fit-style="fill"
@@ -697,14 +697,46 @@ export default {
       showToast('서버 저장 완료 및 행 상태(C,U,D)가 클리어되었습니다.', { type: 'success' })
     },
 
+    /**
+     * 페이징 중이라 그리드엔 현재 페이지 행만 있다. 다른 페이지 행을 앞뒤에 잠시 끼워 전체를 내보내고 다시 뺀다.
+     * 현재 페이지 행은 건드리지 않고, 끼우고 빼는 동안 행 상태 기록을 꺼서(checkRowStates)
+     * 편집 중인 추가/수정/삭제 상태와 체크가 그대로 남는다. 그룹핑 중이면 전체 행 기준으로 묶여 나간다.
+     */
     exportExcel() {
-      if (!this.gridView) return
-      this.gridView.exportGrid({
-        type: 'excel',
-        target: 'local',
-        fileName: 'Pivot_AltA_Group_Export.xlsx',
-        showProgress: true
-      })
+      const gv = this.gridView
+      const dp = this.dataProvider
+      if (!gv) return
+      gv.commit(true)
+
+      const start = gv.getRowIndicator().indexOffset || 0 // 현재 페이지 첫 행의 전체 기준 위치
+      const addedCnt = dp.getStateRows('created').length + dp.getStateRows('createAndDeleted').length
+      const pageCnt = dp.getRowCount() - addedCnt // 원본(mockData) 중 현재 페이지에 있는 행 수
+      const head = this.mockData.slice(0, start)
+      const tail = this.mockData.slice(start + pageCnt)
+
+      dp.checkRowStates(false) // 끼운 행이 '추가'로, 뺀 행이 '삭제'로 남지 않게
+      dp.insertRows(0, head)
+      dp.addRows(tail)
+      gv.setRowIndicator({ indexOffset: 0 })
+
+      const restore = () => {
+        const n = dp.getRowCount()
+        dp.removeRows([...head.keys(), ...tail.map((_, i) => n - tail.length + i)])
+        dp.checkRowStates(true)
+        gv.setRowIndicator({ indexOffset: start })
+      }
+      try {
+        gv.exportGrid({
+          type: 'excel',
+          target: 'local',
+          fileName: 'Pivot_AltA_Group_Export.xlsx',
+          showProgress: true,
+          done: restore // 엑셀 파일 생성이 끝난 뒤 호출된다
+        })
+      } catch (e) {
+        restore()
+        throw e
+      }
     },
 
     openColumnPicker() {

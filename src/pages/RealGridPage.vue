@@ -486,14 +486,46 @@ export default {
       this.dataProvider.clearRowStates()
     },
 
+    /**
+     * 페이징 중이라 그리드엔 현재 페이지 행만 있다. 다른 페이지 행을 앞뒤에 잠시 끼워 전체를 내보내고 다시 뺀다.
+     * 현재 페이지 행은 건드리지 않고, 끼우고 빼는 동안 행 상태 기록을 꺼서(checkRowStates)
+     * 편집 중인 추가/수정/삭제 상태와 체크가 그대로 남는다.
+     */
     exportExcel() {
-      if (!this.gridView) return
-      this.gridView.exportGrid({
-        type: 'excel',
-        target: 'local',
-        fileName: 'RealGrid_User_List.xlsx',
-        showProgress: true
-      })
+      const gv = this.gridView
+      const dp = this.dataProvider
+      if (!gv) return
+      gv.commit(true)
+
+      const start = gv.getRowIndicator().indexOffset || 0 // 현재 페이지 첫 행의 전체 기준 위치
+      const addedCnt = dp.getStateRows('created').length + dp.getStateRows('createAndDeleted').length
+      const pageCnt = dp.getRowCount() - addedCnt // 원본(users) 중 현재 페이지에 있는 행 수
+      const head = this.users.slice(0, start)
+      const tail = this.users.slice(start + pageCnt)
+
+      dp.checkRowStates(false) // 끼운 행이 '추가'로, 뺀 행이 '삭제'로 남지 않게
+      dp.insertRows(0, head)
+      dp.addRows(tail)
+      gv.setRowIndicator({ indexOffset: 0 })
+
+      const restore = () => {
+        const n = dp.getRowCount()
+        dp.removeRows([...head.keys(), ...tail.map((_, i) => n - tail.length + i)])
+        dp.checkRowStates(true)
+        gv.setRowIndicator({ indexOffset: start })
+      }
+      try {
+        gv.exportGrid({
+          type: 'excel',
+          target: 'local',
+          fileName: 'RealGrid_User_List.xlsx',
+          showProgress: true,
+          done: restore // 엑셀 파일 생성이 끝난 뒤 호출된다
+        })
+      } catch (e) {
+        restore()
+        throw e
+      }
     },
 
     openColumnPicker() {
