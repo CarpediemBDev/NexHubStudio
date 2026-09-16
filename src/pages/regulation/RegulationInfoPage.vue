@@ -272,6 +272,10 @@ const COLUMN_LAYOUT = [
 const CLAMP_LINES = 5
 // 셀 좌우 padding(8px × 2, 아래 style 의 .rg-renderer) + 테두리
 const CELL_PAD_X = 18
+// 펼친 셀은 이 줄 수까지만 키우고 나머지는 셀 안에서 스크롤한다.
+// RealGrid 는 행 단위로 스크롤해서, 행 하나가 너무 크면 휠 한 번에 그 행이 통째로 사라진다(스크롤이 튄다).
+const EXPAND_MAX_LINES = 15
+const LINE_HEIGHT = 18 // .reg-wrap line-height
 export default {
   name: 'RegulationInfoPage',
   components: { RealGridCommonJs, Pagination, PageSizeSelect, B2bDatePicker, CountryFilterBar },
@@ -317,7 +321,8 @@ export default {
       gridOptions: {
         // 한 줄짜리 행도 다른 화면(32px)과 같은 높이로.
         // refCalcHeights false: 한 번 잰 높이를 재사용하지 않고 그릴 때마다 다시 잰다 → 펼침/접힘이 바로 반영
-        displayOptions: { minRowHeight: 40, refCalcHeights: false }
+        // wheelScrollLines 1: 기본 3행씩 넘기면 높은 행이 섞인 목록에서 휠 한 번에 화면이 크게 튄다
+        displayOptions: { minRowHeight: 40, refCalcHeights: false, wheelScrollLines: 1 }
       },
 
       gridFields: [
@@ -583,6 +588,9 @@ export default {
     // 행 순서는 페이지·정렬마다 바뀌므로 itemIndex 가 아니라 regInfoId 로 기억한다.
     // 렌더러가 읽기만 하면 되므로 반응형일 필요 없다.
     this.expandedCells = new Set()
+    // 펼친 셀의 셀 안 스크롤 위치 { 'regInfoId|필드명': scrollTop }.
+    // RealGrid 는 그리드를 스크롤할 때마다 셀을 새로 그려서 셀 안 스크롤이 맨 위로 돌아가므로 기억했다가 되돌린다.
+    this.cellScrollTops = {}
   },
   beforeUnmount() {
     if (this.unbindMoreLinks) this.unbindMoreLinks()
@@ -667,7 +675,7 @@ export default {
       const field = model.index.fieldName
       const open = this.expandedCells.has(`${id}|${field}`)
       const body = open
-        ? `<div class="reg-wrap">${html}</div>`
+        ? `<div class="reg-wrap reg-scroll" data-key="${id}|${escapeHtml(field)}" style="max-height:${EXPAND_MAX_LINES * LINE_HEIGHT}px">${html}</div>`
         : `<div class="reg-wrap reg-clamp" style="-webkit-line-clamp:${CLAMP_LINES}">${html}</div>`
       return `<div class="reg-cell">${body}<span class="reg-more" data-id="${id}" data-field="${escapeHtml(field)}">${open ? '접기' : '더보기'}</span></div>`
     },
@@ -719,15 +727,48 @@ export default {
         e.stopPropagation()
         if (e.type === 'click') this.toggleExpand(Number(link.dataset.id), link.dataset.field)
       }
+      // 펼친 셀 위의 휠: 셀 안에 더 스크롤할 내용이 있으면 그리드까지 안 보내 셀만 스크롤한다.
+      // 셀 끝(맨 위/맨 아래)에 닿으면 그대로 보내 그리드가 다음 행으로 넘어간다.
+      const onWheel = (e) => {
+        const box = e.target.closest && e.target.closest('.reg-scroll')
+        if (!box) return
+        const canUp = box.scrollTop > 0
+        const canDown = box.scrollTop + box.clientHeight < box.scrollHeight - 1
+        if ((e.deltaY < 0 && canUp) || (e.deltaY > 0 && canDown)) e.stopPropagation()
+      }
+      // 셀 안 스크롤 위치 기억 (scroll 은 버블링하지 않아 캡처로 받는다)
+      const onScroll = (e) => {
+        const box = e.target
+        if (box.classList && box.classList.contains('reg-scroll')) this.cellScrollTops[box.dataset.key] = box.scrollTop
+      }
+      // 그리드가 셀을 새로 그리면(스크롤·refresh) 펼친 셀의 스크롤 위치를 되돌린다
+      const restoreObserver = new MutationObserver(() => {
+        el.querySelectorAll('.reg-scroll').forEach((box) => {
+          const top = this.cellScrollTops[box.dataset.key]
+          if (top && Math.abs(box.scrollTop - top) > 1) box.scrollTop = top
+        })
+      })
       types.forEach((t) => el.addEventListener(t, handler, true))
-      this.unbindMoreLinks = () => types.forEach((t) => el.removeEventListener(t, handler, true))
+      el.addEventListener('wheel', onWheel, { capture: true, passive: true })
+      el.addEventListener('scroll', onScroll, true)
+      restoreObserver.observe(el, { childList: true, subtree: true })
+      this.unbindMoreLinks = () => {
+        types.forEach((t) => el.removeEventListener(t, handler, true))
+        el.removeEventListener('wheel', onWheel, { capture: true })
+        el.removeEventListener('scroll', onScroll, true)
+        restoreObserver.disconnect()
+      }
     },
     toggleExpand(id, field) {
       const key = `${id}|${field}`
-      if (this.expandedCells.has(key)) this.expandedCells.delete(key)
-      else this.expandedCells.add(key)
+      if (this.expandedCells.has(key)) {
+        this.expandedCells.delete(key)
+        delete this.cellScrollTops[key] // 다시 펼치면 처음부터
+      } else {
+        this.expandedCells.add(key)
+      }
       // 셀을 다시 그리면 rowHeight -1 이 바뀐 내용 높이로 행을 다시 잰다.
-      // 펼친 행은 그리드 행 영역 높이에서 멈추므로 그보다 긴 셀은 아래가 잘린다 — 그리드 높이(최소 700px)로 여유를 둔다.
+      // 펼친 셀은 EXPAND_MAX_LINES 줄까지만 커지고 나머지는 셀 안 스크롤이라 행이 지나치게 커지지 않는다.
       this.gridView.refresh()
     },
     countryCdsOf(record) {
@@ -939,6 +980,12 @@ export default {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 펼친 셀: EXPAND_MAX_LINES 줄을 넘으면 셀 안 스크롤 (max-height 는 렌더러가 inline style 로) */
+.reg-page :deep(.reg-scroll) {
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .reg-page :deep(.reg-more) {
