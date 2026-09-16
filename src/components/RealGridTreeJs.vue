@@ -1,7 +1,7 @@
 <template>
-  <div class="realgrid-tree-wrapper w-100 d-flex flex-column border rounded-2 overflow-hidden shadow-sm" :style="{ height: wrapperHeight }">
+  <div class="realgrid-tree-wrapper w-100 d-flex flex-column overflow-hidden" :style="{ height: wrapperHeight }">
     <!-- 1단: 상단 내장 서브 툴바 (컬럼 팝오버 + 뷰 저장 + 내 뷰 칩스) -->
-    <div v-if="showToolbar" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
+    <div v-if="showToolbar" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 b2b-text-xs">
       <!-- Left: Column Picker & Save View Buttons -->
       <div class="d-flex align-items-center gap-2">
         <!-- 1. [컬럼 설정] 버튼 → 팝업(ColumnPickerModal) -->
