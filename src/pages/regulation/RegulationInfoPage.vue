@@ -177,16 +177,20 @@
         <RealGridCommonJs
           ref="grid"
           grid-id="regInfoGrid"
-          height="520px"
+          height="max(700px, calc(100vh - 400px))"
           :fields="gridFields"
           :columns="gridColumns"
           :rows="pagedRows"
+          :row-height="-1"
+          :options="gridOptions"
           :editable="false"
           :checkable="true"
+          :state-bar-visible="false"
+          :fixed-col-count="3"
           :sortable="true"
           :filterable="true"
           :group-panel-visible="true"
-          fit-style="evenFill"
+          fit-style="even"
           :toast="gridToast"
           @init="onGridInit"
         >
@@ -208,6 +212,7 @@ import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import B2bDatePicker from '@/components/common/B2bDatePicker.vue'
 import CountryFilterBar from './components/CountryFilterBar.vue'
 import { showToast } from '@/utils/toastUtil.js'
+import { escapeHtml } from '@/utils/stringUtil.js'
 import {
   fieldCodes,
   divisionCodes,
@@ -220,13 +225,14 @@ import {
 } from '@/data/regulationMock'
 import { targetNames } from '@/utils/regulationConflict'
 import { useRegulationStore } from '@/stores/regulationStore'
-import { itemSummary } from '@/utils/regulationTree'
+import { itemSummary, itemLines } from '@/utils/regulationTree'
 
-const STATUS_STYLE = {
-  ACTIVE: ['#198754', '#fff'],
-  REVIEW: ['#0d6efd', '#fff'],
-  DRAFT: ['#6c757d', '#fff'],
-  EXPIRED: ['#adb5bd', '#fff']
+// 상태 → 공통 배지(b2b-badge-*). 옅은 배경 + 같은 계열 글자색이라 목록이 무겁지 않고 다크 테마도 따라간다
+const STATUS_BADGE = {
+  ACTIVE: 'success',
+  REVIEW: 'primary',
+  DRAFT: 'secondary',
+  EXPIRED: 'outline'
 }
 
 const NO_COUNTRY = '__NONE__'
@@ -260,6 +266,12 @@ const COLUMN_LAYOUT = [
   'url', 'attachCnt', 'conflictCnt', 'versionNo', 'effectiveDt', 'modDt'
 ]
 
+// 긴 셀(규제명·정보관리항목·인증마크·국가)은 줄바꿈해서 CLAMP_LINES 줄까지 보이고, 넘치면 "..." + "더보기" 로 그 셀을 펼친다.
+// 행 높이는 rowHeight -1(내용에 맞춤)이라 펼침/접힘에 따라 그리드가 알아서 다시 잰다.
+// 줄 수는 여기 하나만 바꾼다 — "..." 위치(CSS line-clamp)도 렌더러가 이 값을 inline style 로 내려준다.
+const CLAMP_LINES = 5
+// 셀 좌우 padding(8px × 2, 아래 style 의 .rg-renderer) + 테두리
+const CELL_PAD_X = 18
 export default {
   name: 'RegulationInfoPage',
   components: { RealGridCommonJs, Pagination, PageSizeSelect, B2bDatePicker, CountryFilterBar },
@@ -302,6 +314,11 @@ export default {
       gridView: null,
       dataProvider: null,
       selectedRegInfoId: null,
+      gridOptions: {
+        // 한 줄짜리 행도 다른 화면(32px)과 같은 높이로.
+        // refCalcHeights false: 한 번 잰 높이를 재사용하지 않고 그릴 때마다 다시 잰다 → 펼침/접힘이 바로 반영
+        displayOptions: { minRowHeight: 40, refCalcHeights: false }
+      },
 
       gridFields: [
         { fieldName: 'regInfoId', dataType: 'number' },
@@ -350,37 +367,36 @@ export default {
             type: 'html',
             callback: (grid, model) => {
               const code = model?.value || 'DRAFT'
-              const [bg, fg] = STATUS_STYLE[code] || STATUS_STYLE.DRAFT
               const name = (statusCodes.find((s) => s.code === code) || {}).name || code
-              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:${bg};color:${fg};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;">${name}</span></div>`
+              return `<span class="b2b-badge b2b-badge-${STATUS_BADGE[code] || 'secondary'}">${escapeHtml(name)}</span>`
             }
           }
         },
         { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' } },
-        { name: 'title', fieldName: 'title', width: '260', header: { text: '규제명' }, styles: { textAlignment: 'near' } },
-        { name: 'itemTxt', fieldName: 'itemTxt', width: '280', header: { text: '정보관리항목' }, styles: { textAlignment: 'near' } },
-        { name: 'itemCnt', fieldName: 'itemCnt', width: '70', header: { text: '항목수' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
-        { name: 'fieldNm', fieldName: 'fieldNm', width: '100', header: { text: '분야' }, styles: { textAlignment: 'center' } },
-        { name: 'markNm', fieldName: 'markNm', width: '170', header: { text: '인증마크/표시' }, styles: { textAlignment: 'near' } },
+        { name: 'title', fieldName: 'title', width: '240', header: { text: '규제명' }, renderer: this.wrapRenderer() },
+        { name: 'itemTxt', fieldName: 'itemTxt', width: '260', header: { text: '정보관리항목' }, renderer: this.wrapRenderer() },
+        { name: 'itemCnt', fieldName: 'itemCnt', width: '64', header: { text: '항목수' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
+        { name: 'fieldNm', fieldName: 'fieldNm', width: '90', header: { text: '분야' }, styles: { textAlignment: 'center' } },
+        { name: 'markNm', fieldName: 'markNm', width: '150', header: { text: '인증마크/표시' }, renderer: this.wrapRenderer() },
         // RealGrid2 는 columns 안에 columns 를 넣는 그룹을 만들지 않는다(자식 컬럼이 아예 안 생긴다).
         // 컬럼은 평평하게 두고, "적용 제품 / 적용 지역" 헤더 묶음은 onGridInit 의 setColumnLayout 이 만든다.
-        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '110', header: { text: '사업부' }, styles: { textAlignment: 'center' } },
+        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '100', header: { text: '사업부' }, styles: { textAlignment: 'center' } },
         { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '100', header: { text: '제품군' }, styles: { textAlignment: 'center' } },
-        { name: 'productTxt', fieldName: 'productTxt', width: '130', header: { text: '제품' }, styles: { textAlignment: 'center' } },
-        { name: 'regionTxt', fieldName: 'regionTxt', width: '100', header: { text: '권역' }, styles: { textAlignment: 'center' } },
-        { name: 'countryTxt', fieldName: 'countryTxt', width: '120', header: { text: '국가' }, styles: { textAlignment: 'center' } },
+        { name: 'productTxt', fieldName: 'productTxt', width: '120', header: { text: '제품' }, styles: { textAlignment: 'center' } },
+        { name: 'regionTxt', fieldName: 'regionTxt', width: '80', header: { text: '권역' }, styles: { textAlignment: 'center' } },
+        { name: 'countryTxt', fieldName: 'countryTxt', width: '120', header: { text: '국가' }, renderer: this.wrapRenderer() },
         {
           name: 'url',
           fieldName: 'url',
-          width: '80',
+          width: '100',
           header: { text: 'URL' },
           styles: { textAlignment: 'center' },
           renderer: {
             type: 'html',
             callback: (grid, model) => {
               const url = model?.value
-              if (!url) return ''
-              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><a href="${url}" target="_blank" rel="noopener" style="color:#0d6efd;text-decoration:none;">바로가기 <i class="bi bi-box-arrow-up-right"></i></a></div>`
+              if (!url) return '<span class="reg-empty">-</span>'
+              return `<a class="reg-link" href="${url}" target="_blank" rel="noopener">바로가기 <i class="bi bi-box-arrow-up-right"></i></a>`
             }
           }
         },
@@ -394,8 +410,8 @@ export default {
             type: 'html',
             callback: (grid, model) => {
               const n = Number(model?.value || 0)
-              if (!n) return '<div style="text-align:center;color:#adb5bd;">-</div>'
-              return `<div style="text-align:center;"><i class="bi bi-paperclip"></i> ${n}</div>`
+              if (!n) return '<span class="reg-empty">-</span>'
+              return `<i class="bi bi-paperclip"></i> ${n}`
             }
           }
         },
@@ -409,14 +425,14 @@ export default {
             type: 'html',
             callback: (grid, model) => {
               const n = Number(model?.value || 0)
-              if (!n) return '<div style="text-align:center;color:#adb5bd;">-</div>'
-              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:#fff3cd;color:#a1690a;border:1px solid #ffe69c;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;">${n}건</span></div>`
+              if (!n) return '<span class="reg-empty">-</span>'
+              return `<span class="b2b-badge b2b-badge-warning">${n}건</span>`
             }
           }
         },
-        { name: 'versionNo', fieldName: 'versionNo', width: '70', header: { text: '버전' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
-        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '100', header: { text: '시행일' }, styles: { textAlignment: 'center' } },
-        { name: 'modDt', fieldName: 'modDt', width: '110', header: { text: '최종수정일' }, styles: { textAlignment: 'center' } }
+        { name: 'versionNo', fieldName: 'versionNo', width: '60', header: { text: '버전' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
+        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '96', header: { text: '시행일' }, styles: { textAlignment: 'center' } },
+        { name: 'modDt', fieldName: 'modDt', width: '96', header: { text: '최종수정일' }, styles: { textAlignment: 'center' } }
       ]
     },
     filteredRecords() {
@@ -481,7 +497,7 @@ export default {
         statusCd: r.statusCd,
         regNo: r.regNo,
         title: r.title,
-        itemTxt: itemSummary(this.store.itemsOf(r.regInfoId)),
+        itemTxt: itemLines(this.store.itemsOf(r.regInfoId)),
         itemCnt: this.store.itemsOf(r.regInfoId).length,
         fieldNm: this.fieldName(r.fieldCd),
         markNm: r.markNm,
@@ -489,7 +505,7 @@ export default {
         productGroupTxt: this.summarize(targetNames(r, 'PRODUCT_GROUP')),
         productTxt: this.summarize(targetNames(r, 'PRODUCT')) || '전체',
         regionTxt: this.summarize(targetNames(r, 'REGION')),
-        countryTxt: this.summarize(targetNames(r, 'COUNTRY')) || '전체',
+        countryTxt: targetNames(r, 'COUNTRY').join(', ') || '전체',
         countryCds: this.countryCdsOf(r),
         url: r.url,
         attachCnt: r.attachCnt,
@@ -563,6 +579,13 @@ export default {
       this.selectedRegInfoId = ctx.selectedRegInfoId
     }
     if (ctx.countryChips) this.countryChips = [...ctx.countryChips]
+    // 펼친 셀 'regInfoId|필드명'. 누른 셀만 펼친다(같은 행의 다른 긴 셀은 접힌 채).
+    // 행 순서는 페이지·정렬마다 바뀌므로 itemIndex 가 아니라 regInfoId 로 기억한다.
+    // 렌더러가 읽기만 하면 되므로 반응형일 필요 없다.
+    this.expandedCells = new Set()
+  },
+  beforeUnmount() {
+    if (this.unbindMoreLinks) this.unbindMoreLinks()
   },
   methods: {
     /* ---------------- 그리드 ---------------- */
@@ -573,9 +596,10 @@ export default {
       this.gridView = gridView
       this.dataProvider = dataProvider
 
-      // 행 높이는 RealGridCommonJs 의 rowHeight prop 이 정한다(기본 32).
-      // 예전엔 여기서 30 으로 덮었는데, CSS 가 만든 셀 높이와 어긋나 셀렉터가 밀렸다.
-      // 바꿔야 하면 <RealGridCommonJs :row-height="..."> 로 준다.
+      // 행 높이는 <RealGridCommonJs :row-height="-1"> 로 셀 내용에 맞춘다(긴 셀 줄바꿈·더보기 때문).
+      // 여기서 CSS 나 setRowHeight 로 덮으면 그리드가 아는 높이와 어긋나 셀렉터가 밀린다.
+      this.bindMoreLinks(gridView.getContainer().parentElement)
+
       gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
         const row = dataProvider.getJsonRow(newRow)
         this.selectedRegInfoId = row ? row.regInfoId : null
@@ -624,6 +648,87 @@ export default {
       } finally {
         this.applyingChips = false
       }
+    },
+    /* ---------------- 긴 셀: 줄바꿈 + 더보기 ---------------- */
+    wrapRenderer() {
+      return { type: 'html', callback: (grid, model, width) => this.renderWrapCell(grid, model, width) }
+    },
+    /**
+     * CLAMP_LINES 줄을 넘는 셀만 말줄임 + "더보기". 펼친 셀은 전체 내용 + "접기".
+     * 값은 사용자 입력(규제명·항목명)이라 html 로 끼워 넣기 전에 반드시 이스케이프한다.
+     */
+    renderWrapCell(grid, model, width) {
+      const text = String(model.value ?? '')
+      const html = escapeHtml(text)
+      if (this.lineCount(text, width - CELL_PAD_X) <= CLAMP_LINES) {
+        return `<div class="reg-cell"><div class="reg-wrap">${html}</div></div>`
+      }
+      const id = Number(grid.getValue(model.index.itemIndex, 'regInfoId'))
+      const field = model.index.fieldName
+      const open = this.expandedCells.has(`${id}|${field}`)
+      const body = open
+        ? `<div class="reg-wrap">${html}</div>`
+        : `<div class="reg-wrap reg-clamp" style="-webkit-line-clamp:${CLAMP_LINES}">${html}</div>`
+      return `<div class="reg-cell">${body}<span class="reg-more" data-id="${id}" data-field="${escapeHtml(field)}">${open ? '접기' : '더보기'}</span></div>`
+    },
+    /**
+     * 셀 너비에서 몇 줄로 줄바꿈되는지 센다.
+     * 렌더러는 문자열만 돌려주므로 그려진 DOM 을 잴 수 없어, 같은 폰트로 canvas 에서 글자 폭을 잰다.
+     * CSS 가 word-break: break-all(글자 단위 줄바꿈)이라 글자 폭을 더해 가면 실제 줄 수와 맞는다.
+     */
+    lineCount(text, maxWidth) {
+      if (!text) return 0
+      if (!(maxWidth > 0)) return 1
+      const ctx = this.measureContext()
+      let lines = 0
+      text.split('\n').forEach((para) => {
+        lines += 1
+        let acc = 0
+        for (const ch of para) {
+          const w = ctx.measureText(ch).width
+          if (acc > 0 && acc + w > maxWidth) {
+            lines += 1
+            acc = 0
+          }
+          acc += w
+        }
+      })
+      return lines
+    },
+    measureContext() {
+      if (!this.measureCtx) this.measureCtx = document.createElement('canvas').getContext('2d')
+      // 그리드 폰트는 테마 CSS 가 정하므로 그려진 그리드에서 읽는다(처음엔 아직 없을 수 있어 찾을 때까지 확인)
+      if (!this.measureFontReady) {
+        const root = this.gridView && this.gridView.getContainer().querySelector('.rg-root')
+        if (root) {
+          this.measureCtx.font = getComputedStyle(root).font
+          this.measureFontReady = true
+        }
+      }
+      return this.measureCtx
+    },
+    /**
+     * "더보기/접기" 클릭. 링크는 그리드가 그린 셀 안에 있으므로 바깥 요소에서 캡처 단계로 먼저 받고,
+     * 그리드까지 가지 않게 막는다 → 링크를 눌러도 행 선택이 바뀌거나 더블클릭(수정 화면 이동)으로 번지지 않는다.
+     */
+    bindMoreLinks(el) {
+      const types = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'dblclick', 'touchstart']
+      const handler = (e) => {
+        const link = e.target.closest && e.target.closest('.reg-more')
+        if (!link) return
+        e.stopPropagation()
+        if (e.type === 'click') this.toggleExpand(Number(link.dataset.id), link.dataset.field)
+      }
+      types.forEach((t) => el.addEventListener(t, handler, true))
+      this.unbindMoreLinks = () => types.forEach((t) => el.removeEventListener(t, handler, true))
+    },
+    toggleExpand(id, field) {
+      const key = `${id}|${field}`
+      if (this.expandedCells.has(key)) this.expandedCells.delete(key)
+      else this.expandedCells.add(key)
+      // 셀을 다시 그리면 rowHeight -1 이 바뀐 내용 높이로 행을 다시 잰다.
+      // 펼친 행은 그리드 행 영역 높이에서 멈추므로 그보다 긴 셀은 아래가 잘린다 — 그리드 높이(최소 700px)로 여유를 둔다.
+      this.gridView.refresh()
     },
     countryCdsOf(record) {
       const codes = (record.targets || []).filter((tg) => tg.targetType === 'COUNTRY').map((tg) => tg.targetCd)
@@ -784,6 +889,69 @@ export default {
   align-items: center;
   gap: 8px;
   background: var(--b2b-color-bg-subcard, #f8f9fa);
+}
+
+/* ---- 목록 그리드 (그리드가 그린 DOM 이라 :deep, 이 화면에만 적용) ---- */
+/* 글자 13px + 셀 좌우 8px 여백. 폰트를 바꾸면 lineCount() 는 그리드에서 폰트를 읽으므로 따라온다 */
+.reg-page :deep(.rg-root) {
+  font-size: 13px !important;
+}
+
+/* 좌우 padding 을 바꾸면 스크립트의 CELL_PAD_X 도 같이 */
+.reg-page :deep(.rg-data-cell .rg-renderer) {
+  padding: 0 8px;
+}
+
+/* 헤더는 데이터보다 한 톤 가볍게 — 색은 grid-theme.css 의 변수 이음매로 */
+.reg-page {
+  --rg-header-color: var(--b2b-color-text-muted);
+}
+
+.reg-page :deep(.rg-root [class*="rg-"][class*="head"]) {
+  font-weight: 500 !important;
+}
+
+.reg-page :deep(.reg-empty) {
+  color: var(--b2b-color-text-faint);
+}
+
+.reg-page :deep(.reg-link) {
+  color: var(--b2b-color-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* ---- 긴 셀: 줄바꿈 + 더보기 ---- */
+.reg-page :deep(.reg-cell) {
+  text-align: left;
+  padding: 6px 0;
+}
+
+/* break-all: lineCount() 가 글자 단위로 줄 수를 세므로 CSS 도 글자 단위로 끊는다 */
+.reg-page :deep(.reg-wrap) {
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 18px;
+}
+
+/* 몇 줄에서 자를지(-webkit-line-clamp)는 렌더러가 CLAMP_LINES 로 inline style 에 넣는다 */
+.reg-page :deep(.reg-clamp) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.reg-page :deep(.reg-more) {
+  display: inline-block;
+  margin-top: 1px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--b2b-color-primary, #0d6efd);
+  cursor: pointer;
+}
+
+.reg-page :deep(.reg-more:hover) {
+  text-decoration: underline;
 }
 
 .reg-page :deep(.multi-select) {

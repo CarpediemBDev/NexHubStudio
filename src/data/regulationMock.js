@@ -1075,3 +1075,58 @@ export const regItemList = [
   ...mkItems(24, 'RG_OCE_RCM', { ST_ASNZS62368: ['CT_RCM_REG'] }),
   ...mkItems(25, 'RG_IECEE_CB', { ST_CB62368: ['CT_CB_CERT', 'CT_CB_REPORT'] })
 ]
+
+/* ---------------- [테스트 데이터] 목록 긴 셀 "5줄 + ... + 더보기" 확인용 ----------------
+ * 규제 정보 목록은 규제명·정보관리항목·인증마크/표시·국가 셀이 5줄을 넘으면 말줄임 + 더보기를 단다.
+ * 더보기가 붙는 행과 안 붙는 행이 번갈아 보이도록, 필드도 골고루 길게 만든다.
+ * 줄 수는 목록 기본 컬럼 너비(규제명 240 / 항목 260 / 인증마크 150 / 국가 120px, 13px) 기준.
+ *
+ *   더보기 O : 2(항목 36개 — 펼쳐도 행 영역보다 긺)  4(항목)  6(규제명)  8(인증마크)  10(항목)  12(규제명)
+ *             14(국가)  15(국가)  17(규제명 + 인증마크 — 한 행에 두 셀)  18(국가)  20(항목)  22·23·25(국가)
+ *   딱 5줄  : 3·16(항목 5개 — 더보기 X, 경계 확인)
+ *   나머지는 짧은 값 그대로
+ */
+const _rootItemOf = (regInfoId) => regItemList.find((it) => it.regInfoId === regInfoId && it.parentItemId == null)
+const _addItems = (regInfoId, names, { parentItemId = _rootItemOf(regInfoId).itemId, itemTypeCd = 'STANDARD', levelNo = 2 } = {}) =>
+  names.map((itemNm, i) => {
+    const item = {
+      itemId: (_itemSeq += 1), regInfoId, parentItemId,
+      itemTypeCd, itemCd: `TEST_${regInfoId}_${_itemSeq}`, itemNm,
+      levelNo, mandatoryYn: 'N', remark: '', sortOrder: 100 + i
+    }
+    regItemList.push(item)
+    return item
+  })
+const _record = (regInfoId) => regInfoList.find((r) => r.regInfoId === regInfoId)
+
+// 2: 항목 36개 — 펼쳐도 그리드 행 영역보다 긴 경우
+_addItems(2, Array.from({ length: 30 }, (_, i) => `추가 규격 ${i + 1} — KN ${101 + i} 전자파 적합성 시험 기준`))
+
+// 3·16: 항목 딱 5줄 — 더보기가 붙지 않아야 한다
+_addItems(3, ['KS C IEC 60950', 'RRA 고시 제2024-3호'])
+_addItems(16, ['JIS C 62368', '電安法 省令 別表第八'])
+
+// 4·10·20: 항목이 많은 레코드 (하위 인증서까지 계층으로)
+{
+  const [std] = _addItems(4, ['KS C IEC 62087 (TV 소비전력 측정)', '고효율에너지기자재 인증기준', '대기전력 1W 이하 기준'])
+  _addItems(4, ['에너지효율 시험성적서', '효율등급 신고확인서'], { parentItemId: std.itemId, itemTypeCd: 'CERT', levelNo: 3 })
+}
+_addItems(10, ['제품안전기본법 표시기준', '소비자기본법 표시·광고 기준', '전기용품 한글 표시사항 고시', '포장재 재질·구조 표시 기준', '원산지 표시 요령'])
+{
+  const [std] = _addItems(20, ['ANSI C63.4 측정 방법', 'ISED ICES-003 Issue 7', 'FCC Part 15 Subpart B Class B'])
+  _addItems(20, ['FCC SDoC 적합성 선언서', 'ISED 표기 라벨 승인', 'EMC 시험성적서(공인 시험소)'], { parentItemId: std.itemId, itemTypeCd: 'CERT', levelNo: 3 })
+}
+
+// 6·12: 규제명이 긴 레코드
+_record(6).title = 'K-RoHS 유해물질 사용제한 — 전기·전자제품 및 자동차의 자원순환에 관한 법률에 따른 납·수은·카드뮴·6가크롬·PBB·PBDE 함유기준 준수, 함유량 분석자료 5년 보관 및 환경부 요청 시 제출 의무, 위반 시 과태료 및 회수·판매중지 명령 대상'
+_record(12).title = 'CE 저전압지침(LVD) 2014/35/EU — 프랑스 특례: 프랑스어 사용설명서·경고문 필수 제공, 소비자법전 L.441 표시 요건, 폐기물 회수 표시(Triman 로고) 및 수리가능성 지수 표시 의무 포함, 시장감시기관(DGCCRF) 점검 대응 서류 비치'
+
+// 8: 인증마크/표시가 긴 레코드
+_record(8).markNm = '분리배출 표시(재질별 삼각 마크) — 종이·플라스틱(PET/HDPE/LDPE/PP/PS/OTHER)·비닐·캔·유리 재질 구분, 포장재 면적 기준 표시 크기 준수'
+
+// 17: 한 행에 긴 셀 두 개 (규제명 + 인증마크) — 누른 셀만 펼쳐지는지 확인
+_record(17).title = '중국 CCC 강제인증 — 국가인증인가감독관리위원회(CNCA) 실시규칙에 따른 형식시험, 초기 공장심사, 연간 사후감독 및 인증서 변경·연장 절차, GB 4943.1 안전 / GB 9254 EMC 기준 적용, 인증 유효기간 5년 및 만료 전 갱신 신청'
+_record(17).markNm = 'CCC 마크(S: 안전, EMC: 전자파, S&E: 안전+전자파) — 표준 규격 마크 인쇄 또는 CNCA 지정 인쇄 허가 후 비표준 규격 표시, 제품 본체 및 명판에 부착'
+
+// 14: 국가가 많은 레코드
+_record(14).targets.push(...t('COUNTRY', ['FR', 'DE', 'IT', 'ES', 'PL', 'NL', 'BE', 'AT', 'SE', 'DK', 'LU', 'CH', 'NO', 'GB']))

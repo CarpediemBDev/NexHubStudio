@@ -178,3 +178,24 @@ export function itemSummary(items) {
     .join(' · ')
   return roots.length > 1 ? `${head} 외 ${roots.length - 1} (${counts})` : `${head} (${counts})`
 }
+
+/**
+ * 목록 그리드의 항목 전체 문자열 — 항목 하나당 한 줄, 하위 항목은 들여쓰기.
+ * 셀은 2줄까지만 보이고 나머지는 "더보기" 로 펼친다.
+ *   EU RoHS
+ *    └ IEC 62321
+ *       └ CE 인증
+ */
+export function itemLines(items) {
+  if (!items || !items.length) return ''
+  const lines = []
+  const walk = (nodes) => {
+    nodes.forEach((n) => {
+      if (n.type !== 'ITEM') return
+      lines.push(n.depth > 1 ? `${'   '.repeat(n.depth - 2)} └ ${n.label}` : n.label)
+      if (n.children) walk(n.children)
+    })
+  }
+  walk(buildItemTree({}, items))
+  return lines.join('\n')
+}
