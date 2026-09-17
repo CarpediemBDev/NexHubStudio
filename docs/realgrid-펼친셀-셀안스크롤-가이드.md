@@ -306,12 +306,14 @@ export function setupCellScroll(gridView, { boxClass = 'wrap-scroll' } = {}) {
 
 ## 9. NexHubStudio 적용 위치 (참고)
 
-`src/pages/regulation/RegulationInfoPage.vue` — 페이지 메서드로 넣었다(RealGrid 기능을 util 로 빼지 않는 프로젝트 방침).
+`src/pages/regulation/RegulationInfoPage.vue` — **현재 셀 안 스크롤은 적용하지 않았다.** 더보기를 누르면 셀 전체 내용을 그대로 펼친다.
 
-| 가이드 | 페이지 |
+이 가이드의 실측(6장)은 이 화면에 셀 안 스크롤을 넣었던 버전(커밋 `545a280`~`7278067`)에서 잰 값이다. "15줄만 펼쳐지는 게 어색하다" 는 판단으로 뺐고, 그래서 행 영역보다 긴 셀(700px 그리드면 약 29줄 초과)은 1장의 문제가 그대로 남는다. 긴 데이터가 흔해지면 3장대로 다시 붙인다.
+
+| 가이드 | 페이지 (현재) |
 |---|---|
-| `EXPAND_MAX_LINES` / `LINE_HEIGHT` | 같은 이름의 상수 (15 / 18) |
-| `wrap-scroll` 클래스 | `reg-scroll` (`<style scoped>` 의 `:deep`) |
-| `setupCellScroll` 의 휠·스크롤·옵저버 | `bindMoreLinks()` 안 `onWheel` / `onScroll` / `restoreObserver`, 해제는 `unbindMoreLinks()` |
-| `scrollTops` / `forget(key)` | `this.cellScrollTops` / `toggleExpand` 에서 접을 때 `delete` |
-| `wheelScrollLines: 1` | `onGridInit` 의 `gridView.setDisplayOptions({ ... })` (행 높이 설정과 한곳) |
+| `EXPAND_MAX_LINES` / `LINE_HEIGHT` | **없음** |
+| `wrap-scroll` 클래스 | **없음** — 펼친 셀은 `reg-wrap` 만 (max-height 없음) |
+| `setupCellScroll` 의 휠·스크롤·옵저버 | **없음** — `bindMoreLinks()` 는 더보기 클릭 처리만 |
+| `scrollTops` / `forget(key)` | **없음** |
+| `wheelScrollLines: 1` | **있음** — `onGridInit` 의 `gridView.setDisplayOptions({ ... })` (행 높이 설정과 한곳). 높은 행이 섞인 목록에서 휠 한 칸에 1행씩 |

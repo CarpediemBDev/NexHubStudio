@@ -893,18 +893,24 @@ wheel (캡처 단계, 부모 요소)
 
 ## 11. NexHubStudio 적용 위치 (참고)
 
-`src/pages/regulation/RegulationInfoPage.vue` — 방식 B 를 **페이지 메서드**로 넣었다(이 프로젝트는 RealGrid 기능을 util 로 빼지 않고 `@init` 의 gridView 를 페이지에서 직접 쓰는 방침). 로직은 6-1 과 같다.
+`src/pages/regulation/RegulationInfoPage.vue` — 방식 B 를 **페이지 메서드**로 넣었다(이 프로젝트는 RealGrid 기능을 util 로 빼지 않고 `@init` 의 gridView 를 페이지에서 직접 쓰는 방침). 로직은 6-1 에서 **펼친 셀 최대 줄 수·셀 안 스크롤(②③④)을 뺀 것**이다.
+
+> **셀 안 스크롤 미적용.** 더보기를 누르면 셀 전체 내용을 그대로 펼친다(최대 줄 수 제한 없음).
+> 그래서 그리드 행 영역(700px 그리드면 약 550px, 약 29줄)보다 긴 셀은 Q5 처럼 아래와 "접기" 가 잘리고 스크롤할 때 행이 통째로 넘어간다.
+> 현재 테스트 데이터는 최대 20줄이라 해당 없음. 긴 데이터가 흔해지면 `realgrid-펼친셀-셀안스크롤-가이드.md` 를 붙인다.
 
 | 가이드 (`setupWrapMore`) | 페이지 |
 |---|---|
 | `clampLines` | `CLAMP_LINES = 5` 상수 — **줄 수는 여기만 바꾼다** |
-| `expandMaxLines` / `lineHeight` / `cellPadX` | `EXPAND_MAX_LINES = 15` / `LINE_HEIGHT = 18` / `CELL_PAD_X = 18` 상수 |
+| `cellPadX` | `CELL_PAD_X = 18` 상수 |
+| `expandMaxLines` / `lineHeight` | **없음** (셀 안 스크롤 미적용) |
 | `renderer` | `wrapRenderer()` → `renderWrapCell()` — 컬럼 정의에 직접 (규제명·정보관리항목·인증마크/표시·국가) |
 | `lineCount` / `measure` | `lineCount()` / `measureContext()` |
-| 클릭·휠·스크롤 리스너, MutationObserver | `bindMoreLinks()` (`onGridInit` 에서), 해제는 `beforeUnmount` 의 `unbindMoreLinks()` |
-| 펼침 토글 | `toggleExpand(id, field)` |
-| `expanded` Set / `scrollTops` | `this.expandedCells` / `this.cellScrollTops` (`regInfoId\|필드명`) |
-| 클래스 `wrap-cell / wrap-text / wrap-clamp / wrap-scroll / wrap-more` | `reg-cell / reg-wrap / reg-clamp / reg-scroll / reg-more` (`<style scoped>` 의 `:deep`) |
+| ① 클릭 리스너 (링크일 때만 막음) | `bindMoreLinks()` (`onGridInit` 에서), 해제는 `beforeUnmount` 의 `unbindMoreLinks()` |
+| ② 휠 분배 / ③ 스크롤 위치 기억 / ④ MutationObserver 복원 | **없음** (셀 안 스크롤 미적용) |
+| 펼침 토글 | `toggleExpand(id, field)` → `gridView.refresh()` |
+| `expanded` Set | `this.expandedCells` (`regInfoId\|필드명`) |
+| 클래스 `wrap-cell / wrap-text / wrap-clamp / wrap-more` | `reg-cell / reg-wrap / reg-clamp / reg-more` (`<style scoped>` 의 `:deep`). `wrap-scroll` 에 해당하는 클래스 없음 |
 | `escapeHtml` 내장 | `src/utils/stringUtil.js` 의 `escapeHtml` |
 | 그리드 옵션 | 템플릿: `height="max(700px, calc(100vh - 400px))"`, `fit-style="even"`, `:fixed-col-count="3"`, `:state-bar-visible="false"` / 행 높이: `onGridInit` 의 `gridView.setDisplayOptions({ rowHeight: -1, refCalcHeights: false, maxRowHeight: 0, minRowHeight: 40, wheelScrollLines: 1 })` 한곳 |
 | 테스트 데이터 | `src/data/regulationMock.js` 맨 아래 `[테스트 데이터]` 블록 |
