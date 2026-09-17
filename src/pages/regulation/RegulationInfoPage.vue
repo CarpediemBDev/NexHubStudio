@@ -181,8 +181,6 @@
           :fields="gridFields"
           :columns="gridColumns"
           :rows="pagedRows"
-          :row-height="-1"
-          :options="gridOptions"
           :editable="false"
           :checkable="true"
           :state-bar-visible="false"
@@ -318,13 +316,6 @@ export default {
       gridView: null,
       dataProvider: null,
       selectedRegInfoId: null,
-      gridOptions: {
-        // 한 줄짜리 행도 다른 화면(32px)과 같은 높이로.
-        // refCalcHeights false: 한 번 잰 높이를 재사용하지 않고 그릴 때마다 다시 잰다 → 펼침/접힘이 바로 반영
-        // wheelScrollLines 1: 기본 3행씩 넘기면 높은 행이 섞인 목록에서 휠 한 번에 화면이 크게 튄다
-        displayOptions: { minRowHeight: 40, refCalcHeights: false, wheelScrollLines: 1 }
-      },
-
       gridFields: [
         { fieldName: 'regInfoId', dataType: 'number' },
         { fieldName: 'statusCd', dataType: 'text' },
@@ -604,8 +595,15 @@ export default {
       this.gridView = gridView
       this.dataProvider = dataProvider
 
-      // 행 높이는 <RealGridCommonJs :row-height="-1"> 로 셀 내용에 맞춘다(긴 셀 줄바꿈·더보기 때문).
-      // 여기서 CSS 나 setRowHeight 로 덮으면 그리드가 아는 높이와 어긋나 셀렉터가 밀린다.
+      // 긴 셀 줄바꿈·더보기용 행 높이 설정은 여기 한곳에 모은다(다른 화면으로 옮길 때 빠지지 않게).
+      // 넘긴 값만 덮어쓰므로 공통 그리드가 먼저 넣은 옵션(fitStyle 등)은 그대로 남는다.
+      gridView.setDisplayOptions({
+        rowHeight: -1, // 행 높이 = 그려진 셀 내용에 맞춤. CSS 나 setRowHeight 로 덮지 않는다(셀렉터가 밀림, -1 이면 무시됨)
+        refCalcHeights: false, // 기본 true 면 처음 잰 높이를 재사용해 refresh() 로 펼쳐도 행이 안 커진다
+        maxRowHeight: 0, // 행 높이 상한 없음 — 걸려 있으면 펼친 셀이 그 높이에서 잘린다(긴 셀은 EXPAND_MAX_LINES 가 제한)
+        minRowHeight: 40, // 한 줄짜리 행 높이
+        wheelScrollLines: 1 // 기본 3행씩 넘기면 높은 행이 섞인 목록에서 휠 한 번에 화면이 크게 튄다
+      })
       this.bindMoreLinks(gridView.getContainer().parentElement)
 
       gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
@@ -1000,118 +998,5 @@ export default {
 
 .reg-page :deep(.reg-more:hover) {
   text-decoration: underline;
-}
-
-.reg-page :deep(.multi-select) {
-  width: 100%;
-}
-
-.form-label-sm {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: var(--b2b-space-2);
-  color: var(--b2b-color-text-primary, #212529);
-}
-
-/* ---- 모달 ---- */
-.modal-mask {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1080;
-}
-
-.modal-box {
-  width: min(920px, 94vw);
-  max-height: 88vh;
-  background: var(--b2b-color-bg-card, #fff);
-  border-radius: 10px;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.25);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.modal-lg-box {
-  width: min(1120px, 96vw);
-}
-
-.modal-head {
-  display: flex;
-  align-items: center;
-  gap: var(--b2b-space-1);
-  padding: var(--b2b-space-3) var(--b2b-space-4);
-  border-bottom: 1px solid var(--b2b-color-border, #dee2e6);
-  background: var(--b2b-color-bg-subcard, #f8f9fa);
-}
-
-.modal-body-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: var(--b2b-space-4);
-}
-
-.modal-foot {
-  display: flex;
-  align-items: center;
-  gap: var(--b2b-space-2);
-  padding: 10px var(--b2b-space-4);
-  border-top: 1px solid var(--b2b-color-border, #dee2e6);
-  background: var(--b2b-color-bg-subcard, #f8f9fa);
-}
-
-.btn-compact {
-  padding: 2px var(--b2b-space-2);
-  font-size: 12px;
-}
-
-/* ---- 충돌 검사 ---- */
-.conflict-summary {
-  border: 1px solid var(--b2b-color-border, #dee2e6);
-  border-left: 4px solid var(--b2b-color-primary);
-  border-radius: 6px;
-  padding: 10px var(--b2b-space-3);
-  background: var(--b2b-color-bg-subcard, #f8f9fa);
-}
-
-.conflict-table th {
-  font-size: 12px;
-  background: var(--b2b-color-bg-subcard, #f8f9fa);
-  white-space: nowrap;
-}
-
-.conflict-table td {
-  vertical-align: top;
-}
-
-/* ---- 첨부 ---- */
-.attach-box {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--b2b-space-2);
-  border: 1px dashed var(--b2b-color-border, #dee2e6);
-  border-radius: 6px;
-  padding: var(--b2b-space-2);
-  min-height: 46px;
-}
-
-.attach-chip {
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  background: var(--b2b-color-bg-subcard, #f1f3f5);
-  border: 1px solid var(--b2b-color-border, #dee2e6);
-  border-radius: 14px;
-  padding: 3px 10px;
-}
-
-.attach-chip .bi-x {
-  cursor: pointer;
 }
 </style>
