@@ -1081,7 +1081,7 @@ export const regItemList = [
  * 더보기가 붙는 행과 안 붙는 행이 번갈아 보이도록, 필드도 골고루 길게 만든다.
  * 줄 수는 목록 기본 컬럼 너비(규제명 240 / 항목 260 / 인증마크 150 / 국가 120px, 13px) 기준.
  *
- *   더보기 O : 2(항목 36개 — 펼쳐도 행 영역보다 긺)  4(항목)  6(규제명)  8(인증마크)  10(항목)  12(규제명)
+ *   더보기 O : 2(항목 20줄)  4(항목)  6(규제명)  8(인증마크)  10(항목)  12(규제명)
  *             14(국가)  15(국가)  17(규제명 + 인증마크 — 한 행에 두 셀)  18(국가)  20(항목)  22·23·25(국가)
  *   딱 5줄  : 3·16(항목 5개 — 더보기 X, 경계 확인)
  *   나머지는 짧은 값 그대로
@@ -1099,8 +1099,14 @@ const _addItems = (regInfoId, names, { parentItemId = _rootItemOf(regInfoId).ite
   })
 const _record = (regInfoId) => regInfoList.find((r) => r.regInfoId === regInfoId)
 
-// 2: 항목 36개 — 펼쳐도 그리드 행 영역보다 긴 경우
-_addItems(2, Array.from({ length: 30 }, (_, i) => `추가 규격 ${i + 1} — KN ${101 + i} 전자파 적합성 시험 기준`))
+// 2: 항목 20줄(규격 7개 × 인증서 1개 추가) — 긴 셀 펼침 확인용.
+//    항목명은 셀 너비(260px)에서 한 줄에 들어가게 짧게 → 화면 줄 수 = 항목 수
+for (let i = 1; i <= 7; i += 1) {
+  const [std] = _addItems(2, [`KN ${100 + i} 적합성 시험 기준`])
+  _addItems(2, ['시험성적서'].map((nm) => `${nm} ${i}`), {
+    parentItemId: std.itemId, itemTypeCd: 'CERT', levelNo: 3
+  })
+}
 
 // 3·16: 항목 딱 5줄 — 더보기가 붙지 않아야 한다
 _addItems(3, ['KS C IEC 60950', 'RRA 고시 제2024-3호'])
