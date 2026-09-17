@@ -13,7 +13,7 @@
 | **A. 너비를 넘으면 개행만** | 긴 셀이 몇 줄이든 전부 보인다. 행이 그만큼 높아진다 | CSS 한 규칙 + 옵션 1개 | **3장** |
 | **B. 개행 + N줄 말줄임 + 더보기** | N줄까지만 보이고 `...` + "더보기". 누르면 그 셀만 펼침(최대 M줄 + 셀 안 스크롤) | 함수 하나 복사 + 옵션 + CSS | **4장** |
 
-> 이미 구현했는데 **펼쳐도 두 줄만 나온다 / "접기" 가 잘린다 / 더보기 누르면 맨 위로 올라간다** 면 → `realgrid-더보기-문제해결-가이드.md`
+> 이미 구현했는데 **펼쳐도 두 줄만 나온다 / "접기" 가 잘린다 / 더보기 누르면 맨 위로 올라간다 / 그 화면만 컬럼 너비 조절이 안 된다** 면 → `realgrid-더보기-문제해결-가이드.md`
 > 더보기는 됐고 **긴 셀의 셀 안 스크롤(펼친 셀 최대 줄 수·휠 분배·위치 복원)만** 따로 붙이려면 → `realgrid-펼친셀-셀안스크롤-가이드.md`
 
 ---
@@ -365,11 +365,13 @@ gridView.destroy()
 
 컬럼을 prop 으로 먼저 넘기는 구조면 그 시점엔 gridView 가 없다. **`@init` 에서 만들고 `setColumnProperty` 로 렌더러를 붙인다**(실측 확인).
 
+**행 높이 설정도 `@init` 의 `setDisplayOptions` 한곳에 모두 넣는다.** 컴포넌트 prop(`:row-height`)과 옵션 객체(`:options`)로 나눠 넣으면, 다른 프로젝트로 옮길 때 그 컴포넌트에 prop 이 없거나 옵션을 병합하지 않아 **`refCalcHeights: false` 같은 값이 조용히 빠진다** — 실제로 그렇게 빠져서 "펼쳐도 안 커짐·맨 위로 튐" 이 생겼다(`realgrid-더보기-문제해결-가이드.md`). `setDisplayOptions` 는 넘긴 값만 덮어쓰므로 컴포넌트가 먼저 넣은 옵션은 유지된다(실측).
+
 ```vue
 <template>
   <MyRealGrid
     :columns="columns" :rows="rows"
-    height="max(700px, calc(100vh - 400px))" :row-height="-1" :options="gridOptions"
+    height="max(700px, calc(100vh - 400px))"
     @init="onGridInit"
   />
 </template>
@@ -381,15 +383,19 @@ const WRAP_COLUMNS = ['title', 'itemTxt', 'countryTxt']
 
 export default {
   data() {
-    return {
-      gridView: null,
-      // 컴포넌트가 displayOptions 를 병합해 주는 경우. 아니면 onGridInit 에서 gridView.setDisplayOptions 로
-      gridOptions: { displayOptions: { minRowHeight: 40, refCalcHeights: false, wheelScrollLines: 1 } }
-    }
+    return { gridView: null }
   },
   methods: {
     onGridInit({ gridView }) {
       this.gridView = gridView
+      // 긴 셀 줄바꿈·더보기용 행 높이 설정 — 여기 한곳에
+      gridView.setDisplayOptions({
+        rowHeight: -1,          // 행 높이 = 그려진 셀 내용
+        refCalcHeights: false,  // refresh() 때 행 높이 다시 잼
+        maxRowHeight: 0,        // 행 높이 상한 없음
+        minRowHeight: 40,
+        wheelScrollLines: 1
+      })
       this.wrapMore = setupWrapMore(gridView, { rowKey: 'regInfoId', clampLines: 5, expandMaxLines: 15 })
       WRAP_COLUMNS.forEach((name) => gridView.setColumnProperty(name, 'renderer', this.wrapMore.renderer))
     }
@@ -900,7 +906,7 @@ wheel (캡처 단계, 부모 요소)
 | `expanded` Set / `scrollTops` | `this.expandedCells` / `this.cellScrollTops` (`regInfoId\|필드명`) |
 | 클래스 `wrap-cell / wrap-text / wrap-clamp / wrap-scroll / wrap-more` | `reg-cell / reg-wrap / reg-clamp / reg-scroll / reg-more` (`<style scoped>` 의 `:deep`) |
 | `escapeHtml` 내장 | `src/utils/stringUtil.js` 의 `escapeHtml` |
-| 그리드 옵션 | `height="max(700px, calc(100vh - 400px))"`, `:row-height="-1"`, `gridOptions.displayOptions = { minRowHeight: 40, refCalcHeights: false, wheelScrollLines: 1 }`, `fit-style="even"`, `:fixed-col-count="3"`, `:state-bar-visible="false"` |
+| 그리드 옵션 | 템플릿: `height="max(700px, calc(100vh - 400px))"`, `fit-style="even"`, `:fixed-col-count="3"`, `:state-bar-visible="false"` / 행 높이: `onGridInit` 의 `gridView.setDisplayOptions({ rowHeight: -1, refCalcHeights: false, maxRowHeight: 0, minRowHeight: 40, wheelScrollLines: 1 })` 한곳 |
 | 테스트 데이터 | `src/data/regulationMock.js` 맨 아래 `[테스트 데이터]` 블록 |
 
 ---

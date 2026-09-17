@@ -314,4 +314,4 @@ export function setupCellScroll(gridView, { boxClass = 'wrap-scroll' } = {}) {
 | `wrap-scroll` 클래스 | `reg-scroll` (`<style scoped>` 의 `:deep`) |
 | `setupCellScroll` 의 휠·스크롤·옵저버 | `bindMoreLinks()` 안 `onWheel` / `onScroll` / `restoreObserver`, 해제는 `unbindMoreLinks()` |
 | `scrollTops` / `forget(key)` | `this.cellScrollTops` / `toggleExpand` 에서 접을 때 `delete` |
-| `wheelScrollLines: 1` | `gridOptions.displayOptions` |
+| `wheelScrollLines: 1` | `onGridInit` 의 `gridView.setDisplayOptions({ ... })` (행 높이 설정과 한곳) |

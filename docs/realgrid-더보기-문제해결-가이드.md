@@ -1,8 +1,8 @@
-# RealGrid 더보기 문제 해결 가이드 (덜 펼쳐짐 · 접기 잘림 · 맨 위로 튐)
+# RealGrid 더보기 문제 해결 가이드 (덜 펼쳐짐 · 접기 잘림 · 맨 위로 튐 · 컬럼 너비 조절 안 됨)
 
 > 대상: RealGrid 2.x (`realgrid` npm, **2.10.0에서 확인**) — GridView
 > 전제: 긴 셀을 html 렌더러로 N줄 말줄임 + "더보기/접기" 로 만든 그리드. 기본 구현은 `realgrid-긴셀-줄바꿈-더보기-가이드.md`.
-> 이 문서는 그 구현을 다른 프로젝트에 옮겼을 때 실제로 겪은 세 가지 증상의 **원인과 고치는 법**이다.
+> 이 문서는 그 구현을 다른 프로젝트에 옮겼을 때 실제로 겪은 네 가지 증상의 **원인과 고치는 법**이다.
 > 모든 수치는 NexHubStudio `/regulation/info` 에서 **각 증상을 일부러 재현해 잰 값**이다(화면 높이 940px, 그리드 700px, 행 영역 550px, 줄 높이 18px, "접기" 링크 16px).
 
 | # | 증상 | 한 줄 원인 | 고치는 곳 |
@@ -10,8 +10,9 @@
 | ① | `gridView.refresh()` 하면 **두 줄만 더** 펼쳐지고 나머지는 잘린다 | 행 높이 상한 `maxRowHeight` 에 걸림 (또는 `refCalcHeights` 가 켜져 있음) | `maxRowHeight: 0`, `refCalcHeights: false` |
 | ② | 초기화 함수 + `setRows()` 로 다시 그리면 펼쳐지지만 **"접기" 가 절반쯤 잘린다** | 행 높이가 셀 내용보다 **몇 px 모자라게** 정해짐 (상한·계산 높이·행 영역 경계) | 높이를 직접 정하지 말고 RealGrid 가 재게 + 긴 셀은 셀 안 스크롤 |
 | ③ | 더보기를 누르면 그리드가 **맨 위로 올라간다** | 초기화 함수의 `clearRows` / `setFields` / `setColumns` 가 스크롤 위치·현재 행을 초기화 | 초기화 함수를 다시 부르지 말고 `refresh()` |
+| ④ | 그 화면만 **컬럼 너비를 마우스로 늘리고 줄일 수 없다** (다른 그리드는 됨) | 더보기 클릭 리스너가 **링크가 아닌 곳의 마우스 이벤트까지** 막음 / 초기화 함수 재호출이 너비를 되돌림 | 링크일 때만 `stopPropagation`, `setColumns` 재호출 금지 |
 
-**세 개는 따로가 아니라 연결돼 있다.** ① 을 피하려고 `refresh()` 대신 초기화 함수를 다시 부르게 되고, 그게 ③ 을 만들고, 그 과정의 높이 처리가 ② 를 남긴다. 그래서 **0장 설정 하나로 셋이 같이 풀린다.**
+**①~③ 은 따로가 아니라 연결돼 있다.** ① 을 피하려고 `refresh()` 대신 초기화 함수를 다시 부르게 되고, 그게 ③ 을 만들고, 그 과정의 높이 처리가 ② 를 남긴다. ④ 는 더보기 클릭을 그리드보다 먼저 받는 리스너를 옮기면서 생긴다. **0장 설정대로 하면 넷이 같이 풀린다.**
 
 ---
 
@@ -32,8 +33,16 @@ gridView.setDisplayOptions({
 ### 0-2. "더보기/접기" 를 누를 때 — 이것만
 
 ```js
-// 펼친 셀 목록(Set)에 'PK|컬럼명' 을 넣거나 빼고
-gridView.refresh()   // ← 끝. 초기화 함수·clearRows·setFields·setColumns·setRows·setRowHeight 호출 금지
+// 클릭은 그리드 부모 요소에서 캡처 단계로 받되, "더보기/접기" 링크일 때만 막는다 (④)
+const host = gridView.getContainer().parentElement
+host.addEventListener('click', (e) => {
+  const link = e.target.closest && e.target.closest('.wrap-more')
+  if (!link || !gridView.getContainer().contains(link)) return   // ← 링크가 아니면 아무것도 안 함
+  e.stopPropagation()
+  // 펼친 셀 목록(Set)에 'PK|컬럼명' 을 넣거나 빼고
+  gridView.refresh()   // ← 끝. 초기화 함수·clearRows·setFields·setColumns·setRows·setRowHeight 호출 금지
+}, true)
+// pointerdown / mousedown / pointerup / mouseup / dblclick / touchstart 도 같은 조건으로 (클릭 이외는 stopPropagation 만)
 ```
 
 ### 0-3. 하지 말 것
@@ -45,6 +54,7 @@ gridView.refresh()   // ← 끝. 초기화 함수·clearRows·setFields·setColu
 | 셀 HTML 에 계산한 **`height` / `max-height` 를 style 로** 넣기 (펼친 셀 최대 줄 수 제외) | RealGrid 가 재는 높이와 어긋나 잘림 (②) |
 | `maxRowHeight` 를 걸어 두기 | 그 높이에서 멈춤 (① ②) |
 | 펼친 셀을 **무제한**으로 키우기 | 그리드 행 영역(700px 그리드면 약 550px)보다 긴 셀은 아래와 "접기" 가 잘림 (②) → **펼친 셀 최대 15줄 + 셀 안 스크롤** |
+| 클릭 리스너에서 **링크인지 확인하기 전에** `stopPropagation` (또는 셀·그리드 전체를 조건으로) | 헤더 경계 드래그가 그리드에 안 가서 **컬럼 너비 조절 불가** (④), 정렬·행 선택도 같이 막힐 수 있음 |
 
 ### 0-4. 긴 셀(행 영역보다 긴 경우)까지 처리
 
@@ -241,7 +251,70 @@ gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
 
 ---
 
-## 4. 고친 뒤 검증 (그 프로젝트 화면에서)
+## 4. 증상 ④ — 그 화면만 컬럼 너비를 마우스로 조절할 수 없다
+
+### 4-1. 컬럼 경계를 드래그할 때 일어나는 일
+
+```
+헤더 경계에서 pointerdown / mousedown
+  │
+  ▼ (캡처 단계) 그리드 컨테이너의 "부모" 요소 — 더보기 클릭 리스너가 여기 달려 있음
+  ├─ 리스너가 "더보기 링크일 때만" 막으면 → 그대로 통과 → RealGrid 가 드래그 시작 → 너비 변경 ✅
+  └─ 리스너가 링크 확인 없이 stopPropagation 하면
+        → RealGrid 는 mousedown 을 못 받음 → 드래그가 시작되지 않음 → 너비 그대로 ❌
+```
+
+더보기 가이드는 링크를 누를 때 행 선택·더블클릭이 번지지 않도록 **그리드보다 바깥 요소에서 캡처 단계로** 클릭 계열 이벤트를 받는다. 이 리스너는 **`.wrap-more` 일 때만** 막아야 한다. 옮기는 과정에서 조건이 빠지거나 넓어지면(셀 전체, 그리드 전체) 헤더 드래그까지 삼킨다. 같은 공통 그리드를 쓰는 다른 화면에는 이 리스너가 없으니 **그 화면만** 안 된다.
+
+### 4-2. 실측 (실제 마우스 드래그)
+
+| 넣어 본 코드 | 결과 |
+|---|---|
+| 현재 구현 (링크일 때만 `stopPropagation`) | 규제명 240 → 333 → 217px, 분야 90 → 182 → 86px — **늘리고 줄이기 모두 됨** |
+| **A.** 그리드 안 `pointerdown/mousedown/pointerup/mouseup/click` 을 **링크 확인 없이 전부** `stopPropagation` | **너비 조절 안 됨** (182px 그대로). 리스너를 떼자 다시 됨(182 → 86) |
+| **B.** 더보기 때 초기화 함수처럼 `setColumns` 재호출 | 드래그는 되지만 **호출 순간 모든 컬럼이 정의된 너비로 돌아감** (217/86/243 → 240/90/150) |
+| C. DOM 이 바뀔 때마다 `refresh()` 호출 | 너비 조절은 됨(150 → 243). 드래그 한 번에 `refresh` 69회 — 무거움 (원인은 아님) |
+
+- **"아예 안 늘어난다"** → A
+- **"늘렸는데 더보기 누르면 원래대로"** → B (증상 ③ 과 같은 초기화 함수 재호출 구조)
+
+### 4-3. 확인
+
+1. 더보기 클릭 리스너에서 `stopPropagation()` **앞에** "링크가 아니면 `return`" 이 있는지
+2. **컬럼 헤더 클릭 정렬, 행 클릭 선택, 필터 버튼**도 그 화면에서 안 되는지 — 같이 안 되면 A 가 확실
+3. 콘솔에서 리스너 없이 되는지:
+
+```js
+// 그 화면에서 더보기 리스너를 해제하는 함수(destroy/unbind)를 부른 뒤 컬럼 경계를 드래그해 본다
+// 해제하니 너비 조절이 되면 → A
+```
+
+4. 더보기를 누를 때 `setColumns` / 초기화 함수를 부르는지 — 부르면 B
+
+### 4-4. 고치기
+
+```js
+// 수정 전 (A): 링크 확인 없이 막음
+host.addEventListener('mousedown', (e) => {
+  if (gridView.getContainer().contains(e.target)) e.stopPropagation()
+}, true)
+
+// 수정 후: 링크일 때만 막음
+const types = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'dblclick', 'touchstart']
+const handler = (e) => {
+  const link = e.target.closest && e.target.closest('.wrap-more')
+  if (!link || !gridView.getContainer().contains(link)) return   // 헤더 드래그·셀 클릭·정렬은 그리드로
+  e.stopPropagation()
+  if (e.type === 'click') toggleExpand(link.dataset.key)          // 펼침 토글 → gridView.refresh()
+}
+types.forEach((t) => host.addEventListener(t, handler, true))
+```
+
+B 는 증상 ③ 과 같다 — 더보기 때 `setColumns` / 초기화 함수를 부르지 않고 `refresh()` 만 (3-3).
+
+---
+
+## 5. 고친 뒤 검증 (그 프로젝트 화면에서)
 
 | 확인 | 기대 |
 |---|---|
@@ -251,11 +324,13 @@ gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
 | 그리드를 10행쯤 내린 뒤 더보기 | **맨 위 행 그대로** (`gridView.getTopItem()` 전후 같음), 선택 행 유지 |
 | 접기 | 원래 높이로 줄어듦 |
 | 더보기 클릭 코드 | 초기화 함수·`clearRows`·`setFields`·`setColumns`·`setRows`·`setRowHeight` 호출 없음 — `refresh()` 만 |
+| 컬럼 경계 드래그 (늘리기·줄이기) | 너비가 바뀜. 더보기를 눌러도 바꾼 너비 유지 |
+| 헤더 클릭 정렬, 행 클릭 선택 | 다른 화면과 같이 동작 |
 | 콘솔 에러 | 없음 (`row is out of bounds` 포함) |
 
 ---
 
-## 5. 실측 요약과 미확인
+## 6. 실측 요약과 미확인
 
 **실측 (NexHubStudio, RealGrid 2.10.0, Chromium)**
 
@@ -267,9 +342,12 @@ gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
 - `clearRows` / `setFields + setColumns` 후 맨 위 행 0·현재 행 -1, `setRows` 만은 유지, `refresh()` 유지
 - `getTopItem` / `getCurrent` 기억 → 초기화 후 `setTopItem` / `setCurrent`: 복원됨
 - `clearRows` 시 `onCurrentRowChanged(newRow = -1)` → `getJsonRow(-1)` 에러
+- 컬럼 너비(실제 마우스 드래그): 링크일 때만 막는 리스너 → 늘리기·줄이기 됨 / 링크 확인 없이 그리드 안 포인터 이벤트 전부 막음 → 안 됨, 해제하면 됨 / `setColumns` 재호출 → 정의된 너비로 되돌아감 / DOM 변경마다 `refresh()` → 조절은 됨(69회 호출)
 
 **미확인 — 그 프로젝트 코드로 확인 필요**
 
 - 그 프로젝트의 "절반 잘림" 이 2-2 의 (a)·(b)·(c)·(d)·셀 HTML 고정 높이 중 **어느 것인지** — 2-3 스니펫 결과로 판정한다. 0장 설정 + 셀 안 스크롤을 적용하면 어느 경우든 해결된다.
 - (d) 초기화 함수가 컬럼 너비를 다시 잡아 높이 측정 뒤 줄이 늘어나는 경우 — 재현 못 함.
+- 그 프로젝트의 컬럼 너비 문제가 ④ 의 A·B 중 어느 것인지 — 4-3 으로 판정한다.
+- 헤더 그룹(`setColumnLayout` 묶음) 아래 컬럼의 너비 조절 — 화면 밖이라 미실측.
 - 트랙패드·터치·키보드 스크롤, TreeView, 행 그룹핑 — 미실측.
