@@ -609,7 +609,8 @@ export default {
       this.bindMoreLinks(gridView.getContainer().parentElement)
 
       gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
-        const row = dataProvider.getJsonRow(newRow)
+        // 행이 비면(clearRows 등) newRow 가 -1 로 온다 — getJsonRow(-1) 은 out of bounds 에러
+        const row = newRow >= 0 ? dataProvider.getJsonRow(newRow) : null
         this.selectedRegInfoId = row ? row.regInfoId : null
       }
       gridView.onCellDblClicked = () => {
