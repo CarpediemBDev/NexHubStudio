@@ -3,7 +3,19 @@ spring:
     # H2 Database 연결 설정
     # - jdbc:h2:file:./data/userpop : 파일 모드 (데이터 영구 저장, 현재 설정)
     # - jdbc:h2:mem:userpop : 메모리 모드 (재시작 시 데이터 초기화)
-    url: jdbc:h2:file:./data/userpop
+    #
+    # MODE=PostgreSQL
+    #   운영 DB 는 PostgreSQL 을 보고 있다. 기본 H2 문법으로 짜면 그때 가서
+    #   조용히 깨지는 쿼리가 나오므로, 로컬에서도 PostgreSQL 문법으로 검증한다.
+    #   (H2 는 PG 호환 모드를 제공한다. SQLite 에는 이런 모드가 없고
+    #    동적 타입·DATE 타입 부재 때문에 PG 와 더 멀다)
+    # DATABASE_TO_LOWER=TRUE
+    #   따옴표 없는 식별자를 PostgreSQL 처럼 소문자로 접는다.
+    #   매퍼가 이미 reg_info / field_cd 처럼 소문자로 쓰고 있어 그대로 맞는다.
+    #
+    # 이 옵션을 바꾸면 기존 data/ 파일과 호환되지 않는다 -> data/ 삭제 후 재기동
+    # (Liquibase 가 스키마와 시드를 다시 만든다. dev.bat clean 이 이 일을 한다)
+    url: jdbc:h2:file:./data/userpop;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
