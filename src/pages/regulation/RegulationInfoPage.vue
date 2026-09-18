@@ -37,11 +37,26 @@
         </div>
 
         <div class="col-6 col-md-2">
-          <label class="b2b-form-label b2b-text-sm text-theme-primary mb-2 fw-semibold">국가</label>
-          <select v-model="filters.countryCd" class="form-select form-select-sm bg-theme-card text-theme-primary border-theme">
-            <option value="">전체</option>
+          <label class="b2b-form-label b2b-text-sm text-theme-primary mb-2 fw-semibold">
+            국가
+            <span v-if="filters.countryCds.length" class="b2b-badge b2b-badge-primary ms-1">{{ filters.countryCds.length }}</span>
+          </label>
+          <!-- 국가는 여러 개를 고를 수 있어서 셀렉트가 값을 쥐지 않는다. 고르는 순간 조건에 더하고 다시 비운다.
+               v-model 을 쓰면 값이 '' → 코드 → '' 로 제자리라 Vue 가 DOM 을 되돌리지 않아 고른 국가가 박혀 있는다 -->
+          <select
+            class="form-select form-select-sm bg-theme-card text-theme-primary border-theme"
+            :value="''"
+            @change="addCountryFromSelect"
+          >
+            <option value="">{{ filters.countryCds.length ? '국가 추가…' : '전체' }}</option>
             <option v-for="c in filteredCountryCodes" :key="c.code" :value="c.code">{{ c.name }}</option>
           </select>
+          <!-- 아래 필터 바에서 누른 국가도 여기 태그로 들어온다. 조건이 어디에 걸렸는지 한 곳에서 보이게 -->
+          <div v-if="filters.countryCds.length" class="reg-country-tags mt-1">
+            <span v-for="cd in filters.countryCds" :key="cd" class="reg-country-tag">
+              {{ countryName(cd) }}<i class="bi bi-x" @click="removeCountry(cd)"></i>
+            </span>
+          </div>
         </div>
 
         <div class="col-6 col-md-3">
@@ -118,12 +133,29 @@
         <span class="fw-bold text-theme-primary">
           <i class="bi bi-shield-check text-primary me-1"></i>규제 정보 목록
         </span>
-        <span class="b2b-badge b2b-badge-secondary">{{ gridCount }}건</span>
+        <span class="b2b-badge b2b-badge-secondary">{{ listRows.length }}건</span>
         <span v-if="selectedRecord" class="b2b-text-xs text-muted ms-1">
           선택: <strong>{{ selectedRecord.regNo }}</strong> · v{{ selectedRecord.versionNo }}
         </span>
 
         <div class="ms-auto d-flex align-items-center gap-2">
+          <!-- 보기 전환 탭: 평면(레코드 1건 = 1행) / 전개(행을 열로) -->
+          <div class="view-tabs" role="tablist">
+            <button
+              v-for="t in VIEW_TABS"
+              :key="t.key"
+              type="button"
+              role="tab"
+              :class="{ on: viewMode === t.key }"
+              :aria-selected="viewMode === t.key"
+              :title="t.desc"
+              @click="viewMode = t.key"
+            >
+              <i class="bi me-1" :class="t.icon"></i>{{ t.label }}
+            </button>
+          </div>
+          <span class="view-tabs-sep"></span>
+
           <button class="btn-b2b-action" :disabled="!selectedRecord" @click="openDetail">
             <i class="bi bi-file-text text-secondary me-1"></i>상세
           </button>
@@ -163,32 +195,57 @@
         <span class="b2b-text-xs text-muted d-none d-lg-inline">{{ currentVariantDesc }}</span>
       </div>
 
-      <!-- 국가별 필터: 그리드 국가 컬럼의 컬럼 필터를 켜고 끈다 (다중 선택, 헤더 필터와 동기화) -->
+      <!-- 국가별 필터: 선택 국가로 목록 행을 거르고(listRows), 헤더 필터 드롭다운과도 동기화한다 -->
       <CountryFilterBar
         :variant="filterVariant"
         :options="countryChipOptions"
-        :selected="countryChips"
-        :total-count="filteredRecords.length"
+        :selected="filters.countryCds"
+        :total-count="recordsBeforeCountry.length"
         :regions="regionCodes"
         @update:selected="setCountryChips"
       />
 
       <div class="b2b-card-body p-2">
         <RealGridCommonJs
+          v-if="viewMode === 'flat'"
           ref="grid"
           grid-id="regInfoGrid"
-          height="520px"
+          height="max(700px, calc(100vh - 400px))"
           :fields="gridFields"
           :columns="gridColumns"
-          :rows="gridRows"
+          :rows="pagedRows"
           :editable="false"
           :checkable="true"
+          :state-bar-visible="false"
+          :fixed-col-count="3"
           :sortable="true"
           :filterable="true"
           :group-panel-visible="true"
-          fit-style="evenFill"
+          fit-style="even"
           :toast="gridToast"
           @init="onGridInit"
+        >
+          <template #toolbar-right>
+            <PageSizeSelect v-model="pageSize" size="sm" />
+          </template>
+        </RealGridCommonJs>
+        <Pagination
+          v-if="viewMode === 'flat'"
+          v-model:page="page"
+          v-model:page-size="pageSize"
+          :total="listRows.length"
+          :show-size-select="false"
+        />
+
+        <!-- 전개 탭. 조회·국가칩까지 걸린 결과(listRowIds)만 서버가 펼친다 -->
+        <RegulationExpandGrid
+          v-else
+          ref="expandGrid"
+          :reg-info-ids="listRowIds"
+          :selected-reg-info-id="selectedRegInfoId"
+          :toast="gridToast"
+          @update:selected-reg-info-id="selectedRegInfoId = $event"
+          @open="openEdit"
         />
       </div>
     </div>
@@ -198,9 +255,13 @@
 
 <script>
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
+import Pagination from '@/components/Pagination.vue'
+import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import B2bDatePicker from '@/components/common/B2bDatePicker.vue'
 import CountryFilterBar from './components/CountryFilterBar.vue'
+import RegulationExpandGrid from './components/RegulationExpandGrid.vue'
 import { showToast } from '@/utils/toastUtil.js'
+import { escapeHtml } from '@/utils/stringUtil.js'
 import {
   fieldCodes,
   divisionCodes,
@@ -213,16 +274,27 @@ import {
 } from '@/data/regulationMock'
 import { targetNames } from '@/utils/regulationConflict'
 import { useRegulationStore } from '@/stores/regulationStore'
-import { itemSummary } from '@/utils/regulationTree'
+import { itemSummary, itemLines } from '@/utils/regulationTree'
 
-const STATUS_STYLE = {
-  ACTIVE: ['#198754', '#fff'],
-  REVIEW: ['#0d6efd', '#fff'],
-  DRAFT: ['#6c757d', '#fff'],
-  EXPIRED: ['#adb5bd', '#fff']
+// 상태 → 공통 배지(b2b-badge-*). 옅은 배경 + 같은 계열 글자색이라 목록이 무겁지 않고 다크 테마도 따라간다
+const STATUS_BADGE = {
+  ACTIVE: 'success',
+  REVIEW: 'primary',
+  DRAFT: 'secondary',
+  EXPIRED: 'outline'
 }
 
 const NO_COUNTRY = '__NONE__'
+/**
+ * 보기 전환 탭.
+ *  flat   - 지금까지의 목록. 레코드 1건이 1행이라 규제/규격/관리항목·제품은 한 셀에 모인다.
+ *  expand - 그 값들을 각각 열로 펴고, 같은 값이 이어지는 앞쪽 축은 세로로 묶는다.
+ *           펼치기는 JOIN 이라 화면이 아니라 서버가 한다(POST /regulations/expanded).
+ */
+const VIEW_TABS = [
+  { key: 'flat', label: '평면', icon: 'bi-list-ul', desc: '레코드 1건 = 1행. 규제·규격·관리항목과 제품은 한 셀에 모아 보여준다' },
+  { key: 'expand', label: '전개', icon: 'bi-diagram-3', desc: '분야 · 규제 · 규격 · 관리항목 · 제품을 각각 열로 펴고, 같은 값은 세로로 묶는다' }
+]
 // 국가 필터 디자인 6종. 데이터와 그리드 필터는 같고 모양만 다르며, 사용자가 상단 스위치로 고른다
 const FILTER_VARIANTS = [
   { key: 'more', label: 'A 더보기', desc: '건수 상위 20개만 펼쳐 두고 나머지는 더보기로 연다' },
@@ -253,9 +325,15 @@ const COLUMN_LAYOUT = [
   'url', 'attachCnt', 'conflictCnt', 'versionNo', 'effectiveDt', 'modDt'
 ]
 
+// 긴 셀(규제명·정보관리항목·인증마크·국가)은 줄바꿈해서 CLAMP_LINES 줄까지 보이고, 넘치면 "..." + "더보기" 로 그 셀을 펼친다.
+// 행 높이는 rowHeight -1(내용에 맞춤)이라 펼침/접힘에 따라 그리드가 알아서 다시 잰다.
+// 줄 수는 여기 하나만 바꾼다 — "..." 위치(CSS line-clamp)도 렌더러가 이 값을 inline style 로 내려준다.
+const CLAMP_LINES = 5
+// 셀 좌우 padding(8px × 2, 아래 style 의 .rg-renderer) + 테두리
+const CELL_PAD_X = 18
 export default {
   name: 'RegulationInfoPage',
-  components: { RealGridCommonJs, B2bDatePicker, CountryFilterBar },
+  components: { RealGridCommonJs, Pagination, PageSizeSelect, B2bDatePicker, CountryFilterBar, RegulationExpandGrid },
   data() {
     return {
       fieldCodes,
@@ -274,7 +352,8 @@ export default {
         keyword: '',
         fieldCd: '',
         regionCd: '',
-        countryCd: '',
+        // 국가는 여러 개. 상단 셀렉트와 국가 필터 바가 같은 이 값을 건드린다
+        countryCds: [],
         regulationCd: '',
         divisionCd: '',
         productGroupCd: '',
@@ -285,17 +364,16 @@ export default {
         onlyConflict: false
       },
       appliedFilters: null,
-      // 국가 칩 선택값 = 국가 컬럼에서 활성화된 필터 이름. 비어 있으면 전체
-      countryChips: [],
       FILTER_VARIANTS,
       filterVariant: loadVariant(),
-      // 그리드 필터까지 적용된 뒤 화면에 보이는 건수
-      gridCount: 0,
+      VIEW_TABS,
+      viewMode: 'flat',
+      page: 1,
+      pageSize: 20,
 
       gridView: null,
       dataProvider: null,
       selectedRegInfoId: null,
-
       gridFields: [
         { fieldName: 'regInfoId', dataType: 'number' },
         { fieldName: 'statusCd', dataType: 'text' },
@@ -343,37 +421,36 @@ export default {
             type: 'html',
             callback: (grid, model) => {
               const code = model?.value || 'DRAFT'
-              const [bg, fg] = STATUS_STYLE[code] || STATUS_STYLE.DRAFT
               const name = (statusCodes.find((s) => s.code === code) || {}).name || code
-              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:${bg};color:${fg};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;">${name}</span></div>`
+              return `<span class="b2b-badge b2b-badge-${STATUS_BADGE[code] || 'secondary'}">${escapeHtml(name)}</span>`
             }
           }
         },
         { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' } },
-        { name: 'title', fieldName: 'title', width: '260', header: { text: '규제명' }, styles: { textAlignment: 'near' } },
-        { name: 'itemTxt', fieldName: 'itemTxt', width: '280', header: { text: '정보관리항목' }, styles: { textAlignment: 'near' } },
-        { name: 'itemCnt', fieldName: 'itemCnt', width: '70', header: { text: '항목수' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
-        { name: 'fieldNm', fieldName: 'fieldNm', width: '100', header: { text: '분야' }, styles: { textAlignment: 'center' } },
-        { name: 'markNm', fieldName: 'markNm', width: '170', header: { text: '인증마크/표시' }, styles: { textAlignment: 'near' } },
+        { name: 'title', fieldName: 'title', width: '240', header: { text: '규제명' }, renderer: this.wrapRenderer() },
+        { name: 'itemTxt', fieldName: 'itemTxt', width: '260', header: { text: '정보관리항목' }, renderer: this.wrapRenderer() },
+        { name: 'itemCnt', fieldName: 'itemCnt', width: '64', header: { text: '항목수' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
+        { name: 'fieldNm', fieldName: 'fieldNm', width: '90', header: { text: '분야' }, styles: { textAlignment: 'center' } },
+        { name: 'markNm', fieldName: 'markNm', width: '150', header: { text: '인증마크/표시' }, renderer: this.wrapRenderer() },
         // RealGrid2 는 columns 안에 columns 를 넣는 그룹을 만들지 않는다(자식 컬럼이 아예 안 생긴다).
         // 컬럼은 평평하게 두고, "적용 제품 / 적용 지역" 헤더 묶음은 onGridInit 의 setColumnLayout 이 만든다.
-        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '110', header: { text: '사업부' }, styles: { textAlignment: 'center' } },
+        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '100', header: { text: '사업부' }, styles: { textAlignment: 'center' } },
         { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '100', header: { text: '제품군' }, styles: { textAlignment: 'center' } },
-        { name: 'productTxt', fieldName: 'productTxt', width: '130', header: { text: '제품' }, styles: { textAlignment: 'center' } },
-        { name: 'regionTxt', fieldName: 'regionTxt', width: '100', header: { text: '권역' }, styles: { textAlignment: 'center' } },
-        { name: 'countryTxt', fieldName: 'countryTxt', width: '120', header: { text: '국가' }, styles: { textAlignment: 'center' } },
+        { name: 'productTxt', fieldName: 'productTxt', width: '120', header: { text: '제품' }, styles: { textAlignment: 'center' } },
+        { name: 'regionTxt', fieldName: 'regionTxt', width: '80', header: { text: '권역' }, styles: { textAlignment: 'center' } },
+        { name: 'countryTxt', fieldName: 'countryTxt', width: '120', header: { text: '국가' }, renderer: this.wrapRenderer() },
         {
           name: 'url',
           fieldName: 'url',
-          width: '80',
+          width: '100',
           header: { text: 'URL' },
           styles: { textAlignment: 'center' },
           renderer: {
             type: 'html',
             callback: (grid, model) => {
               const url = model?.value
-              if (!url) return ''
-              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><a href="${url}" target="_blank" rel="noopener" style="color:#0d6efd;text-decoration:none;">바로가기 <i class="bi bi-box-arrow-up-right"></i></a></div>`
+              if (!url) return '<span class="reg-empty">-</span>'
+              return `<a class="reg-link" href="${url}" target="_blank" rel="noopener">바로가기 <i class="bi bi-box-arrow-up-right"></i></a>`
             }
           }
         },
@@ -387,8 +464,8 @@ export default {
             type: 'html',
             callback: (grid, model) => {
               const n = Number(model?.value || 0)
-              if (!n) return '<div style="text-align:center;color:#adb5bd;">-</div>'
-              return `<div style="text-align:center;"><i class="bi bi-paperclip"></i> ${n}</div>`
+              if (!n) return '<span class="reg-empty">-</span>'
+              return `<i class="bi bi-paperclip"></i> ${n}`
             }
           }
         },
@@ -402,17 +479,22 @@ export default {
             type: 'html',
             callback: (grid, model) => {
               const n = Number(model?.value || 0)
-              if (!n) return '<div style="text-align:center;color:#adb5bd;">-</div>'
-              return `<div style="display:flex;align-items:center;justify-content:center;height:100%;"><span style="background:#fff3cd;color:#a1690a;border:1px solid #ffe69c;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;">${n}건</span></div>`
+              if (!n) return '<span class="reg-empty">-</span>'
+              return `<span class="b2b-badge b2b-badge-warning">${n}건</span>`
             }
           }
         },
-        { name: 'versionNo', fieldName: 'versionNo', width: '70', header: { text: '버전' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
-        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '100', header: { text: '시행일' }, styles: { textAlignment: 'center' } },
-        { name: 'modDt', fieldName: 'modDt', width: '110', header: { text: '최종수정일' }, styles: { textAlignment: 'center' } }
+        { name: 'versionNo', fieldName: 'versionNo', width: '60', header: { text: '버전' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
+        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '96', header: { text: '시행일' }, styles: { textAlignment: 'center' } },
+        { name: 'modDt', fieldName: 'modDt', width: '96', header: { text: '최종수정일' }, styles: { textAlignment: 'center' } }
       ]
     },
-    filteredRecords() {
+    /**
+     * 국가를 뺀 나머지 조건까지 걸린 목록.
+     * 국가 칩의 건수를 이걸로 센다 — 국가까지 걸고 세면 고른 국가만 남고
+     * 나머지 칩이 전부 0 건이 되어 다른 국가로 갈아탈 수가 없다.
+     */
+    recordsBeforeCountry() {
       const f = this.appliedFilters
       if (!f) return this.records
 
@@ -430,7 +512,6 @@ export default {
         if (f.fieldCd && r.fieldCd !== f.fieldCd) return false
         if (f.statusCd && r.statusCd !== f.statusCd) return false
         if (f.regionCd && !this.hasTarget(r, 'REGION', f.regionCd)) return false
-        if (f.countryCd && !this.hasTarget(r, 'COUNTRY', f.countryCd)) return false
         if (f.regulationCd && !this.hasItem(r, 'REGULATION', f.regulationCd)) return false
         if (f.divisionCd && !this.hasTarget(r, 'DIVISION', f.divisionCd)) return false
         if (f.productGroupCd && !this.hasTarget(r, 'PRODUCT_GROUP', f.productGroupCd)) return false
@@ -441,26 +522,32 @@ export default {
         return true
       })
     },
+    /** 국가 조건까지 걸린 최종 조회 결과. 국가는 여러 개면 OR */
+    filteredRecords() {
+      const cds = (this.appliedFilters && this.appliedFilters.countryCds) || []
+      if (!cds.length) return this.recordsBeforeCountry
+      return this.recordsBeforeCountry.filter((r) => cds.some((cd) => this.matchCountry(r, cd)))
+    },
     /**
-     * 칩 목록은 조회 결과(filteredRecords) 기준 건수로 만든다.
+     * 칩 목록은 국가 직전까지 걸린 결과(recordsBeforeCountry) 기준 건수로 만든다.
      * 한 레코드가 여러 국가에 걸치면 각 국가에 한 번씩 센다.
      * 재조회로 0건이 된 칩도 선택돼 있으면 남겨서 해제할 수 있게 한다.
      */
     countryChipOptions() {
       const counts = {}
       let noneCnt = 0
-      this.filteredRecords.forEach((r) => {
+      this.recordsBeforeCountry.forEach((r) => {
         const codes = (r.targets || []).filter((tg) => tg.targetType === 'COUNTRY').map((tg) => tg.targetCd)
         if (codes.length === 0) noneCnt++
         new Set(codes).forEach((cd) => { counts[cd] = (counts[cd] || 0) + 1 })
       })
       const opts = countryCodes
-        .filter((c) => counts[c.code] || this.countryChips.includes(c.code))
+        .filter((c) => counts[c.code] || this.filters.countryCds.includes(c.code))
         .map((c) => ({ code: c.code, name: c.name, count: counts[c.code] || 0, parentCd: c.parentCd }))
         // 건수 많은 순. 같으면 코드 테이블 순서(권역별)를 유지한다(sort 는 안정 정렬)
         .sort((a, b) => b.count - a.count)
       // parentCd 가 없으므로 필터 바는 이 칩을 '국가' 로 세지 않고 '미지정' 묶음에 둔다
-      if (noneCnt || this.countryChips.includes(NO_COUNTRY)) {
+      if (noneCnt || this.filters.countryCds.includes(NO_COUNTRY)) {
         opts.push({ code: NO_COUNTRY, name: '국가 미지정', count: noneCnt, parentCd: null })
       }
       return opts
@@ -474,7 +561,7 @@ export default {
         statusCd: r.statusCd,
         regNo: r.regNo,
         title: r.title,
-        itemTxt: itemSummary(this.store.itemsOf(r.regInfoId)),
+        itemTxt: itemLines(this.store.itemsOf(r.regInfoId)),
         itemCnt: this.store.itemsOf(r.regInfoId).length,
         fieldNm: this.fieldName(r.fieldCd),
         markNm: r.markNm,
@@ -482,7 +569,7 @@ export default {
         productGroupTxt: this.summarize(targetNames(r, 'PRODUCT_GROUP')),
         productTxt: this.summarize(targetNames(r, 'PRODUCT')) || '전체',
         regionTxt: this.summarize(targetNames(r, 'REGION')),
-        countryTxt: this.summarize(targetNames(r, 'COUNTRY')) || '전체',
+        countryTxt: targetNames(r, 'COUNTRY').join(', ') || '전체',
         countryCds: this.countryCdsOf(r),
         url: r.url,
         attachCnt: r.attachCnt,
@@ -491,6 +578,24 @@ export default {
         effectiveDt: r.effectiveDt,
         modDt: r.modDt
       }))
+    },
+    /**
+     * 전체 목록. 국가는 조회 조건(filteredRecords)에서 이미 걸렸으므로 여기서 또 거르지 않는다.
+     * 그리드 컬럼 필터는 헤더 드롭다운 표시를 조건과 맞추기 위해 같이 켜 둘 뿐이다
+     * (그리드엔 현재 페이지만 들어가서 컬럼 필터만으로는 페이지 안에서만 걸린다).
+     */
+    listRows() {
+      return this.gridRows
+    },
+    pagedRows() {
+      return this.listRows.slice(this.pageOffset, this.pageOffset + this.pageSize)
+    },
+    /** 전개 탭에 넘길 대상. 그리드가 아니라 조회 결과 전체 기준이다(페이징은 전개 쪽이 따로 한다) */
+    listRowIds() {
+      return this.listRows.map((r) => r.regInfoId)
+    },
+    pageOffset() {
+      return (this.page - 1) * this.pageSize
     },
     selectedRecord() {
       return this.records.find((r) => r.regInfoId === this.selectedRegInfoId) || null
@@ -520,9 +625,25 @@ export default {
     }
   },
   watch: {
-    // 재조회로 행이 바뀌면 그리드가 setRows 한 뒤(필터 재적용 후) 건수를 다시 센다
-    gridRows() {
-      this.$nextTick(() => this.syncGridCount())
+    // 재조회·국가 칩 변경으로 목록이 바뀌면 1페이지부터
+    listRows() {
+      this.page = 1
+    },
+    // 행 번호가 페이지를 넘어 전체 기준(21, 22…)으로 이어지게 한다
+    pageOffset(offset) {
+      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: offset })
+    },
+    /**
+     * 탭을 떠나면 평면 그리드는 파괴된다. 참조와 더보기 리스너를 그대로 두면
+     * 이후 호출이 죽은 그리드를 건드리므로 여기서 끊는다.
+     * 돌아오면 onGridInit 이 다시 전부 걸어 준다.
+     */
+    viewMode(mode) {
+      if (mode === 'flat') return
+      if (this.unbindMoreLinks) this.unbindMoreLinks()
+      this.unbindMoreLinks = null
+      this.gridView = null
+      this.dataProvider = null
     }
   },
   created() {
@@ -532,11 +653,17 @@ export default {
     // 수정 페이지에서 돌아온 경우 검색조건을 복원한다
     const ctx = this.store.listContext
     if (ctx.filters) {
-      this.filters = { ...ctx.filters }
-      this.appliedFilters = { ...ctx.filters }
+      this.filters = { ...ctx.filters, countryCds: [...(ctx.filters.countryCds || [])] }
+      this.appliedFilters = { ...this.filters }
       this.selectedRegInfoId = ctx.selectedRegInfoId
     }
-    if (ctx.countryChips) this.countryChips = [...ctx.countryChips]
+    // 펼친 셀 'regInfoId|필드명'. 누른 셀만 펼친다(같은 행의 다른 긴 셀은 접힌 채).
+    // 행 순서는 페이지·정렬마다 바뀌므로 itemIndex 가 아니라 regInfoId 로 기억한다.
+    // 렌더러가 읽기만 하면 되므로 반응형일 필요 없다.
+    this.expandedCells = new Set()
+  },
+  beforeUnmount() {
+    if (this.unbindMoreLinks) this.unbindMoreLinks()
   },
   methods: {
     /* ---------------- 그리드 ---------------- */
@@ -547,11 +674,20 @@ export default {
       this.gridView = gridView
       this.dataProvider = dataProvider
 
-      // 행 높이는 RealGridCommonJs 의 rowHeight prop 이 정한다(기본 32).
-      // 예전엔 여기서 30 으로 덮었는데, CSS 가 만든 셀 높이와 어긋나 셀렉터가 밀렸다.
-      // 바꿔야 하면 <RealGridCommonJs :row-height="..."> 로 준다.
+      // 긴 셀 줄바꿈·더보기용 행 높이 설정은 여기 한곳에 모은다(다른 화면으로 옮길 때 빠지지 않게).
+      // 넘긴 값만 덮어쓰므로 공통 그리드가 먼저 넣은 옵션(fitStyle 등)은 그대로 남는다.
+      gridView.setDisplayOptions({
+        rowHeight: -1, // 행 높이 = 그려진 셀 내용에 맞춤. CSS 나 setRowHeight 로 덮지 않는다(셀렉터가 밀림, -1 이면 무시됨)
+        refCalcHeights: false, // 기본 true 면 처음 잰 높이를 재사용해 refresh() 로 펼쳐도 행이 안 커진다
+        maxRowHeight: 0, // 행 높이 상한 없음 — 걸려 있으면 펼친 셀이 그 높이에서 잘린다
+        minRowHeight: 40, // 한 줄짜리 행 높이
+        wheelScrollLines: 1 // 기본 3행씩 넘기면 높은 행이 섞인 목록에서 휠 한 번에 화면이 크게 튄다
+      })
+      this.bindMoreLinks(gridView.getContainer().parentElement)
+
       gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
-        const row = dataProvider.getJsonRow(newRow)
+        // 행이 비면(clearRows 등) newRow 가 -1 로 온다 — getJsonRow(-1) 은 out of bounds 에러
+        const row = newRow >= 0 ? dataProvider.getJsonRow(newRow) : null
         this.selectedRegInfoId = row ? row.regInfoId : null
       }
       gridView.onCellDblClicked = () => {
@@ -564,8 +700,7 @@ export default {
       // 헤더 필터 드롭다운에서 바꿔도 칩이 따라오게 한다
       gridView.onFilteringChanged = (grid, column) => {
         if (this.applyingChips || column?.name !== COUNTRY_COL) return
-        this.countryChips = grid.getActiveColumnFilters(COUNTRY_COL).map((f) => f.name)
-        this.syncGridCount()
+        this.setCountryChips(grid.getActiveColumnFilters(COUNTRY_COL).map((f) => f.name))
       }
       // 목록에서 돌아온 경우 복원된 칩을 그리드에 반영
       this.applyCountryChips()
@@ -590,7 +725,7 @@ export default {
     applyCountryChips() {
       const gv = this.gridView
       if (!gv) return
-      const codes = [...this.countryChips]
+      const codes = [...this.filters.countryCds]
       // activate 호출이 onFilteringChanged 를 부르더라도 칩을 되덮지 않게 막는다
       this.applyingChips = true
       try {
@@ -599,29 +734,107 @@ export default {
       } finally {
         this.applyingChips = false
       }
-      this.syncGridCount()
     },
-    /** 필터·정렬이 반영된 화면 순서대로 regInfoId 를 뽑는다 (그룹 헤더 행은 제외) */
-    visibleRegInfoIds() {
-      const gv = this.gridView
-      if (!gv) return this.gridRows.map((r) => r.regInfoId)
-      const ids = []
-      for (let i = 0, n = gv.getItemCount(); i < n; i++) {
-        const dataRow = gv.getDataRow(i)
-        if (dataRow >= 0) ids.push(this.dataProvider.getValue(dataRow, 'regInfoId'))
+    /* ---------------- 긴 셀: 줄바꿈 + 더보기 ---------------- */
+    wrapRenderer() {
+      return { type: 'html', callback: (grid, model, width) => this.renderWrapCell(grid, model, width) }
+    },
+    /**
+     * CLAMP_LINES 줄을 넘는 셀만 말줄임 + "더보기". 펼친 셀은 전체 내용 + "접기".
+     * 값은 사용자 입력(규제명·항목명)이라 html 로 끼워 넣기 전에 반드시 이스케이프한다.
+     */
+    renderWrapCell(grid, model, width) {
+      const text = String(model.value ?? '')
+      const html = escapeHtml(text)
+      if (this.lineCount(text, width - CELL_PAD_X) <= CLAMP_LINES) {
+        return `<div class="reg-cell"><div class="reg-wrap">${html}</div></div>`
       }
-      return ids
+      const id = Number(grid.getValue(model.index.itemIndex, 'regInfoId'))
+      const field = model.index.fieldName
+      const open = this.expandedCells.has(`${id}|${field}`)
+      const body = open
+        ? `<div class="reg-wrap">${html}</div>`
+        : `<div class="reg-wrap reg-clamp" style="-webkit-line-clamp:${CLAMP_LINES}">${html}</div>`
+      return `<div class="reg-cell">${body}<span class="reg-more" data-id="${id}" data-field="${escapeHtml(field)}">${open ? '접기' : '더보기'}</span></div>`
     },
-    syncGridCount() {
-      this.gridCount = this.visibleRegInfoIds().length
+    /**
+     * 셀 너비에서 몇 줄로 줄바꿈되는지 센다.
+     * 렌더러는 문자열만 돌려주므로 그려진 DOM 을 잴 수 없어, 같은 폰트로 canvas 에서 글자 폭을 잰다.
+     * CSS 가 word-break: break-all(글자 단위 줄바꿈)이라 글자 폭을 더해 가면 실제 줄 수와 맞는다.
+     */
+    lineCount(text, maxWidth) {
+      if (!text) return 0
+      if (!(maxWidth > 0)) return 1
+      const ctx = this.measureContext()
+      let lines = 0
+      text.split('\n').forEach((para) => {
+        lines += 1
+        let acc = 0
+        for (const ch of para) {
+          const w = ctx.measureText(ch).width
+          if (acc > 0 && acc + w > maxWidth) {
+            lines += 1
+            acc = 0
+          }
+          acc += w
+        }
+      })
+      return lines
+    },
+    measureContext() {
+      if (!this.measureCtx) this.measureCtx = document.createElement('canvas').getContext('2d')
+      // 그리드 폰트는 테마 CSS 가 정하므로 그려진 그리드에서 읽는다(처음엔 아직 없을 수 있어 찾을 때까지 확인)
+      if (!this.measureFontReady) {
+        const root = this.gridView && this.gridView.getContainer().querySelector('.rg-root')
+        if (root) {
+          this.measureCtx.font = getComputedStyle(root).font
+          this.measureFontReady = true
+        }
+      }
+      return this.measureCtx
+    },
+    /**
+     * "더보기/접기" 클릭. 링크는 그리드가 그린 셀 안에 있으므로 바깥 요소에서 캡처 단계로 먼저 받고,
+     * 그리드까지 가지 않게 막는다 → 링크를 눌러도 행 선택이 바뀌거나 더블클릭(수정 화면 이동)으로 번지지 않는다.
+     */
+    bindMoreLinks(el) {
+      const types = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'dblclick', 'touchstart']
+      const handler = (e) => {
+        const link = e.target.closest && e.target.closest('.reg-more')
+        if (!link) return
+        e.stopPropagation()
+        if (e.type === 'click') this.toggleExpand(Number(link.dataset.id), link.dataset.field)
+      }
+      types.forEach((t) => el.addEventListener(t, handler, true))
+      this.unbindMoreLinks = () => types.forEach((t) => el.removeEventListener(t, handler, true))
+    },
+    toggleExpand(id, field) {
+      const key = `${id}|${field}`
+      if (this.expandedCells.has(key)) this.expandedCells.delete(key)
+      else this.expandedCells.add(key)
+      // 셀을 다시 그리면 rowHeight -1 이 바뀐 내용 높이로 행을 다시 잰다.
+      this.gridView.refresh()
     },
     countryCdsOf(record) {
       const codes = (record.targets || []).filter((tg) => tg.targetType === 'COUNTRY').map((tg) => tg.targetCd)
       return `|${(codes.length ? codes : [NO_COUNTRY]).join('|')}|`
     },
     exportExcel() {
+      if (this.viewMode === 'expand') {
+        if (this.$refs.expandGrid) this.$refs.expandGrid.exportExcel()
+        return
+      }
       if (!this.gridView) return
-      this.gridView.exportGrid({ type: 'excel', target: 'local', fileName: '규제정보_목록.xlsx' })
+      // 그리드엔 현재 페이지 행만 있으므로 전체 목록을 잠시 넣고 내보낸 뒤 보던 페이지로 되돌린다
+      const pageRows = this.dataProvider.getJsonRows()
+      const restore = () => this.dataProvider.setRows(pageRows)
+      this.dataProvider.setRows(this.listRows)
+      try {
+        this.gridView.exportGrid({ type: 'excel', target: 'local', fileName: '규제정보_목록.xlsx', done: restore })
+      } catch (e) {
+        restore()
+        throw e
+      }
     },
 
     /* ---------------- 검색 ---------------- */
@@ -631,18 +844,44 @@ export default {
     },
     resetFilters() {
       this.filters = {
-        keyword: '', fieldCd: '', regionCd: '', countryCd: '', regulationCd: '',
+        keyword: '', fieldCd: '', regionCd: '', countryCds: [], regulationCd: '',
         divisionCd: '', productGroupCd: '', productCd: '', statusCd: '',
         effectiveFrom: '', effectiveTo: '', onlyConflict: false
       }
       this.appliedFilters = null
-      this.countryChips = []
       this.applyCountryChips()
     },
-    /** 필터 바가 넘긴 선택값을 그대로 그리드 컬럼 필터에 반영 */
+    /**
+     * 국가 필터 바(회전목마 등)에서 고른 값 = 국가 검색조건.
+     * 조회 버튼을 기다리지 않고 누르는 즉시 조건에 넣는다 — 칩은 "눌러서 좁히는" 장치라
+     * 한 번 더 조회를 눌러야 반영되면 누른 결과가 안 보여서 고장 난 것처럼 느껴진다.
+     *
+     * 아직 조회하지 않은 다른 폼 입력(타이핑 중인 키워드 등)까지 같이 적용되면 안 되므로
+     * appliedFilters 를 통째로 갈지 않고 국가 항목만 갈아 끼운다.
+     */
     setCountryChips(codes) {
-      this.countryChips = [...codes]
+      this.filters.countryCds = [...codes]
+      this.appliedFilters = { ...(this.appliedFilters || {}), countryCds: [...codes] }
       this.applyCountryChips()
+    },
+    /** 상단 셀렉트에서 고른 국가를 조건에 더한다(중복은 무시). 셀렉트는 곧바로 제자리로 */
+    addCountryFromSelect(e) {
+      const cd = e.target.value
+      e.target.value = ''
+      if (!cd || this.filters.countryCds.includes(cd)) return
+      this.setCountryChips([...this.filters.countryCds, cd])
+    },
+    removeCountry(cd) {
+      this.setCountryChips(this.filters.countryCds.filter((c) => c !== cd))
+    },
+    /** 국가 미지정 칩은 코드가 아니라 "COUNTRY 타겟이 하나도 없음" 을 뜻한다 */
+    matchCountry(record, code) {
+      if (code === NO_COUNTRY) return !(record.targets || []).some((tg) => tg.targetType === 'COUNTRY')
+      return this.hasTarget(record, 'COUNTRY', code)
+    },
+    countryName(code) {
+      if (code === NO_COUNTRY) return '국가 미지정'
+      return (countryCodes.find((c) => c.code === code) || {}).name || code
     },
     setFilterVariant(key) {
       this.filterVariant = key
@@ -696,9 +935,9 @@ export default {
      */
     saveListContext() {
       this.store.setListContext({
-        filters: { ...this.filters },
-        countryChips: [...this.countryChips],
-        orderedIds: this.visibleRegInfoIds(),
+        filters: { ...this.filters, countryCds: [...this.filters.countryCds] },
+        // 페이지를 넘나들며 이동해야 하므로 현재 페이지가 아닌 전체 목록 순서
+        orderedIds: this.listRows.map((r) => r.regInfoId),
         selectedRegInfoId: this.selectedRegInfoId
       })
     },
@@ -757,6 +996,69 @@ export default {
   font-weight: 600;
 }
 
+/* ---- 검색조건에 들어간 국가 태그 ---- */
+.reg-country-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.reg-country-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  line-height: 16px;
+  padding: 1px 4px 1px 6px;
+  border-radius: 10px;
+  background: var(--b2b-color-primary-subtle, #e7f1ff);
+  color: var(--b2b-color-primary, #0d6efd);
+}
+
+.reg-country-tag i {
+  cursor: pointer;
+  opacity: 0.65;
+}
+
+.reg-country-tag i:hover {
+  opacity: 1;
+}
+
+/* ---- 보기 전환 탭 (그리드 우측 상단) ---- */
+.view-tabs {
+  display: inline-flex;
+  border: 1px solid var(--b2b-color-border, #dee2e6);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--b2b-color-bg-card, #fff);
+}
+
+.view-tabs button {
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  color: var(--b2b-color-text-secondary, #6c757d);
+  white-space: nowrap;
+}
+
+.view-tabs button + button {
+  border-left: 1px solid var(--b2b-color-border, #dee2e6);
+}
+
+.view-tabs button.on {
+  background: var(--b2b-color-primary, #0d6efd);
+  color: #fff;
+  font-weight: 600;
+}
+
+.view-tabs-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--b2b-color-border, #dee2e6);
+}
+
 /* ---- 국가 필터 디자인 전환 스위치 ---- */
 .design-switch {
   display: flex;
@@ -766,116 +1068,66 @@ export default {
   background: var(--b2b-color-bg-subcard, #f8f9fa);
 }
 
-.reg-page :deep(.multi-select) {
-  width: 100%;
+/* ---- 목록 그리드 (그리드가 그린 DOM 이라 :deep, 이 화면에만 적용) ---- */
+/* 글자 13px + 셀 좌우 8px 여백. 폰트를 바꾸면 lineCount() 는 그리드에서 폰트를 읽으므로 따라온다 */
+.reg-page :deep(.rg-root) {
+  font-size: 13px !important;
 }
 
-.form-label-sm {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: var(--b2b-space-2);
-  color: var(--b2b-color-text-primary, #212529);
+/* 좌우 padding 을 바꾸면 스크립트의 CELL_PAD_X 도 같이 */
+.reg-page :deep(.rg-data-cell .rg-renderer) {
+  padding: 0 8px;
 }
 
-/* ---- 모달 ---- */
-.modal-mask {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1080;
+/* 헤더는 데이터보다 한 톤 가볍게 — 색은 grid-theme.css 의 변수 이음매로 */
+.reg-page {
+  --rg-header-color: var(--b2b-color-text-muted);
 }
 
-.modal-box {
-  width: min(920px, 94vw);
-  max-height: 88vh;
-  background: var(--b2b-color-bg-card, #fff);
-  border-radius: 10px;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.25);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.reg-page :deep(.rg-root [class*="rg-"][class*="head"]) {
+  font-weight: 500 !important;
 }
 
-.modal-lg-box {
-  width: min(1120px, 96vw);
+.reg-page :deep(.reg-empty) {
+  color: var(--b2b-color-text-faint);
 }
 
-.modal-head {
-  display: flex;
-  align-items: center;
-  gap: var(--b2b-space-1);
-  padding: var(--b2b-space-3) var(--b2b-space-4);
-  border-bottom: 1px solid var(--b2b-color-border, #dee2e6);
-  background: var(--b2b-color-bg-subcard, #f8f9fa);
-}
-
-.modal-body-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: var(--b2b-space-4);
-}
-
-.modal-foot {
-  display: flex;
-  align-items: center;
-  gap: var(--b2b-space-2);
-  padding: 10px var(--b2b-space-4);
-  border-top: 1px solid var(--b2b-color-border, #dee2e6);
-  background: var(--b2b-color-bg-subcard, #f8f9fa);
-}
-
-.btn-compact {
-  padding: 2px var(--b2b-space-2);
-  font-size: 12px;
-}
-
-/* ---- 충돌 검사 ---- */
-.conflict-summary {
-  border: 1px solid var(--b2b-color-border, #dee2e6);
-  border-left: 4px solid var(--b2b-color-primary);
-  border-radius: 6px;
-  padding: 10px var(--b2b-space-3);
-  background: var(--b2b-color-bg-subcard, #f8f9fa);
-}
-
-.conflict-table th {
-  font-size: 12px;
-  background: var(--b2b-color-bg-subcard, #f8f9fa);
+.reg-page :deep(.reg-link) {
+  color: var(--b2b-color-primary);
+  text-decoration: none;
   white-space: nowrap;
 }
 
-.conflict-table td {
-  vertical-align: top;
+/* ---- 긴 셀: 줄바꿈 + 더보기 ---- */
+.reg-page :deep(.reg-cell) {
+  text-align: left;
+  padding: 6px 0;
 }
 
-/* ---- 첨부 ---- */
-.attach-box {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--b2b-space-2);
-  border: 1px dashed var(--b2b-color-border, #dee2e6);
-  border-radius: 6px;
-  padding: var(--b2b-space-2);
-  min-height: 46px;
+/* break-all: lineCount() 가 글자 단위로 줄 수를 세므로 CSS 도 글자 단위로 끊는다 */
+.reg-page :deep(.reg-wrap) {
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 18px;
 }
 
-.attach-chip {
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  background: var(--b2b-color-bg-subcard, #f1f3f5);
-  border: 1px solid var(--b2b-color-border, #dee2e6);
-  border-radius: 14px;
-  padding: 3px 10px;
+/* 몇 줄에서 자를지(-webkit-line-clamp)는 렌더러가 CLAMP_LINES 로 inline style 에 넣는다 */
+.reg-page :deep(.reg-clamp) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.attach-chip .bi-x {
+.reg-page :deep(.reg-more) {
+  display: inline-block;
+  margin-top: 1px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--b2b-color-primary, #0d6efd);
   cursor: pointer;
+}
+
+.reg-page :deep(.reg-more:hover) {
+  text-decoration: underline;
 }
 </style>

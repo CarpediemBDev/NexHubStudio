@@ -1,5 +1,54 @@
 /* RealGrid & Generic Grid Theme Overrides */
 
+/* ==========================================================================
+   화이트 카드 팔레트
+   RealGrid 기본(realgrid-white.css)은 하늘색 테두리(#95C5FF)·선택 틴트(#D2E7FF)·파란
+   스크롤바가 섞여 있어 앱의 slate 톤과 따로 논다. 선은 slate 계열 두 단계만 쓰고,
+   파랑은 '포커스 셀' 한 곳에만 브랜드색으로 남긴다.
+   ⚠ 테두리 '두께'는 건드리지 않는다 — 행 높이·셀 폭 계산(fitHeight, CELL_PAD_X)이 1px 기준.
+   ========================================================================== */
+:root,
+[data-theme="light"] {
+  --rg-radius: 12px;
+  --rg-line: #EEF1F5;                          /* 셀 사이 선 (가장 옅게) */
+  --rg-line-strong: var(--b2b-color-border);   /* 헤더 하단·합계 상단·틀고정 경계 */
+  --rg-header-surface: #F8FAFC;                /* 헤더·합계 바탕 (slate-50) */
+  --rg-header-text: #475569;                   /* slate-600 */
+  --rg-rowbar-text: var(--b2b-color-text-muted);
+  --rg-row-focus-bg: #F1F5F9;                 /* 포커스 행의 No./체크 칸 */
+  --rg-scroll-thumb: #CBD5E1;
+  --rg-scroll-thumb-hover: #94A3B8;
+}
+
+[data-theme="dark"],
+[data-theme="dark-navy"] {
+  --rg-line: var(--border-color);
+  --rg-line-strong: var(--border-color);
+  --rg-header-surface: var(--b2b-color-bg-body);
+  --rg-header-text: var(--b2b-color-text-main);
+  --rg-rowbar-text: var(--b2b-color-text-muted);
+  --rg-row-focus-bg: rgba(var(--b2b-color-primary-rgb), 0.22);
+  --rg-scroll-thumb: #475569;
+  --rg-scroll-thumb-hover: #64748B;
+}
+
+/* 그리드 컴포넌트 외곽 카드 (RealGridCommonVue / CommonJs / TreeJs) */
+.realgrid-vue-wrapper,
+.realgrid-js-wrapper,
+.realgrid-tree-wrapper {
+  background-color: var(--bg-card);
+  border: 1px solid var(--b2b-color-border);
+  border-radius: var(--rg-radius);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+}
+
+.realgrid-vue-wrapper > .b2b-grid-inner-toolbar,
+.realgrid-js-wrapper > .b2b-grid-inner-toolbar,
+.realgrid-tree-wrapper > .b2b-grid-inner-toolbar {
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--rg-line);
+}
+
 .rg-root,
 .rg-container,
 .rg-grid {
@@ -32,10 +81,10 @@
 .rg-state-header,
 [class*="rg-"][class*="header"],
 [class*="rg-"][class*="head"] {
-  background-color: var(--rg-header-bg, var(--b2b-color-bg-header)) !important;
-  color: var(--rg-header-color, var(--b2b-color-text-main)) !important;
+  background-color: var(--rg-header-bg, var(--rg-header-surface)) !important;
+  color: var(--rg-header-color, var(--rg-header-text)) !important;
   font-weight: 600 !important;
-  border-bottom: 1px solid var(--border-color) !important;
+  border-bottom: 1px solid var(--rg-line-strong) !important;
 }
 
 /* 데이터 셀 — 제어열(indicator/checkBar/stateBar) 포함 전부 동일 배경 */
@@ -44,8 +93,8 @@
 .rg-check-cell,
 .rg-state-cell,
 [class*="rg-cell"] {
-  border-right: 1px solid var(--border-color) !important;
-  border-bottom: 1px solid var(--border-color) !important;
+  border-right: 1px solid var(--rg-line) !important;
+  border-bottom: 1px solid var(--rg-line) !important;
   color: var(--rg-cell-color, var(--b2b-color-text-main)) !important;
   background-color: var(--rg-cell-bg, var(--b2b-color-bg-card)) !important;
 }
@@ -63,17 +112,177 @@
    RealGrid 2.10.0 기본 규칙 `.rg-rowbarcontainer .rg-table tr td { background:#F1F7FF }`
    이 제어열 전체에 연한 파랑 틴트를 깔아 데이터 셀(흰색)과 달라 보임 → JqxGrid 톤에 맞춰 흰색으로.
    RealGrid는 이 CSS 클래스 색을 읽어 캔버스에 칠하므로 오버라이드가 반영됨.
-   ⚠ RealGrid base 규칙과 동일 specificity((0,2,2))로 두고, grid-theme.css 가 RealGrid 주입
-     스타일보다 늦게 로드되는 점을 이용해 base 틴트만 덮는다. 상태 마커(created/updated/
-     deleted)·focus·select 규칙은 (0,3,2) 로 더 높아 그대로 유지된다. !important 는 쓰지 않는다. */
-.rg-rowbarcontainer .rg-table tr td {
+   ⚠ realgrid-white.css 는 그리드 컴포넌트가 import 해서 화면 진입 시 grid-theme.css '보다 늦게'
+     붙는다. 그래서 같은 특정도로는 지고, 앞에 html 을 붙여 (0,2,3) 으로 base(0,2,2)만 이긴다.
+     상태 마커(created/updated/deleted)·focus·select 규칙은 (0,3,2) 로 더 높아 그대로 유지된다.
+     !important 는 쓰지 않는다. */
+html .rg-rowbarcontainer .rg-table tr td {
   background-color: var(--bg-card);
-  /* No.(rowindicator) 숫자색 — RealGrid 기본 네이비(#002D62) → JqxGrid 톤의 회색으로 */
-  color: var(--text-secondary);
+  /* No.(rowindicator) 숫자색 — RealGrid 기본 네이비(#002D62) → 옅은 회색으로 */
+  color: var(--rg-rowbar-text);
+  border-right-color: var(--rg-line);
+  border-bottom-color: var(--rg-line);
 }
 
-/* 행 높이 — ⚠ 여기서 만들지 않는다. realgridOps.js 의 GRID_ROW_HEIGHT 가 유일한 기준이고,
-   각 그리드 컴포넌트가 setDisplayOptions({ rowHeight }) 로 그리드에 알린다.
+/* 포커스/hover 행의 No.·체크 칸 — 기본 하늘색(#D2E7FF/#BEDBFF) → slate.
+   base(0,3,3)+html. 다크는 아래 html[data-theme] 규칙(0,4,3) !important 가 이긴다. */
+html .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-focus,
+html .rg-rowbarcontainer .rg-table tr td.rg-statebar-focus,
+html .rg-rowbarcontainer .rg-table tr td.rg-checkbar-focus,
+html .rg-rowbarcontainer .rg-table tr td.rg-rowindicator-cell:hover {
+  background-color: var(--rg-row-focus-bg);
+  color: var(--b2b-color-text-main);
+}
+
+/* ==========================================================================
+   RealGrid 기본 테마의 하늘색 선·바탕 제거
+   각 규칙은 realgrid-white.css 선택자 앞에 html 을 붙여 특정도를 한 단계 올렸다 (위 ROW BAR 참고).
+   ========================================================================== */
+html .rg-rowbarcontainer {
+  background: var(--bg-card);
+}
+
+/* 헤더 영역(컬럼 헤더·No./체크 헤더·행그룹 헤더) 세로선 */
+html .rg-header .rg-table tr td,
+html .rg-head .rg-table tr td,
+html .rg-rowgroup-head .rg-table tr td,
+html .rg-rowgroup-bar .rg-table tr td,
+html .rg-rowgroup-header {
+  border-right-color: var(--rg-line);
+  border-bottom-color: var(--rg-line-strong);
+}
+
+/* 합계(footer) */
+html .rg-footer,
+html .rg-foot,
+html .rg-rowgroup-foot,
+html .rg-header-summary,
+html .rg-fixed-header-summary,
+html .rg-filter-panel,
+html .rg-fixed-filter-panel {
+  background: var(--rg-header-surface);
+  color: var(--b2b-color-text-main);
+}
+
+html .rg-footer .rg-table tr td,
+html .rg-fixed-footer .rg-table tr td,
+html .rg-foot .rg-table tr td,
+html .rg-rowgroup-foot .rg-table tr td,
+html .rg-rowgroup-footer .rg-table tr td {
+  border-top-color: var(--rg-line-strong);
+  border-right-color: var(--rg-line);
+}
+
+html .rg-header-summary .rg-table tr td,
+html .rg-fixed-header-summary .rg-table tr td,
+html .rg-filter-panel .rg-table tr td,
+html .rg-fixed-filter-panel .rg-table tr td {
+  border-right-color: var(--rg-line);
+  border-bottom-color: var(--rg-line-strong);
+}
+
+/* 틀고정 경계선 */
+html .rg-fixed-column-bar,
+html .rg-right-column-bar {
+  background: var(--bg-card);
+  border-color: var(--rg-line-strong);
+}
+
+/* 그룹핑 패널 ("컬럼 헤더를 이 곳으로…") */
+html .rg-group-panel {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--rg-line);
+}
+
+html .rg-group-panel-message {
+  color: var(--b2b-color-text-faint);
+}
+
+html .rg-group-panel-item,
+html .rg-group-panel-reset {
+  background: var(--rg-header-surface);
+  border: 1px solid var(--b2b-color-border);
+  border-radius: 6px;
+}
+
+html .rg-group-panel-reset:hover {
+  border-color: var(--rg-scroll-thumb-hover);
+}
+
+/* 헤더 필터 아이콘 — 기본 파란 SVG 는 회색으로 눌러 두고, 필터가 걸린 컬럼만 원래 색 */
+html .rg-header-filtering:not(.filter-activated) {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+html .rg-header-cell:hover .rg-header-filtering:not(.filter-activated) {
+  opacity: 0.8;
+}
+
+/* 포커스 셀 — 하늘색 → 브랜드 파랑 한 가지로 */
+html .rg-focus,
+html .rg-focus-line {
+  border: 2px solid rgba(var(--b2b-color-primary-rgb), 0.85);
+  border-radius: 3px;
+}
+
+html .rg-deactive-focus {
+  border: 2px solid rgba(var(--b2b-color-primary-rgb), 0.35);
+}
+
+html .rg-focus-editing {
+  border: 2px solid var(--b2b-color-primary);
+}
+
+html .rg-focus-inner,
+html .rg-focus-inner-line {
+  border-color: transparent;
+}
+
+/* 스크롤바 — 트랙은 비우고 thumb 은 가는 회색 알약.
+   크기는 그리드 옵션 그대로 두고, 투명 테두리 + background-clip 으로 '보이는 두께'만 줄인다. */
+html .rg-scrolltrack,
+html .rg-scrolledge {
+  background: var(--bg-card);
+  border-color: transparent;
+}
+
+html .rg-hscrollbar .rg-scrollthumb,
+html .rg-vscrollbar .rg-scrollthumb {
+  background: var(--rg-scroll-thumb);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+
+html .rg-hscrollbar .rg-scrollthumb:hover,
+html .rg-vscrollbar .rg-scrollthumb:hover {
+  background: var(--rg-scroll-thumb-hover);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+}
+
+html .rg-hscrollbar .rg-scroll-left,
+html .rg-hscrollbar .rg-scroll-right,
+html .rg-vscrollbar .rg-scroll-up,
+html .rg-vscrollbar .rg-scroll-down {
+  background-color: var(--bg-card);
+  border-color: transparent;
+  filter: grayscale(1); /* 화살표가 파란 SVG */
+  opacity: 0.6;
+}
+
+html .rg-hscrollbar .rg-scroll-left:hover,
+html .rg-hscrollbar .rg-scroll-right:hover,
+html .rg-vscrollbar .rg-scroll-up:hover,
+html .rg-vscrollbar .rg-scroll-down:hover {
+  background-color: var(--b2b-color-hover-bg);
+  border-color: transparent;
+  opacity: 1;
+}
+
+/* 행 높이 — ⚠ 여기서 만들지 않는다. 각 그리드 컴포넌트의 rowHeight prop 이 유일한 기준이고,
+   컴포넌트가 setDisplayOptions({ rowHeight }) 로 그리드에 알린다.
 
    이유: RealGrid 는 셀을 <table> 로 그리지만 선택/포커스 오버레이는 DOM 을 안 보고
    displayOptions.rowHeight 로 좌표를 계산한다. 예전엔 이 자리에서 `line-height: 32px`

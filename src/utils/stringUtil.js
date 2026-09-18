@@ -15,6 +15,18 @@ export function truncate(text, length, suffix = '...') {
   return text.substring(0, length) + suffix
 }
 
+const HTML_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+
+/**
+ * HTML 특수문자 이스케이프
+ * 사용자 입력을 html 문자열에 끼워 넣을 때(RealGrid html 렌더러 등) 반드시 거친다.
+ * @param {*} value - 원본 값 (null/undefined 는 빈 문자열)
+ * @returns {string} 태그로 해석되지 않는 문자열
+ */
+export function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (ch) => HTML_ESCAPE_MAP[ch])
+}
+
 /**
  * HTML 태그 제거
  * @param {string} html - HTML 문자열

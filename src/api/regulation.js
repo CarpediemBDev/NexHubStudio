@@ -19,6 +19,18 @@ export const regulationApi = {
   snapshot: () => http.get('/regulations').then((r) => r.data),
 
   /**
+   * 전개(행→열) 목록.
+   * 목록 한 셀에 여러 줄로 뭉쳐 있던 값 — 규제 > 규격 > 관리항목(인증서), 제품 —
+   * 을 "조합 1건 = 1행" 으로 펼친 결과. 펼치기는 결국 JOIN 이므로 화면이 아니라 서버가 한다.
+   *
+   * 조회인데 POST 인 이유: 앞단 조회 결과가 수천 건이면 ID 목록이 URL 길이 제한을 넘는다.
+   * @param {number[]} regInfoIds 이미 걸러진 레코드 ID. 빈 배열이면 전체.
+   * @returns {Promise<{rows: Array, totalCount: number}>}
+   */
+  expanded: (regInfoIds = []) =>
+    http.post('/regulations/expanded', { regInfoIds }).then((r) => r.data),
+
+  /**
    * 레코드 1건 저장. 신규/수정 모두 이 엔드포인트로 간다(수정은 서버가 새 버전으로 올린다).
    * @param {object} payload  { master, targets, items, attachFiles, changes, decisions }
    * @returns {Promise<object>} 저장된 레코드

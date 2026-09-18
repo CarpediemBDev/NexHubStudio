@@ -173,10 +173,143 @@ function applyDecisionSideEffects(decisions, saved, stamp) {
   })
 }
 
+/* ---------------- 전개(행→열) ---------------- */
+/**
+ * 목록 화면 "전개" 탭이 쓰는 결과. 백엔드가 JOIN 으로 만들 모양을 그대로 흉내 낸다.
+ *
+ *   SELECT i.field_cd, i.reg_no, i.title, ...,
+ *          rg.item_cd AS regulation_cd, st.item_cd AS standard_cd, ct.item_cd AS cert_cd,
+ *          p.target_cd AS product_cd,
+ *          COALESCE(ct.mandatory_yn, st.mandatory_yn, rg.mandatory_yn) AS mandatory_yn
+ *     FROM reg_info i
+ *     LEFT JOIN reg_info_item   rg ON rg.reg_info_id    = i.reg_info_id AND rg.item_type_cd = 'REGULATION'
+ *     LEFT JOIN reg_info_item   st ON st.parent_item_id = rg.item_id    AND st.item_type_cd = 'STANDARD'
+ *     LEFT JOIN reg_info_item   ct ON ct.parent_item_id = st.item_id    AND ct.item_type_cd = 'CERT'
+ *     LEFT JOIN reg_info_target p  ON p.reg_info_id     = i.reg_info_id AND p.target_type   = 'PRODUCT'
+ *    WHERE i.reg_info_id IN (:ids)
+ *    ORDER BY i.field_cd, i.reg_no, rg.sort_order, st.sort_order, ct.sort_order, p.target_cd
+ *
+ * LEFT JOIN 이라 하위 단계가 없으면 그 칸은 빈 값으로 남고(규격은 있는데 인증서가 없는 규제 등),
+ * 제품을 지정하지 않은 레코드는 제품 칸이 빈 값인 한 행이 된다.
+ *
+ * 내리는 것은 "코드" 뿐이다. 이름은 붙이지 않는다 —
+ * reg_info_item 에는 ITEM_NM 이 없고 common_code 에도 규제 코드가 없어서
+ * 백엔드에는 코드→이름 출처가 아예 없다. 이름은 화면의 코드테이블(regulationMock.js)이 단독으로 쥔다.
+ * 여기서 이름을 지어 내리면 목업 모드와 실제 모드의 응답이 갈라진다.
+ *
+ * 병합키(fieldKey/recKey/ruleKey/stdKey)는 여기서 만든다.
+ * "어디까지 같아야 한 칸으로 묶느냐" 는 정렬 순서와 한 몸인데,
+ * 정렬은 서버가 하고 키는 화면이 만들면 ORDER BY 를 바꾸는 순간 병합이 조용히 깨진다.
+ * 정렬한 쪽이 키도 만든다.
+ */
+
+/** 레코드의 특정 타겟 코드 목록. 순서는 SQL 과 같게 코드 오름차순 */
+const targetCdsOf = (record, targetType) =>
+  (record.targets || [])
+    .filter((tg) => tg.targetType === targetType)
+    .map((tg) => tg.targetCd)
+    .sort()
+
+/** 규제 > 규격 > 인증서 3단 LEFT JOIN 과 같은 조합 목록 */
+function ruleCombos(items) {
+  const blank = { regulationCd: '', standardCd: '', certCd: '', mandatoryYn: '' }
+  const childrenOf = (parentItemId, itemTypeCd) =>
+    items
+      .filter((it) => it.parentItemId === parentItemId && it.itemTypeCd === itemTypeCd)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const roots = items
+    .filter((it) => it.itemTypeCd === 'REGULATION')
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+  if (!roots.length) return [{ ...blank }]
+
+  const out = []
+  roots.forEach((rg) => {
+    const stds = childrenOf(rg.itemId, 'STANDARD')
+    if (!stds.length) {
+      out.push({ ...blank, regulationCd: rg.itemCd, mandatoryYn: rg.mandatoryYn })
+      return
+    }
+    stds.forEach((st) => {
+      const certs = childrenOf(st.itemId, 'CERT')
+      if (!certs.length) {
+        out.push({ ...blank, regulationCd: rg.itemCd, standardCd: st.itemCd, mandatoryYn: st.mandatoryYn })
+        return
+      }
+      certs.forEach((ct) => {
+        out.push({
+          regulationCd: rg.itemCd,
+          standardCd: st.itemCd,
+          certCd: ct.itemCd,
+          mandatoryYn: ct.mandatoryYn
+        })
+      })
+    })
+  })
+  return out
+}
+
+/** 제품 타겟이 없으면 빈 코드 한 행(= LEFT JOIN 결과). 있으면 제품마다 한 행 */
+function productCombos(record) {
+  const cds = targetCdsOf(record, 'PRODUCT')
+  return cds.length ? cds : ['']
+}
+
+function expandRecords(records) {
+  const rows = []
+  const sorted = [...records].sort(
+    (a, b) =>
+      String(a.fieldCd || '').localeCompare(String(b.fieldCd || '')) ||
+      String(a.regNo || '').localeCompare(String(b.regNo || ''))
+  )
+
+  sorted.forEach((r) => {
+    const items = db.items.filter((it) => it.regInfoId === r.regInfoId)
+    // 레코드 단위 멀티값. 전개 축이 아니므로 곱하지 않고 목록 그대로 내린다
+    const base = {
+      regInfoId: r.regInfoId,
+      statusCd: r.statusCd,
+      regNo: r.regNo,
+      title: r.title,
+      fieldCd: r.fieldCd,
+      divisionCds: targetCdsOf(r, 'DIVISION'),
+      productGroupCds: targetCdsOf(r, 'PRODUCT_GROUP'),
+      regionCds: targetCdsOf(r, 'REGION'),
+      countryCds: targetCdsOf(r, 'COUNTRY'),
+      effectiveDt: dateOnly(r.effectiveDt),
+      versionNo: r.versionNo
+    }
+
+    ruleCombos(items).forEach((rule) => {
+      productCombos(r).forEach((productCd) => {
+        rows.push({
+          ...base,
+          ...rule,
+          productCd,
+          fieldKey: String(r.fieldCd || ''),
+          recKey: `${r.fieldCd}|${r.regInfoId}`,
+          ruleKey: `${r.fieldCd}|${r.regInfoId}|${rule.regulationCd}`,
+          stdKey: `${r.fieldCd}|${r.regInfoId}|${rule.regulationCd}|${rule.standardCd}`
+        })
+      })
+    })
+  })
+  return rows
+}
+
 /* ---------------- 핸들러 ---------------- */
 export default [
   // 화면 진입 시 스냅샷
   http.get('/api/regulations', () => ok(db)),
+
+  // 전개(행→열) 목록. 조회 결과로 이미 걸러진 ID 만 받는다(빈 배열이면 전체)
+  http.post('/api/regulations/expanded', async ({ request }) => {
+    const { regInfoIds = [] } = await request.json()
+    const ids = new Set((regInfoIds || []).map(Number))
+    const targets = ids.size ? db.records.filter((r) => ids.has(r.regInfoId)) : db.records
+    const rows = expandRecords(targets)
+    return ok({ rows, totalCount: rows.length })
+  }),
 
   // 저장 (신규 = INSERT, 기존 = 새 버전으로 UPDATE)
   http.post('/api/regulations', async ({ request }) => {

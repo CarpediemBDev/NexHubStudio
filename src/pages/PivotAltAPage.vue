@@ -131,7 +131,7 @@
           grid-id="pivot-alt-a-v3"
           :fields="gridFields"
           :columns="gridColumns"
-          :rows="mockData"
+          :rows="pagedRows"
           :sortable="true"
           :filterable="true"
           :checkable="true"
@@ -148,10 +148,15 @@
           :use-footer="true"
           :soft-deletable="true"
           :summary-mode="'aggregate'"
-          :fit-style="'none'"
+          fit-style="fill"
           :toast="gridToast"
           @init="onGridInit"
-        />
+        >
+          <template #toolbar-right>
+            <PageSizeSelect v-model="pageSize" size="sm" />
+          </template>
+        </RealGridCommonJs>
+        <Pagination v-model:page="page" v-model:page-size="pageSize" :total="mockData.length" :show-size-select="false" />
       </div>
     </div>
 
@@ -170,6 +175,8 @@ import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 import QuickSearchBar from '@/components/QuickSearchBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import Pagination from '@/components/Pagination.vue'
+import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import { showToast } from '@/utils/toastUtil.js'
 import { searchGrid, captureViewState, applyViewState } from '@/utils/realgridOps'
 
@@ -179,7 +186,9 @@ export default {
     PageHeader,
     RealGridCommonJs,
     ColumnPickerModal,
-    QuickSearchBar
+    QuickSearchBar,
+    Pagination,
+    PageSizeSelect
   },
   props: {
     initialGroup: {
@@ -202,6 +211,8 @@ export default {
         { id: 'preset_eval_grade', name: '평가등급 ➔ 부서별', fields: ['evalGrade', 'dept'], icon: 'bi-award' }
       ],
       userSavedViews: [],
+      page: 1,
+      pageSize: 20,
       gridFields: [
         { fieldName: 'userId', dataType: 'text' },
         { fieldName: 'name', dataType: 'text' },
@@ -352,7 +363,20 @@ export default {
       ]
     }
   },
+  watch: {
+    // 행 번호가 페이지를 넘어 전체 기준(21, 22…)으로 이어지게 한다
+    pageOffset(offset) {
+      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: offset })
+    }
+  },
   computed: {
+    /** 현재 페이지 행만 그리드에 넘긴다. 페이지를 넘기면 그리드가 setRows 로 갈아끼우므로 편집 상태·체크는 사라진다 */
+    pagedRows() {
+      return this.mockData.slice(this.pageOffset, this.pageOffset + this.pageSize)
+    },
+    pageOffset() {
+      return (this.page - 1) * this.pageSize
+    },
     isGrouped() {
       return this.activeHasGroup
     },
@@ -376,12 +400,8 @@ export default {
         if (!res.ok) throw new Error('db.json fetch 실패')
         const data = await res.json()
         const rows = Array.isArray(data) ? data : (data.users || [])
-        if (rows.length) {
-          this.mockData = rows
-          if (this.dataProvider) {
-            this.dataProvider.setRows(this.mockData)
-          }
-        }
+        // 그리드 반영은 pagedRows → RealGridCommonJs 의 rows 감시가 한다
+        if (rows.length) this.mockData = rows
       } catch (e) {
         console.warn('[PivotAltA] db.json 로드 실패 → 폴백 데이터 사용:', e)
       }
@@ -700,14 +720,46 @@ export default {
       showToast('서버 저장 완료 및 행 상태(C,U,D)가 클리어되었습니다.', { type: 'success' })
     },
 
+    /**
+     * 페이징 중이라 그리드엔 현재 페이지 행만 있다. 다른 페이지 행을 앞뒤에 잠시 끼워 전체를 내보내고 다시 뺀다.
+     * 현재 페이지 행은 건드리지 않고, 끼우고 빼는 동안 행 상태 기록을 꺼서(checkRowStates)
+     * 편집 중인 추가/수정/삭제 상태와 체크가 그대로 남는다. 그룹핑 중이면 전체 행 기준으로 묶여 나간다.
+     */
     exportExcel() {
-      if (!this.gridView) return
-      this.gridView.exportGrid({
-        type: 'excel',
-        target: 'local',
-        fileName: 'Pivot_AltA_Group_Export.xlsx',
-        showProgress: true
-      })
+      const gv = this.gridView
+      const dp = this.dataProvider
+      if (!gv) return
+      gv.commit(true)
+
+      const start = this.pageOffset // 현재 페이지 첫 행의 전체 기준 위치
+      const addedCnt = dp.getStateRows('created').length + dp.getStateRows('createAndDeleted').length
+      const pageCnt = dp.getRowCount() - addedCnt // 원본(mockData) 중 현재 페이지에 있는 행 수
+      const head = this.mockData.slice(0, start)
+      const tail = this.mockData.slice(start + pageCnt)
+
+      dp.checkRowStates(false) // 끼운 행이 '추가'로, 뺀 행이 '삭제'로 남지 않게
+      dp.insertRows(0, head)
+      dp.addRows(tail)
+      gv.setRowIndicator({ indexOffset: 0 })
+
+      const restore = () => {
+        const n = dp.getRowCount()
+        dp.removeRows([...head.keys(), ...tail.map((_, i) => n - tail.length + i)])
+        dp.checkRowStates(true)
+        gv.setRowIndicator({ indexOffset: start })
+      }
+      try {
+        gv.exportGrid({
+          type: 'excel',
+          target: 'local',
+          fileName: 'Pivot_AltA_Group_Export.xlsx',
+          showProgress: true,
+          done: restore // 엑셀 파일 생성이 끝난 뒤 호출된다
+        })
+      } catch (e) {
+        restore()
+        throw e
+      }
     },
 
     openColumnPicker() {

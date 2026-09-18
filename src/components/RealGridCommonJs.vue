@@ -1,7 +1,7 @@
 <template>
-  <div class="realgrid-js-wrapper w-100 border rounded-2 overflow-hidden shadow-sm" :style="{ height: height }">
+  <div class="realgrid-js-wrapper w-100 d-flex flex-column overflow-hidden" :style="{ height: wrapperHeight }">
     <!-- 1단: 상단 내장 서브 툴바 (컬럼 팝오버 + 뷰 저장 + 내 뷰 칩스) -->
-    <div v-if="showColumnPicker || showSavedViews" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 bg-theme-subcard border-bottom b2b-text-xs">
+    <div v-if="showToolbar" class="b2b-grid-inner-toolbar d-flex flex-wrap align-items-center justify-content-between px-3 py-2 b2b-text-xs">
       <!-- Left: Column Picker & Save View Buttons -->
       <div class="d-flex align-items-center gap-2">
         <!-- 1. [컬럼 설정] 버튼 → 팝업(ColumnPickerModal) -->
@@ -28,26 +28,32 @@
         </button>
       </div>
 
-      <!-- Right: Dynamic [내 뷰] Chips (독립 우측 분리) -->
-      <div v-if="showSavedViews && savedViews.length > 0" class="d-flex align-items-center gap-1.5 ms-auto flex-wrap">
-        <span v-if="savedViews.length > 0" class="b2b-text-xs text-muted fw-semibold me-1">
-          <i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:
-        </span>
-        <div
-          v-for="view in savedViews"
-          :key="view.id"
-          class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal b2b-text-xs"
-          :class="activeViewId === view.id ? 'bg-primary text-white shadow-sm' : 'bg-theme-card text-theme-primary border-theme'"
-          @click="applySavedView(view)"
-        >
-          <span>{{ view.name }}</span>
-          <i class="bi bi-x ms-1 text-danger opacity-75 hover-opacity-100" @click.stop="deleteSavedView(view.id)" title="뷰 삭제"></i>
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <!-- Right: Dynamic [내 뷰] Chips (독립 우측 분리) -->
+        <div v-if="showSavedViews && savedViews.length > 0" class="d-flex align-items-center gap-1.5 flex-wrap">
+          <span v-if="savedViews.length > 0" class="b2b-text-xs text-muted fw-semibold me-1">
+            <i class="bi bi-star-fill text-warning me-1"></i>내 저장 뷰:
+          </span>
+          <div
+            v-for="view in savedViews"
+            :key="view.id"
+            class="badge py-1 px-2 border cursor-pointer d-flex align-items-center gap-1 transition-all fw-normal b2b-text-xs"
+            :class="activeViewId === view.id ? 'bg-primary text-white shadow-sm' : 'bg-theme-card text-theme-primary border-theme'"
+            @click="applySavedView(view)"
+          >
+            <span>{{ view.name }}</span>
+            <i class="bi bi-x ms-1 text-danger opacity-75 hover-opacity-100" @click.stop="deleteSavedView(view.id)" title="뷰 삭제"></i>
+          </div>
         </div>
+
+        <!-- 화면이 넣는 툴바 우측 영역 (예: 페이지당 행 수 셀렉트) -->
+        <slot name="toolbar-right"></slot>
       </div>
     </div>
 
     <!-- 2단: RealGrid Canvas Container (하단 100% 가로 폭 그룹핑 패널 포함) -->
-    <div ref="gridElement" class="w-100" :style="{ height: (showColumnPicker || showSavedViews) ? 'calc(100% - 38px)' : '100%' }"></div>
+    <!-- 툴바를 뺀 나머지 높이를 flex 로 채운다 (툴바 높이를 숫자로 빼면 실제 높이와 어긋난다) -->
+    <div ref="gridElement" class="w-100 rg-grid-area"></div>
 
     <!-- 컬럼 표시/숨기기 설정 팝업 -->
     <ColumnPickerModal
@@ -64,7 +70,6 @@ import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
 import { captureViewState, applyViewState } from '@/utils/realgridOps'
-import { GRID_ROW_HEIGHT, buildRowHeightOptions, warnIfRowHeightMismatch } from '@/utils/realgridRowHeight'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
 export default {
@@ -75,7 +80,7 @@ export default {
     columns: { type: Array, default: () => [] },
     rows: { type: Array, default: () => [] },
     gridId: { type: String, default: '' },
-    height: { type: String, default: '580px' },
+    height: { type: String, default: '500px' },
     editable: { type: Boolean, default: true },
     hideDeletedRows: { type: Boolean, default: false },
     showColumnPicker: { type: Boolean, default: true },
@@ -95,11 +100,11 @@ export default {
     rowResizable: { type: Boolean, default: undefined },
     /**
      * 행 높이(px). 행 높이는 반드시 이 prop 으로 정한다 — CSS 로 만들면 그리드가
-     * 모르는 높이가 생겨 셀 선택 표시가 행과 어긋난다(realgridRowHeight.js 참고).
+     * 모르는 높이가 생겨 셀 선택 표시가 행과 어긋난다(grid-theme.css 참고).
      *  -1 : 셀 내용에 맞춰 행마다 자동(이미지·버튼·여러 줄 텍스트가 있는 그리드)
      *   0 : 폰트/padding 기준으로 그리드가 계산한 값으로 고정
      */
-    rowHeight: { type: Number, default: GRID_ROW_HEIGHT },
+    rowHeight: { type: Number, default: 32 },
     summaryMode: { type: String, default: undefined },
     groupPanelVisible: { type: Boolean, default: undefined },
     fitStyle: { type: String, default: 'evenFill' },
@@ -113,7 +118,14 @@ export default {
     options: { type: Object, default: () => ({}) },
     gridOptions: { type: Object, default: () => ({}) },
     theme: { type: String, default: '' },
-    toast: { type: Function, default: null }
+    toast: { type: Function, default: null },
+    /**
+     * 행 N개가 빈칸 없이 딱 보이는 높이로 그리드를 맞춘다. 기본 10행, 0 이면 끔 → height 고정.
+     * 이때 height 는 "최대 높이"가 된다: min(height, 툴바 + 그룹패널 + 헤더 + 합계 + N × rowHeight).
+     * 그룹패널·합계를 켜고 끄면 그 영역만큼 자동으로 다시 계산한다. height 가 px 일 때만 동작(100% 등은 영향 없음).
+     * 페이지당 개수(pageSize)를 넘기지 말 것 — 20·100개로 바꿀 때마다 그리드 높이가 출렁인다. 고정 N행에서 스크롤로 본다.
+     */
+    visibleRows: { type: Number, default: 10 }
   },
   emits: ['init', 'notify'],
   data() {
@@ -121,10 +133,17 @@ export default {
       savedViews: [],
       activeViewId: null,
       columnItems: [],
-      showColumnModal: false
+      showColumnModal: false,
+      fitHeight: null // visibleRows 로 계산한 틀 높이(px). null 이면 height 그대로
     }
   },
   computed: {
+    wrapperHeight() {
+      return this.fitHeight ? `${this.fitHeight}px` : this.height
+    },
+    showToolbar() {
+      return this.showColumnPicker || this.showSavedViews || !!this.$slots['toolbar-right']
+    },
     columnPickerCols() {
       return this.columnItems.map(c => ({
         name: c.name,
@@ -229,6 +248,8 @@ export default {
     if (this.gridId) {
       this.saveGridLayout()
     }
+    if (this._fitObserver) this._fitObserver.disconnect()
+    cancelAnimationFrame(this._fitRaf)
     this.destroyGrid()
   },
   methods: {
@@ -712,11 +733,9 @@ export default {
       this.gridView.setFooter({ visible: this.resolvedUseFooter, ...(customOpts.footer || {}) })
 
       // 행 높이는 반드시 그리드에 알린다. CSS 로 행을 키우면 그리드가 모르는 높이가 생겨
-      // 셀 선택 표시가 행과 어긋난다(realgridRowHeight.js 참고).
-      const rowHeightOpts = buildRowHeightOptions(this.rowHeight)
-
+      // 셀 선택 표시가 행과 어긋난다(grid-theme.css 참고).
       if (this.resolvedGroupPanelVisible) {
-        this.gridView.setDisplayOptions({ ...rowHeightOpts, columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
         this.gridView.setGroupPanel({ visible: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupPanel || {}) })
         this.gridView.setGroupingOptions({ enabled: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupingOptions || {}) })
         this.gridView.setSortingOptions({ enabled: true, ...(customOpts.sortingOptions || {}) })
@@ -727,7 +746,7 @@ export default {
           ...(customOpts.rowGroup || {})
         })
       } else {
-        this.gridView.setDisplayOptions({ ...rowHeightOpts, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
       }
 
       if (this.fields && this.fields.length > 0) {
@@ -749,10 +768,73 @@ export default {
       this.syncColumnItems()
       this.applyCellMerging()
       this.$emit('init', { gridView: this.gridView, dataProvider: this.dataProvider })
+      this.watchFitHeight()
+    },
 
-      // 개발 모드에서만: CSS 가 몰래 행을 키우고 있으면 경고한다. 이 어긋남은 조용해서
-      // (에러도 안 나고 행이 적으면 눈에도 안 띈다) 그냥 두면 한참 뒤에 발견된다.
-      warnIfRowHeightMismatch(this.gridView, container, 'RealGridCommonJs')
+    // =========================================================
+    // 📏 visibleRows: 행 N개가 딱 보이는 높이로 틀을 맞춘다
+    //  height 가 그룹패널·헤더·합계·가로스크롤까지 포함한 높이라, 그 영역이 켜지고 꺼지면
+    //  행 영역이 커지거나(아래 빈칸) 작아진다(스크롤). 그래서 고정영역을 실제로 재서 더한다.
+    // =========================================================
+    watchFitHeight() {
+      if (typeof ResizeObserver === 'undefined') return
+      const schedule = () => {
+        cancelAnimationFrame(this._fitRaf)
+        this._fitRaf = requestAnimationFrame(() => this.fitToVisibleRows())
+      }
+      this._fitObserver = new ResizeObserver(schedule)
+      // 그리드 영역 크기가 바뀌거나(툴바 줄바꿈 등), 행 영역이 바뀌면(그룹패널·합계·가로스크롤 on/off) 다시 계산
+      this._fitObserver.observe(this.$refs.gridElement)
+      this.fitToVisibleRows()
+    },
+
+    /**
+     * 계산에 쓸 행 높이.
+     *  양수 : 지정값 /  0(RealGrid 기본값) : 폰트·패딩으로 정해진 실제 높이를 행에서 읽음 / -1 : 행마다 달라 계산 불가(0)
+     */
+    resolveRowHeight() {
+      const set = this.gridView.getDisplayOptions().rowHeight
+      if (set > 0) return set
+      if (set < 0) return 0
+      // getRowHeight 는 행이 0건이면 에러가 나므로, 행이 있을 때 읽어 두고 없을 땐 마지막 값을 쓴다
+      try {
+        if (this.gridView.getItemCount() > 0) this._autoRowHeight = this.gridView.getRowHeight(0)
+      } catch (e) { /* noop */ }
+      return this._autoRowHeight || 0
+    },
+
+    fitToVisibleRows() {
+      const area = this.$refs.gridElement
+      const maxHeight = /^\d+(\.\d+)?px$/.test(this.height) ? parseFloat(this.height) : NaN
+      const rowHeight = this.gridView ? this.resolveRowHeight() : 0
+      if (!(this.visibleRows > 0) || !area || isNaN(maxHeight) || !(rowHeight > 0)) {
+        this.fitHeight = null
+        return
+      }
+      if (!area.offsetHeight) return // 숨겨진 상태(탭 전환 등) → 보이면 ResizeObserver 가 다시 부른다
+
+      // RealGrid 는 틀 크기가 바뀐 뒤 행 영역을 늦게 다시 배치한다(생성 직후엔 행 영역 DOM 도 아직 없다).
+      // 옛 행 영역 높이로 재면 고정영역이 틀리게 나와 높이가 계속 줄어드므로, 재기 전에 즉시 배치시킨다.
+      this.gridView.resetSize()
+      const root = area.querySelector('.rg-root')
+      const body = root && root.querySelector('.rg-body')
+      if (!body) return
+      // 행 영역은 처음 그려진 뒤에 생기므로 여기서 감시에 건다(같은 요소면 무시됨)
+      if (this._fitObserver && this._fitBody !== body) {
+        this._fitObserver.observe(body)
+        this._fitBody = body
+      }
+
+      const fixedArea = root.offsetHeight - body.offsetHeight // 그룹패널 + 헤더 + 합계 + 가로스크롤
+      const outer = this.$el.offsetHeight - area.offsetHeight // 툴바 + 테두리
+      // 최대 높이에 걸려 스크롤이 생길 때도 행 영역을 행 높이의 배수로 둔다. RealGrid 는 행 단위로 스크롤해서
+      // 배수가 아니면 맨 아래까지 내렸을 때 1행 미만의 자투리가 빈칸으로 남는다.
+      const fitRows = Math.max(1, Math.min(this.visibleRows, Math.floor((maxHeight - outer - fixedArea) / rowHeight)))
+      const want = Math.ceil(outer + fixedArea + fitRows * rowHeight)
+      const next = want < maxHeight ? want : null
+      if (next === this.fitHeight) return
+      this.fitHeight = next
+      this.$nextTick(() => this.gridView && this.gridView.resetSize())
     }
   }
 }
@@ -763,6 +845,10 @@ export default {
   position: relative;
 }
 .b2b-grid-inner-toolbar {
-  background-color: var(--b2b-color-bg-subcard, #f8fafc);
+  flex-shrink: 0;
+}
+.rg-grid-area {
+  flex: 1 1 0;
+  min-height: 0;
 }
 </style>
