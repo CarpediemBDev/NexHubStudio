@@ -1087,16 +1087,26 @@ export const regItemList = [
  *   나머지는 짧은 값 그대로
  */
 const _rootItemOf = (regInfoId) => regItemList.find((it) => it.regInfoId === regInfoId && it.parentItemId == null)
-const _addItems = (regInfoId, names, { parentItemId = _rootItemOf(regInfoId).itemId, itemTypeCd = 'STANDARD', levelNo = 2 } = {}) =>
-  names.map((itemNm, i) => {
+/**
+ * REG_INFO_ITEM 에는 이름 컬럼이 없다. 항목은 코드만 들고 있고 이름은 코드표가 쥔다.
+ * 그래서 테스트 항목도 코드표(standardCodes/certCodes)에 같이 등록해야
+ * 목록·전개 두 탭이 다 codeName() 으로 같은 이름을 얻는다.
+ */
+const _codeTableOf = (itemTypeCd) => (itemTypeCd === 'CERT' ? certCodes : standardCodes)
+
+const _addItems = (regInfoId, names, { parentItemId = _rootItemOf(regInfoId).itemId, itemTypeCd = 'STANDARD', levelNo = 2 } = {}) => {
+  const parentCd = (regItemList.find((it) => it.itemId === parentItemId) || {}).itemCd
+  return names.map((name, i) => {
     const item = {
       itemId: (_itemSeq += 1), regInfoId, parentItemId,
-      itemTypeCd, itemCd: `TEST_${regInfoId}_${_itemSeq}`, itemNm,
+      itemTypeCd, itemCd: `TEST_${regInfoId}_${_itemSeq}`,
       levelNo, mandatoryYn: 'N', remark: '', sortOrder: 100 + i
     }
     regItemList.push(item)
+    _codeTableOf(itemTypeCd).push({ code: item.itemCd, name, parentCd, levelNo })
     return item
   })
+}
 const _record = (regInfoId) => regInfoList.find((r) => r.regInfoId === regInfoId)
 
 // 2: 항목 20줄(규격 7개 × 인증서 1개 추가) — 긴 셀 펼침 확인용.

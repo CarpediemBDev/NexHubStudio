@@ -116,6 +116,16 @@ export const useRegulationStore = defineStore('regulation', {
       }
     },
 
+    /**
+     * 전개(행→열) 목록.
+     * 결과는 조회 조건에 딸린 화면 상태라 state 에 두지 않고 부른 쪽에 돌려준다.
+     * (state 에 두면 목록/전개 탭이 서로 다른 시점의 결과를 보게 된다)
+     * @param {number[]} regInfoIds 목록에서 이미 걸러진 레코드 ID
+     */
+    fetchExpanded(regInfoIds) {
+      return regulationApi.expanded(regInfoIds)
+    },
+
     /* ---------------- 목록 컨텍스트 ---------------- */
     setListContext(ctx) {
       this.listContext = { ...this.listContext, ...ctx }
