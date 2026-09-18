@@ -60,6 +60,62 @@ public class RegulationResponse {
         private List<Target> targets;
     }
 
+    /**
+     * POST /api/regulations/expanded — 전개(행→열) 결과.
+     * 행 한 줄 = (레코드 × 규제 × 규격 × 관리항목 × 제품) 조합 하나.
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Expanded {
+        private List<ExpandedRow> rows;
+        private int totalCount;
+    }
+
+    /**
+     * 전개 한 행. 코드만 내린다 —
+     * reg_info_item 에 ITEM_NM 이 없고 common_code 에도 규제 코드가 없어서
+     * 백엔드에는 코드→이름 출처가 아예 없다. 이름은 화면 코드테이블이 붙인다.
+     * 목업 핸들러(src/mocks/handlers/regulation.js 의 expandRecords)와 같은 모양이어야 한다.
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ExpandedRow {
+        private Long regInfoId;
+        private String statusCd;
+        private String regNo;
+        private String title;
+        private String fieldCd;
+
+        /** 정보관리항목 3단. 하위가 없는 단계는 빈 문자열 */
+        private String regulationCd;
+        private String standardCd;
+        private String certCd;
+        private String mandatoryYn;
+
+        /** 제품 타겟. 미지정이면 빈 문자열 — 화면이 '전체' 로 읽는다 */
+        private String productCd;
+
+        /** 레코드 단위 멀티값. 전개 축이 아니라서 곱하지 않고 목록 그대로 */
+        private List<String> divisionCds;
+        private List<String> productGroupCds;
+        private List<String> regionCds;
+        private List<String> countryCds;
+
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        private LocalDate effectiveDt;
+        private Integer versionNo;
+
+        /** 셀 병합키. 정렬한 쪽(서버)이 만든다 */
+        private String fieldKey;
+        private String recKey;
+        private String ruleKey;
+        private String stdKey;
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

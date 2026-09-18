@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexhubstudio.backend.domain.RegAttachFile;
 import com.nexhubstudio.backend.domain.RegConflictHist;
+import com.nexhubstudio.backend.domain.RegExpandRow;
 import com.nexhubstudio.backend.domain.RegInfo;
 import com.nexhubstudio.backend.domain.RegInfoHist;
 import com.nexhubstudio.backend.domain.RegInfoItem;
@@ -82,6 +83,75 @@ public class RegulationService {
                 .conflicts(regulationMapper.findAllConflicts().stream().map(this::toConflict).toList())
                 .attachments(attachments)
                 .build();
+    }
+
+    /**
+     * 전개(행→열).
+     * 목록 화면 "전개" 탭이 쓴다. 한 셀에 여러 줄로 쌓이던 값
+     * (규제 &gt; 규격 &gt; 관리항목, 제품)을 각각 열로 돌린 결과다.
+     *
+     * 펼치기 자체는 JOIN 이라 SQL 이 하고, 여기서는 두 가지만 한다.
+     *   1. 레코드 단위 멀티값(사업부·제품군·권역·국가) 붙이기
+     *      — 전개 축이 아니라서 JOIN 에 끼우면 행이 그 개수만큼 배로 불어난다
+     *   2. null 을 빈 문자열로 — 화면이 값 있음/없음을 한 가지 방법으로만 판단하게
+     *
+     * 이름은 붙이지 않는다. 코드→이름 출처가 백엔드에 없다(RegExpandRow 주석 참고).
+     */
+    @Transactional(readOnly = true)
+    public RegulationResponse.Expanded expand(RegulationRequest.Expand req) {
+        List<Long> ids = req == null || req.getRegInfoIds() == null ? List.of() : req.getRegInfoIds();
+        List<RegExpandRow> rows = regulationMapper.findExpandedRows(ids);
+
+        Set<Long> recordIds = rows.stream().map(RegExpandRow::getRegInfoId).collect(Collectors.toSet());
+        // 스냅샷이 이미 쓰는 조회를 재사용한다. 타겟이 커지면 레코드 범위 조회를 따로 둘 것
+        Map<Long, Map<String, List<String>>> targetsByRecord = regulationMapper.findAllTargets().stream()
+                .filter(t -> recordIds.contains(t.getRegInfoId()))
+                .collect(Collectors.groupingBy(RegInfoTarget::getRegInfoId,
+                        Collectors.groupingBy(RegInfoTarget::getTargetType,
+                                Collectors.mapping(RegInfoTarget::getTargetCd, Collectors.toList()))));
+
+        List<RegulationResponse.ExpandedRow> out = rows.stream()
+                .map(r -> toExpandedRow(r, targetsByRecord.getOrDefault(r.getRegInfoId(), Map.of())))
+                .toList();
+
+        return RegulationResponse.Expanded.builder()
+                .rows(out)
+                .totalCount(out.size())
+                .build();
+    }
+
+    private RegulationResponse.ExpandedRow toExpandedRow(RegExpandRow r, Map<String, List<String>> targets) {
+        return RegulationResponse.ExpandedRow.builder()
+                .regInfoId(r.getRegInfoId())
+                .statusCd(r.getStatusCd())
+                .regNo(r.getRegNo())
+                .title(r.getTitle())
+                .fieldCd(r.getFieldCd())
+                .regulationCd(blankIfNull(r.getRegulationCd()))
+                .standardCd(blankIfNull(r.getStandardCd()))
+                .certCd(blankIfNull(r.getCertCd()))
+                .mandatoryYn(blankIfNull(r.getMandatoryYn()))
+                .productCd(blankIfNull(r.getProductCd()))
+                .divisionCds(targetCds(targets, "DIVISION"))
+                .productGroupCds(targetCds(targets, "PRODUCT_GROUP"))
+                .regionCds(targetCds(targets, "REGION"))
+                .countryCds(targetCds(targets, "COUNTRY"))
+                .effectiveDt(r.getEffectiveDt())
+                .versionNo(r.getVersionNo())
+                .fieldKey(r.getFieldKey())
+                .recKey(r.getRecKey())
+                .ruleKey(r.getRuleKey())
+                .stdKey(r.getStdKey())
+                .build();
+    }
+
+    /** 코드 오름차순. 목업 핸들러도 같은 순서라 두 모드의 화면 표시가 일치한다 */
+    private List<String> targetCds(Map<String, List<String>> targets, String targetType) {
+        return targets.getOrDefault(targetType, List.of()).stream().sorted().toList();
+    }
+
+    private String blankIfNull(String v) {
+        return v == null ? "" : v;
     }
 
     /* ============================================================ *

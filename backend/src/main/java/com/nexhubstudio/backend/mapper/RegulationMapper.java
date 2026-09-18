@@ -2,6 +2,7 @@ package com.nexhubstudio.backend.mapper;
 
 import com.nexhubstudio.backend.domain.RegAttachFile;
 import com.nexhubstudio.backend.domain.RegConflictHist;
+import com.nexhubstudio.backend.domain.RegExpandRow;
 import com.nexhubstudio.backend.domain.RegInfo;
 import com.nexhubstudio.backend.domain.RegInfoHist;
 import com.nexhubstudio.backend.domain.RegInfoItem;
@@ -26,6 +27,13 @@ public interface RegulationMapper {
     List<RegConflictHist> findAllConflicts();
 
     List<RegAttachFile> findAllAttachments();
+
+    /* ---------------- 전개(행→열) ---------------- */
+    /**
+     * 레코드 × 규제 × 규격 × 관리항목 × 제품 조합을 한 행씩.
+     * regInfoIds 가 비어 있으면 전체.
+     */
+    List<RegExpandRow> findExpandedRows(@Param("regInfoIds") List<Long> regInfoIds);
 
     /* ---------------- 레코드 ---------------- */
     RegInfo findRecordById(Long regInfoId);

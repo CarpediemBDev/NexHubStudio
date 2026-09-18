@@ -28,6 +28,17 @@ public class RegulationRequest {
         private List<ConflictDecision> decisions;
     }
 
+    /** POST /api/regulations/expanded — 전개(행→열) 조회 */
+    @Data
+    @NoArgsConstructor
+    public static class Expand {
+        /**
+         * 목록에서 이미 걸러진 레코드 ID. 비어 있으면 전체.
+         * 조회인데 POST 인 이유는 조회 결과가 수천 건이면 ID 목록이 URL 길이 제한을 넘기 때문이다.
+         */
+        private List<Long> regInfoIds;
+    }
+
     /** POST /api/regulations/conflict-histories — 등록 취소 시 충돌 이력만 남김 */
     @Data
     @NoArgsConstructor

@@ -30,6 +30,16 @@ public class RegulationController {
     }
 
     /**
+     * 전개(행→열) 목록.
+     * 조회지만 POST 다 — 조회 결과가 수천 건이면 ID 목록이 URL 길이 제한을 넘는다.
+     */
+    @PostMapping("/expanded")
+    public ResponseEntity<ApiResponse<RegulationResponse.Expanded>> expanded(
+            @RequestBody RegulationRequest.Expand request) {
+        return ResponseEntity.ok(ApiResponse.success(regulationService.expand(request)));
+    }
+
+    /**
      * 저장 (신규 = INSERT, 기존 = 새 버전으로 UPDATE)
      */
     @PostMapping

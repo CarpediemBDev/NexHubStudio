@@ -39,6 +39,56 @@
          ORDER BY r.reg_info_id, f.id
     </select>
 
+    <!-- ================= 전개(행→열) =================
+         목록 "전개" 탭. 한 셀에 여러 줄로 쌓이던 값을 각각 열로 돌린 결과.
+
+         LEFT JOIN 이라 하위 단계가 없으면 그 칸은 NULL 로 남고(규격은 있는데 인증서가 없는 규제),
+         제품을 지정하지 않은 레코드는 제품 칸이 NULL 인 한 행이 된다.
+
+         사업부·제품군·권역·국가는 여기 끼우지 않는다. 전개 축이 아니라 레코드 속성이라
+         JOIN 에 넣으면 행이 그 개수만큼 배로 불어난다(카티션 곱). 서비스가 따로 붙인다.
+
+         병합키는 여기서 만든다 — 어디까지 같아야 한 칸으로 묶느냐는 아래 ORDER BY 와 한 몸이다.
+         CONCAT 을 쓰는 이유: bigint 를 || 로 이으면 DB 마다 암시적 캐스팅이 갈린다.
+    -->
+    <select id="findExpandedRows" resultType="RegExpandRow">
+        SELECT i.reg_info_id,
+               i.status_cd,
+               i.reg_no,
+               i.title,
+               i.field_cd,
+               rg.item_cd AS regulation_cd,
+               st.item_cd AS standard_cd,
+               ct.item_cd AS cert_cd,
+               COALESCE(ct.mandatory_yn, st.mandatory_yn, rg.mandatory_yn) AS mandatory_yn,
+               p.target_cd AS product_cd,
+               i.effective_dt,
+               i.version_no,
+               i.field_cd AS field_key,
+               CONCAT(i.field_cd, '|', i.reg_info_id) AS rec_key,
+               CONCAT(i.field_cd, '|', i.reg_info_id, '|', COALESCE(rg.item_cd, '')) AS rule_key,
+               CONCAT(i.field_cd, '|', i.reg_info_id, '|', COALESCE(rg.item_cd, ''),
+                      '|', COALESCE(st.item_cd, '')) AS std_key
+          FROM reg_info i
+          LEFT JOIN reg_info_item rg
+                 ON rg.reg_info_id = i.reg_info_id
+                AND rg.item_type_cd = 'REGULATION'
+          LEFT JOIN reg_info_item st
+                 ON st.parent_item_id = rg.item_id
+                AND st.item_type_cd = 'STANDARD'
+          LEFT JOIN reg_info_item ct
+                 ON ct.parent_item_id = st.item_id
+                AND ct.item_type_cd = 'CERT'
+          LEFT JOIN reg_info_target p
+                 ON p.reg_info_id = i.reg_info_id
+                AND p.target_type = 'PRODUCT'
+        <if test="regInfoIds != null and regInfoIds.size() > 0">
+         WHERE i.reg_info_id IN
+            <foreach item="id" collection="regInfoIds" open="(" separator="," close=")">#{id}</foreach>
+        </if>
+         ORDER BY i.field_cd, i.reg_no, rg.sort_order, st.sort_order, ct.sort_order, p.target_cd
+    </select>
+
     <!-- ================= 레코드 ================= -->
 
     <select id="findRecordById" parameterType="long" resultType="RegInfo">
