@@ -60,6 +60,91 @@
          ORDER BY g.sort_order, c.sort_order, c.code_id
     </select>
 
+    <!-- ================= 교차표(제품 = 열) =================
+         전개와 다른 점은 제품을 JOIN 하지 않는다는 것뿐이다.
+         제품을 곱하면 행이 제품 수만큼 늘어나는데, 교차표는 그 제품들을 "열" 로 눕히므로
+         행은 레코드 × 규제 × 규격 × 관리항목 까지만이다.
+
+         열 목록은 이 페이지에 실제로 나온 레코드의 제품만으로 만든다(findCrosstabProducts).
+         전체 제품으로 열을 만들면 40개가 늘 붙어 대부분 빈 칸이 된다.
+    -->
+    <sql id="crosstabFrom">
+          FROM reg_info i
+          LEFT JOIN reg_info_item rg
+                 ON rg.reg_info_id = i.reg_info_id
+                AND rg.item_type_cd = 'REGULATION'
+          LEFT JOIN reg_info_item st
+                 ON st.parent_item_id = rg.item_id
+                AND st.item_type_cd = 'STANDARD'
+          LEFT JOIN reg_info_item ct
+                 ON ct.parent_item_id = st.item_id
+                AND ct.item_type_cd = 'CERT'
+        <if test="regInfoIds != null and regInfoIds.size() > 0">
+         WHERE i.reg_info_id IN
+            <foreach item="id" collection="regInfoIds" open="(" separator="," close=")">#{id}</foreach>
+        </if>
+    </sql>
+
+    <select id="countCrosstabRows" resultType="int">
+        SELECT COUNT(*)
+        <include refid="crosstabFrom"/>
+    </select>
+
+    <select id="findCrosstabRows" resultType="RegExpandRow">
+        SELECT i.reg_info_id,
+               i.status_cd,
+               i.reg_no,
+               i.title,
+               i.field_cd,
+               rg.item_cd AS regulation_cd,
+               st.item_cd AS standard_cd,
+               ct.item_cd AS cert_cd,
+               COALESCE(ct.mandatory_yn, st.mandatory_yn, rg.mandatory_yn) AS mandatory_yn,
+               i.effective_dt,
+               i.version_no,
+               i.field_cd AS field_key,
+               CONCAT(i.field_cd, '|', i.reg_info_id) AS rec_key,
+               CONCAT(i.field_cd, '|', i.reg_info_id, '|', COALESCE(rg.item_cd, '')) AS rule_key,
+               CONCAT(i.field_cd, '|', i.reg_info_id, '|', COALESCE(rg.item_cd, ''),
+                      '|', COALESCE(st.item_cd, '')) AS std_key
+        <include refid="crosstabFrom"/>
+         ORDER BY i.field_cd, i.reg_no, rg.sort_order, st.sort_order, ct.sort_order, i.reg_info_id
+        <if test="limit != null">
+         LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+
+    <!-- 이 레코드들이 실제로 쓰는 제품만. 열 순서는 코드표 정렬을 따른다 -->
+    <select id="findCrosstabProducts" resultType="RegCode">
+        SELECT 'PRODUCT'   AS group_code,
+               c.code_id   AS code,
+               c.code_name AS name,
+               p.code_id   AS parent_code,
+               c.sort_order AS sort_order
+          FROM reg_info_target t
+          JOIN common_code c ON c.code_id = t.target_cd
+           AND c.code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')
+          LEFT JOIN common_code p ON p.id = c.parent_id
+         WHERE t.target_type = 'PRODUCT'
+        <if test="regInfoIds != null and regInfoIds.size() > 0">
+           AND t.reg_info_id IN
+            <foreach item="id" collection="regInfoIds" open="(" separator="," close=")">#{id}</foreach>
+        </if>
+         GROUP BY c.code_id, c.code_name, p.code_id, c.sort_order
+         ORDER BY c.sort_order, c.code_id
+    </select>
+
+    <!-- 레코드 → 제품 코드. 셀을 채울 때 쓴다 -->
+    <select id="findProductTargets" resultType="RegInfoTarget">
+        SELECT reg_info_id, target_type, target_cd, level_no, exclude_yn
+          FROM reg_info_target
+         WHERE target_type = 'PRODUCT'
+        <if test="regInfoIds != null and regInfoIds.size() > 0">
+           AND reg_info_id IN
+            <foreach item="id" collection="regInfoIds" open="(" separator="," close=")">#{id}</foreach>
+        </if>
+    </select>
+
     <!-- ================= 전개(행→열) =================
          목록 "전개" 탭. 한 셀에 여러 줄로 쌓이던 값을 각각 열로 돌린 결과.
 
@@ -72,6 +157,35 @@
          병합키는 여기서 만든다 — 어디까지 같아야 한 칸으로 묶느냐는 아래 ORDER BY 와 한 몸이다.
          CONCAT 을 쓰는 이유: bigint 를 || 로 이으면 DB 마다 암시적 캐스팅이 갈린다.
     -->
+    <!--
+        목록과 카운트가 같은 조건을 봐야 총 건수와 페이지가 어긋나지 않는다.
+        조건이 갈라지면 "3페이지가 있다는데 열면 비어 있는" 종류의 버그가 된다.
+    -->
+    <sql id="expandedFrom">
+          FROM reg_info i
+          LEFT JOIN reg_info_item rg
+                 ON rg.reg_info_id = i.reg_info_id
+                AND rg.item_type_cd = 'REGULATION'
+          LEFT JOIN reg_info_item st
+                 ON st.parent_item_id = rg.item_id
+                AND st.item_type_cd = 'STANDARD'
+          LEFT JOIN reg_info_item ct
+                 ON ct.parent_item_id = st.item_id
+                AND ct.item_type_cd = 'CERT'
+          LEFT JOIN reg_info_target p
+                 ON p.reg_info_id = i.reg_info_id
+                AND p.target_type = 'PRODUCT'
+        <if test="regInfoIds != null and regInfoIds.size() > 0">
+         WHERE i.reg_info_id IN
+            <foreach item="id" collection="regInfoIds" open="(" separator="," close=")">#{id}</foreach>
+        </if>
+    </sql>
+
+    <select id="countExpandedRows" resultType="int">
+        SELECT COUNT(*)
+        <include refid="expandedFrom"/>
+    </select>
+
     <select id="findExpandedRows" resultType="RegExpandRow">
         SELECT i.reg_info_id,
                i.status_cd,
@@ -90,24 +204,16 @@
                CONCAT(i.field_cd, '|', i.reg_info_id, '|', COALESCE(rg.item_cd, '')) AS rule_key,
                CONCAT(i.field_cd, '|', i.reg_info_id, '|', COALESCE(rg.item_cd, ''),
                       '|', COALESCE(st.item_cd, '')) AS std_key
-          FROM reg_info i
-          LEFT JOIN reg_info_item rg
-                 ON rg.reg_info_id = i.reg_info_id
-                AND rg.item_type_cd = 'REGULATION'
-          LEFT JOIN reg_info_item st
-                 ON st.parent_item_id = rg.item_id
-                AND st.item_type_cd = 'STANDARD'
-          LEFT JOIN reg_info_item ct
-                 ON ct.parent_item_id = st.item_id
-                AND ct.item_type_cd = 'CERT'
-          LEFT JOIN reg_info_target p
-                 ON p.reg_info_id = i.reg_info_id
-                AND p.target_type = 'PRODUCT'
-        <if test="regInfoIds != null and regInfoIds.size() > 0">
-         WHERE i.reg_info_id IN
-            <foreach item="id" collection="regInfoIds" open="(" separator="," close=")">#{id}</foreach>
+        <include refid="expandedFrom"/>
+        <!--
+            정렬이 페이지마다 흔들리면 같은 행이 두 페이지에 나오거나 아예 빠진다.
+            마지막에 reg_info_id 를 넣어 동률일 때도 순서가 하나로 정해지게 한다.
+        -->
+         ORDER BY i.field_cd, i.reg_no, rg.sort_order, st.sort_order, ct.sort_order,
+                  p.target_cd, i.reg_info_id
+        <if test="limit != null">
+         LIMIT #{limit} OFFSET #{offset}
         </if>
-         ORDER BY i.field_cd, i.reg_no, rg.sort_order, st.sort_order, ct.sort_order, p.target_cd
     </select>
 
     <!-- ================= 레코드 ================= -->

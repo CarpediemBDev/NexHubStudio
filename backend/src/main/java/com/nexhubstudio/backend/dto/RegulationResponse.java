@@ -111,6 +111,67 @@ public class RegulationResponse {
     }
 
     /**
+     * POST /api/regulations/crosstab — 교차표 결과.
+     *
+     * 전개는 제품마다 행이 늘어나지만, 교차표는 제품을 열로 눕힌다.
+     * 열은 "이 페이지에 나온 레코드가 실제로 쓰는 제품" 만이다 —
+     * 전체 제품으로 열을 만들면 대부분 빈 칸인 표가 된다.
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Crosstab {
+        /** 제품 열. 순서가 곧 화면 컬럼 순서다 */
+        private List<CrosstabColumn> columns;
+        private List<CrosstabRow> rows;
+        /** 전체 행 수(가져온 행 수가 아니다) */
+        private int totalCount;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CrosstabColumn {
+        private String code;
+        private String name;
+        /** 제품군 코드. 화면이 제품군으로 열을 묶는 데 쓴다 */
+        private String parentCode;
+        private String parentName;
+    }
+
+    /** 행: 레코드 × 규제 × 규격 × 관리항목. 제품은 곱하지 않는다 */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CrosstabRow {
+        private Long regInfoId;
+        private String statusCd;
+        private String regNo;
+        private String title;
+        private String fieldCd;
+        private String fieldNm;
+        private String regulationCd;
+        private String regulationNm;
+        private String standardCd;
+        private String standardNm;
+        private String certCd;
+        private String certNm;
+        private String mandatoryYn;
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        private LocalDate effectiveDt;
+        private Integer versionNo;
+        /** 이 행의 레코드가 적용되는 제품 코드. 화면이 이 값으로 셀을 채운다 */
+        private List<String> productCds;
+        private String fieldKey;
+        private String recKey;
+        private String ruleKey;
+        private String stdKey;
+    }
+
+    /**
      * POST /api/regulations/expanded — 전개(행→열) 결과.
      * 행 한 줄 = (레코드 × 규제 × 규격 × 관리항목 × 제품) 조합 하나.
      */
@@ -124,9 +185,12 @@ public class RegulationResponse {
     }
 
     /**
-     * 전개 한 행. 코드만 내린다 —
-     * reg_info_item 에 ITEM_NM 이 없고 common_code 에도 규제 코드가 없어서
-     * 백엔드에는 코드→이름 출처가 아예 없다. 이름은 화면 코드테이블이 붙인다.
+     * 전개 한 행.
+     *
+     * 코드와 이름을 함께 내린다. 코드표가 common_code 에 적재된 뒤로 서버가 이름을
+     * 해석할 수 있게 됐다 — 그 전에는 코드만 내리고 화면이 자기 코드표로 붙였다.
+     * 코드도 계속 내리는 이유는 병합키·필터가 코드로 동작하고, 이름은 바뀔 수 있어서다.
+     *
      * 목업 핸들러(src/mocks/handlers/regulation.js 의 expandRecords)와 같은 모양이어야 한다.
      */
     @Data
@@ -139,21 +203,33 @@ public class RegulationResponse {
         private String regNo;
         private String title;
         private String fieldCd;
+        private String fieldNm;
 
         /** 정보관리항목 3단. 하위가 없는 단계는 빈 문자열 */
         private String regulationCd;
+        private String regulationNm;
         private String standardCd;
+        private String standardNm;
         private String certCd;
+        private String certNm;
         private String mandatoryYn;
 
         /** 제품 타겟. 미지정이면 빈 문자열 — 화면이 '전체' 로 읽는다 */
         private String productCd;
+        private String productNm;
 
-        /** 레코드 단위 멀티값. 전개 축이 아니라서 곱하지 않고 목록 그대로 */
+        /**
+         * 레코드 단위 멀티값. 전개 축이 아니라서 곱하지 않고 목록 그대로.
+         * 이어 붙이는 것(", " 연결)은 표시라서 화면이 한다.
+         */
         private List<String> divisionCds;
+        private List<String> divisionNms;
         private List<String> productGroupCds;
+        private List<String> productGroupNms;
         private List<String> regionCds;
+        private List<String> regionNms;
         private List<String> countryCds;
+        private List<String> countryNms;
 
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate effectiveDt;

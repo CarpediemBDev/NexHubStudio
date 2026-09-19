@@ -1,0 +1,1395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        교차표(제품=열) 확인용 데이터.
+
+        제품 타겟이 붙은 레코드가 2건뿐이라 교차표를 만들어도 열이 서너 개였다.
+        제품군별 모델을 늘리고(10 -> 40) 각 레코드에 자기 제품군의 모델을 배정한다.
+
+        손으로 쓰지 않는다 - src/data/regulationMock.js 의 productCodes 와
+        productAssignment 에서 생성한다. 목업 모드와 실제 모드가 같은 데이터를
+        보려면 배정 규칙이 한 곳에만 있어야 한다.
+    -->
+
+    <changeSet id="20260920-seed-product-codes-extra" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_TV_CRYSTAL"/>
+            <column name="code_name" value="크리스탈 UHD TV"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="100"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_TV_FRAME"/>
+            <column name="code_name" value="더 프레임"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="101"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_TV_SERIF"/>
+            <column name="code_name" value="더 세리프"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="102"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_TV_TERRACE"/>
+            <column name="code_name" value="더 테라스(옥외)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="103"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_TV_MICROLED"/>
+            <column name="code_name" value="마이크로 LED"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="104"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_MON24"/>
+            <column name="code_name" value="24&quot; 모니터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_MON' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="105"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_MON32"/>
+            <column name="code_name" value="32&quot; 모니터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_MON' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="106"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_MON_CURVE"/>
+            <column name="code_name" value="49&quot; 커브드 모니터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_MON' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="107"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_MON_GAME"/>
+            <column name="code_name" value="게이밍 모니터 240Hz"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_MON' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="108"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_MON_PRO"/>
+            <column name="code_name" value="프로 디자인 모니터 5K"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_MON' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="109"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_MON_PORT"/>
+            <column name="code_name" value="포터블 모니터 16&quot;"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_MON' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="110"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_SIGN43"/>
+            <column name="code_name" value="43&quot; 사이니지"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_SIGN' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="111"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_SIGN75"/>
+            <column name="code_name" value="75&quot; 사이니지"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_SIGN' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="112"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_SIGN_VIDEO"/>
+            <column name="code_name" value="비디오월 패널"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_SIGN' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="113"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_SIGN_OUT"/>
+            <column name="code_name" value="옥외 사이니지(고휘도)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_SIGN' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="114"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_SIGN_KIOSK"/>
+            <column name="code_name" value="키오스크 사이니지"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_SIGN' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="115"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PROJ_FHD"/>
+            <column name="code_name" value="FHD 프로젝터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PROJ' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="116"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PROJ_PORT"/>
+            <column name="code_name" value="포터블 빔프로젝터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PROJ' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="117"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PROJ_LASER"/>
+            <column name="code_name" value="레이저 초단초점"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PROJ' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="118"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PROJ_BIZ"/>
+            <column name="code_name" value="비즈니스 프로젝터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PROJ' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="119"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_REF400"/>
+            <column name="code_name" value="일반 냉장고 400L"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_REF' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="120"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_REF600"/>
+            <column name="code_name" value="양문형 600L"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_REF' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="121"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_REF_KIM"/>
+            <column name="code_name" value="김치냉장고"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_REF' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="122"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_REF_WINE"/>
+            <column name="code_name" value="와인셀러"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_REF' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="123"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_REF_MINI"/>
+            <column name="code_name" value="미니 냉장고 100L"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_REF' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="124"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_REF_FAM"/>
+            <column name="code_name" value="패밀리허브 냉장고"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_REF' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="125"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PH_FLAG"/>
+            <column name="code_name" value="플래그십 스마트폰"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PHONE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="126"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PH_MID"/>
+            <column name="code_name" value="보급형 스마트폰"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PHONE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="127"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PH_FLIP"/>
+            <column name="code_name" value="플립형 폴더블"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PHONE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="128"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PH_TAB"/>
+            <column name="code_name" value="태블릿"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PHONE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="129"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260920-seed-reg-product-targets" author="dev">
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="1"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="2"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="4"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="5"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_SERIF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_MON27"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="6"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_MON24"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_SERIF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="7"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_TERRACE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_SERIF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_TERRACE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="8"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_MICROLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_MON27"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_MON24"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_MON32"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_MON_CURVE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_MON_GAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_MON_PRO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_SIGN55"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="10"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_SIGN43"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="11"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="12"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="13"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="14"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="15"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_SERIF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_SERIF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="16"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_TERRACE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_SERIF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_TERRACE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="17"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_MICROLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="18"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="19"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="20"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="21"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="22"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="23"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="24"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_SERIF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_QLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_NEO"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_OLED"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_8K"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_LIFE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_CRYSTAL"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_FRAME"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_SERIF"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+        <insert tableName="reg_info_target">
+            <column name="reg_info_id" valueNumeric="25"/>
+            <column name="target_type" value="PRODUCT"/>
+            <column name="target_cd" value="P_TV_TERRACE"/>
+            <column name="level_no" valueNumeric="3"/>
+            <column name="exclude_yn" value="N"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

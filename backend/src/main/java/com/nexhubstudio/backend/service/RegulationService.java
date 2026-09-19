@@ -101,7 +101,19 @@ public class RegulationService {
     @Transactional(readOnly = true)
     public RegulationResponse.Expanded expand(RegulationRequest.Expand req) {
         List<Long> ids = req == null || req.getRegInfoIds() == null ? List.of() : req.getRegInfoIds();
-        List<RegExpandRow> rows = regulationMapper.findExpandedRows(ids);
+
+        // 페이지를 안 주면 전체를 준다 — 엑셀 내보내기처럼 한 번에 다 받아야 하는 경우가 있다
+        Integer size = req == null ? null : req.getSize();
+        Integer offset = null;
+        if (size != null && size > 0) {
+            int page = req.getPage() == null || req.getPage() < 1 ? 1 : req.getPage();
+            offset = (page - 1) * size;
+        } else {
+            size = null;
+        }
+
+        int totalCount = regulationMapper.countExpandedRows(ids);
+        List<RegExpandRow> rows = regulationMapper.findExpandedRows(ids, offset, size);
 
         Set<Long> recordIds = rows.stream().map(RegExpandRow::getRegInfoId).collect(Collectors.toSet());
         // 스냅샷이 이미 쓰는 조회를 재사용한다. 타겟이 커지면 레코드 범위 조회를 따로 둘 것
@@ -111,32 +123,51 @@ public class RegulationService {
                         Collectors.groupingBy(RegInfoTarget::getTargetType,
                                 Collectors.mapping(RegInfoTarget::getTargetCd, Collectors.toList()))));
 
+        // 코드→이름. 행마다 열 번 넘게 찾으므로 한 번만 접어 둔다
+        Map<String, Map<String, String>> names = nameIndex();
+
         List<RegulationResponse.ExpandedRow> out = rows.stream()
-                .map(r -> toExpandedRow(r, targetsByRecord.getOrDefault(r.getRegInfoId(), Map.of())))
+                .map(r -> toExpandedRow(r, targetsByRecord.getOrDefault(r.getRegInfoId(), Map.of()), names))
                 .toList();
 
+        // totalCount 는 가져온 행 수가 아니라 전체 건수다. 페이지네이션이 이 값으로 페이지를 센다
         return RegulationResponse.Expanded.builder()
                 .rows(out)
-                .totalCount(out.size())
+                .totalCount(totalCount)
                 .build();
     }
 
-    private RegulationResponse.ExpandedRow toExpandedRow(RegExpandRow r, Map<String, List<String>> targets) {
+    private RegulationResponse.ExpandedRow toExpandedRow(RegExpandRow r, Map<String, List<String>> targets,
+                                                        Map<String, Map<String, String>> names) {
+        List<String> divisionCds = targetCds(targets, "DIVISION");
+        List<String> productGroupCds = targetCds(targets, "PRODUCT_GROUP");
+        List<String> regionCds = targetCds(targets, "REGION");
+        List<String> countryCds = targetCds(targets, "COUNTRY");
+
         return RegulationResponse.ExpandedRow.builder()
                 .regInfoId(r.getRegInfoId())
                 .statusCd(r.getStatusCd())
                 .regNo(r.getRegNo())
                 .title(r.getTitle())
                 .fieldCd(r.getFieldCd())
+                .fieldNm(name(names, "FIELD", r.getFieldCd()))
                 .regulationCd(blankIfNull(r.getRegulationCd()))
+                .regulationNm(name(names, "REGULATION", r.getRegulationCd()))
                 .standardCd(blankIfNull(r.getStandardCd()))
+                .standardNm(name(names, "STANDARD", r.getStandardCd()))
                 .certCd(blankIfNull(r.getCertCd()))
+                .certNm(name(names, "CERT", r.getCertCd()))
                 .mandatoryYn(blankIfNull(r.getMandatoryYn()))
                 .productCd(blankIfNull(r.getProductCd()))
-                .divisionCds(targetCds(targets, "DIVISION"))
-                .productGroupCds(targetCds(targets, "PRODUCT_GROUP"))
-                .regionCds(targetCds(targets, "REGION"))
-                .countryCds(targetCds(targets, "COUNTRY"))
+                .productNm(name(names, "PRODUCT", r.getProductCd()))
+                .divisionCds(divisionCds)
+                .divisionNms(names(names, "DIVISION", divisionCds))
+                .productGroupCds(productGroupCds)
+                .productGroupNms(names(names, "PRODUCT_GROUP", productGroupCds))
+                .regionCds(regionCds)
+                .regionNms(names(names, "REGION", regionCds))
+                .countryCds(countryCds)
+                .countryNms(names(names, "COUNTRY", countryCds))
                 .effectiveDt(r.getEffectiveDt())
                 .versionNo(r.getVersionNo())
                 .fieldKey(r.getFieldKey())
@@ -144,6 +175,33 @@ public class RegulationService {
                 .ruleKey(r.getRuleKey())
                 .stdKey(r.getStdKey())
                 .build();
+    }
+
+    /** groupCode -> code -> 이름 */
+    private Map<String, Map<String, String>> nameIndex() {
+        Map<String, Map<String, String>> idx = new LinkedHashMap<>();
+        getCodes().forEach((group, list) -> {
+            Map<String, String> m = new LinkedHashMap<>();
+            list.forEach(rc -> m.put(rc.getCode(), rc.getName()));
+            idx.put(group, m);
+        });
+        return idx;
+    }
+
+    /**
+     * 코드 → 이름. 코드가 비어 있으면 빈 문자열이다 —
+     * LEFT JOIN 으로 하위가 없는 단계는 값 자체가 없으므로 "없음" 과 "이름을 못 찾음" 을 구분한다.
+     * 코드가 있는데 코드표에 없으면 코드를 그대로 보여준다(지워진 코드를 쓰는 과거 데이터).
+     */
+    private String name(Map<String, Map<String, String>> names, String groupCode, String code) {
+        if (isBlank(code)) {
+            return "";
+        }
+        return names.getOrDefault(groupCode, Map.of()).getOrDefault(code, code);
+    }
+
+    private List<String> names(Map<String, Map<String, String>> names, String groupCode, List<String> codes) {
+        return codes.stream().map(cd -> name(names, groupCode, cd)).toList();
     }
 
     /** 코드 오름차순. 목업 핸들러도 같은 순서라 두 모드의 화면 표시가 일치한다 */
@@ -278,6 +336,90 @@ public class RegulationService {
     public Map<String, List<RegCode>> getCodes() {
         return regulationMapper.findRegCodes().stream()
                 .collect(Collectors.groupingBy(RegCode::getGroupCode, LinkedHashMap::new, Collectors.toList()));
+    }
+
+    /* ============================================================ *
+     * 교차표 - 제품을 열로
+     * ============================================================ */
+
+    /**
+     * 교차표. 전개와 달리 제품을 곱하지 않고 열로 눕힌다.
+     *
+     * 열은 "이 페이지에 실제로 나온 레코드가 쓰는 제품" 만이다.
+     * 조회 결과 전체의 제품으로 열을 만들면 페이지마다 40개 열이 붙고 대부분 빈 칸이 된다.
+     * 페이지를 넘기면 열 구성이 바뀌는데, 그게 교차표가 좁게 유지되는 이유다.
+     */
+    @Transactional(readOnly = true)
+    public RegulationResponse.Crosstab crosstab(RegulationRequest.Expand req) {
+        List<Long> ids = req == null || req.getRegInfoIds() == null ? List.of() : req.getRegInfoIds();
+
+        Integer size = req == null ? null : req.getSize();
+        Integer offset = null;
+        if (size != null && size > 0) {
+            int page = req.getPage() == null || req.getPage() < 1 ? 1 : req.getPage();
+            offset = (page - 1) * size;
+        } else {
+            size = null;
+        }
+
+        int totalCount = regulationMapper.countCrosstabRows(ids);
+        List<RegExpandRow> rows = regulationMapper.findCrosstabRows(ids, offset, size);
+
+        // 열과 셀은 "이 페이지의 레코드" 기준이다
+        List<Long> pageIds = rows.stream()
+                .map(RegExpandRow::getRegInfoId)
+                .distinct()
+                .toList();
+
+        List<RegulationResponse.CrosstabColumn> columns = List.of();
+        Map<Long, List<String>> productsByRecord = Map.of();
+        if (!pageIds.isEmpty()) {
+            Map<String, Map<String, String>> names = nameIndex();
+            columns = regulationMapper.findCrosstabProducts(pageIds).stream()
+                    .map(rc -> RegulationResponse.CrosstabColumn.builder()
+                            .code(rc.getCode())
+                            .name(rc.getName())
+                            .parentCode(rc.getParentCode())
+                            .parentName(name(names, "PRODUCT_GROUP", rc.getParentCode()))
+                            .build())
+                    .toList();
+            productsByRecord = regulationMapper.findProductTargets(pageIds).stream()
+                    .collect(Collectors.groupingBy(RegInfoTarget::getRegInfoId, LinkedHashMap::new,
+                            Collectors.mapping(RegInfoTarget::getTargetCd, Collectors.toList())));
+        }
+
+        Map<String, Map<String, String>> names = nameIndex();
+        Map<Long, List<String>> byRecord = productsByRecord;
+        List<RegulationResponse.CrosstabRow> out = rows.stream()
+                .map(r -> RegulationResponse.CrosstabRow.builder()
+                        .regInfoId(r.getRegInfoId())
+                        .statusCd(r.getStatusCd())
+                        .regNo(r.getRegNo())
+                        .title(r.getTitle())
+                        .fieldCd(r.getFieldCd())
+                        .fieldNm(name(names, "FIELD", r.getFieldCd()))
+                        .regulationCd(blankIfNull(r.getRegulationCd()))
+                        .regulationNm(name(names, "REGULATION", r.getRegulationCd()))
+                        .standardCd(blankIfNull(r.getStandardCd()))
+                        .standardNm(name(names, "STANDARD", r.getStandardCd()))
+                        .certCd(blankIfNull(r.getCertCd()))
+                        .certNm(name(names, "CERT", r.getCertCd()))
+                        .mandatoryYn(blankIfNull(r.getMandatoryYn()))
+                        .effectiveDt(r.getEffectiveDt())
+                        .versionNo(r.getVersionNo())
+                        .productCds(byRecord.getOrDefault(r.getRegInfoId(), List.of()))
+                        .fieldKey(r.getFieldKey())
+                        .recKey(r.getRecKey())
+                        .ruleKey(r.getRuleKey())
+                        .stdKey(r.getStdKey())
+                        .build())
+                .toList();
+
+        return RegulationResponse.Crosstab.builder()
+                .columns(columns)
+                .rows(out)
+                .totalCount(totalCount)
+                .build();
     }
 
     /* ============================================================ *

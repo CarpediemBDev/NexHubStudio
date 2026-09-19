@@ -45,6 +45,9 @@ public class RegulationRequest {
          * 조회인데 POST 인 이유는 조회 결과가 수천 건이면 ID 목록이 URL 길이 제한을 넘기 때문이다.
          */
         private List<Long> regInfoIds;
+        /** 1부터. 없으면 전체(엑셀 내보내기처럼 한 번에 다 받아야 할 때) */
+        private Integer page;
+        private Integer size;
     }
 
     /** POST /api/regulations/conflict-histories — 등록 취소 시 충돌 이력만 남김 */

@@ -23,5 +23,8 @@
     <!-- DML: 샘플 데이터 (개발/테스트 환경만) -->
     <include file="db/changelog/dml/seed-sample-data.xml"/>
     <include file="db/changelog/dml/seed-regulation-sample.xml"/>
+    <!-- 교차표(제품=열) 확인용: 제품 모델 30개 + 레코드별 제품 배정.
+         reg_info_target 이 reg_info 를 FK 로 참조하므로 반드시 sample 뒤여야 한다 -->
+    <include file="db/changelog/dml/seed-regulation-products.xml"/>
 
 </databaseChangeLog>

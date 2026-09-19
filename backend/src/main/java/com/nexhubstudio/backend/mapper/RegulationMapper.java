@@ -33,12 +33,31 @@ public interface RegulationMapper {
     /** 규제 코드 전부(분야·권역>국가·사업부>제품군>제품·규제>규격>인증서). 상위는 코드로 풀어서 온다 */
     List<RegCode> findRegCodes();
 
+    /* ---------------- 교차표(제품 = 열) ---------------- */
+    /** 행: 레코드 × 규제 × 규격 × 관리항목 (제품은 곱하지 않는다) */
+    List<RegExpandRow> findCrosstabRows(@Param("regInfoIds") List<Long> regInfoIds,
+                                        @Param("offset") Integer offset,
+                                        @Param("limit") Integer limit);
+
+    int countCrosstabRows(@Param("regInfoIds") List<Long> regInfoIds);
+
+    /** 이 레코드들이 실제로 쓰는 제품만. 교차표의 열이 된다 */
+    List<RegCode> findCrosstabProducts(@Param("regInfoIds") List<Long> regInfoIds);
+
+    /** 레코드 → 제품 코드. 셀을 채울 때 쓴다 */
+    List<RegInfoTarget> findProductTargets(@Param("regInfoIds") List<Long> regInfoIds);
+
     /* ---------------- 전개(행→열) ---------------- */
     /**
      * 레코드 × 규제 × 규격 × 관리항목 × 제품 조합을 한 행씩.
      * regInfoIds 가 비어 있으면 전체.
      */
-    List<RegExpandRow> findExpandedRows(@Param("regInfoIds") List<Long> regInfoIds);
+    List<RegExpandRow> findExpandedRows(@Param("regInfoIds") List<Long> regInfoIds,
+                                       @Param("offset") Integer offset,
+                                       @Param("limit") Integer limit);
+
+    /** 전개 행 총 개수. 페이지를 잘라 오므로 전체 건수는 따로 센다 */
+    int countExpandedRows(@Param("regInfoIds") List<Long> regInfoIds);
 
     /* ---------------- 레코드 ---------------- */
     RegInfo findRecordById(Long regInfoId);

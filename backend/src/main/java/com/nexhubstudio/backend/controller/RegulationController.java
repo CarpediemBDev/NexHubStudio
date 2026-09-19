@@ -62,6 +62,16 @@ public class RegulationController {
     }
 
     /**
+     * 교차표 — 제품을 열로.
+     * 열은 그 페이지에 나온 레코드가 실제로 쓰는 제품만이다.
+     */
+    @PostMapping("/crosstab")
+    public ResponseEntity<ApiResponse<RegulationResponse.Crosstab>> crosstab(
+            @RequestBody RegulationRequest.Expand request) {
+        return ResponseEntity.ok(ApiResponse.success(regulationService.crosstab(request)));
+    }
+
+    /**
      * 저장 전 충돌 예측.
      * 화면이 입력하는 동안 보여주려고 부른다. 저장 시에는 서버가 같은 엔진으로 다시 판정하므로
      * 이 응답을 고쳐 보내도 저장되는 판정은 바뀌지 않는다.
