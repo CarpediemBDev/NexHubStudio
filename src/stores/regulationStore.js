@@ -56,18 +56,6 @@ export const useRegulationStore = defineStore('regulation', {
 
     attachmentsOf: (s) => (id) => s.attachments[id] || [],
 
-    /**
-     * 충돌 판정용 레코드 목록.
-     * RULE 축(규제>규격>인증서)은 적용대상이 아니라 정보관리항목에서 읽으므로
-     * 레코드에 items 를 붙여서 넘겨야 한다.
-     * 안 붙이면 기존 레코드의 RULE 범위가 전부 "전체"로 잡혀 오탐이 쏟아진다.
-     */
-    recordsWithItems: (s) =>
-      s.records.map((r) => ({
-        ...r,
-        items: s.items.filter((it) => it.regInfoId === r.regInfoId && it.itemCd)
-      })),
-
     conflictCountOf: (s) => (id) =>
       s.conflicts.filter((c) => c.newRegInfoId === id || c.existRegInfoId === id).length,
 
@@ -129,6 +117,15 @@ export const useRegulationStore = defineStore('regulation', {
     /* ---------------- 목록 컨텍스트 ---------------- */
     setListContext(ctx) {
       this.listContext = { ...this.listContext, ...ctx }
+    },
+
+    /* ---------------- 충돌 판정 ---------------- */
+    /**
+     * 저장 전 충돌 예측. 판정은 서버가 한다.
+     * 화면 상태라 state 에 두지 않고 부른 쪽에 돌려준다.
+     */
+    detectConflicts(payload) {
+      return regulationApi.detectConflicts(payload)
     },
 
     /* ---------------- 저장 ---------------- */

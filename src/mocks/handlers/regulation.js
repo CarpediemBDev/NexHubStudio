@@ -8,6 +8,7 @@
  * 동시에 이 파일이 백엔드에 요구할 스펙 문서 역할을 한다.
  */
 import { http, HttpResponse } from 'msw'
+import { detectConflicts } from '@/utils/regulationConflict'
 import {
   regInfoList,
   regHistList,
@@ -320,6 +321,24 @@ export default [
     const targets = ids.size ? db.records.filter((r) => ids.has(r.regInfoId)) : db.records
     const rows = expandRecords(targets)
     return ok({ rows, totalCount: rows.length })
+  }),
+
+  /**
+   * 저장 전 충돌 예측.
+   *
+   * 백엔드는 이 판정을 자바로 갖고 있다(RegulationConflictEngine).
+   * 목업은 같은 규칙의 원본인 regulationConflict.js 를 그대로 부른다 —
+   * 두 모드에서 화면이 같은 답을 받아야 하므로 규칙을 여기서 새로 쓰지 않는다.
+   */
+  http.post('/api/regulations/detect-conflicts', async ({ request }) => {
+    const { master = {}, targets = [], items = [] } = await request.json()
+    const newRecord = { ...master, targets, items: (items || []).filter((it) => it.itemCd) }
+    // 기존 레코드는 항목을 붙여서 넘겨야 RULE 축이 읽힌다
+    const existList = db.records.map((r) => ({
+      ...r,
+      items: db.items.filter((it) => it.regInfoId === r.regInfoId && it.itemCd)
+    }))
+    return ok(detectConflicts(newRecord, existList))
   }),
 
   // 저장 (신규 = INSERT, 기존 = 새 버전으로 UPDATE)
