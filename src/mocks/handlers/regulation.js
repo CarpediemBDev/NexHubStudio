@@ -314,6 +314,20 @@ export default [
   // 저장 (신규 = INSERT, 기존 = 새 버전으로 UPDATE)
   http.post('/api/regulations', async ({ request }) => {
     const { master, targets, items, attachFiles, changes, decisions = [] } = await request.json()
+
+    // 동일범위(SAME)는 중복 등록이라 저장 자체를 막는다. 기존 레코드를 개정(REPLACE)하거나
+    // 흡수(MERGE)하는 조치를 고른 경우에만 통과시킨다 — 그때는 결과가 한 건으로 남는다.
+    const sameUnresolved = decisions.filter(
+      (d) => d.conflictType === 'SAME' && !['REPLACE', 'MERGE', 'CANCEL'].includes(d.decisionCd)
+    )
+    if (sameUnresolved.length) {
+      return fail(
+        409,
+        `적용 범위가 완전히 같은 레코드가 ${sameUnresolved.length}건 있습니다. ` +
+          '중복 등록 대신 기존 레코드를 개정(REPLACE)하거나 흡수(MERGE)하세요.'
+      )
+    }
+
     const stamp = stampNow()
     const isNew = !master.regInfoId
 
@@ -386,6 +400,55 @@ export default [
   }),
 
   // 폐지 (물리 삭제 없이 상태만 EXPIRED)
+  /**
+   * 확정 — 상태를 ACTIVE 로.
+   *
+   * 화면이 먼저 충돌이력을 보여주고 동의를 받지만, 여기서도 한 번 더 막는다.
+   * 화면만 믿으면 API 를 직접 부르거나 다른 화면이 생겼을 때 규칙이 새어 나간다.
+   *
+   * 미해결 SAME(동일범위)이 남아 있으면 거절한다 — 같은 분야·같은 범위를
+   * 시행중인 레코드가 둘이 되면 현업이 어느 쪽을 따라야 할지 정해지지 않는다.
+   * PARENT/CHILD/OVERLAP 은 상하위·부분중복이라 공존할 수 있으므로 통과시킨다.
+   */
+  http.post('/api/regulations/:regInfoId/activate', ({ params }) => {
+    const id = Number(params.regInfoId)
+    const idx = db.records.findIndex((r) => r.regInfoId === id)
+    if (idx < 0) return fail(404, '레코드를 찾을 수 없습니다.')
+    const r = db.records[idx]
+
+    if (r.statusCd === 'EXPIRED') return fail(409, '폐지된 레코드는 확정할 수 없습니다.')
+    if (r.statusCd === 'ACTIVE') return fail(409, '이미 확정(시행중)인 레코드입니다.')
+
+    const blocking = db.conflicts.filter(
+      (c) =>
+        (c.newRegInfoId === id || c.existRegInfoId === id) &&
+        c.conflictType === 'SAME' &&
+        c.statusCd !== 'RESOLVED'
+    )
+    if (blocking.length) {
+      return fail(409, `동일범위(SAME) 충돌 ${blocking.length}건이 조치되지 않아 확정할 수 없습니다.`)
+    }
+
+    const next = { ...r, statusCd: 'ACTIVE', versionNo: r.versionNo + 1 }
+    fillSnapshot(r)
+    db.records.splice(idx, 1, next)
+    db.histories.push({
+      histId: Date.now(),
+      regInfoId: id,
+      versionNo: next.versionNo,
+      // CHANGE_TYPE 은 INSERT/UPDATE/DELETE/CONFLICT_RESOLVE 네 가지다.
+      // 확정은 상태만 바뀌는 수정이라 UPDATE 로 남기고 사유를 노트에 적는다
+      changeType: 'UPDATE',
+      changeNote: '충돌이력 확인 후 확정(ACTIVE)',
+      regId: 'me',
+      regDt: stampNow(),
+      snapshotJson: JSON.stringify(snapshotOf(next)),
+      masterChanged: true,
+      changedItemIds: []
+    })
+    return ok(next, '확정되었습니다.')
+  }),
+
   http.post('/api/regulations/:regInfoId/expire', ({ params }) => {
     const id = Number(params.regInfoId)
     const idx = db.records.findIndex((r) => r.regInfoId === id)

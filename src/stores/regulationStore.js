@@ -157,6 +157,17 @@ export const useRegulationStore = defineStore('regulation', {
       await this.refresh()
     },
 
+    /* ---------------- 확정 ---------------- */
+    /**
+     * 상태를 ACTIVE 로. 화면이 충돌이력을 보여주고 동의를 받은 뒤 부른다.
+     * 서버가 미해결 SAME 을 거절할 수 있으므로 호출부가 오류를 받아 처리해야 한다.
+     */
+    async activateRecord(regInfoId) {
+      const saved = await regulationApi.activate(regInfoId)
+      await this.refresh()
+      return saved
+    },
+
     /* ---------------- 폐지 ---------------- */
     async expireRecord(regInfoId) {
       await regulationApi.expire(regInfoId)

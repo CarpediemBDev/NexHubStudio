@@ -41,6 +41,14 @@ export const regulationApi = {
   expire: (regInfoId) => http.post(`/regulations/${regInfoId}/expire`).then((r) => r.data),
 
   /**
+   * 확정 — 상태를 ACTIVE 로.
+   * 화면이 충돌이력을 사용자에게 보여주고 동의를 받은 뒤 부른다.
+   * 서버는 미해결 SAME(동일범위) 충돌이 남아 있으면 거절한다 —
+   * 같은 범위를 시행중인 레코드가 둘이 되면 어느 쪽을 따라야 할지 정해지지 않는다.
+   */
+  activate: (regInfoId) => http.post(`/regulations/${regInfoId}/activate`).then((r) => r.data),
+
+  /**
    * 등록을 취소했지만 충돌 감지 사실은 남겨야 할 때.
    * 저장된 레코드가 없으므로 별도 엔드포인트로 분리한다.
    */

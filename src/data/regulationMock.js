@@ -907,6 +907,47 @@ export const regConflictList = [
     decideId: 'park.cert',
     decideDt: '2025-04-01 10:50',
     statusCd: 'RESOLVED'
+  },
+  /* ---- [테스트 데이터] 확정(ACTIVE 전환) 화면 확인용 ----
+   * 확정 버튼은 "이 레코드에 쌓인 충돌이력을 보여주고 동의를 받는" 장치인데,
+   * 시드의 충돌 3건이 전부 이미 ACTIVE 인 레코드에 걸려 있어서 볼 수가 없었다.
+   * 아직 ACTIVE 가 아닌 레코드에 두 가지 경우를 만들어 둔다.
+   *   9004 : 조치 끝난 CHILD  -> 확정 화면에 이력으로 보이고, 확정은 통과
+   *   9005 : 미조치 SAME      -> 확정이 막히는 경우 (같은 범위가 둘 다 시행중이 될 수 없다)
+   */
+  {
+    conflictId: 9004,
+    newRegNo: 'REG-2026-0033',
+    newRegInfoId: 17,
+    existRegNo: 'REG-2026-0001',
+    existRegInfoId: 1,
+    conflictType: 'CHILD',
+    conflictAxis: 'GEO',
+    newScopeTxt: '아시아 > 중국',
+    existScopeTxt: '아시아(권역 전체)',
+    decisionCd: 'KEEP_BOTH',
+    decisionNote: '중국 CCC 는 국가 고유 절차라 하위 특례로 유지',
+    detectDt: '2026-03-04 10:31',
+    decideId: 'park.cn',
+    decideDt: '2026-03-04 10:45',
+    statusCd: 'RESOLVED'
+  },
+  {
+    conflictId: 9005,
+    newRegNo: 'REG-2026-0038',
+    newRegInfoId: 22,
+    existRegNo: 'REG-2026-0037',
+    existRegInfoId: 21,
+    conflictType: 'SAME',
+    conflictAxis: 'GEO',
+    newScopeTxt: '중남미 > 브라질, 아르헨티나',
+    existScopeTxt: '중남미 > 브라질, 아르헨티나',
+    decisionCd: null,
+    decisionNote: '',
+    detectDt: '2026-03-11 14:02',
+    decideId: null,
+    decideDt: null,
+    statusCd: 'DETECTED'
   }
 ]
 
