@@ -28,6 +28,14 @@ public class RegulationRequest {
         private List<ConflictDecision> decisions;
     }
 
+    /** POST /api/regulations/{id}/status — 상태 변경 */
+    @Data
+    @NoArgsConstructor
+    public static class ChangeStatus {
+        /** 목적지 상태 (ACTIVE / REVIEW / EXPIRED) */
+        private String statusCd;
+    }
+
     /** POST /api/regulations/expanded — 전개(행→열) 조회 */
     @Data
     @NoArgsConstructor

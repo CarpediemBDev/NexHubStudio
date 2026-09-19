@@ -125,10 +125,10 @@
          WHERE reg_info_id = #{regInfoId}
     </update>
 
-    <!-- 확정: 상태만 ACTIVE 로 + version_no 1 증가 (폐지와 같은 모양) -->
-    <update id="activateRecord">
+    <!-- 상태 변경: 상태만 바꾸고 version_no 1 증가. 확정·재검토·폐지·복원이 모두 이 하나를 쓴다 -->
+    <update id="updateStatus">
         UPDATE reg_info
-           SET status_cd  = 'ACTIVE',
+           SET status_cd  = #{statusCd},
                version_no = version_no + 1,
                updated_by = #{userId},
                updated_at = CURRENT_TIMESTAMP
@@ -147,15 +147,6 @@
            AND status_cd &lt;&gt; 'RESOLVED'
            AND (new_reg_info_id = #{regInfoId} OR exist_reg_info_id = #{regInfoId})
     </select>
-
-    <update id="expireRecord">
-        UPDATE reg_info
-           SET status_cd  = 'EXPIRED',
-               version_no = version_no + 1,
-               updated_by = #{userId},
-               updated_at = CURRENT_TIMESTAMP
-         WHERE reg_info_id = #{regInfoId}
-    </update>
 
     <!-- ================= 적용 대상 ================= -->
 

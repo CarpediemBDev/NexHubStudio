@@ -43,11 +43,10 @@ public interface RegulationMapper {
     /** 기본정보 갱신 + version_no 1 증가 */
     int updateRecordAsNewVersion(RegInfo record);
 
-    /** 상태만 EXPIRED 로 + version_no 1 증가 */
-    int expireRecord(@Param("regInfoId") Long regInfoId, @Param("userId") String userId);
-
-    /** 상태만 ACTIVE 로 + version_no 1 증가 (확정) */
-    int activateRecord(@Param("regInfoId") Long regInfoId, @Param("userId") String userId);
+    /** 상태만 바꾸고 version_no 1 증가. 확정·재검토·폐지·복원이 모두 이 하나를 쓴다 */
+    int updateStatus(@Param("regInfoId") Long regInfoId,
+                     @Param("statusCd") String statusCd,
+                     @Param("userId") String userId);
 
     /** 확정을 막는 미조치 동일범위(SAME) 충돌 건수 */
     int countUnresolvedSameConflicts(Long regInfoId);

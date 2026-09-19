@@ -242,69 +242,58 @@ public class RegulationService {
     }
 
     /* ============================================================ *
-     * 폐지 — 물리 삭제 없이 EXPIRED + 새 버전
-     * ============================================================ */
-
-    @Transactional
-    public RegulationResponse.Record expire(Long regInfoId, String userId) {
-        RegInfo before = requireRecord(regInfoId);
-        if ("EXPIRED".equals(before.getStatusCd())) {
-            throw new BusinessException(ErrorCode.REGULATION_ALREADY_EXPIRED);
-        }
-        fillSnapshot(before);
-        regulationMapper.expireRecord(regInfoId, userId);
-        RegInfo after = requireRecord(regInfoId);
-
-        regulationMapper.insertHistory(RegInfoHist.builder()
-                .regInfoId(regInfoId)
-                .versionNo(after.getVersionNo())
-                .changeType("DELETE")
-                .changeNote("사용자 요청으로 폐지")
-                .snapshotJson(snapshotOf(after))
-                .masterChangedYn("Y")
-                .changedItemIds("[]")
-                .regId(userId)
-                .build());
-
-        return toRecord(after, targetsOf(regInfoId), countAttachments(after.getAttachGroupId()));
-    }
-
-    /* ============================================================ *
-     * 확정 - 상태를 ACTIVE 로
+     * 상태 변경 - 확정 / 재검토 / 폐지 / 복원
      * ============================================================ */
 
     /**
-     * 확정. 화면이 먼저 충돌이력을 보여주고 동의를 받지만 여기서도 한 번 더 막는다 —
-     * 화면만 믿으면 API 를 직접 부르거나 다른 화면이 생겼을 때 규칙이 새어 나간다.
+     * 갈 수 있는 곳. 프론트(regulationMock.js 의 statusTransitions)와 같은 표여야 한다.
+     * 작성중(DRAFT)은 두지 않는다 — 신규 등록의 기본값이라 모든 레코드가 거기서 태어나는데,
+     * 저장 시점에 규제번호가 채번되므로 버려진 작성중 레코드마다 번호가 하나씩 소각된다.
+     */
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+            "REVIEW", Set.of("ACTIVE", "EXPIRED"),
+            "ACTIVE", Set.of("REVIEW", "EXPIRED"),
+            "EXPIRED", Set.of("REVIEW"));
+
+    /** 상태 변경 이력에 남기는 사유. 왜 바뀌었는지가 이력에서 읽혀야 한다 */
+    private static final Map<String, String> STATUS_CHANGE_NOTE = Map.of(
+            "ACTIVE", "충돌이력 확인 후 확정(시행중)",
+            "REVIEW", "시행을 멈추고 검토중으로",
+            "EXPIRED", "사용자 요청으로 폐지");
+
+    /**
+     * 상태 변경. 전이마다 엔드포인트를 두지 않고 목적지만 받는다 —
+     * 전이가 늘 때마다 API 와 화면이 같이 늘고 "어디서 어디로" 규칙이 흩어진다.
      *
-     * 막는 것은 미조치 동일범위(SAME) 뿐이다. 같은 분야·같은 범위를 시행중인 레코드가
-     * 둘이 되면 현업이 어느 쪽을 따라야 할지 정해지지 않는다.
-     * PARENT/CHILD/OVERLAP 은 상하위·부분중복이라 공존할 수 있으므로 통과시킨다.
+     * 확정만 추가 검사가 있다. 미조치 동일범위(SAME)가 남아 있으면 막는다:
+     * 같은 분야·같은 범위를 시행중인 레코드가 둘이 되면 현업이 어느 쪽을 따라야 할지
+     * 정해지지 않는다. PARENT/CHILD/OVERLAP 은 상하위·부분중복이라 공존할 수 있다.
+     *
+     * 화면이 이미 막고 있어도 여기서 또 막는다 — 화면만 믿으면 API 를 직접 부르거나
+     * 다른 화면이 생겼을 때 규칙이 새어 나간다.
      */
     @Transactional
-    public RegulationResponse.Record activate(Long regInfoId, String userId) {
+    public RegulationResponse.Record changeStatus(Long regInfoId, String toStatusCd, String userId) {
         RegInfo before = requireRecord(regInfoId);
-        if ("EXPIRED".equals(before.getStatusCd())) {
-            throw new BusinessException(ErrorCode.REGULATION_EXPIRED_CANNOT_ACTIVATE);
+        Set<String> allowed = STATUS_TRANSITIONS.getOrDefault(before.getStatusCd(), Set.of());
+        if (toStatusCd == null || !allowed.contains(toStatusCd)) {
+            throw new BusinessException(ErrorCode.REGULATION_STATUS_TRANSITION_INVALID);
         }
-        if ("ACTIVE".equals(before.getStatusCd())) {
-            throw new BusinessException(ErrorCode.REGULATION_ALREADY_ACTIVE);
-        }
-        if (regulationMapper.countUnresolvedSameConflicts(regInfoId) > 0) {
+        if ("ACTIVE".equals(toStatusCd) && regulationMapper.countUnresolvedSameConflicts(regInfoId) > 0) {
             throw new BusinessException(ErrorCode.REGULATION_SAME_CONFLICT_UNRESOLVED);
         }
 
         fillSnapshot(before);
-        regulationMapper.activateRecord(regInfoId, userId);
+        regulationMapper.updateStatus(regInfoId, toStatusCd, userId);
         RegInfo after = requireRecord(regInfoId);
 
         regulationMapper.insertHistory(RegInfoHist.builder()
                 .regInfoId(regInfoId)
                 .versionNo(after.getVersionNo())
                 // CHANGE_TYPE 은 INSERT/UPDATE/DELETE/CONFLICT_RESOLVE 네 가지다.
-                // 확정은 상태만 바뀌는 수정이라 UPDATE 로 남기고 사유를 노트에 적는다
-                .changeType("UPDATE")
-                .changeNote("충돌이력 확인 후 확정(ACTIVE)")
+                // 폐지만 DELETE 로 남기고 나머지 상태 변경은 UPDATE + 사유로 둔다
+                .changeType("EXPIRED".equals(toStatusCd) ? "DELETE" : "UPDATE")
+                .changeNote(STATUS_CHANGE_NOTE.getOrDefault(toStatusCd, "상태 변경"))
                 .snapshotJson(snapshotOf(after))
                 .masterChangedYn("Y")
                 .changedItemIds("[]")
@@ -484,7 +473,8 @@ public class RegulationService {
                     continue;
                 }
                 fillSnapshot(exist);
-                regulationMapper.expireRecord(existId, userId);
+                // 충돌 MERGE = 기존 레코드를 흡수하고 폐지. 상태 변경은 updateStatus 하나로 모았다
+                regulationMapper.updateStatus(existId, "EXPIRED", userId);
                 RegInfo merged = requireRecord(existId);
                 regulationMapper.insertHistory(RegInfoHist.builder()
                         .regInfoId(existId)

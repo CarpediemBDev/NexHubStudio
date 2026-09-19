@@ -50,24 +50,16 @@ public class RegulationController {
     }
 
     /**
-     * 폐지 (물리 삭제 없이 EXPIRED)
+     * 상태 변경 — 확정(ACTIVE) · 재검토(REVIEW) · 폐지(EXPIRED) · 복원.
+     * 전이마다 엔드포인트를 두지 않고 목적지만 받는다. 갈 수 있는지는 서비스의 전이표가 정한다.
      */
-    @PostMapping("/{regInfoId}/expire")
-    public ResponseEntity<ApiResponse<RegulationResponse.Record>> expire(
+    @PostMapping("/{regInfoId}/status")
+    public ResponseEntity<ApiResponse<RegulationResponse.Record>> changeStatus(
             @PathVariable Long regInfoId,
+            @RequestBody RegulationRequest.ChangeStatus request,
             @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String userId) {
-        return ResponseEntity.ok(ApiResponse.success("폐지 처리되었습니다.", regulationService.expire(regInfoId, userId)));
-    }
-
-    /**
-     * 확정 (상태를 ACTIVE 로).
-     * 화면이 충돌이력을 보여주고 동의를 받은 뒤 부른다.
-     */
-    @PostMapping("/{regInfoId}/activate")
-    public ResponseEntity<ApiResponse<RegulationResponse.Record>> activate(
-            @PathVariable Long regInfoId,
-            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String userId) {
-        return ResponseEntity.ok(ApiResponse.success("확정되었습니다.", regulationService.activate(regInfoId, userId)));
+        return ResponseEntity.ok(ApiResponse.success("상태가 변경되었습니다.",
+                regulationService.changeStatus(regInfoId, request.getStatusCd(), userId)));
     }
 
     /**
