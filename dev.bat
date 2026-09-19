@@ -22,6 +22,12 @@ REM  "api" exists because backend\ lives only on feature/fullstack-migration.
 REM  On master you can still point the frontend at a backend started from that
 REM  worktree - the /api proxy is on both branches.
 REM
+REM  Backend lookup order:
+REM    1) backend\                          (this worktree = fullstack branch)
+REM    2) ..\NexHubStudio-fullstack\backend  (sibling worktree, usual layout)
+REM  So running dev.bat from the master folder still brings the backend up.
+REM  Neither found -> frontend only, MOCK.
+REM
 REM  clean removes only regenerable, gitignored output:
 REM    backend\build    Gradle compile output
 REM    backend\.gradle  Gradle build cache
@@ -29,10 +35,6 @@ REM    backend\data     H2 file DB   <- manually entered rows are lost
 REM    backend\logs     Spring Boot logs
 REM  Source under backend\src is tracked by git and is never touched.
 REM  Next start is slower (full compile + Liquibase re-seed).
-REM
-REM  NOTE: backend/ exists ONLY on the feature/fullstack-migration branch.
-REM        On master the frontend runs, but there is no /api proxy,
-REM        so API calls fall through to the SPA (index.html).
 REM
 REM  JDK lookup order:
 REM    1) %JAVA_HOME%
@@ -49,6 +51,8 @@ set "MODE=%~1"
 if "%MODE%"=="" set "MODE=all"
 
 set "DEFAULT_JDK=D:\dev\01.OpenJDK\jdk-21.0.4+7"
+REM Sibling worktree that holds backend\ when this folder is on master.
+set "SIBLING_BACK=%~dp0..\NexHubStudio-fullstack\backend"
 set "FRONT_URL=http://localhost:5173"
 set "BACK_URL=https://localhost:8443"
 set "STARTED_BACK="
@@ -144,18 +148,33 @@ goto :eof
 
 REM ------------------------------------------------------------- backend ---
 :back
-if exist "backend\gradlew.bat" goto have_backend
+set "BACK_ROOT=%~dp0backend"
+if exist "!BACK_ROOT!\gradlew.bat" goto have_backend
+
+REM Not on this worktree - try the sibling one. backend\ lives only on
+REM feature/fullstack-migration, and the usual layout keeps that branch checked
+REM out next to this folder, so running dev.bat from master still works.
+REM %%~fI resolves the ".." so the printed path is readable.
+for %%I in ("!SIBLING_BACK!") do set "BACK_ROOT=%%~fI"
+if exist "!BACK_ROOT!\gradlew.bat" goto have_sibling
+
+set "BACK_ROOT="
 if /i "!MODE!"=="back" goto no_backend
-REM backend\ lives only on feature/fullstack-migration. Without it there is
-REM nothing for dev:api to talk to, so fall back to mock instead of leaving the
-REM frontend pointed at a dead proxy (every /api call would 500).
+REM Nothing to talk to, so fall back to mock instead of leaving the frontend
+REM pointed at a dead proxy (every /api call would 500).
 set "FRONT_SCRIPT=dev"
 REM Do not use "!" here: EnableDelayedExpansion consumes it even when escaped.
-echo  [*] backend\ not found - starting frontend only, MOCK data.
+echo  [*] no backend here or in the sibling worktree - frontend only, MOCK data.
+echo      looked in: %~dp0backend
+echo            and: %~dp0..\NexHubStudio-fullstack\backend
 echo      Need the backend?  git switch feature/fullstack-migration
-echo      Backend already running elsewhere?  dev.bat api
 echo.
 goto front
+
+:have_sibling
+echo   backend : sibling worktree
+echo             !BACK_ROOT!
+goto have_backend
 
 :no_backend
 echo  [X] backend\ not found.
@@ -177,7 +196,7 @@ exit /b 1
 for /f "tokens=3" %%v in ('""!JDK!\bin\java.exe" -version 2>&1 | findstr /i "version""') do set "JV=%%~v"
 echo   JDK    : !JDK!  ^(!JV!^)
 echo   backend  starting -^> !BACK_URL!
-start "NexHub Backend" cmd /k ""%~f0" _child_back "!JDK!""
+start "NexHub Backend" cmd /k ""%~f0" _child_back "!JDK!" "!BACK_ROOT!""
 set "STARTED_BACK=1"
 
 if /i "!MODE!"=="back" goto done
@@ -197,8 +216,11 @@ echo.
 echo  ----------------------------------------------------------
 if /i not "!MODE!"=="back"  echo   frontend : !FRONT_URL!
 if defined STARTED_BACK     echo   backend  : !BACK_URL!    health: !BACK_URL!/actuator/health
+REM Only meaningful when a frontend was started - back mode has none.
+if /i "!MODE!"=="back" goto summary_done
 if /i "!FRONT_SCRIPT!"=="dev:api" echo   data     : REAL   (backend query, H2 file db)
 if /i "!FRONT_SCRIPT!"=="dev"     echo   data     : MOCK   (MSW in the browser, no backend)
+:summary_done
 echo.
 echo   Each server runs in its own window. Close it or press Ctrl+C to stop.
 echo.
@@ -216,14 +238,16 @@ REM  breaks on quoted paths and on a PATH containing special characters.
 
 :child_back
 set "JDK=%~2"
+set "BACK_ROOT=%~3"
+if "%BACK_ROOT%"=="" set "BACK_ROOT=%~dp0backend"
 set "JAVA_HOME=%JDK%"
 set "PATH=%JDK%\bin;%PATH%"
-cd /d "%~dp0backend"
+cd /d "%BACK_ROOT%"
 echo  [backend] JAVA_HOME=%JAVA_HOME%
 echo  [backend] cwd=%CD%
 REM Call with an explicit path: cmd does not search the current directory when
 REM NoDefaultCurrentDirectoryInExePath is set (happens when launched via PowerShell).
-call "%~dp0backend\gradlew.bat" bootRun --console=plain
+call "%BACK_ROOT%\gradlew.bat" bootRun --console=plain
 echo.
 echo  [backend] process ended (exit %ERRORLEVEL%)
 goto :eof
