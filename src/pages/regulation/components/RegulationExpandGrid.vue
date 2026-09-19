@@ -6,7 +6,7 @@
       height="max(700px, calc(100vh - 400px))"
       :fields="gridFields"
       :columns="gridColumns"
-      :rows="pagedRows"
+      :rows="namedRows"
       :editable="false"
       :checkable="false"
       :state-bar-visible="false"
@@ -24,12 +24,12 @@
           <i class="bi bi-arrow-repeat me-1"></i>전개 중…
         </span>
         <span v-else class="b2b-text-xs text-theme-secondary me-2">
-          레코드 {{ regInfoIds.length }}건 → 전개 {{ rows.length }}행
+          레코드 {{ regInfoIds.length }}건 → 전개 {{ totalCount }}행
         </span>
         <PageSizeSelect v-model="pageSize" size="sm" />
       </template>
     </RealGridCommonJs>
-    <Pagination v-model:page="page" v-model:page-size="pageSize" :total="rows.length" :show-size-select="false" />
+    <Pagination v-model:page="page" v-model:page-size="pageSize" :total="totalCount" :show-size-select="false" />
   </div>
 </template>
 
@@ -47,17 +47,14 @@
  *   행   = 그 조합 1건
  * 같은 값이 반복되는 앞쪽 축은 mergeRule 로 세로 병합해서 계층처럼 묶어 보여준다.
  *
- * 펼치기(JOIN)와 정렬·병합키는 서버가 만든다(src/mocks/handlers/regulation.js 의 expandRecords).
- * 서버가 내리는 것은 코드뿐이다 — reg_info_item 에 ITEM_NM 이 없고 common_code 에도
- * 규제 코드가 없어서 백엔드에는 코드→이름 출처가 아예 없다.
- * 이름은 코드테이블(regulationMock.js)을 쥔 화면이 codeName() 으로 붙인다.
+ * 펼치기(JOIN)와 정렬·병합키, 코드→이름까지 서버가 만든다.
+ * 화면에 남은 것은 표시 규칙뿐이다 — 여러 값을 ", " 로 잇고, 빈 값을 '전체' 로 읽는 것.
  */
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import Pagination from '@/components/Pagination.vue'
 import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import { escapeHtml } from '@/utils/stringUtil.js'
 import { statusCodes } from '@/data/regulationMock'
-import { codeName } from '@/utils/regulationConflict'
 import { useRegulationStore } from '@/stores/regulationStore'
 
 const STATUS_BADGE = {
@@ -106,7 +103,10 @@ export default {
     return {
       store: useRegulationStore(),
       rows: [],
+      totalCount: 0,
       loading: false,
+      // 페이지 요청 순번. 늦게 온 응답이 최신 페이지를 덮어쓰는 것을 막는다
+      loadSeq: 0,
       page: 1,
       pageSize: 50,
       gridView: null,
@@ -218,53 +218,72 @@ export default {
       ]
     },
     /**
-     * 서버가 준 코드 행에 이름을 입힌다.
-     * 병합키는 코드로 만들어져 있으므로 이름을 붙여도 병합 단위는 그대로다.
+     * 서버가 준 행을 그리드 컬럼 모양으로만 다듬는다.
+     * 이름은 서버가 붙여서 온다 — 코드표가 DB 에 적재된 뒤로 화면이 코드를 해석할 일이 없다.
+     * 여기 남은 것은 표시 규칙뿐이다: 여러 값을 ", " 로 잇는 것과, 빈 값을 '전체' 로 읽는 것.
      */
     namedRows() {
-      const names = (type, cds) => (cds || []).map((cd) => codeName(type, cd))
-      return this.rows.map((r) => ({
-        ...r,
-        fieldNm: codeName('FIELD', r.fieldCd),
-        regulationNm: r.regulationCd ? codeName('REGULATION', r.regulationCd) : '',
-        standardNm: r.standardCd ? codeName('STANDARD', r.standardCd) : '',
-        certNm: r.certCd ? codeName('CERT', r.certCd) : '',
-        divisionTxt: names('DIVISION', r.divisionCds).join(', '),
-        productGroupTxt: names('PRODUCT_GROUP', r.productGroupCds).join(', '),
-        // 제품 미지정은 서버가 빈 코드로 준다(LEFT JOIN). 화면에서만 '전체' 로 읽는다
-        productNm: r.productCd ? codeName('PRODUCT', r.productCd) : '전체',
-        regionTxt: names('REGION', r.regionCds).join(', '),
-        countryTxt: names('COUNTRY', r.countryCds).join(', ') || '전체',
-        countryCnt: (r.countryCds || []).length
-      }))
+      return this.toGridRows(this.rows)
     },
-    pagedRows() {
-      const offset = (this.page - 1) * this.pageSize
-      return this.namedRows.slice(offset, offset + this.pageSize)
+    /** 현재 페이지의 첫 행이 전체에서 몇 번째인지. 행 번호를 전체 기준으로 잇는 데 쓴다 */
+    pageOffset() {
+      return (this.page - 1) * this.pageSize
     }
   },
   watch: {
+    // 조회 조건이 바뀌면 1페이지부터 다시
     regInfoIds: {
       immediate: true,
       handler() {
-        this.reload()
+        if (this.page === 1) this.reload()
+        else this.page = 1 // page 워처가 reload 한다
       }
     },
-    rows() {
-      this.page = 1
+    page() {
+      this.reload()
     },
-    page(p) {
-      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: (p - 1) * this.pageSize })
+    pageSize() {
+      if (this.page === 1) this.reload()
+      else this.page = 1
+    },
+    // 행 번호를 페이지를 넘어 전체 기준(51, 52…)으로 잇는다
+    pageOffset(offset) {
+      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: offset })
     }
   },
   methods: {
+    /**
+     * 서버에서 현재 페이지만 받아온다.
+     * 늦게 온 응답이 최신 페이지를 덮어쓰지 않도록 순번을 붙인다 —
+     * 페이지를 빠르게 넘기면 요청이 겹치고 먼저 보낸 쪽이 나중에 도착할 수 있다.
+     */
+    /**
+     * 서버 행 → 그리드 컬럼 모양.
+     * 이름은 서버가 붙여서 온다. 여기 남은 것은 표시 규칙뿐이다 —
+     * 여러 값을 ", " 로 잇는 것과, 빈 값을 '전체'(제한 없음)로 읽는 것.
+     * 엑셀 내보내기도 같은 변환을 써야 하므로 computed 가 아니라 메서드다.
+     */
+    toGridRows(rows) {
+      return (rows || []).map((r) => ({
+        ...r,
+        divisionTxt: (r.divisionNms || []).join(', '),
+        productGroupTxt: (r.productGroupNms || []).join(', '),
+        productNm: r.productNm || '전체',
+        regionTxt: (r.regionNms || []).join(', '),
+        countryTxt: (r.countryNms || []).join(', ') || '전체',
+        countryCnt: (r.countryCds || []).length
+      }))
+    },
     async reload() {
+      const seq = ++this.loadSeq
       this.loading = true
       try {
-        const res = await this.store.fetchExpanded(this.regInfoIds)
+        const res = await this.store.fetchExpanded(this.regInfoIds, { page: this.page, size: this.pageSize })
+        if (seq !== this.loadSeq) return
         this.rows = (res && res.rows) || []
+        this.totalCount = (res && res.totalCount) || 0
       } finally {
-        this.loading = false
+        if (seq === this.loadSeq) this.loading = false
       }
     },
     onGridInit({ gridView, dataProvider }) {
@@ -290,12 +309,16 @@ export default {
         }
       }
     },
-    /** 엑셀은 보고 있는 페이지가 아니라 전개 결과 전체를 내보낸다 */
-    exportExcel() {
+    /**
+     * 엑셀은 보고 있는 페이지가 아니라 전개 결과 전체를 내보낸다.
+     * 이제 그리드에는 현재 페이지만 있으므로 전체를 따로 받아 와야 한다(size 없이 부르면 전부 온다).
+     */
+    async exportExcel() {
       if (!this.gridView) return
       const pageRows = this.dataProvider.getJsonRows()
       const restore = () => this.dataProvider.setRows(pageRows)
-      this.dataProvider.setRows(this.rows)
+      const all = await this.store.fetchExpanded(this.regInfoIds)
+      this.dataProvider.setRows(this.toGridRows((all && all.rows) || []))
       try {
         this.gridView.exportGrid({ type: 'excel', target: 'local', fileName: '규제정보_전개.xlsx', done: restore })
       } catch (e) {

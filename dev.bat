@@ -6,6 +6,7 @@ REM  NexHubStudio dev launcher
 REM
 REM    dev.bat          backend + frontend, REAL data  (frontend calls the backend)
 REM    dev.bat mock     frontend only,  MOCK data  (no backend needed)
+REM    dev.bat api      frontend only,  REAL data  (backend already running elsewhere)
 REM    dev.bat front    same as mock  (kept for habit)
 REM    dev.bat back     backend only   -> https://localhost:8443
 REM    dev.bat clean    remove generated backend artifacts (no server start)
@@ -16,6 +17,10 @@ REM    npm run dev:api  -> --mode api  -> VITE_USE_MOCK=false -> vite proxies
 REM                        /api to https://localhost:8443
 REM  Starting the backend and then running the frontend in mock mode would
 REM  leave the backend idle, so the combined launch uses dev:api.
+REM
+REM  "api" exists because backend\ lives only on feature/fullstack-migration.
+REM  On master you can still point the frontend at a backend started from that
+REM  worktree - the /api proxy is on both branches.
 REM
 REM  clean removes only regenerable, gitignored output:
 REM    backend\build    Gradle compile output
@@ -64,13 +69,15 @@ REM which npm script the frontend window runs. Only the combined launch
 REM (no argument) has a backend to talk to, so only it uses dev:api.
 set "FRONT_SCRIPT=dev"
 if /i "!MODE!"=="all" set "FRONT_SCRIPT=dev:api"
+if /i "!MODE!"=="api" set "FRONT_SCRIPT=dev:api"
 
 if /i "!MODE!"=="front" goto front
 if /i "!MODE!"=="mock"  goto front
+if /i "!MODE!"=="api"   goto front
 if /i "!MODE!"=="back"  goto back
 if /i "!MODE!"=="clean" goto clean
 if /i "!MODE!"=="all"   goto back
-echo  [X] unknown argument "!MODE!"   (use: mock ^| front ^| back ^| clean ^| no argument)
+echo  [X] unknown argument "!MODE!"   (use: mock ^| api ^| front ^| back ^| clean ^| no argument)
 endlocal
 exit /b 1
 
@@ -139,9 +146,14 @@ REM ------------------------------------------------------------- backend ---
 :back
 if exist "backend\gradlew.bat" goto have_backend
 if /i "!MODE!"=="back" goto no_backend
+REM backend\ lives only on feature/fullstack-migration. Without it there is
+REM nothing for dev:api to talk to, so fall back to mock instead of leaving the
+REM frontend pointed at a dead proxy (every /api call would 500).
+set "FRONT_SCRIPT=dev"
 REM Do not use "!" here: EnableDelayedExpansion consumes it even when escaped.
-echo  [*] backend\ not found - starting frontend only.
+echo  [*] backend\ not found - starting frontend only, MOCK data.
 echo      Need the backend?  git switch feature/fullstack-migration
+echo      Backend already running elsewhere?  dev.bat api
 echo.
 goto front
 

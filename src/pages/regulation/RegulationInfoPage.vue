@@ -228,10 +228,20 @@
 
         <!-- 전개 탭. 조회·국가칩까지 걸린 결과(listRowIds)만 서버가 펼친다 -->
         <RegulationExpandGrid
-          v-else
+          v-else-if="viewMode === 'expand'"
           ref="expandGrid"
           :reg-info-ids="listRowIds"
           :selected-reg-info-id="selectedRegInfoId"
+          :toast="gridToast"
+          @update:selected-reg-info-id="selectedRegInfoId = $event"
+          @open="openDetailOf(selectedRegInfoId)"
+        />
+
+        <!-- 교차표 탭. 제품이 열이 되고 열 구성은 페이지마다 달라진다 -->
+        <RegulationCrosstabGrid
+          v-else
+          ref="crosstabGrid"
+          :reg-info-ids="listRowIds"
           :toast="gridToast"
           @update:selected-reg-info-id="selectedRegInfoId = $event"
           @open="openDetailOf(selectedRegInfoId)"
@@ -344,6 +354,7 @@ import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import B2bDatePicker from '@/components/common/B2bDatePicker.vue'
 import CountryFilterBar from './components/CountryFilterBar.vue'
 import RegulationExpandGrid from './components/RegulationExpandGrid.vue'
+import RegulationCrosstabGrid from './components/RegulationCrosstabGrid.vue'
 import { showToast } from '@/utils/toastUtil.js'
 import { escapeHtml } from '@/utils/stringUtil.js'
 import {
@@ -378,7 +389,8 @@ const NO_COUNTRY = '__NONE__'
  */
 const VIEW_TABS = [
   { key: 'flat', label: '평면', icon: 'bi-list-ul', desc: '레코드 1건 = 1행. 규제·규격·관리항목과 제품은 한 셀에 모아 보여준다' },
-  { key: 'expand', label: '전개', icon: 'bi-diagram-3', desc: '분야 · 규제 · 규격 · 관리항목 · 제품을 각각 열로 펴고, 같은 값은 세로로 묶는다' }
+  { key: 'expand', label: '전개', icon: 'bi-diagram-3', desc: '분야 · 규제 · 규격 · 관리항목 · 제품을 각각 열로 펴고, 같은 값은 세로로 묶는다' },
+  { key: 'crosstab', label: '교차표', icon: 'bi-grid-3x3', desc: '제품을 열로 눕힌다. 열은 그 페이지에 나온 제품만이라 페이지마다 구성이 바뀐다' }
 ]
 // 국가 필터 디자인 6종. 데이터와 그리드 필터는 같고 모양만 다르며, 사용자가 상단 스위치로 고른다
 const FILTER_VARIANTS = [
@@ -418,7 +430,7 @@ const CLAMP_LINES = 5
 const CELL_PAD_X = 18
 export default {
   name: 'RegulationInfoPage',
-  components: { RealGridCommonJs, Pagination, PageSizeSelect, B2bDatePicker, CountryFilterBar, RegulationExpandGrid },
+  components: { RealGridCommonJs, Pagination, PageSizeSelect, B2bDatePicker, CountryFilterBar, RegulationExpandGrid, RegulationCrosstabGrid },
   data() {
     return {
       fieldCodes,
@@ -963,6 +975,12 @@ export default {
       return `|${(codes.length ? codes : [NO_COUNTRY]).join('|')}|`
     },
     exportExcel() {
+      if (this.viewMode === 'crosstab') {
+        // 교차표는 열이 페이지마다 달라 "전체 엑셀" 의 열 구성이 정해지지 않는다.
+        // 전체 기준 열로 내보내려면 별도 설계가 필요하므로 지금은 막는다
+        showToast('교차표는 엑셀 내보내기를 아직 지원하지 않습니다. 전개 탭에서 내보내세요.', { type: 'info' })
+        return
+      }
       if (this.viewMode === 'expand') {
         if (this.$refs.expandGrid) this.$refs.expandGrid.exportExcel()
         return

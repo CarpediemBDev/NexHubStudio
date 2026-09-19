@@ -110,8 +110,13 @@ export const useRegulationStore = defineStore('regulation', {
      * (state 에 두면 목록/전개 탭이 서로 다른 시점의 결과를 보게 된다)
      * @param {number[]} regInfoIds 목록에서 이미 걸러진 레코드 ID
      */
-    fetchExpanded(regInfoIds) {
-      return regulationApi.expanded(regInfoIds)
+    fetchExpanded(regInfoIds, paging) {
+      return regulationApi.expanded(regInfoIds, paging)
+    },
+
+    /** 교차표(제품 = 열). 열 구성은 페이지마다 달라진다 */
+    fetchCrosstab(regInfoIds, paging) {
+      return regulationApi.crosstab(regInfoIds, paging)
     },
 
     /* ---------------- 목록 컨텍스트 ---------------- */

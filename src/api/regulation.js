@@ -24,11 +24,28 @@ export const regulationApi = {
    * 을 "조합 1건 = 1행" 으로 펼친 결과. 펼치기는 결국 JOIN 이므로 화면이 아니라 서버가 한다.
    *
    * 조회인데 POST 인 이유: 앞단 조회 결과가 수천 건이면 ID 목록이 URL 길이 제한을 넘는다.
+   * 페이징은 서버가 한다. 전개는 레코드 하나가 여러 행이 되므로 결과가 원본보다 훨씬
+   * 크고(제품·규격·인증서의 곱), 전부 받아 화면에서 자르면 레코드가 늘수록 그대로 무너진다.
+   * size 를 주지 않으면 전체를 받는다 — 엑셀 내보내기처럼 한 번에 다 필요할 때.
+   *
    * @param {number[]} regInfoIds 이미 걸러진 레코드 ID. 빈 배열이면 전체.
-   * @returns {Promise<{rows: Array, totalCount: number}>}
+   * @param {{page?: number, size?: number}} paging 1부터. 생략하면 전체
+   * @returns {Promise<{rows: Array, totalCount: number}>} totalCount 는 전체 건수(가져온 행 수가 아니다)
    */
-  expanded: (regInfoIds = []) =>
-    http.post('/regulations/expanded', { regInfoIds }).then((r) => r.data),
+  expanded: (regInfoIds = [], paging = {}) =>
+    http.post('/regulations/expanded', { regInfoIds, ...paging }).then((r) => r.data),
+
+  /**
+   * 교차표 — 제품을 열로.
+   *
+   * 전개는 제품마다 행이 늘어나지만(제품 40개면 그 레코드만 40행), 교차표는 눕힌다.
+   * 열은 "그 페이지에 나온 레코드가 실제로 쓰는 제품" 만이라 페이지마다 열 구성이 바뀐다 —
+   * 조회 결과 전체의 제품으로 열을 만들면 대부분 빈 칸인 표가 된다.
+   *
+   * @returns {Promise<{columns: Array, rows: Array, totalCount: number}>}
+   */
+  crosstab: (regInfoIds = [], paging = {}) =>
+    http.post('/regulations/crosstab', { regInfoIds, ...paging }).then((r) => r.data),
 
   /**
    * 저장 전 충돌 예측.

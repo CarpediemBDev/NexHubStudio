@@ -54,7 +54,46 @@ export const productCodes = [
   { code: 'P_SIGN55', name: '55" 사이니지', parentCd: 'PG_SIGN', levelNo: 3 },
   { code: 'P_PROJ4K', name: '4K 프로젝터', parentCd: 'PG_PROJ', levelNo: 3 },
   { code: 'P_REF900', name: '비스포크 900L', parentCd: 'PG_REF', levelNo: 3 },
-  { code: 'P_FOLD', name: '폴더블폰', parentCd: 'PG_PHONE', levelNo: 3 }
+  { code: 'P_FOLD', name: '폴더블폰', parentCd: 'PG_PHONE', levelNo: 3 },
+
+  /* ---- 교차표(제품=열) 확인용 확장. 제품군마다 여러 모델을 둬야 열이 늘어난다 ----
+   * 위 10개는 시드 데이터(reg_info_target)가 코드로 참조하므로 손대지 않는다.
+   */
+  { code: 'P_TV_CRYSTAL', name: '크리스탈 UHD TV', parentCd: 'PG_TV', levelNo: 3 },
+  { code: 'P_TV_FRAME', name: '더 프레임', parentCd: 'PG_TV', levelNo: 3 },
+  { code: 'P_TV_SERIF', name: '더 세리프', parentCd: 'PG_TV', levelNo: 3 },
+  { code: 'P_TV_TERRACE', name: '더 테라스(옥외)', parentCd: 'PG_TV', levelNo: 3 },
+  { code: 'P_TV_MICROLED', name: '마이크로 LED', parentCd: 'PG_TV', levelNo: 3 },
+
+  { code: 'P_MON24', name: '24" 모니터', parentCd: 'PG_MON', levelNo: 3 },
+  { code: 'P_MON32', name: '32" 모니터', parentCd: 'PG_MON', levelNo: 3 },
+  { code: 'P_MON_CURVE', name: '49" 커브드 모니터', parentCd: 'PG_MON', levelNo: 3 },
+  { code: 'P_MON_GAME', name: '게이밍 모니터 240Hz', parentCd: 'PG_MON', levelNo: 3 },
+  { code: 'P_MON_PRO', name: '프로 디자인 모니터 5K', parentCd: 'PG_MON', levelNo: 3 },
+  { code: 'P_MON_PORT', name: '포터블 모니터 16"', parentCd: 'PG_MON', levelNo: 3 },
+
+  { code: 'P_SIGN43', name: '43" 사이니지', parentCd: 'PG_SIGN', levelNo: 3 },
+  { code: 'P_SIGN75', name: '75" 사이니지', parentCd: 'PG_SIGN', levelNo: 3 },
+  { code: 'P_SIGN_VIDEO', name: '비디오월 패널', parentCd: 'PG_SIGN', levelNo: 3 },
+  { code: 'P_SIGN_OUT', name: '옥외 사이니지(고휘도)', parentCd: 'PG_SIGN', levelNo: 3 },
+  { code: 'P_SIGN_KIOSK', name: '키오스크 사이니지', parentCd: 'PG_SIGN', levelNo: 3 },
+
+  { code: 'P_PROJ_FHD', name: 'FHD 프로젝터', parentCd: 'PG_PROJ', levelNo: 3 },
+  { code: 'P_PROJ_PORT', name: '포터블 빔프로젝터', parentCd: 'PG_PROJ', levelNo: 3 },
+  { code: 'P_PROJ_LASER', name: '레이저 초단초점', parentCd: 'PG_PROJ', levelNo: 3 },
+  { code: 'P_PROJ_BIZ', name: '비즈니스 프로젝터', parentCd: 'PG_PROJ', levelNo: 3 },
+
+  { code: 'P_REF400', name: '일반 냉장고 400L', parentCd: 'PG_REF', levelNo: 3 },
+  { code: 'P_REF600', name: '양문형 600L', parentCd: 'PG_REF', levelNo: 3 },
+  { code: 'P_REF_KIM', name: '김치냉장고', parentCd: 'PG_REF', levelNo: 3 },
+  { code: 'P_REF_WINE', name: '와인셀러', parentCd: 'PG_REF', levelNo: 3 },
+  { code: 'P_REF_MINI', name: '미니 냉장고 100L', parentCd: 'PG_REF', levelNo: 3 },
+  { code: 'P_REF_FAM', name: '패밀리허브 냉장고', parentCd: 'PG_REF', levelNo: 3 },
+
+  { code: 'P_PH_FLAG', name: '플래그십 스마트폰', parentCd: 'PG_PHONE', levelNo: 3 },
+  { code: 'P_PH_MID', name: '보급형 스마트폰', parentCd: 'PG_PHONE', levelNo: 3 },
+  { code: 'P_PH_FLIP', name: '플립형 폴더블', parentCd: 'PG_PHONE', levelNo: 3 },
+  { code: 'P_PH_TAB', name: '태블릿', parentCd: 'PG_PHONE', levelNo: 3 }
 ]
 
 // 권역 (levelNo 1) > 국가 (2)
@@ -1215,3 +1254,37 @@ _record(17).markNm = 'CCC 마크(S: 안전, EMC: 전자파, S&E: 안전+전자�
 
 // 14: 국가가 많은 레코드
 _record(14).targets.push(...t('COUNTRY', ['FR', 'DE', 'IT', 'ES', 'PL', 'NL', 'BE', 'AT', 'SE', 'DK', 'LU', 'CH', 'NO', 'GB']))
+
+
+/* ---------------- [테스트 데이터] 교차표(제품=열) 확인용 제품 배정 ----------------
+ * 지금까지 PRODUCT 타겟이 붙은 레코드가 2건뿐이라 교차표를 만들어도 열이 서너 개였다.
+ * 각 레코드가 가진 제품군의 실제 모델을 붙인다 — 제품군과 무관한 제품을 붙이면
+ * "TV 규제인데 냉장고가 열에 뜨는" 데이터가 되어 화면을 못 믿게 된다.
+ *
+ * 배정 규칙(고정): 레코드 id 를 씨앗으로 제품군별 모델 중 앞에서 n개.
+ * 난수를 쓰지 않는 이유는 백엔드 시드를 이 규칙으로 생성하기 때문이다 —
+ * 새로 고칠 때마다 달라지면 두 모드가 갈라진다.
+ */
+export const productAssignment = (() => {
+  const out = []
+  regInfoList.forEach((rec) => {
+    const already = rec.targets.some((tg) => tg.targetType === 'PRODUCT')
+    if (already) return // 손으로 지정한 레코드(3, 9)는 그대로 둔다
+    const groups = rec.targets.filter((tg) => tg.targetType === 'PRODUCT_GROUP').map((tg) => tg.targetCd)
+    if (!groups.length) return
+    const codes = []
+    groups.forEach((pg) => {
+      const models = productCodes.filter((pc) => pc.parentCd === pg)
+      if (!models.length) return
+      // 레코드마다 개수를 달리해야 "열이 행마다 다르게 채워지는" 모습이 나온다
+      const n = 2 + (rec.regInfoId % Math.max(1, models.length - 1))
+      codes.push(...models.slice(0, Math.min(n, models.length)).map((pc) => pc.code))
+    })
+    if (codes.length) out.push({ regInfoId: rec.regInfoId, productCds: codes })
+  })
+  return out
+})()
+
+productAssignment.forEach(({ regInfoId, productCds }) => {
+  _record(regInfoId).targets.push(...t('PRODUCT', productCds))
+})
