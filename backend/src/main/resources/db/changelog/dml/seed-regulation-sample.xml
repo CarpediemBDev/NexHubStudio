@@ -3134,6 +3134,50 @@
         </insert>
     </changeSet>
 
+    <!--
+        확정(ACTIVE 전환) 화면 확인용 충돌 2건.
+        기존 충돌 3건이 전부 이미 ACTIVE 인 레코드에 걸려 있어서 확정 화면을 볼 수가 없었다.
+        아직 ACTIVE 가 아닌 레코드에 두 경우를 만들어 둔다.
+          9004  조치 끝난 CHILD -> 확정 화면에 이력으로 보이고, 확정은 통과
+          9005  미조치 SAME    -> 확정이 막히는 경우
+        프론트 목업(src/data/regulationMock.js 의 regConflictList)과 같은 내용이어야
+        목업 모드와 실제 모드에서 같은 화면이 나온다.
+        기존 seed-5 는 체크섬이 잠겨 있으므로 고치지 않고 새 changeSet 으로 덧붙인다.
+    -->
+    <changeSet id="20260919-seed-7-reg-conflict-activate-fixture" author="dev">
+        <insert tableName="reg_conflict_hist">
+            <column name="conflict_id" valueNumeric="9004"/>
+            <column name="new_reg_info_id" valueNumeric="17"/>
+            <column name="new_reg_no" value="REG-2026-0033"/>
+            <column name="exist_reg_info_id" valueNumeric="1"/>
+            <column name="exist_reg_no" value="REG-2026-0001"/>
+            <column name="conflict_type" value="CHILD"/>
+            <column name="conflict_axis" value="GEO"/>
+            <column name="new_scope_txt" value="아시아 &gt; 중국"/>
+            <column name="exist_scope_txt" value="아시아(권역 전체)"/>
+            <column name="decision_cd" value="KEEP_BOTH"/>
+            <column name="decision_note" value="중국 CCC 는 국가 고유 절차라 하위 특례로 유지"/>
+            <column name="detect_dt" valueDate="2026-03-04T10:31:00"/>
+            <column name="decide_id" value="park.cn"/>
+            <column name="decide_dt" valueDate="2026-03-04T10:45:00"/>
+            <column name="status_cd" value="RESOLVED"/>
+        </insert>
+        <insert tableName="reg_conflict_hist">
+            <column name="conflict_id" valueNumeric="9005"/>
+            <column name="new_reg_info_id" valueNumeric="22"/>
+            <column name="new_reg_no" value="REG-2026-0038"/>
+            <column name="exist_reg_info_id" valueNumeric="21"/>
+            <column name="exist_reg_no" value="REG-2026-0037"/>
+            <column name="conflict_type" value="SAME"/>
+            <column name="conflict_axis" value="GEO"/>
+            <column name="new_scope_txt" value="중남미 &gt; 브라질, 아르헨티나"/>
+            <column name="exist_scope_txt" value="중남미 &gt; 브라질, 아르헨티나"/>
+            <column name="decision_note" value=""/>
+            <column name="detect_dt" valueDate="2026-03-11T14:02:00"/>
+            <column name="status_cd" value="DETECTED"/>
+        </insert>
+    </changeSet>
+
     <changeSet id="20260913-seed-6-reg-attach-files" author="dev">
         <insert tableName="files">
             <column name="original_name" value="안전확인신고증명서_2026.pdf"/>

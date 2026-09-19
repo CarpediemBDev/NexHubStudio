@@ -73,6 +73,10 @@ public enum ErrorCode {
     REGULATION_TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "R002", "규제 제목은 필수입니다."),
     REGULATION_FIELD_REQUIRED(HttpStatus.BAD_REQUEST, "R003", "분야는 필수입니다."),
     REGULATION_ALREADY_EXPIRED(HttpStatus.BAD_REQUEST, "R004", "이미 폐지된 규제 정보입니다."),
+    REGULATION_ALREADY_ACTIVE(HttpStatus.BAD_REQUEST, "R005", "이미 확정(시행중)인 규제 정보입니다."),
+    REGULATION_EXPIRED_CANNOT_ACTIVATE(HttpStatus.BAD_REQUEST, "R006", "폐지된 규제 정보는 확정할 수 없습니다."),
+    REGULATION_SAME_CONFLICT_UNRESOLVED(HttpStatus.CONFLICT, "R007",
+            "적용 범위가 완전히 같은(동일범위) 충돌이 조치되지 않아 확정할 수 없습니다."),
 
     // 외부 API 관련 에러 (X001~X099)
     EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "X001", "외부 시스템 연동 중 오류가 발생했습니다.");

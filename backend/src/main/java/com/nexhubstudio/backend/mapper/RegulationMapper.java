@@ -46,6 +46,12 @@ public interface RegulationMapper {
     /** 상태만 EXPIRED 로 + version_no 1 증가 */
     int expireRecord(@Param("regInfoId") Long regInfoId, @Param("userId") String userId);
 
+    /** 상태만 ACTIVE 로 + version_no 1 증가 (확정) */
+    int activateRecord(@Param("regInfoId") Long regInfoId, @Param("userId") String userId);
+
+    /** 확정을 막는 미조치 동일범위(SAME) 충돌 건수 */
+    int countUnresolvedSameConflicts(Long regInfoId);
+
     /* ---------------- 적용 대상 ---------------- */
     List<RegInfoTarget> findTargetsByRecord(Long regInfoId);
 

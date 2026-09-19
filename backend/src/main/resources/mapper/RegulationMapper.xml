@@ -125,6 +125,29 @@
          WHERE reg_info_id = #{regInfoId}
     </update>
 
+    <!-- 확정: 상태만 ACTIVE 로 + version_no 1 증가 (폐지와 같은 모양) -->
+    <update id="activateRecord">
+        UPDATE reg_info
+           SET status_cd  = 'ACTIVE',
+               version_no = version_no + 1,
+               updated_by = #{userId},
+               updated_at = CURRENT_TIMESTAMP
+         WHERE reg_info_id = #{regInfoId}
+    </update>
+
+    <!--
+        확정을 막는 충돌 = 조치되지 않은 동일범위(SAME).
+        같은 범위를 시행중인 레코드가 둘이 되면 현업이 어느 쪽을 따라야 할지 정해지지 않는다.
+        PARENT/CHILD/OVERLAP 은 상하위·부분중복이라 공존할 수 있으므로 세지 않는다.
+    -->
+    <select id="countUnresolvedSameConflicts" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+          FROM reg_conflict_hist
+         WHERE conflict_type = 'SAME'
+           AND status_cd &lt;&gt; 'RESOLVED'
+           AND (new_reg_info_id = #{regInfoId} OR exist_reg_info_id = #{regInfoId})
+    </select>
+
     <update id="expireRecord">
         UPDATE reg_info
            SET status_cd  = 'EXPIRED',

@@ -60,6 +60,17 @@ public class RegulationController {
     }
 
     /**
+     * 확정 (상태를 ACTIVE 로).
+     * 화면이 충돌이력을 보여주고 동의를 받은 뒤 부른다.
+     */
+    @PostMapping("/{regInfoId}/activate")
+    public ResponseEntity<ApiResponse<RegulationResponse.Record>> activate(
+            @PathVariable Long regInfoId,
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String userId) {
+        return ResponseEntity.ok(ApiResponse.success("확정되었습니다.", regulationService.activate(regInfoId, userId)));
+    }
+
+    /**
      * 등록은 취소했지만 충돌 감지 사실은 남기는 경우
      */
     @PostMapping("/conflict-histories")

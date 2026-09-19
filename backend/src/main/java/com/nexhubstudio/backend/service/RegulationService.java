@@ -169,6 +169,16 @@ public class RegulationService {
             throw new BusinessException(ErrorCode.REGULATION_FIELD_REQUIRED);
         }
 
+        // 동일범위(SAME)는 중복 등록이라 저장 자체를 막는다.
+        // 기존을 개정(REPLACE)하거나 흡수(MERGE)하는 조치를 고른 경우에만 통과시킨다 —
+        // 그때는 결과가 한 건으로 남는다. 목업 핸들러도 같은 규칙이다.
+        boolean sameUnresolved = nullSafe(req.getDecisions()).stream()
+                .anyMatch(d -> "SAME".equals(d.getConflictType())
+                        && !List.of("REPLACE", "MERGE", "CANCEL").contains(String.valueOf(d.getDecisionCd())));
+        if (sameUnresolved) {
+            throw new BusinessException(ErrorCode.REGULATION_SAME_CONFLICT_UNRESOLVED);
+        }
+
         List<RegulationRequest.Target> targets = nullSafe(req.getTargets());
         List<RegulationRequest.Item> items = nullSafe(req.getItems());
         List<RegulationRequest.ConflictDecision> decisions = nullSafe(req.getDecisions());
@@ -250,6 +260,51 @@ public class RegulationService {
                 .versionNo(after.getVersionNo())
                 .changeType("DELETE")
                 .changeNote("사용자 요청으로 폐지")
+                .snapshotJson(snapshotOf(after))
+                .masterChangedYn("Y")
+                .changedItemIds("[]")
+                .regId(userId)
+                .build());
+
+        return toRecord(after, targetsOf(regInfoId), countAttachments(after.getAttachGroupId()));
+    }
+
+    /* ============================================================ *
+     * 확정 - 상태를 ACTIVE 로
+     * ============================================================ */
+
+    /**
+     * 확정. 화면이 먼저 충돌이력을 보여주고 동의를 받지만 여기서도 한 번 더 막는다 —
+     * 화면만 믿으면 API 를 직접 부르거나 다른 화면이 생겼을 때 규칙이 새어 나간다.
+     *
+     * 막는 것은 미조치 동일범위(SAME) 뿐이다. 같은 분야·같은 범위를 시행중인 레코드가
+     * 둘이 되면 현업이 어느 쪽을 따라야 할지 정해지지 않는다.
+     * PARENT/CHILD/OVERLAP 은 상하위·부분중복이라 공존할 수 있으므로 통과시킨다.
+     */
+    @Transactional
+    public RegulationResponse.Record activate(Long regInfoId, String userId) {
+        RegInfo before = requireRecord(regInfoId);
+        if ("EXPIRED".equals(before.getStatusCd())) {
+            throw new BusinessException(ErrorCode.REGULATION_EXPIRED_CANNOT_ACTIVATE);
+        }
+        if ("ACTIVE".equals(before.getStatusCd())) {
+            throw new BusinessException(ErrorCode.REGULATION_ALREADY_ACTIVE);
+        }
+        if (regulationMapper.countUnresolvedSameConflicts(regInfoId) > 0) {
+            throw new BusinessException(ErrorCode.REGULATION_SAME_CONFLICT_UNRESOLVED);
+        }
+
+        fillSnapshot(before);
+        regulationMapper.activateRecord(regInfoId, userId);
+        RegInfo after = requireRecord(regInfoId);
+
+        regulationMapper.insertHistory(RegInfoHist.builder()
+                .regInfoId(regInfoId)
+                .versionNo(after.getVersionNo())
+                // CHANGE_TYPE 은 INSERT/UPDATE/DELETE/CONFLICT_RESOLVE 네 가지다.
+                // 확정은 상태만 바뀌는 수정이라 UPDATE 로 남기고 사유를 노트에 적는다
+                .changeType("UPDATE")
+                .changeNote("충돌이력 확인 후 확정(ACTIVE)")
                 .snapshotJson(snapshotOf(after))
                 .masterChangedYn("Y")
                 .changedItemIds("[]")
