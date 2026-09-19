@@ -222,7 +222,7 @@ const emptyMaster = () => ({
   authority: '',
   url: '',
   summary: '',
-  statusCd: 'DRAFT',
+  statusCd: 'REVIEW',
   versionNo: 0,
   effectiveDt: '',
   divisionCds: [],
@@ -669,13 +669,13 @@ export default {
       if (this.invalidItemIds.length) {
         return `값이 선택되지 않은 정보관리항목이 ${this.invalidItemIds.length}건 있습니다.`
       }
-      if (this.master.statusCd === 'DRAFT') return null
-
+      // 작성중 단계가 없으므로 저장 = 검토중 진입이다. 아래 둘은 조사를 시작하는
+      // 시점에 이미 아는 값이라 문턱이 되지 않는다(나머지는 검토중인 채로 채워 나간다)
       if (!this.master.regionCds.length && !this.master.countryCds.length) {
-        return '권역 또는 국가를 선택하세요. (작성중 상태로는 저장할 수 있습니다)'
+        return '권역 또는 국가를 1개 이상 선택하세요.'
       }
       if (!this.itemDrafts.length) {
-        return '정보관리항목을 1개 이상 등록하세요. (작성중 상태로는 저장할 수 있습니다)'
+        return '정보관리항목을 1개 이상 등록하세요.'
       }
       return null
     },

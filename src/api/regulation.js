@@ -37,16 +37,20 @@ export const regulationApi = {
    */
   save: (payload) => http.post('/regulations', payload).then((r) => r.data),
 
-  /** 폐지(물리 삭제 없이 상태만 EXPIRED 로) */
-  expire: (regInfoId) => http.post(`/regulations/${regInfoId}/expire`).then((r) => r.data),
-
   /**
-   * 확정 — 상태를 ACTIVE 로.
-   * 화면이 충돌이력을 사용자에게 보여주고 동의를 받은 뒤 부른다.
-   * 서버는 미해결 SAME(동일범위) 충돌이 남아 있으면 거절한다 —
+   * 상태 변경 — 확정(ACTIVE) · 재검토(REVIEW) · 폐지(EXPIRED) · 복원을 한 곳에서.
+   *
+   * 전이마다 엔드포인트를 따로 두면(activate / expire / restore …) 전이가 늘 때마다
+   * API 와 화면이 같이 늘고, "어디서 어디로 갈 수 있나" 라는 규칙이 흩어진다.
+   * 목적지만 받고 갈 수 있는지는 서버가 전이표로 판단한다.
+   *
+   * 확정은 미해결 SAME(동일범위) 충돌이 남아 있으면 거절된다 —
    * 같은 범위를 시행중인 레코드가 둘이 되면 어느 쪽을 따라야 할지 정해지지 않는다.
+   * @param {number} regInfoId
+   * @param {string} statusCd  목적지 상태 (ACTIVE / REVIEW / EXPIRED)
    */
-  activate: (regInfoId) => http.post(`/regulations/${regInfoId}/activate`).then((r) => r.data),
+  changeStatus: (regInfoId, statusCd) =>
+    http.post(`/regulations/${regInfoId}/status`, { statusCd }).then((r) => r.data),
 
   /**
    * 등록을 취소했지만 충돌 감지 사실은 남겨야 할 때.

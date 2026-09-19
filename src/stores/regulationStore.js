@@ -157,21 +157,16 @@ export const useRegulationStore = defineStore('regulation', {
       await this.refresh()
     },
 
-    /* ---------------- 확정 ---------------- */
+    /* ---------------- 상태 변경 ---------------- */
     /**
-     * 상태를 ACTIVE 로. 화면이 충돌이력을 보여주고 동의를 받은 뒤 부른다.
-     * 서버가 미해결 SAME 을 거절할 수 있으므로 호출부가 오류를 받아 처리해야 한다.
+     * 확정 · 재검토 · 폐지 · 복원을 한 액션으로.
+     * 화면이 전이 전에 충돌이력을 보여주고 동의를 받지만, 갈 수 있는지의 최종 판단은 서버다.
+     * 서버가 거절할 수 있으므로 호출부가 오류를 받아 처리해야 한다.
      */
-    async activateRecord(regInfoId) {
-      const saved = await regulationApi.activate(regInfoId)
+    async changeStatus(regInfoId, statusCd) {
+      const saved = await regulationApi.changeStatus(regInfoId, statusCd)
       await this.refresh()
       return saved
-    },
-
-    /* ---------------- 폐지 ---------------- */
-    async expireRecord(regInfoId) {
-      await regulationApi.expire(regInfoId)
-      await this.refresh()
     }
   }
 })

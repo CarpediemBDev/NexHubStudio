@@ -164,7 +164,7 @@ export default {
           renderer: {
             type: 'html',
             callback: (grid, model) => {
-              const code = model?.value || 'DRAFT'
+              const code = model?.value || 'REVIEW'
               const name = (statusCodes.find((s) => s.code === code) || {}).name || code
               return `<span class="b2b-badge b2b-badge-${STATUS_BADGE[code] || 'secondary'}">${escapeHtml(name)}</span>`
             }
