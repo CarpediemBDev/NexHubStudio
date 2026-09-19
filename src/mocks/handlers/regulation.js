@@ -8,7 +8,7 @@
  * 동시에 이 파일이 백엔드에 요구할 스펙 문서 역할을 한다.
  */
 import { http, HttpResponse } from 'msw'
-import { detectConflicts } from '@/utils/regulationConflict'
+import { detectConflicts, codeName } from '@/utils/regulationConflict'
 import {
   regInfoList,
   regHistList,
@@ -204,16 +204,22 @@ function applyDecisionSideEffects(decisions, saved, stamp) {
  * LEFT JOIN 이라 하위 단계가 없으면 그 칸은 빈 값으로 남고(규격은 있는데 인증서가 없는 규제 등),
  * 제품을 지정하지 않은 레코드는 제품 칸이 빈 값인 한 행이 된다.
  *
- * 내리는 것은 "코드" 뿐이다. 이름은 붙이지 않는다 —
- * reg_info_item 에는 ITEM_NM 이 없고 common_code 에도 규제 코드가 없어서
- * 백엔드에는 코드→이름 출처가 아예 없다. 이름은 화면의 코드테이블(regulationMock.js)이 단독으로 쥔다.
- * 여기서 이름을 지어 내리면 목업 모드와 실제 모드의 응답이 갈라진다.
+ * 코드와 이름을 함께 내린다. 백엔드는 common_code 에 적재된 코드표로 이름을 해석하고,
+ * 목업은 같은 코드표의 원본인 regulationMock.js 로 해석한다.
+ * 코드도 계속 내리는 이유는 병합키·필터가 코드로 동작하고 이름은 바뀔 수 있어서다.
  *
  * 병합키(fieldKey/recKey/ruleKey/stdKey)는 여기서 만든다.
  * "어디까지 같아야 한 칸으로 묶느냐" 는 정렬 순서와 한 몸인데,
  * 정렬은 서버가 하고 키는 화면이 만들면 ORDER BY 를 바꾸는 순간 병합이 조용히 깨진다.
  * 정렬한 쪽이 키도 만든다.
  */
+
+/**
+ * 코드 → 이름. 코드가 비어 있으면 빈 문자열이다 —
+ * LEFT JOIN 으로 하위가 없는 단계는 값 자체가 없으므로 "없음" 과 "이름을 못 찾음" 을 구분한다.
+ */
+const nameOf = (groupCode, code) => (code ? codeName(groupCode, code) : '')
+const namesOf = (groupCode, codes) => (codes || []).map((cd) => nameOf(groupCode, cd))
 
 /** 레코드의 특정 타겟 코드 목록. 순서는 SQL 과 같게 코드 오름차순 */
 const targetCdsOf = (record, targetType) =>
@@ -278,16 +284,25 @@ function expandRecords(records) {
   sorted.forEach((r) => {
     const items = db.items.filter((it) => it.regInfoId === r.regInfoId)
     // 레코드 단위 멀티값. 전개 축이 아니므로 곱하지 않고 목록 그대로 내린다
+    const divisionCds = targetCdsOf(r, 'DIVISION')
+    const productGroupCds = targetCdsOf(r, 'PRODUCT_GROUP')
+    const regionCds = targetCdsOf(r, 'REGION')
+    const countryCds = targetCdsOf(r, 'COUNTRY')
     const base = {
       regInfoId: r.regInfoId,
       statusCd: r.statusCd,
       regNo: r.regNo,
       title: r.title,
       fieldCd: r.fieldCd,
-      divisionCds: targetCdsOf(r, 'DIVISION'),
-      productGroupCds: targetCdsOf(r, 'PRODUCT_GROUP'),
-      regionCds: targetCdsOf(r, 'REGION'),
-      countryCds: targetCdsOf(r, 'COUNTRY'),
+      fieldNm: nameOf('FIELD', r.fieldCd),
+      divisionCds,
+      divisionNms: namesOf('DIVISION', divisionCds),
+      productGroupCds,
+      productGroupNms: namesOf('PRODUCT_GROUP', productGroupCds),
+      regionCds,
+      regionNms: namesOf('REGION', regionCds),
+      countryCds,
+      countryNms: namesOf('COUNTRY', countryCds),
       effectiveDt: dateOnly(r.effectiveDt),
       versionNo: r.versionNo
     }
@@ -297,7 +312,11 @@ function expandRecords(records) {
         rows.push({
           ...base,
           ...rule,
+          regulationNm: nameOf('REGULATION', rule.regulationCd),
+          standardNm: nameOf('STANDARD', rule.standardCd),
+          certNm: nameOf('CERT', rule.certCd),
           productCd,
+          productNm: nameOf('PRODUCT', productCd),
           fieldKey: String(r.fieldCd || ''),
           recKey: `${r.fieldCd}|${r.regInfoId}`,
           ruleKey: `${r.fieldCd}|${r.regInfoId}|${rule.regulationCd}`,

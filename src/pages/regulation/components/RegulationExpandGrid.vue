@@ -47,17 +47,14 @@
  *   행   = 그 조합 1건
  * 같은 값이 반복되는 앞쪽 축은 mergeRule 로 세로 병합해서 계층처럼 묶어 보여준다.
  *
- * 펼치기(JOIN)와 정렬·병합키는 서버가 만든다(src/mocks/handlers/regulation.js 의 expandRecords).
- * 서버가 내리는 것은 코드뿐이다 — reg_info_item 에 ITEM_NM 이 없고 common_code 에도
- * 규제 코드가 없어서 백엔드에는 코드→이름 출처가 아예 없다.
- * 이름은 코드테이블(regulationMock.js)을 쥔 화면이 codeName() 으로 붙인다.
+ * 펼치기(JOIN)와 정렬·병합키, 코드→이름까지 서버가 만든다.
+ * 화면에 남은 것은 표시 규칙뿐이다 — 여러 값을 ", " 로 잇고, 빈 값을 '전체' 로 읽는 것.
  */
 import RealGridCommonJs from '@/components/RealGridCommonJs.vue'
 import Pagination from '@/components/Pagination.vue'
 import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import { escapeHtml } from '@/utils/stringUtil.js'
 import { statusCodes } from '@/data/regulationMock'
-import { codeName } from '@/utils/regulationConflict'
 import { useRegulationStore } from '@/stores/regulationStore'
 
 const STATUS_BADGE = {
@@ -218,23 +215,19 @@ export default {
       ]
     },
     /**
-     * 서버가 준 코드 행에 이름을 입힌다.
-     * 병합키는 코드로 만들어져 있으므로 이름을 붙여도 병합 단위는 그대로다.
+     * 서버가 준 행을 그리드 컬럼 모양으로만 다듬는다.
+     * 이름은 서버가 붙여서 온다 — 코드표가 DB 에 적재된 뒤로 화면이 코드를 해석할 일이 없다.
+     * 여기 남은 것은 표시 규칙뿐이다: 여러 값을 ", " 로 잇는 것과, 빈 값을 '전체' 로 읽는 것.
      */
     namedRows() {
-      const names = (type, cds) => (cds || []).map((cd) => codeName(type, cd))
       return this.rows.map((r) => ({
         ...r,
-        fieldNm: codeName('FIELD', r.fieldCd),
-        regulationNm: r.regulationCd ? codeName('REGULATION', r.regulationCd) : '',
-        standardNm: r.standardCd ? codeName('STANDARD', r.standardCd) : '',
-        certNm: r.certCd ? codeName('CERT', r.certCd) : '',
-        divisionTxt: names('DIVISION', r.divisionCds).join(', '),
-        productGroupTxt: names('PRODUCT_GROUP', r.productGroupCds).join(', '),
-        // 제품 미지정은 서버가 빈 코드로 준다(LEFT JOIN). 화면에서만 '전체' 로 읽는다
-        productNm: r.productCd ? codeName('PRODUCT', r.productCd) : '전체',
-        regionTxt: names('REGION', r.regionCds).join(', '),
-        countryTxt: names('COUNTRY', r.countryCds).join(', ') || '전체',
+        divisionTxt: (r.divisionNms || []).join(', '),
+        productGroupTxt: (r.productGroupNms || []).join(', '),
+        // 미지정은 서버가 빈 값으로 준다(LEFT JOIN). "제한 없음" 이라는 뜻이라 화면에서 '전체' 로 읽는다
+        productNm: r.productNm || '전체',
+        regionTxt: (r.regionNms || []).join(', '),
+        countryTxt: (r.countryNms || []).join(', ') || '전체',
         countryCnt: (r.countryCds || []).length
       }))
     },
