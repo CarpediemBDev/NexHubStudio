@@ -114,6 +114,11 @@ export const useRegulationStore = defineStore('regulation', {
       return regulationApi.expanded(regInfoIds, paging)
     },
 
+    /** 교차표(제품 = 열). 열 구성은 페이지마다 달라진다 */
+    fetchCrosstab(regInfoIds, paging) {
+      return regulationApi.crosstab(regInfoIds, paging)
+    },
+
     /* ---------------- 목록 컨텍스트 ---------------- */
     setListContext(ctx) {
       this.listContext = { ...this.listContext, ...ctx }

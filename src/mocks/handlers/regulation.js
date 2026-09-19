@@ -9,6 +9,7 @@
  */
 import { http, HttpResponse } from 'msw'
 import { detectConflicts, codeName } from '@/utils/regulationConflict'
+import { productCodes } from '@/data/regulationMock'
 import {
   regInfoList,
   regHistList,
@@ -328,10 +329,79 @@ function expandRecords(records) {
   return rows
 }
 
+/* ---------------- 교차표(제품 = 열) ---------------- */
+/**
+ * 전개와 다른 점은 제품을 곱하지 않는다는 것뿐이다.
+ * 제품은 열로 눕으므로 행은 레코드 × 규제 × 규격 × 관리항목 까지다.
+ *
+ * 열은 "이 페이지에 나온 레코드가 실제로 쓰는 제품" 으로 만든다 —
+ * 조회 결과 전체의 제품으로 만들면 페이지마다 40개 열이 붙고 대부분 빈 칸이 된다.
+ */
+function crosstabRows(records) {
+  const rows = []
+  const sorted = [...records].sort(
+    (a, b) =>
+      String(a.fieldCd || '').localeCompare(String(b.fieldCd || '')) ||
+      String(a.regNo || '').localeCompare(String(b.regNo || ''))
+  )
+  sorted.forEach((r) => {
+    const items = db.items.filter((it) => it.regInfoId === r.regInfoId)
+    const productCds = targetCdsOf(r, 'PRODUCT')
+    ruleCombos(items).forEach((rule) => {
+      rows.push({
+        regInfoId: r.regInfoId,
+        statusCd: r.statusCd,
+        regNo: r.regNo,
+        title: r.title,
+        fieldCd: r.fieldCd,
+        fieldNm: nameOf('FIELD', r.fieldCd),
+        ...rule,
+        regulationNm: nameOf('REGULATION', rule.regulationCd),
+        standardNm: nameOf('STANDARD', rule.standardCd),
+        certNm: nameOf('CERT', rule.certCd),
+        effectiveDt: dateOnly(r.effectiveDt),
+        versionNo: r.versionNo,
+        productCds,
+        fieldKey: String(r.fieldCd || ''),
+        recKey: `${r.fieldCd}|${r.regInfoId}`,
+        ruleKey: `${r.fieldCd}|${r.regInfoId}|${rule.regulationCd}`,
+        stdKey: `${r.fieldCd}|${r.regInfoId}|${rule.regulationCd}|${rule.standardCd}`
+      })
+    })
+  })
+  return rows
+}
+
+/** 주어진 행들이 쓰는 제품만 골라 열로. 순서는 코드표 순서를 따른다 */
+function crosstabColumns(rows) {
+  const used = new Set()
+  rows.forEach((r) => (r.productCds || []).forEach((cd) => used.add(cd)))
+  return productCodes
+    .filter((pc) => used.has(pc.code))
+    .map((pc) => ({
+      code: pc.code,
+      name: pc.name,
+      parentCode: pc.parentCd,
+      parentName: nameOf('PRODUCT_GROUP', pc.parentCd)
+    }))
+}
+
 /* ---------------- 핸들러 ---------------- */
 export default [
   // 화면 진입 시 스냅샷
   http.get('/api/regulations', () => ok(db)),
+
+  // 교차표. 열은 그 페이지에 나온 레코드의 제품만
+  http.post('/api/regulations/crosstab', async ({ request }) => {
+    const { regInfoIds = [], page, size } = await request.json()
+    const ids = new Set((regInfoIds || []).map(Number))
+    const targets = ids.size ? db.records.filter((r) => ids.has(r.regInfoId)) : db.records
+    const all = crosstabRows(targets)
+    const pageRows = !size || size < 1
+      ? all
+      : all.slice(((page && page > 0 ? page : 1) - 1) * size, ((page && page > 0 ? page : 1) - 1) * size + size)
+    return ok({ columns: crosstabColumns(pageRows), rows: pageRows, totalCount: all.length })
+  }),
 
   // 전개(행→열) 목록. 조회 결과로 이미 걸러진 ID 만 받는다(빈 배열이면 전체)
   http.post('/api/regulations/expanded', async ({ request }) => {

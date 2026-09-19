@@ -36,6 +36,18 @@ export const regulationApi = {
     http.post('/regulations/expanded', { regInfoIds, ...paging }).then((r) => r.data),
 
   /**
+   * 교차표 — 제품을 열로.
+   *
+   * 전개는 제품마다 행이 늘어나지만(제품 40개면 그 레코드만 40행), 교차표는 눕힌다.
+   * 열은 "그 페이지에 나온 레코드가 실제로 쓰는 제품" 만이라 페이지마다 열 구성이 바뀐다 —
+   * 조회 결과 전체의 제품으로 열을 만들면 대부분 빈 칸인 표가 된다.
+   *
+   * @returns {Promise<{columns: Array, rows: Array, totalCount: number}>}
+   */
+  crosstab: (regInfoIds = [], paging = {}) =>
+    http.post('/regulations/crosstab', { regInfoIds, ...paging }).then((r) => r.data),
+
+  /**
    * 저장 전 충돌 예측.
    *
    * 판정 규칙은 서버가 쥔다 — 저장할 때 서버가 같은 엔진으로 다시 판정하므로,
