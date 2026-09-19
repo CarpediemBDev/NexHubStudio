@@ -975,10 +975,10 @@ export default {
       return `|${(codes.length ? codes : [NO_COUNTRY]).join('|')}|`
     },
     exportExcel() {
+      // 교차표는 화면 열이 "이 페이지의 제품" 뿐이라, 컴포넌트가 전체를 한 페이지로
+      // 다시 불러 전체 제품 열로 내보낸다
       if (this.viewMode === 'crosstab') {
-        // 교차표는 열이 페이지마다 달라 "전체 엑셀" 의 열 구성이 정해지지 않는다.
-        // 전체 기준 열로 내보내려면 별도 설계가 필요하므로 지금은 막는다
-        showToast('교차표는 엑셀 내보내기를 아직 지원하지 않습니다. 전개 탭에서 내보내세요.', { type: 'info' })
+        if (this.$refs.crosstabGrid) this.$refs.crosstabGrid.exportExcel()
         return
       }
       if (this.viewMode === 'expand') {
