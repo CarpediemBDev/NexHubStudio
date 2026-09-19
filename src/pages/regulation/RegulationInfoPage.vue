@@ -204,7 +204,7 @@
           :columns="gridColumns"
           :rows="pagedRows"
           :editable="false"
-          :checkable="true"
+          :checkable="false"
           :state-bar-visible="false"
           :fixed-col-count="4"
           :sortable="true"
