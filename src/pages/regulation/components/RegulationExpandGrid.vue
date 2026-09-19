@@ -6,7 +6,7 @@
       height="max(700px, calc(100vh - 400px))"
       :fields="gridFields"
       :columns="gridColumns"
-      :rows="pagedRows"
+      :rows="namedRows"
       :editable="false"
       :checkable="false"
       :state-bar-visible="false"
@@ -24,12 +24,12 @@
           <i class="bi bi-arrow-repeat me-1"></i>전개 중…
         </span>
         <span v-else class="b2b-text-xs text-theme-secondary me-2">
-          레코드 {{ regInfoIds.length }}건 → 전개 {{ rows.length }}행
+          레코드 {{ regInfoIds.length }}건 → 전개 {{ totalCount }}행
         </span>
         <PageSizeSelect v-model="pageSize" size="sm" />
       </template>
     </RealGridCommonJs>
-    <Pagination v-model:page="page" v-model:page-size="pageSize" :total="rows.length" :show-size-select="false" />
+    <Pagination v-model:page="page" v-model:page-size="pageSize" :total="totalCount" :show-size-select="false" />
   </div>
 </template>
 
@@ -103,7 +103,10 @@ export default {
     return {
       store: useRegulationStore(),
       rows: [],
+      totalCount: 0,
       loading: false,
+      // 페이지 요청 순번. 늦게 온 응답이 최신 페이지를 덮어쓰는 것을 막는다
+      loadSeq: 0,
       page: 1,
       pageSize: 50,
       gridView: null,
@@ -220,44 +223,67 @@ export default {
      * 여기 남은 것은 표시 규칙뿐이다: 여러 값을 ", " 로 잇는 것과, 빈 값을 '전체' 로 읽는 것.
      */
     namedRows() {
-      return this.rows.map((r) => ({
+      return this.toGridRows(this.rows)
+    },
+    /** 현재 페이지의 첫 행이 전체에서 몇 번째인지. 행 번호를 전체 기준으로 잇는 데 쓴다 */
+    pageOffset() {
+      return (this.page - 1) * this.pageSize
+    }
+  },
+  watch: {
+    // 조회 조건이 바뀌면 1페이지부터 다시
+    regInfoIds: {
+      immediate: true,
+      handler() {
+        if (this.page === 1) this.reload()
+        else this.page = 1 // page 워처가 reload 한다
+      }
+    },
+    page() {
+      this.reload()
+    },
+    pageSize() {
+      if (this.page === 1) this.reload()
+      else this.page = 1
+    },
+    // 행 번호를 페이지를 넘어 전체 기준(51, 52…)으로 잇는다
+    pageOffset(offset) {
+      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: offset })
+    }
+  },
+  methods: {
+    /**
+     * 서버에서 현재 페이지만 받아온다.
+     * 늦게 온 응답이 최신 페이지를 덮어쓰지 않도록 순번을 붙인다 —
+     * 페이지를 빠르게 넘기면 요청이 겹치고 먼저 보낸 쪽이 나중에 도착할 수 있다.
+     */
+    /**
+     * 서버 행 → 그리드 컬럼 모양.
+     * 이름은 서버가 붙여서 온다. 여기 남은 것은 표시 규칙뿐이다 —
+     * 여러 값을 ", " 로 잇는 것과, 빈 값을 '전체'(제한 없음)로 읽는 것.
+     * 엑셀 내보내기도 같은 변환을 써야 하므로 computed 가 아니라 메서드다.
+     */
+    toGridRows(rows) {
+      return (rows || []).map((r) => ({
         ...r,
         divisionTxt: (r.divisionNms || []).join(', '),
         productGroupTxt: (r.productGroupNms || []).join(', '),
-        // 미지정은 서버가 빈 값으로 준다(LEFT JOIN). "제한 없음" 이라는 뜻이라 화면에서 '전체' 로 읽는다
         productNm: r.productNm || '전체',
         regionTxt: (r.regionNms || []).join(', '),
         countryTxt: (r.countryNms || []).join(', ') || '전체',
         countryCnt: (r.countryCds || []).length
       }))
     },
-    pagedRows() {
-      const offset = (this.page - 1) * this.pageSize
-      return this.namedRows.slice(offset, offset + this.pageSize)
-    }
-  },
-  watch: {
-    regInfoIds: {
-      immediate: true,
-      handler() {
-        this.reload()
-      }
-    },
-    rows() {
-      this.page = 1
-    },
-    page(p) {
-      if (this.gridView) this.gridView.setRowIndicator({ indexOffset: (p - 1) * this.pageSize })
-    }
-  },
-  methods: {
     async reload() {
+      const seq = ++this.loadSeq
       this.loading = true
       try {
-        const res = await this.store.fetchExpanded(this.regInfoIds)
+        const res = await this.store.fetchExpanded(this.regInfoIds, { page: this.page, size: this.pageSize })
+        if (seq !== this.loadSeq) return
         this.rows = (res && res.rows) || []
+        this.totalCount = (res && res.totalCount) || 0
       } finally {
-        this.loading = false
+        if (seq === this.loadSeq) this.loading = false
       }
     },
     onGridInit({ gridView, dataProvider }) {
@@ -283,12 +309,16 @@ export default {
         }
       }
     },
-    /** 엑셀은 보고 있는 페이지가 아니라 전개 결과 전체를 내보낸다 */
-    exportExcel() {
+    /**
+     * 엑셀은 보고 있는 페이지가 아니라 전개 결과 전체를 내보낸다.
+     * 이제 그리드에는 현재 페이지만 있으므로 전체를 따로 받아 와야 한다(size 없이 부르면 전부 온다).
+     */
+    async exportExcel() {
       if (!this.gridView) return
       const pageRows = this.dataProvider.getJsonRows()
       const restore = () => this.dataProvider.setRows(pageRows)
-      this.dataProvider.setRows(this.rows)
+      const all = await this.store.fetchExpanded(this.regInfoIds)
+      this.dataProvider.setRows(this.toGridRows((all && all.rows) || []))
       try {
         this.gridView.exportGrid({ type: 'excel', target: 'local', fileName: '규제정보_전개.xlsx', done: restore })
       } catch (e) {

@@ -335,11 +335,15 @@ export default [
 
   // 전개(행→열) 목록. 조회 결과로 이미 걸러진 ID 만 받는다(빈 배열이면 전체)
   http.post('/api/regulations/expanded', async ({ request }) => {
-    const { regInfoIds = [] } = await request.json()
+    const { regInfoIds = [], page, size } = await request.json()
     const ids = new Set((regInfoIds || []).map(Number))
     const targets = ids.size ? db.records.filter((r) => ids.has(r.regInfoId)) : db.records
-    const rows = expandRecords(targets)
-    return ok({ rows, totalCount: rows.length })
+    const all = expandRecords(targets)
+    // size 가 없으면 전체 — 엑셀 내보내기처럼 한 번에 다 받아야 하는 경우가 있다
+    if (!size || size < 1) return ok({ rows: all, totalCount: all.length })
+    const offset = ((page && page > 0 ? page : 1) - 1) * size
+    // totalCount 는 자르기 전 전체 건수다. 페이지네이션이 이 값으로 페이지를 센다
+    return ok({ rows: all.slice(offset, offset + size), totalCount: all.length })
   }),
 
   /**
