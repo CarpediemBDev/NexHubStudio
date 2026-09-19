@@ -1,6 +1,7 @@
 package com.nexhubstudio.backend.mapper;
 
 import com.nexhubstudio.backend.domain.RegAttachFile;
+import com.nexhubstudio.backend.domain.RegCode;
 import com.nexhubstudio.backend.domain.RegConflictHist;
 import com.nexhubstudio.backend.domain.RegExpandRow;
 import com.nexhubstudio.backend.domain.RegInfo;
@@ -27,6 +28,10 @@ public interface RegulationMapper {
     List<RegConflictHist> findAllConflicts();
 
     List<RegAttachFile> findAllAttachments();
+
+    /* ---------------- 코드 계층 ---------------- */
+    /** 규제 코드 전부(분야·권역>국가·사업부>제품군>제품·규제>규격>인증서). 상위는 코드로 풀어서 온다 */
+    List<RegCode> findRegCodes();
 
     /* ---------------- 전개(행→열) ---------------- */
     /**

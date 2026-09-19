@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexhubstudio.backend.domain.RegAttachFile;
+import com.nexhubstudio.backend.domain.RegCode;
 import com.nexhubstudio.backend.domain.RegConflictHist;
 import com.nexhubstudio.backend.domain.RegExpandRow;
 import com.nexhubstudio.backend.domain.RegInfo;
@@ -239,6 +240,26 @@ public class RegulationService {
         applyDecisionSideEffects(decisions, record, userId);
 
         return toRecord(record, targetsOf(regInfoId), countAttachments(record.getAttachGroupId()));
+    }
+
+    /* ============================================================ *
+     * 코드 계층
+     * ============================================================ */
+
+    /**
+     * 규제 코드 전부를 그룹별로.
+     *
+     * 지금까지 코드→이름과 계층을 프론트 regulationMock.js 만 알고 있었다.
+     * 그래서 전개 API 가 이름을 못 내렸고, 무엇보다 충돌 판정의 leafScope
+     * ("유럽" -&gt; {FR, DE, IT...}) 를 서버에서 할 수 없어 판정 권위가 브라우저에 남았다.
+     *
+     * 키는 target_type / item_type_cd 값 그대로다(REGION, COUNTRY, DIVISION, …).
+     * 호출하는 쪽이 타입만 알면 그 축의 코드 목록을 바로 꺼낼 수 있다.
+     */
+    @Transactional(readOnly = true)
+    public Map<String, List<RegCode>> getCodes() {
+        return regulationMapper.findRegCodes().stream()
+                .collect(Collectors.groupingBy(RegCode::getGroupCode, LinkedHashMap::new, Collectors.toList()));
     }
 
     /* ============================================================ *

@@ -39,6 +39,27 @@
          ORDER BY r.reg_info_id, f.id
     </select>
 
+    <!-- ================= 코드 계층 =================
+         common_code 에서 규제 그룹만 뽑는다. 그룹 코드는 target_type / item_type_cd 와 같은 값이다.
+
+         DB 는 계층을 parent_id(대리키)로 들고 있는데 여기서 self join 으로 상위 "코드" 를 꺼낸다.
+         충돌 판정이 다루는 값이 전부 코드라, id 를 그대로 올려보내면 판정 코드가
+         매번 id↔code 를 오가야 한다. 계층을 읽는 쪽이 한 번에 풀어서 준다.
+    -->
+    <select id="findRegCodes" resultType="RegCode">
+        SELECT g.group_code  AS group_code,
+               c.code_id     AS code,
+               c.code_name   AS name,
+               p.code_id     AS parent_code,
+               c.sort_order  AS sort_order
+          FROM common_code c
+          JOIN common_code_group g ON g.id = c.code_group_id
+          LEFT JOIN common_code p  ON p.id = c.parent_id
+         WHERE g.category = 'REGULATION'
+           AND c.use_yn = 'Y'
+         ORDER BY g.sort_order, c.sort_order, c.code_id
+    </select>
+
     <!-- ================= 전개(행→열) =================
          목록 "전개" 탭. 한 셀에 여러 줄로 쌓이던 값을 각각 열로 돌린 결과.
 

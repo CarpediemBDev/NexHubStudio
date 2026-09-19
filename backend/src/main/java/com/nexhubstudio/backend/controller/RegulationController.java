@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.nexhubstudio.backend.domain.RegCode;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,6 +50,15 @@ public class RegulationController {
             @RequestBody RegulationRequest.Save request,
             @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String userId) {
         return ResponseEntity.ok(ApiResponse.success("저장되었습니다.", regulationService.save(request, userId)));
+    }
+
+    /**
+     * 규제 코드 계층 (분야 · 권역&gt;국가 · 사업부&gt;제품군&gt;제품 · 규제&gt;규격&gt;인증서).
+     * 키는 target_type / item_type_cd 값과 같다.
+     */
+    @GetMapping("/codes")
+    public ResponseEntity<ApiResponse<Map<String, List<RegCode>>>> getCodes() {
+        return ResponseEntity.ok(ApiResponse.success(regulationService.getCodes()));
     }
 
     /**

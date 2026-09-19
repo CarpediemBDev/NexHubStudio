@@ -1,0 +1,2233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        규제 코드 계층 적재.
+
+        지금까지 코드 -> 이름과 계층(권역>국가 등)을 프론트 regulationMock.js 만 알고 있었다.
+        그래서 백엔드는 이름을 내려주지 못했고(전개 API 가 코드만 내린다),
+        무엇보다 충돌 판정의 leafScope("유럽" -> {FR,DE,IT...})를 서버에서 할 수 없어
+        판정 권위가 브라우저에 남아 있었다.
+
+        그룹 코드는 reg_info_target.target_type / reg_info_item.item_type_cd 값을 그대로 쓴다.
+        타입에서 그룹을 유도할 수 있어 조인에 매핑표가 필요 없다.
+        계층은 common_code.parent_id (v1.2 에서 추가된 자기참조) 로 건다.
+
+        이 파일은 손으로 쓰지 않는다 - src/data/regulationMock.js 에서 생성한다.
+        (190여 건을 옮겨 적으면 반드시 어긋난다)
+    -->
+
+    <changeSet id="20260919-seed-reg-code-groups" author="dev">
+        <insert tableName="common_code_group">
+            <column name="group_code" value="FIELD"/>
+            <column name="group_name" value="규제 분야"/>
+            <column name="description" value="규제 정보 규제 분야 코드"/>
+            <column name="sort_order" valueNumeric="901"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="REGION"/>
+            <column name="group_name" value="규제 권역"/>
+            <column name="description" value="규제 정보 규제 권역 코드"/>
+            <column name="sort_order" valueNumeric="902"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="COUNTRY"/>
+            <column name="group_name" value="규제 국가"/>
+            <column name="description" value="규제 정보 규제 국가 코드"/>
+            <column name="sort_order" valueNumeric="903"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="DIVISION"/>
+            <column name="group_name" value="규제 사업부"/>
+            <column name="description" value="규제 정보 규제 사업부 코드"/>
+            <column name="sort_order" valueNumeric="904"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="PRODUCT_GROUP"/>
+            <column name="group_name" value="규제 제품군"/>
+            <column name="description" value="규제 정보 규제 제품군 코드"/>
+            <column name="sort_order" valueNumeric="905"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="PRODUCT"/>
+            <column name="group_name" value="규제 제품"/>
+            <column name="description" value="규제 정보 규제 제품 코드"/>
+            <column name="sort_order" valueNumeric="906"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="REGULATION"/>
+            <column name="group_name" value="규제(법령)"/>
+            <column name="description" value="규제 정보 규제(법령) 코드"/>
+            <column name="sort_order" valueNumeric="907"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="STANDARD"/>
+            <column name="group_name" value="규격(기술기준)"/>
+            <column name="description" value="규제 정보 규격(기술기준) 코드"/>
+            <column name="sort_order" valueNumeric="908"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code_group">
+            <column name="group_code" value="CERT"/>
+            <column name="group_name" value="인증서/증빙"/>
+            <column name="description" value="규제 정보 인증서/증빙 코드"/>
+            <column name="sort_order" valueNumeric="909"/>
+            <column name="use_yn" value="Y"/>
+            <column name="category" value="REGULATION"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-field" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="SAFETY"/>
+            <column name="code_name" value="안전"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="EMC"/>
+            <column name="code_name" value="전자파(EMC)"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="RF"/>
+            <column name="code_name" value="무선(RF)"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="ENERGY"/>
+            <column name="code_name" value="에너지"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="ENV"/>
+            <column name="code_name" value="환경/유해물질"/>
+            <column name="sort_order" valueNumeric="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="RECYCLE"/>
+            <column name="code_name" value="자원순환"/>
+            <column name="sort_order" valueNumeric="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="LABEL"/>
+            <column name="code_name" value="표시/라벨"/>
+            <column name="sort_order" valueNumeric="7"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="BROADCAST"/>
+            <column name="code_name" value="방송/통신"/>
+            <column name="sort_order" valueNumeric="8"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="CHEM"/>
+            <column name="code_name" value="화학물질"/>
+            <column name="sort_order" valueNumeric="9"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'FIELD')"/>
+            <column name="code_id" value="ACCESS"/>
+            <column name="code_name" value="접근성"/>
+            <column name="sort_order" valueNumeric="10"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-region" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGION')"/>
+            <column name="code_id" value="R_ASIA"/>
+            <column name="code_name" value="아시아"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGION')"/>
+            <column name="code_id" value="R_EU"/>
+            <column name="code_name" value="유럽"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGION')"/>
+            <column name="code_id" value="R_NA"/>
+            <column name="code_name" value="북미"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGION')"/>
+            <column name="code_id" value="R_LA"/>
+            <column name="code_name" value="중남미"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGION')"/>
+            <column name="code_id" value="R_MEA"/>
+            <column name="code_name" value="중동/아프리카"/>
+            <column name="sort_order" valueNumeric="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGION')"/>
+            <column name="code_id" value="R_OCE"/>
+            <column name="code_name" value="오세아니아"/>
+            <column name="sort_order" valueNumeric="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-country" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="KR"/>
+            <column name="code_name" value="한국"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="JP"/>
+            <column name="code_name" value="일본"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="CN"/>
+            <column name="code_name" value="중국"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="VN"/>
+            <column name="code_name" value="베트남"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="IN"/>
+            <column name="code_name" value="인도"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="TW"/>
+            <column name="code_name" value="대만"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="HK"/>
+            <column name="code_name" value="홍콩"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="7"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="MO"/>
+            <column name="code_name" value="마카오"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="8"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="SG"/>
+            <column name="code_name" value="싱가포르"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="9"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="TH"/>
+            <column name="code_name" value="태국"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="10"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="MY"/>
+            <column name="code_name" value="말레이시아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="11"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="ID"/>
+            <column name="code_name" value="인도네시아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="12"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="PH"/>
+            <column name="code_name" value="필리핀"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="13"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="BN"/>
+            <column name="code_name" value="브루나이"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="14"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="MM"/>
+            <column name="code_name" value="미얀마"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="15"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="KH"/>
+            <column name="code_name" value="캄보디아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="16"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="LA"/>
+            <column name="code_name" value="라오스"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="17"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="BD"/>
+            <column name="code_name" value="방글라데시"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="18"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="PK"/>
+            <column name="code_name" value="파키스탄"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="19"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="LK"/>
+            <column name="code_name" value="스리랑카"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="20"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="NP"/>
+            <column name="code_name" value="네팔"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="21"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="MN"/>
+            <column name="code_name" value="몽골"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="22"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="KZ"/>
+            <column name="code_name" value="카자흐스탄"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="23"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="UZ"/>
+            <column name="code_name" value="우즈베키스탄"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_ASIA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="24"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="FR"/>
+            <column name="code_name" value="프랑스"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="25"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="DE"/>
+            <column name="code_name" value="독일"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="26"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="IT"/>
+            <column name="code_name" value="이탈리아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="27"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="ES"/>
+            <column name="code_name" value="스페인"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="28"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="PL"/>
+            <column name="code_name" value="폴란드"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="29"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="GB"/>
+            <column name="code_name" value="영국"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="30"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="NL"/>
+            <column name="code_name" value="네덜란드"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="31"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="BE"/>
+            <column name="code_name" value="벨기에"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="32"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="LU"/>
+            <column name="code_name" value="룩셈부르크"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="33"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="AT"/>
+            <column name="code_name" value="오스트리아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="34"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="CH"/>
+            <column name="code_name" value="스위스"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="35"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="SE"/>
+            <column name="code_name" value="스웨덴"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="36"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="NO"/>
+            <column name="code_name" value="노르웨이"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="37"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="DK"/>
+            <column name="code_name" value="덴마크"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="38"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="FI"/>
+            <column name="code_name" value="핀란드"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="39"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="IS"/>
+            <column name="code_name" value="아이슬란드"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="40"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="IE"/>
+            <column name="code_name" value="아일랜드"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="41"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="PT"/>
+            <column name="code_name" value="포르투갈"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="42"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="GR"/>
+            <column name="code_name" value="그리스"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="43"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="CY"/>
+            <column name="code_name" value="키프로스"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="44"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="MT"/>
+            <column name="code_name" value="몰타"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="45"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="CZ"/>
+            <column name="code_name" value="체코"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="46"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="SK"/>
+            <column name="code_name" value="슬로바키아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="47"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="HU"/>
+            <column name="code_name" value="헝가리"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="48"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="RO"/>
+            <column name="code_name" value="루마니아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="49"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="BG"/>
+            <column name="code_name" value="불가리아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="50"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="HR"/>
+            <column name="code_name" value="크로아티아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="51"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="SI"/>
+            <column name="code_name" value="슬로베니아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="52"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="RS"/>
+            <column name="code_name" value="세르비아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="53"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="EE"/>
+            <column name="code_name" value="에스토니아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="54"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="LV"/>
+            <column name="code_name" value="라트비아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="55"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="LT"/>
+            <column name="code_name" value="리투아니아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="56"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="UA"/>
+            <column name="code_name" value="우크라이나"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="57"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="TR"/>
+            <column name="code_name" value="튀르키예"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_EU' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="58"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="US"/>
+            <column name="code_name" value="미국"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_NA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="59"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="CA"/>
+            <column name="code_name" value="캐나다"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_NA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="60"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="MX"/>
+            <column name="code_name" value="멕시코"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_NA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="61"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="BR"/>
+            <column name="code_name" value="브라질"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="62"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="AR"/>
+            <column name="code_name" value="아르헨티나"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="63"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="CL"/>
+            <column name="code_name" value="칠레"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="64"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="CO"/>
+            <column name="code_name" value="콜롬비아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="65"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="PE"/>
+            <column name="code_name" value="페루"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="66"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="EC"/>
+            <column name="code_name" value="에콰도르"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="67"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="UY"/>
+            <column name="code_name" value="우루과이"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="68"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="PY"/>
+            <column name="code_name" value="파라과이"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="69"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="BO"/>
+            <column name="code_name" value="볼리비아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="70"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="VE"/>
+            <column name="code_name" value="베네수엘라"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="71"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="CR"/>
+            <column name="code_name" value="코스타리카"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="72"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="PA"/>
+            <column name="code_name" value="파나마"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="73"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="GT"/>
+            <column name="code_name" value="과테말라"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="74"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="DO"/>
+            <column name="code_name" value="도미니카공화국"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="75"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="AE"/>
+            <column name="code_name" value="UAE"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="76"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="SA"/>
+            <column name="code_name" value="사우디아라비아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="77"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="QA"/>
+            <column name="code_name" value="카타르"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="78"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="KW"/>
+            <column name="code_name" value="쿠웨이트"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="79"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="BH"/>
+            <column name="code_name" value="바레인"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="80"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="OM"/>
+            <column name="code_name" value="오만"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="81"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="IL"/>
+            <column name="code_name" value="이스라엘"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="82"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="JO"/>
+            <column name="code_name" value="요르단"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="83"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="IQ"/>
+            <column name="code_name" value="이라크"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="84"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="IR"/>
+            <column name="code_name" value="이란"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="85"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="EG"/>
+            <column name="code_name" value="이집트"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="86"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="MA"/>
+            <column name="code_name" value="모로코"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="87"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="TN"/>
+            <column name="code_name" value="튀니지"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="88"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="DZ"/>
+            <column name="code_name" value="알제리"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="89"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="NG"/>
+            <column name="code_name" value="나이지리아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="90"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="GH"/>
+            <column name="code_name" value="가나"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="91"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="KE"/>
+            <column name="code_name" value="케냐"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="92"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="ET"/>
+            <column name="code_name" value="에티오피아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="93"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="TZ"/>
+            <column name="code_name" value="탄자니아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="94"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="ZA"/>
+            <column name="code_name" value="남아프리카공화국"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_MEA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="95"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="AU"/>
+            <column name="code_name" value="호주"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_OCE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="96"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="NZ"/>
+            <column name="code_name" value="뉴질랜드"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_OCE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="97"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="FJ"/>
+            <column name="code_name" value="피지"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_OCE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="98"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="PG"/>
+            <column name="code_name" value="파푸아뉴기니"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_OCE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="99"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'COUNTRY')"/>
+            <column name="code_id" value="NC"/>
+            <column name="code_name" value="뉴칼레도니아"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'R_OCE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGION'))"/>
+            <column name="sort_order" valueNumeric="100"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-division" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DIVISION')"/>
+            <column name="code_id" value="VD"/>
+            <column name="code_name" value="VD사업부(영상디스플레이)"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DIVISION')"/>
+            <column name="code_id" value="DA"/>
+            <column name="code_name" value="DA사업부(생활가전)"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'DIVISION')"/>
+            <column name="code_id" value="MX"/>
+            <column name="code_name" value="MX사업부(모바일)"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-product_group" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP')"/>
+            <column name="code_id" value="PG_TV"/>
+            <column name="code_name" value="TV"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'VD' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'DIVISION'))"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP')"/>
+            <column name="code_id" value="PG_MON"/>
+            <column name="code_name" value="모니터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'VD' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'DIVISION'))"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP')"/>
+            <column name="code_id" value="PG_SIGN"/>
+            <column name="code_name" value="사이니지"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'VD' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'DIVISION'))"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP')"/>
+            <column name="code_id" value="PG_PROJ"/>
+            <column name="code_name" value="프로젝터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'VD' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'DIVISION'))"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP')"/>
+            <column name="code_id" value="PG_REF"/>
+            <column name="code_name" value="냉장고"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'DA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'DIVISION'))"/>
+            <column name="sort_order" valueNumeric="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP')"/>
+            <column name="code_id" value="PG_PHONE"/>
+            <column name="code_name" value="스마트폰"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'MX' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'DIVISION'))"/>
+            <column name="sort_order" valueNumeric="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-product" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_QLED"/>
+            <column name="code_name" value="QLED TV"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_NEO"/>
+            <column name="code_name" value="Neo QLED TV"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_OLED"/>
+            <column name="code_name" value="OLED TV"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_8K"/>
+            <column name="code_name" value="8K TV"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_LIFE"/>
+            <column name="code_name" value="라이프스타일 TV"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_MON27"/>
+            <column name="code_name" value="27&quot; 모니터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_MON' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_SIGN55"/>
+            <column name="code_name" value="55&quot; 사이니지"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_SIGN' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="7"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_PROJ4K"/>
+            <column name="code_name" value="4K 프로젝터"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PROJ' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="8"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_REF900"/>
+            <column name="code_name" value="비스포크 900L"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_REF' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="9"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'PRODUCT')"/>
+            <column name="code_id" value="P_FOLD"/>
+            <column name="code_name" value="폴더블폰"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'PG_PHONE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'PRODUCT_GROUP'))"/>
+            <column name="sort_order" valueNumeric="10"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-regulation" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_KC_SAFE"/>
+            <column name="code_name" value="전기용품 및 생활용품 안전관리법(안전확인)"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_RADIO"/>
+            <column name="code_name" value="전파법(방송통신기자재 적합성평가)"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_ENERGY"/>
+            <column name="code_name" value="에너지이용 합리화법(효율관리기자재)"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_STANDBY"/>
+            <column name="code_name" value="에너지이용 합리화법(대기전력저감프로그램)"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_EPR"/>
+            <column name="code_name" value="전자제품등 자원순환법"/>
+            <column name="sort_order" valueNumeric="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_KREACH"/>
+            <column name="code_name" value="화학물질등록평가법(K-REACH)"/>
+            <column name="sort_order" valueNumeric="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_BCAST"/>
+            <column name="code_name" value="방송법/지상파 UHD 수신 규격"/>
+            <column name="sort_order" valueNumeric="7"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_LABEL"/>
+            <column name="code_name" value="제품 표시·광고 규정(한글 표시)"/>
+            <column name="sort_order" valueNumeric="8"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_EU_LVD"/>
+            <column name="code_name" value="EU 저전압지침 LVD 2014/35/EU"/>
+            <column name="sort_order" valueNumeric="9"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_EU_ELABEL"/>
+            <column name="code_name" value="EU 에너지라벨 규정 2017/1369"/>
+            <column name="sort_order" valueNumeric="10"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_EU_EMC"/>
+            <column name="code_name" value="EU EMC 지침 2014/30/EU"/>
+            <column name="sort_order" valueNumeric="11"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_ASEAN_EMC"/>
+            <column name="code_name" value="ASEAN 전기전자 EMC 상호인정협정(MRA)"/>
+            <column name="sort_order" valueNumeric="12"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_JP_PSE"/>
+            <column name="code_name" value="일본 전기용품안전법(PSE)"/>
+            <column name="sort_order" valueNumeric="13"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_CN_CCC"/>
+            <column name="code_name" value="중국 강제성제품인증(CCC)"/>
+            <column name="sort_order" valueNumeric="14"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_EU_ROHS"/>
+            <column name="code_name" value="EU RoHS 지침 2011/65/EU"/>
+            <column name="sort_order" valueNumeric="15"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_UKCA"/>
+            <column name="code_name" value="영국 제품안전 규정(UKCA)"/>
+            <column name="sort_order" valueNumeric="16"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_US_FCC"/>
+            <column name="code_name" value="미국 FCC Part 15 / 캐나다 ICES-003"/>
+            <column name="sort_order" valueNumeric="17"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_MX_NOM"/>
+            <column name="code_name" value="멕시코 NOM 공식표준"/>
+            <column name="sort_order" valueNumeric="18"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_LA_SAFE"/>
+            <column name="code_name" value="중남미 국가별 전기안전 인증"/>
+            <column name="sort_order" valueNumeric="19"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_GCC"/>
+            <column name="code_name" value="GCC 기술규정 / 중동·아프리카 수입 적합성"/>
+            <column name="sort_order" valueNumeric="20"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_OCE_RCM"/>
+            <column name="code_name" value="호주·뉴질랜드 EESS / RCM"/>
+            <column name="sort_order" valueNumeric="21"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'REGULATION')"/>
+            <column name="code_id" value="RG_IECEE_CB"/>
+            <column name="code_name" value="IECEE CB Scheme"/>
+            <column name="sort_order" valueNumeric="22"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 1"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-standard" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_62368"/>
+            <column name="code_name" value="KC 62368-1 (AV·ICT 기기 안전)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_KC_SAFE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_KN32"/>
+            <column name="code_name" value="KN 32 (전자파 방사 허용기준)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_RADIO' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_KN35"/>
+            <column name="code_name" value="KN 35 (전자파 내성 기준)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_RADIO' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_RF_WIFI"/>
+            <column name="code_name" value="무선설비규칙 5GHz WLAN 기술기준"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_RADIO' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_EFF_TV"/>
+            <column name="code_name" value="효율관리기자재 운용규정 [별표] 텔레비전수상기"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_ENERGY' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_STANDBY"/>
+            <column name="code_name" value="대기전력저감프로그램 운용규정(TV)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_STANDBY' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_KROHS"/>
+            <column name="code_name" value="K-RoHS 유해물질 6종 제한"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_EPR' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="7"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_EPR_RATE"/>
+            <column name="code_name" value="EPR 재활용의무율 고시"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_EPR' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="8"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_SEPARATE"/>
+            <column name="code_name" value="분리배출 표시에 관한 지침"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_EPR' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="9"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_KREACH_REG"/>
+            <column name="code_name" value="K-REACH 등록·신고 대상물질"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_KREACH' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="10"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_ATSC3"/>
+            <column name="code_name" value="ATSC 3.0 / TTA 지상파 UHD 수신 규격"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_BCAST' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="11"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_KOR_LABEL"/>
+            <column name="code_name" value="전기용품 한글 표시사항 기준"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_LABEL' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="12"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_EN62368"/>
+            <column name="code_name" value="EN IEC 62368-1"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_EU_LVD' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="13"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_EU_ELABEL"/>
+            <column name="code_name" value="EU 2019/2013 (전자 디스플레이 에너지라벨)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_EU_ELABEL' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="14"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_EN55032"/>
+            <column name="code_name" value="EN 55032 / EN 55035"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_EU_EMC' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="15"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_ASEAN_CISPR32"/>
+            <column name="code_name" value="CISPR 32 (ASEAN 조화 EMC 방사 기준)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_ASEAN_EMC' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="16"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_JP_J62368"/>
+            <column name="code_name" value="J62368-1 (일본 AV·ICT 기기 안전)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_JP_PSE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="17"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_GB4943"/>
+            <column name="code_name" value="GB 4943.1 (중국 AV·ICT 기기 안전)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_CN_CCC' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="18"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_EN63000"/>
+            <column name="code_name" value="EN IEC 63000 (RoHS 기술문서)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_EU_ROHS' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="19"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_BS62368"/>
+            <column name="code_name" value="BS EN IEC 62368-1"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_UKCA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="20"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_FCC15B"/>
+            <column name="code_name" value="FCC Part 15 Subpart B / ICES-003"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_US_FCC' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="21"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_NOM001"/>
+            <column name="code_name" value="NOM-001-SCFI (전자기기 안전)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_MX_NOM' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="22"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_IEC62368_LA"/>
+            <column name="code_name" value="IEC 62368-1 국가 채택판 (NBR/IRAM 등)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_LA_SAFE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="23"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_GSO_IEC62368"/>
+            <column name="code_name" value="GSO IEC 62368-1"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_GCC' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="24"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_ASNZS62368"/>
+            <column name="code_name" value="AS/NZS 62368.1"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_OCE_RCM' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="25"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'STANDARD')"/>
+            <column name="code_id" value="ST_CB62368"/>
+            <column name="code_name" value="IEC 62368-1 (CB 시험 기준)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'RG_IECEE_CB' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'REGULATION'))"/>
+            <column name="sort_order" valueNumeric="26"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 2"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260919-seed-reg-code-cert" author="dev">
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_SAFE_DECL"/>
+            <column name="code_name" value="안전확인신고증명서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_SAFE_TEST"/>
+            <column name="code_name" value="KC 62368-1 시험성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_RF_REG"/>
+            <column name="code_name" value="적합등록필증"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_KN32' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_RF_TEST"/>
+            <column name="code_name" value="KN 32 방사시험성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_KN32' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_RF_IMM"/>
+            <column name="code_name" value="KN 35 내성시험성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_KN35' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="5"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_WIFI_CERT"/>
+            <column name="code_name" value="무선설비 적합인증서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_RF_WIFI' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="6"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_EFF_DECL"/>
+            <column name="code_name" value="효율등급 신고확인서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_EFF_TV' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="7"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_STBY_DECL"/>
+            <column name="code_name" value="대기전력저감 신고확인서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_STANDBY' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="8"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_ROHS_ANAL"/>
+            <column name="code_name" value="유해물질 분석성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_KROHS' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="9"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_EPR_CERT"/>
+            <column name="code_name" value="재활용의무이행 확인서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_EPR_RATE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="10"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_SEP_MARK"/>
+            <column name="code_name" value="분리배출 표시 확인서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_SEPARATE' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="11"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_KREACH_NOTI"/>
+            <column name="code_name" value="K-REACH 등록번호 통지서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_KREACH_REG' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="12"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_ATSC_TEST"/>
+            <column name="code_name" value="UHD 수신 적합성 시험성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_ATSC3' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="13"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_LABEL_CHK"/>
+            <column name="code_name" value="한글 표시사항 검수확인서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_KOR_LABEL' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="14"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_EU_DOC"/>
+            <column name="code_name" value="EU 적합성선언서(DoC)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_EN62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="15"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_EU_TEST"/>
+            <column name="code_name" value="EN IEC 62368-1 시험성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_EN62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="16"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_EU_EPREL"/>
+            <column name="code_name" value="EPREL 등록확인서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_EU_ELABEL' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="17"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_EU_EMC_DOC"/>
+            <column name="code_name" value="EMC 적합성선언서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_EN55032' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="18"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_ASEAN_EMC"/>
+            <column name="code_name" value="ASEAN MRA 지정시험소 EMC 성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_ASEAN_CISPR32' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="19"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_JP_PSE_SELF"/>
+            <column name="code_name" value="PSE 자기확인 시험기록"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_JP_J62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="20"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_CN_CCC"/>
+            <column name="code_name" value="CCC 인증서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_GB4943' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="21"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_CN_FACTORY"/>
+            <column name="code_name" value="CCC 공장심사 보고서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_GB4943' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="22"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_EU_ROHS_DOC"/>
+            <column name="code_name" value="RoHS 기술문서 / DoC"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_EN63000' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="23"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_UKCA_DOC"/>
+            <column name="code_name" value="UK 적합성선언서(UK DoC)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_BS62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="24"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_FCC_SDOC"/>
+            <column name="code_name" value="FCC SDoC 시험성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_FCC15B' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="25"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_NOM_CERT"/>
+            <column name="code_name" value="NOM 인증서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_NOM001' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="26"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_LA_CERT"/>
+            <column name="code_name" value="국가별 안전 인증서 (INMETRO/IRAM/SEC)"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_IEC62368_LA' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="27"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_GCC_GMARK"/>
+            <column name="code_name" value="G-Mark 적합성 증명서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_GSO_IEC62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="28"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_RCM_REG"/>
+            <column name="code_name" value="EESS 등록 확인서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_ASNZS62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="29"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_CB_CERT"/>
+            <column name="code_name" value="CB 인증서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_CB62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="30"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+        <insert tableName="common_code">
+            <column name="code_group_id" valueComputed="(SELECT id FROM common_code_group WHERE group_code = 'CERT')"/>
+            <column name="code_id" value="CT_CB_REPORT"/>
+            <column name="code_name" value="CB 시험성적서"/>
+            <column name="parent_id" valueComputed="(SELECT id FROM common_code WHERE code_id = 'ST_CB62368' AND code_group_id = (SELECT id FROM common_code_group WHERE group_code = 'STANDARD'))"/>
+            <column name="sort_order" valueNumeric="31"/>
+            <column name="use_yn" value="Y"/>
+            <column name="description" value="레벨 3"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

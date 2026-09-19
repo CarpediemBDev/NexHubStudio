@@ -16,6 +16,9 @@
     <!-- DML: 공통코드 초기 데이터 (운영 필수) -->
     <include file="db/changelog/dml/seed-common-codes.xml"/>
     <include file="db/changelog/dml/v20251204-insert-post-public-codes.xml"/>
+    <!-- 규제 코드 계층(분야/권역>국가/사업부>제품군>제품/규제>규격>인증서).
+         충돌 판정의 leafScope 와 코드→이름이 이 데이터를 쓴다. 샘플이 아니라 운영 필수다 -->
+    <include file="db/changelog/dml/seed-regulation-codes.xml"/>
 
     <!-- DML: 샘플 데이터 (개발/테스트 환경만) -->
     <include file="db/changelog/dml/seed-sample-data.xml"/>
