@@ -31,6 +31,19 @@ export const regulationApi = {
     http.post('/regulations/expanded', { regInfoIds }).then((r) => r.data),
 
   /**
+   * 저장 전 충돌 예측.
+   *
+   * 판정 규칙은 서버가 쥔다 — 저장할 때 서버가 같은 엔진으로 다시 판정하므로,
+   * 화면이 여기서 받은 결과를 고쳐 보내도 저장되는 판정은 바뀌지 않는다.
+   * 화면은 "무엇을 할지"(조치)만 정한다.
+   *
+   * @param {object} payload { master, targets, items } — 저장 payload 와 같은 모양
+   * @returns {Promise<Array>} [{ existRecord, conflictType, axisDetails, mainAxis, recommend }]
+   */
+  detectConflicts: (payload) =>
+    http.post('/regulations/detect-conflicts', payload).then((r) => r.data),
+
+  /**
    * 레코드 1건 저장. 신규/수정 모두 이 엔드포인트로 간다(수정은 서버가 새 버전으로 올린다).
    * @param {object} payload  { master, targets, items, attachFiles, changes, decisions }
    * @returns {Promise<object>} 저장된 레코드

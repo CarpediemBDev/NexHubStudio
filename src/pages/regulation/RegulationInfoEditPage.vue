@@ -200,7 +200,7 @@ import RegItemForm from './components/RegItemForm.vue'
 import RegInsightPanel from './components/RegInsightPanel.vue'
 
 import { useRegulationStore } from '@/stores/regulationStore'
-import { detectConflicts, targetCodes, itemCodes } from '@/utils/regulationConflict'
+import { targetCodes, itemCodes } from '@/utils/regulationConflict'
 import {
   buildItemTree,
   flattenItems,
@@ -254,6 +254,8 @@ export default {
       liveConflicts: [],
       detecting: false,
       detectTimer: null,
+      // 판정 요청 순번. 늦게 온 응답이 최신 결과를 덮어쓰는 것을 막는다
+      detectSeq: 0,
       resolvedKeys: [],
 
       insightTab: 'predict',
@@ -603,20 +605,44 @@ export default {
       this.master.attachFiles = this.master.attachFiles.filter((f) => f.fileId !== fileId)
     },
 
-    /* ================= 실시간 충돌 판정 ================= */
+    /* ================= 실시간 충돌 판정 =================
+     * 판정은 서버가 한다. 화면이 같은 규칙을 한 벌 더 들고 있으면 한쪽만 고쳤을 때
+     * 조용히 갈라지고, 무엇보다 계층 전개("유럽" -> 34개국)의 근거인 코드표가
+     * 이제 DB 에 있다.
+     *
+     * 입력할 때마다 부르므로 디바운스는 그대로 두고, 늦게 온 응답이 최신 결과를
+     * 덮어쓰지 않도록 순번을 붙인다 — 400ms 안에 두 번 입력하면 두 요청이 겹치고
+     * 먼저 보낸 쪽이 나중에 도착할 수 있다.
+     */
     scheduleDetect(delay = 400) {
       clearTimeout(this.detectTimer)
       this.detecting = true
-      this.detectTimer = setTimeout(() => {
-        const found = detectConflicts(this.masterAsRecord, this.store.recordsWithItems)
-        const prev = new Map(this.liveConflicts.map((c) => [c.existRecord.regInfoId, c.decisionCd]))
-        this.liveConflicts = found.map((c) => ({
-          ...c,
-          // 사용자가 이미 고른 조치는 재판정 후에도 유지한다
-          decisionCd: prev.get(c.existRecord.regInfoId) || c.recommend.decisionCd
-        }))
-        this.detecting = false
-      }, delay)
+      this.detectTimer = setTimeout(() => this.runDetect(), delay)
+    },
+    async runDetect() {
+      const seq = ++this.detectSeq
+      const rec = this.masterAsRecord
+      let found
+      try {
+        found = await this.store.detectConflicts({
+          master: this.master,
+          targets: rec.targets,
+          items: rec.items
+        })
+      } catch (e) {
+        // http.js 인터셉터가 이미 알린다. 직전 판정을 지우지 않고 그대로 둔다
+        if (seq === this.detectSeq) this.detecting = false
+        return
+      }
+      if (seq !== this.detectSeq) return // 더 최신 요청이 이미 떠 있다
+
+      const prev = new Map(this.liveConflicts.map((c) => [c.existRecord.regInfoId, c.decisionCd]))
+      this.liveConflicts = (found || []).map((c) => ({
+        ...c,
+        // 사용자가 이미 고른 조치는 재판정 후에도 유지한다
+        decisionCd: prev.get(c.existRecord.regInfoId) || c.recommend.decisionCd
+      }))
+      this.detecting = false
     },
     onDecisionChange({ index, decisionCd }) {
       const c = this.liveConflicts[index]

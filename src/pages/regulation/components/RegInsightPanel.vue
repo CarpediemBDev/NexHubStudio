@@ -142,7 +142,7 @@ export default {
     /** 'create' | 'edit' | 'view' */
     mode: { type: String, default: 'edit' },
     activeTab: { type: String, default: 'predict' },
-    /** detectConflicts() 실시간 결과 (+ decisionCd 부여) */
+    /** 서버 실시간 판정 결과 (POST /regulations/detect-conflicts + decisionCd 부여) */
     liveConflicts: { type: Array, default: () => [] },
     detecting: { type: Boolean, default: false },
     conflictHistories: { type: Array, default: () => [] },
