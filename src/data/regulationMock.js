@@ -232,12 +232,40 @@ export const standardCodes = [
   { code: 'ST_CB62368', name: 'IEC 62368-1 (CB 시험 기준)', parentCd: 'RG_IECEE_CB', levelNo: 2 }
 ]
 
+/**
+ * 레코드 상태.
+ *
+ * 작성중(DRAFT)은 두지 않는다. 신규 등록의 기본값이라 모든 레코드가 거기서 태어나는데,
+ * 저장 시점에 규제번호가 채번되므로 버려진 작성중 레코드마다 번호가 하나씩 소각된다.
+ * 번호가 연속이라 빈 번호는 "없어진 규제" 처럼 보인다.
+ * 검토중으로 올라가는 조건(제목 + 지역 1개 + 항목 1개)은 조사를 시작하는 시점에
+ * 이미 아는 값이라, 작성중 단계가 실제로 막아주던 것이 없었다.
+ */
 export const statusCodes = [
-  { code: 'DRAFT', name: '작성중' },
   { code: 'REVIEW', name: '검토중' },
   { code: 'ACTIVE', name: '시행중' },
   { code: 'EXPIRED', name: '폐지' }
 ]
+
+/**
+ * 상태 전이표. 화면·목업 핸들러·백엔드가 같은 규칙을 봐야 한다.
+ *   label  버튼에 쓰는 말
+ *   desc   그 전이가 무슨 뜻인지 (모달에서 고를 때 읽는다)
+ *   guard  추가 검사가 필요한 전이 (지금은 확정만)
+ */
+export const statusTransitions = {
+  REVIEW: [
+    { to: 'ACTIVE', label: '확정', desc: '현업이 실제로 지켜야 하는 규제가 됩니다.', guard: 'SAME_CONFLICT' },
+    { to: 'EXPIRED', label: '폐지', desc: '더 이상 적용하지 않습니다. 데이터는 남습니다.' }
+  ],
+  ACTIVE: [
+    { to: 'REVIEW', label: '재검토', desc: '시행을 멈추고 검토 단계로 되돌립니다.' },
+    { to: 'EXPIRED', label: '폐지', desc: '더 이상 적용하지 않습니다. 데이터는 남습니다.' }
+  ],
+  EXPIRED: [
+    { to: 'REVIEW', label: '복원', desc: '폐지를 되돌려 검토 단계로 가져옵니다.' }
+  ]
+}
 
 export const conflictTypes = [
   { code: 'SAME', name: '동일범위', desc: '기존 레코드와 적용 범위가 완전히 같음 (중복 등록)' },
@@ -497,7 +525,7 @@ export const regInfoList = [
     authority: '환경부 / 화학물질관리협회',
     url: 'https://kreach.me.go.kr',
     summary: '연간 1톤 이상 신규/기존 화학물질 사용 시 등록. TV는 부품 소재 기준 확인 필요.',
-    statusCd: 'DRAFT',
+    statusCd: 'REVIEW',
     versionNo: 1,
     effectiveDt: '2026-01-01',
     modDt: '2026-06-09',
@@ -674,7 +702,7 @@ export const regInfoList = [
     authority: '영국 OPSS',
     url: 'https://www.gov.uk/guidance/using-the-ukca-marking',
     summary: '영국(GB) 판매 모델에 UKCA 표시. UK DoC 별도 작성.',
-    statusCd: 'DRAFT',
+    statusCd: 'REVIEW',
     versionNo: 1,
     effectiveDt: '2026-10-01',
     modDt: '2026-08-21',
@@ -907,6 +935,47 @@ export const regConflictList = [
     decideId: 'park.cert',
     decideDt: '2025-04-01 10:50',
     statusCd: 'RESOLVED'
+  },
+  /* ---- [테스트 데이터] 확정(ACTIVE 전환) 화면 확인용 ----
+   * 확정 버튼은 "이 레코드에 쌓인 충돌이력을 보여주고 동의를 받는" 장치인데,
+   * 시드의 충돌 3건이 전부 이미 ACTIVE 인 레코드에 걸려 있어서 볼 수가 없었다.
+   * 아직 ACTIVE 가 아닌 레코드에 두 가지 경우를 만들어 둔다.
+   *   9004 : 조치 끝난 CHILD  -> 확정 화면에 이력으로 보이고, 확정은 통과
+   *   9005 : 미조치 SAME      -> 확정이 막히는 경우 (같은 범위가 둘 다 시행중이 될 수 없다)
+   */
+  {
+    conflictId: 9004,
+    newRegNo: 'REG-2026-0033',
+    newRegInfoId: 17,
+    existRegNo: 'REG-2026-0001',
+    existRegInfoId: 1,
+    conflictType: 'CHILD',
+    conflictAxis: 'GEO',
+    newScopeTxt: '아시아 > 중국',
+    existScopeTxt: '아시아(권역 전체)',
+    decisionCd: 'KEEP_BOTH',
+    decisionNote: '중국 CCC 는 국가 고유 절차라 하위 특례로 유지',
+    detectDt: '2026-03-04 10:31',
+    decideId: 'park.cn',
+    decideDt: '2026-03-04 10:45',
+    statusCd: 'RESOLVED'
+  },
+  {
+    conflictId: 9005,
+    newRegNo: 'REG-2026-0038',
+    newRegInfoId: 22,
+    existRegNo: 'REG-2026-0037',
+    existRegInfoId: 21,
+    conflictType: 'SAME',
+    conflictAxis: 'GEO',
+    newScopeTxt: '중남미 > 브라질, 아르헨티나',
+    existScopeTxt: '중남미 > 브라질, 아르헨티나',
+    decisionCd: null,
+    decisionNote: '',
+    detectDt: '2026-03-11 14:02',
+    decideId: null,
+    decideDt: null,
+    statusCd: 'DETECTED'
   }
 ]
 

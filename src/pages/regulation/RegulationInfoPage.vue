@@ -156,20 +156,9 @@
           </div>
           <span class="view-tabs-sep"></span>
 
-          <button class="btn-b2b-action" :disabled="!selectedRecord" @click="openDetail">
-            <i class="bi bi-file-text text-secondary me-1"></i>상세
-          </button>
+          <!-- 행에 거는 동작(상세·수정·상태)은 작업 컬럼에 있다. 여기엔 선택과 무관한 것만 둔다 -->
           <button class="btn-b2b-action" @click="openCreate">
             <i class="bi bi-plus-lg text-success me-1"></i>신규 등록
-          </button>
-          <button class="btn-b2b-action" :disabled="!selectedRecord" @click="openEdit">
-            <i class="bi bi-pencil-square text-primary me-1"></i>수정
-          </button>
-          <button class="btn-b2b-action" :disabled="!selectedRecord" @click="openHistory">
-            <i class="bi bi-clock-history text-warning me-1"></i>이력
-          </button>
-          <button class="btn-b2b-action" :disabled="!selectedRecord" @click="removeRecord">
-            <i class="bi bi-trash text-danger me-1"></i>삭제
           </button>
           <button class="btn-b2b-action" @click="exportExcel">
             <i class="bi bi-file-earmark-excel text-success me-1"></i>엑셀
@@ -217,7 +206,7 @@
           :editable="false"
           :checkable="true"
           :state-bar-visible="false"
-          :fixed-col-count="3"
+          :fixed-col-count="4"
           :sortable="true"
           :filterable="true"
           :group-panel-visible="true"
@@ -245,8 +234,103 @@
           :selected-reg-info-id="selectedRegInfoId"
           :toast="gridToast"
           @update:selected-reg-info-id="selectedRegInfoId = $event"
-          @open="openEdit"
+          @open="openDetailOf(selectedRegInfoId)"
         />
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 3. 상태 변경 모달 — 충돌이력을 먼저 보여주고 목적지를 고르게 한다  -->
+    <!-- ============================================================ -->
+    <div v-if="statusTarget" class="reg-modal-backdrop" @click.self="closeStatus">
+      <div class="reg-modal b2b-card bg-theme-card border border-theme rounded-3 shadow">
+        <div class="b2b-card-header bg-theme-subcard px-3 py-2 d-flex align-items-center border-bottom">
+          <span class="fw-bold text-theme-primary">
+            <i class="bi bi-arrow-left-right text-primary me-1"></i>상태 변경
+          </span>
+          <button type="button" class="btn-close ms-auto" :disabled="statusChanging" @click="closeStatus"></button>
+        </div>
+
+        <div class="reg-modal-body px-3 py-3">
+          <div class="mb-3">
+            <div class="fw-semibold text-theme-primary">{{ statusTarget.regNo }} · {{ statusTarget.title }}</div>
+            <div class="b2b-text-xs text-theme-secondary mt-1">
+              현재 상태
+              <span class="b2b-badge b2b-badge-secondary">{{ statusName(statusTarget.statusCd) }}</span>
+            </div>
+          </div>
+
+          <div class="b2b-text-sm fw-semibold text-theme-primary mb-2">
+            이 레코드의 충돌 이력
+            <span class="b2b-badge b2b-badge-secondary ms-1">{{ statusConflicts.length }}건</span>
+          </div>
+
+          <p v-if="!statusConflicts.length" class="b2b-text-sm text-theme-secondary mb-3">
+            기록된 충돌이 없습니다.
+          </p>
+
+          <div v-else class="table-responsive mb-3">
+            <table class="table table-sm align-middle mb-0 b2b-text-xs">
+              <thead>
+                <tr class="text-theme-secondary">
+                  <th>유형</th><th>축</th><th>상대 레코드</th><th>조치</th><th>감지일</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="c in statusConflicts" :key="c.conflictId">
+                  <td>
+                    <span class="b2b-badge" :class="c.conflictType === 'SAME' ? 'b2b-badge-danger' : 'b2b-badge-warning'">
+                      {{ c.typeNm }}
+                    </span>
+                  </td>
+                  <td class="text-theme-secondary">{{ c.conflictAxis }}</td>
+                  <td>
+                    <div class="text-theme-primary">{{ c.otherRegNo }}</div>
+                    <div class="text-theme-secondary">{{ c.otherTitle }}</div>
+                  </td>
+                  <td class="text-theme-secondary">{{ c.decisionNm }}</td>
+                  <td class="text-theme-secondary">{{ c.detectDt }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="b2b-text-sm fw-semibold text-theme-primary mb-2">어디로 바꿀까요?</div>
+          <label
+            v-for="o in statusOptions"
+            :key="o.to"
+            class="reg-trans"
+            :class="{ on: statusPick === o.to, off: !!o.blockedBy }"
+          >
+            <input
+              v-model="statusPick"
+              type="radio"
+              :value="o.to"
+              :disabled="!!o.blockedBy || statusChanging"
+              class="form-check-input mt-1"
+            />
+            <span class="reg-trans-body">
+              <span class="reg-trans-head">
+                {{ o.label }}
+                <i class="bi bi-arrow-right mx-1 text-theme-secondary"></i>
+                <span class="b2b-badge" :class="o.to === 'ACTIVE' ? 'b2b-badge-success' : 'b2b-badge-secondary'">
+                  {{ o.toName }}
+                </span>
+              </span>
+              <span class="b2b-text-xs text-theme-secondary d-block">{{ o.desc }}</span>
+              <span v-if="o.blockedBy" class="b2b-text-xs text-danger d-block mt-1">
+                <i class="bi bi-exclamation-octagon-fill me-1"></i>{{ o.blockedBy }} — 기존 레코드를 개정하거나 흡수한 뒤 다시 시도하세요.
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div class="px-3 py-2 border-top d-flex justify-content-end gap-2">
+          <button type="button" class="btn-b2b-action" :disabled="statusChanging" @click="closeStatus">취소</button>
+          <button type="button" class="btn-b2b-primary" :disabled="!statusPick || statusChanging" @click="confirmStatus">
+            <i class="bi bi-check2 me-1"></i>{{ statusChanging ? '변경 중…' : '변경' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -273,6 +357,7 @@ import {
   statusCodes
 } from '@/data/regulationMock'
 import { targetNames } from '@/utils/regulationConflict'
+import { conflictTypes, decisionCodes, statusTransitions as STATUS_TRANSITIONS } from '@/data/regulationMock'
 import { useRegulationStore } from '@/stores/regulationStore'
 import { itemSummary, itemLines } from '@/utils/regulationTree'
 
@@ -319,7 +404,7 @@ const COUNTRY_COL = 'countryTxt'
 
 // 컬럼 헤더 묶음. gridColumns 의 컬럼 이름을 그대로 배치한다.
 const COLUMN_LAYOUT = [
-  'statusCd', 'regNo', 'title', 'itemTxt', 'itemCnt', 'fieldNm', 'markNm',
+  'action', 'statusCd', 'regNo', 'title', 'itemTxt', 'itemCnt', 'fieldNm', 'markNm',
   { name: 'orgGroup', direction: 'horizontal', header: { text: '적용 제품' }, items: ['divisionTxt', 'productGroupTxt', 'productTxt'] },
   { name: 'geoGroup', direction: 'horizontal', header: { text: '적용 지역' }, items: ['regionTxt', COUNTRY_COL] },
   'url', 'attachCnt', 'conflictCnt', 'versionNo', 'effectiveDt', 'modDt'
@@ -374,6 +459,10 @@ export default {
       gridView: null,
       dataProvider: null,
       selectedRegInfoId: null,
+      // 상태 변경 모달. null 이면 닫힘
+      statusTarget: null,
+      statusPick: '',
+      statusChanging: false,
       gridFields: [
         { fieldName: 'regInfoId', dataType: 'number' },
         { fieldName: 'statusCd', dataType: 'text' },
@@ -412,6 +501,31 @@ export default {
     gridColumns() {
       return [
         {
+          // 행마다 거는 작업. 필드는 regInfoId 를 빌려 쓴다 — 값이 아니라 대상 식별자가 필요하다
+          name: 'action',
+          fieldName: 'regInfoId',
+          width: '168',
+          header: { text: '작업' },
+          styles: { textAlignment: 'center' },
+          sortable: false,
+          renderer: {
+            type: 'html',
+            callback: (grid, model) => {
+              const id = Number(model?.value)
+              const status = grid.getValue(model.index.itemIndex, 'statusCd')
+              // 갈 곳이 없는 상태면 상태 버튼을 죽인다. 전이표가 유일한 근거다
+              const next = STATUS_TRANSITIONS[status] || []
+              const st = next.length
+                ? `<span class="reg-act is-primary" data-act="status" data-id="${id}">상태</span>`
+                : `<span class="reg-act is-off" title="바꿀 수 있는 상태가 없습니다">상태</span>`
+              return (
+                `<span class="reg-act" data-act="detail" data-id="${id}">상세</span>` +
+                `<span class="reg-act" data-act="edit" data-id="${id}">수정</span>${st}`
+              )
+            }
+          }
+        },
+        {
           name: 'statusCd',
           fieldName: 'statusCd',
           width: '80',
@@ -420,7 +534,7 @@ export default {
           renderer: {
             type: 'html',
             callback: (grid, model) => {
-              const code = model?.value || 'DRAFT'
+              const code = model?.value || 'REVIEW'
               const name = (statusCodes.find((s) => s.code === code) || {}).name || code
               return `<span class="b2b-badge b2b-badge-${STATUS_BADGE[code] || 'secondary'}">${escapeHtml(name)}</span>`
             }
@@ -590,6 +704,23 @@ export default {
     pagedRows() {
       return this.listRows.slice(this.pageOffset, this.pageOffset + this.pageSize)
     },
+    /** 상태 모달이 보여줄 충돌이력 */
+    statusConflicts() {
+      return this.statusTarget ? this.conflictRowsOf(this.statusTarget.regInfoId) : []
+    },
+    /** 확정을 막는 것 = 조치되지 않은 동일범위 충돌 */
+    statusBlocking() {
+      return this.statusConflicts.filter((c) => c.conflictType === 'SAME' && c.statusCd !== 'RESOLVED')
+    },
+    /** 현재 상태에서 갈 수 있는 곳 + 각각의 차단 사유 */
+    statusOptions() {
+      if (!this.statusTarget) return []
+      return (STATUS_TRANSITIONS[this.statusTarget.statusCd] || []).map((o) => ({
+        ...o,
+        toName: this.statusName(o.to),
+        blockedBy: this.transitionBlockReason(o)
+      }))
+    },
     /** 전개 탭에 넘길 대상. 그리드가 아니라 조회 결과 전체 기준이다(페이징은 전개 쪽이 따로 한다) */
     listRowIds() {
       return this.listRows.map((r) => r.regInfoId)
@@ -690,8 +821,9 @@ export default {
         const row = newRow >= 0 ? dataProvider.getJsonRow(newRow) : null
         this.selectedRegInfoId = row ? row.regInfoId : null
       }
+      // 작업 컬럼의 첫 버튼과 같은 곳으로 간다 — 같은 행을 두 방법으로 열었을 때 다른 화면이 뜨면 헷갈린다
       gridView.onCellDblClicked = () => {
-        if (this.selectedRegInfoId) this.openEdit()
+        if (this.selectedRegInfoId) this.openDetailOf(this.selectedRegInfoId)
       }
 
       gridView.setColumnLayout(COLUMN_LAYOUT)
@@ -794,16 +926,27 @@ export default {
       return this.measureCtx
     },
     /**
-     * "더보기/접기" 클릭. 링크는 그리드가 그린 셀 안에 있으므로 바깥 요소에서 캡처 단계로 먼저 받고,
-     * 그리드까지 가지 않게 막는다 → 링크를 눌러도 행 선택이 바뀌거나 더블클릭(수정 화면 이동)으로 번지지 않는다.
+     * 셀 안에 그려 넣은 조작(더보기/접기, 작업 컬럼의 상세·확정) 클릭 처리.
+     *
+     * 이것들은 그리드가 그린 DOM 안에 있어서, 그냥 두면 클릭이 그리드까지 내려가
+     * 행 선택이 바뀌거나 더블클릭으로 번져 수정 화면으로 튄다.
+     * 그래서 바깥 요소에서 캡처 단계로 먼저 받아 막는다.
      */
     bindMoreLinks(el) {
       const types = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'dblclick', 'touchstart']
       const handler = (e) => {
-        const link = e.target.closest && e.target.closest('.reg-more')
-        if (!link) return
+        const hit = e.target.closest && e.target.closest('.reg-more, .reg-act')
+        if (!hit) return
         e.stopPropagation()
-        if (e.type === 'click') this.toggleExpand(Number(link.dataset.id), link.dataset.field)
+        if (e.type !== 'click') return
+        if (hit.classList.contains('reg-more')) {
+          this.toggleExpand(Number(hit.dataset.id), hit.dataset.field)
+          return
+        }
+        const id = Number(hit.dataset.id)
+        if (hit.dataset.act === 'detail') this.openDetailOf(id)
+        if (hit.dataset.act === 'edit') this.openEditOf(id)
+        if (hit.dataset.act === 'status') this.openStatus(id)
       }
       types.forEach((t) => el.addEventListener(t, handler, true))
       this.unbindMoreLinks = () => types.forEach((t) => el.removeEventListener(t, handler, true))
@@ -916,6 +1059,9 @@ export default {
     },
 
     /* ---------------- 코드명 ---------------- */
+    statusName(code) {
+      return (statusCodes.find((st) => st.code === code) || {}).name || code
+    },
     fieldName(code) {
       return (fieldCodes.find((f) => f.code === code) || {}).name || code
     },
@@ -950,25 +1096,77 @@ export default {
     openCreate() {
       this.goEditPage('RegulationInfoCreate')
     },
-    openDetail() {
-      const r = this.selectedRecord
-      if (r) this.goEditPage('RegulationInfoView', { regInfoId: r.regInfoId })
+    /** 작업 컬럼의 상세 — 행을 고르고 들어가야 돌아왔을 때 그 행이 선택돼 있다 */
+    openDetailOf(regInfoId) {
+      this.selectedRegInfoId = regInfoId
+      this.goEditPage('RegulationInfoView', { regInfoId })
     },
-    openEdit() {
-      const r = this.selectedRecord
-      if (r) this.goEditPage('RegulationInfoEdit', { regInfoId: r.regInfoId })
+    openEditOf(regInfoId) {
+      this.selectedRegInfoId = regInfoId
+      this.goEditPage('RegulationInfoEdit', { regInfoId })
     },
-    /** 이력은 상세 화면 우측 패널에서 본다 */
-    openHistory() {
-      const r = this.selectedRecord
-      if (r) this.goEditPage('RegulationInfoView', { regInfoId: r.regInfoId }, { tab: 'history' })
-    },
-    async removeRecord() {
-      const r = this.selectedRecord
+
+    /* ---------------- 상태 변경 ---------------- */
+    /**
+     * 확정 · 재검토 · 폐지 · 복원을 한 모달에서.
+     *
+     * 어느 전이든 이 레코드에 쌓인 충돌이력을 먼저 펼쳐 보여준다 —
+     * 등록 시점에 "둘 다 유지" 같은 조치로 넘어간 건들이 있고,
+     * 시행중으로 올리는 순간 그 판단이 실제 규제로 굳기 때문이다.
+     */
+    openStatus(regInfoId) {
+      const r = this.records.find((x) => x.regInfoId === regInfoId)
       if (!r) return
-      if (!window.confirm(`${r.regNo} 를 폐지 처리하시겠습니까? (물리 삭제 없이 상태만 변경)`)) return
-      await this.store.expireRecord(r.regInfoId)
-      showToast(`${r.regNo} 폐지 처리`, { type: 'success' })
+      this.selectedRegInfoId = regInfoId
+      this.statusTarget = r
+      this.statusChanging = false
+      // 갈 수 있는 곳이 하나뿐이면 미리 골라 둔다(폐지 → 복원 같은 경우)
+      const opts = STATUS_TRANSITIONS[r.statusCd] || []
+      const first = opts.find((o) => !this.transitionBlockReason(o))
+      this.statusPick = first ? first.to : ''
+    },
+    closeStatus() {
+      if (this.statusChanging) return
+      this.statusTarget = null
+      this.statusPick = ''
+    },
+    async confirmStatus() {
+      if (!this.statusTarget || !this.statusPick || this.statusChanging) return
+      this.statusChanging = true
+      try {
+        const saved = await this.store.changeStatus(this.statusTarget.regInfoId, this.statusPick)
+        showToast(`${saved.regNo} → ${this.statusName(saved.statusCd)}`, { type: 'success' })
+        this.statusTarget = null
+        this.statusPick = ''
+      } catch (e) {
+        // http.js 인터셉터가 서버 메시지로 토스트를 이미 띄운다. 모달은 열어 둔다
+      }
+      this.statusChanging = false
+    },
+    /**
+     * 이 전이를 막는 이유. 없으면 null.
+     * 지금은 확정만 조건이 있다 — 같은 범위를 시행중인 레코드가 둘이 될 수 없다.
+     */
+    transitionBlockReason(opt) {
+      if (opt.guard !== 'SAME_CONFLICT') return null
+      const n = this.statusBlocking.length
+      return n ? `동일범위(SAME) 충돌 ${n}건이 조치되지 않았습니다` : null
+    },
+    /** 확정 대상의 충돌이력. 상대 레코드 이름을 붙여 화면에서 바로 읽히게 한다 */
+    conflictRowsOf(regInfoId) {
+      return this.conflicts
+        .filter((c) => c.newRegInfoId === regInfoId || c.existRegInfoId === regInfoId)
+        .map((c) => {
+          const otherId = c.newRegInfoId === regInfoId ? c.existRegInfoId : c.newRegInfoId
+          const other = this.records.find((r) => r.regInfoId === otherId)
+          return {
+            ...c,
+            typeNm: (conflictTypes.find((t) => t.code === c.conflictType) || {}).name || c.conflictType,
+            decisionNm: (decisionCodes.find((d) => d.code === c.decisionCd) || {}).name || c.decisionCd || '미조치',
+            otherRegNo: (c.newRegInfoId === regInfoId ? c.existRegNo : c.newRegNo) || (other && other.regNo) || '-',
+            otherTitle: (other && other.title) || ''
+          }
+        })
     }
   }
 }
@@ -994,6 +1192,99 @@ export default {
   background: var(--b2b-color-primary, #0d6efd);
   color: #fff;
   font-weight: 600;
+}
+
+/* ---- 작업 컬럼의 상세/확정 버튼 (그리드가 그린 DOM 이라 :deep) ---- */
+.reg-page :deep(.reg-act) {
+  display: inline-block;
+  margin: 0 2px;
+  padding: 1px 8px;
+  font-size: 11px;
+  line-height: 18px;
+  border: 1px solid var(--b2b-color-border, #dee2e6);
+  border-radius: 4px;
+  background: var(--b2b-color-bg-card, #fff);
+  color: var(--b2b-color-text-secondary, #6c757d);
+  cursor: pointer;
+  user-select: none;
+}
+
+.reg-page :deep(.reg-act:hover) {
+  border-color: var(--b2b-color-primary, #0d6efd);
+  color: var(--b2b-color-primary, #0d6efd);
+}
+
+.reg-page :deep(.reg-act.is-primary) {
+  border-color: var(--b2b-color-primary, #0d6efd);
+  color: var(--b2b-color-primary, #0d6efd);
+  font-weight: 600;
+}
+
+/* 확정할 것이 없는 행(이미 시행중 / 폐지)은 눌리지 않는다 */
+.reg-page :deep(.reg-act.is-off) {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.reg-page :deep(.reg-act.is-off:hover) {
+  border-color: var(--b2b-color-border, #dee2e6);
+  color: var(--b2b-color-text-secondary, #6c757d);
+}
+
+/* ---- 확정 모달 ---- */
+.reg-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1060;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.reg-modal {
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.reg-modal-body {
+  overflow: auto;
+}
+
+/* ---- 상태 전이 선택지 ---- */
+.reg-trans {
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border: 1px solid var(--b2b-color-border, #dee2e6);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reg-trans.on {
+  border-color: var(--b2b-color-primary, #0d6efd);
+  background: var(--b2b-color-primary-subtle, #e7f1ff);
+}
+
+.reg-trans.off {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.reg-trans-body {
+  flex: 1;
+}
+
+.reg-trans-head {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b2b-color-text-primary);
 }
 
 /* ---- 검색조건에 들어간 국가 태그 ---- */

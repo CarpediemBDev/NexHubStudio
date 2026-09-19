@@ -13,7 +13,9 @@ import {
   regHistList,
   regConflictList,
   regItemList,
-  attachMock
+  attachMock,
+  statusCodes,
+  statusTransitions
 } from '@/data/regulationMock'
 
 /* ---------------- 응답 봉투 (백엔드 ApiResponse 와 동일) ---------------- */
@@ -25,6 +27,15 @@ const fail = (status, message) =>
 
 /* ---------------- 공용 ---------------- */
 const pad = (n) => String(n).padStart(2, '0')
+
+const statusName = (code) => (statusCodes.find((s) => s.code === code) || {}).name || code
+
+/** 상태 변경 이력에 남기는 사유. 왜 바뀌었는지가 이력에서 읽혀야 한다 */
+const STATUS_CHANGE_NOTE = {
+  ACTIVE: '충돌이력 확인 후 확정(시행중)',
+  REVIEW: '시행을 멈추고 검토중으로',
+  EXPIRED: '사용자 요청으로 폐지'
+}
 
 const stampNow = () => {
   const d = new Date()
@@ -314,6 +325,20 @@ export default [
   // 저장 (신규 = INSERT, 기존 = 새 버전으로 UPDATE)
   http.post('/api/regulations', async ({ request }) => {
     const { master, targets, items, attachFiles, changes, decisions = [] } = await request.json()
+
+    // 동일범위(SAME)는 중복 등록이라 저장 자체를 막는다. 기존 레코드를 개정(REPLACE)하거나
+    // 흡수(MERGE)하는 조치를 고른 경우에만 통과시킨다 — 그때는 결과가 한 건으로 남는다.
+    const sameUnresolved = decisions.filter(
+      (d) => d.conflictType === 'SAME' && !['REPLACE', 'MERGE', 'CANCEL'].includes(d.decisionCd)
+    )
+    if (sameUnresolved.length) {
+      return fail(
+        409,
+        `적용 범위가 완전히 같은 레코드가 ${sameUnresolved.length}건 있습니다. ` +
+          '중복 등록 대신 기존 레코드를 개정(REPLACE)하거나 흡수(MERGE)하세요.'
+      )
+    }
+
     const stamp = stampNow()
     const isNew = !master.regInfoId
 
@@ -386,28 +411,63 @@ export default [
   }),
 
   // 폐지 (물리 삭제 없이 상태만 EXPIRED)
-  http.post('/api/regulations/:regInfoId/expire', ({ params }) => {
+  /**
+   * 상태 변경 — 확정(ACTIVE) · 재검토(REVIEW) · 폐지(EXPIRED) · 복원.
+   *
+   * 전이마다 엔드포인트를 두지 않고 목적지만 받는다. 갈 수 있는지는 전이표가 정한다 —
+   * 규칙이 한 곳에 있어야 화면과 어긋나지 않는다(statusTransitions).
+   *
+   * 확정만 추가 검사가 있다. 미조치 동일범위(SAME)가 남아 있으면 막는다:
+   * 같은 분야·같은 범위를 시행중인 레코드가 둘이 되면 현업이 어느 쪽을 따라야 할지
+   * 정해지지 않는다. PARENT/CHILD/OVERLAP 은 상하위·부분중복이라 공존할 수 있다.
+   *
+   * 화면이 이미 막고 있어도 여기서 또 막는다 — 화면만 믿으면 API 를 직접 부르거나
+   * 다른 화면이 생겼을 때 규칙이 새어 나간다.
+   */
+  http.post('/api/regulations/:regInfoId/status', async ({ params, request }) => {
     const id = Number(params.regInfoId)
+    const { statusCd: to } = await request.json()
     const idx = db.records.findIndex((r) => r.regInfoId === id)
     if (idx < 0) return fail(404, '레코드를 찾을 수 없습니다.')
     const r = db.records[idx]
-    const next = { ...r, statusCd: 'EXPIRED', versionNo: r.versionNo + 1 }
+
+    const allowed = (statusTransitions[r.statusCd] || []).map((t) => t.to)
+    if (!allowed.includes(to)) {
+      return fail(409, `${statusName(r.statusCd)} 에서 ${statusName(to)} 로는 바꿀 수 없습니다.`)
+    }
+
+    if (to === 'ACTIVE') {
+      const blocking = db.conflicts.filter(
+        (c) =>
+          (c.newRegInfoId === id || c.existRegInfoId === id) &&
+          c.conflictType === 'SAME' &&
+          c.statusCd !== 'RESOLVED'
+      )
+      if (blocking.length) {
+        return fail(409, `동일범위(SAME) 충돌 ${blocking.length}건이 조치되지 않아 확정할 수 없습니다.`)
+      }
+    }
+
+    const next = { ...r, statusCd: to, versionNo: r.versionNo + 1 }
     fillSnapshot(r)
     db.records.splice(idx, 1, next)
     db.histories.push({
       histId: Date.now(),
       regInfoId: id,
       versionNo: next.versionNo,
-      changeType: 'DELETE',
-      changeNote: '사용자 요청으로 폐지',
+      // CHANGE_TYPE 은 INSERT/UPDATE/DELETE/CONFLICT_RESOLVE 네 가지다.
+      // 폐지만 DELETE 로 남기고 나머지 상태 변경은 UPDATE + 사유로 둔다
+      changeType: to === 'EXPIRED' ? 'DELETE' : 'UPDATE',
+      changeNote: STATUS_CHANGE_NOTE[to] || `상태를 ${statusName(to)} 로 변경`,
       regId: 'me',
       regDt: stampNow(),
       snapshotJson: JSON.stringify(snapshotOf(next)),
       masterChanged: true,
       changedItemIds: []
     })
-    return ok(next, '폐지 처리되었습니다.')
+    return ok(next, `${statusName(to)} 으로 변경되었습니다.`)
   }),
+
 
   // 등록은 취소했지만 충돌 감지 사실은 남기는 경우
   http.post('/api/regulations/conflict-histories', async ({ request }) => {
