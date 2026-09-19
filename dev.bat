@@ -4,10 +4,23 @@ setlocal EnableDelayedExpansion
 REM ===========================================================================
 REM  NexHubStudio dev launcher
 REM
-REM    dev.bat          backend + frontend  (frontend only if backend/ absent)
-REM    dev.bat front    frontend only  -> http://localhost:5173
+REM    dev.bat          backend + frontend, REAL data  (frontend calls the backend)
+REM    dev.bat mock     frontend only,  MOCK data  (no backend needed)
+REM    dev.bat api      frontend only,  REAL data  (backend already running elsewhere)
+REM    dev.bat front    same as mock  (kept for habit)
 REM    dev.bat back     backend only   -> https://localhost:8443
 REM    dev.bat clean    remove generated backend artifacts (no server start)
+REM
+REM  REAL vs MOCK is decided by which npm script the frontend runs:
+REM    npm run dev      -> --mode mock -> VITE_USE_MOCK=true  -> MSW answers /api
+REM    npm run dev:api  -> --mode api  -> VITE_USE_MOCK=false -> vite proxies
+REM                        /api to https://localhost:8443
+REM  Starting the backend and then running the frontend in mock mode would
+REM  leave the backend idle, so the combined launch uses dev:api.
+REM
+REM  "api" exists because backend\ lives only on feature/fullstack-migration.
+REM  On master you can still point the frontend at a backend started from that
+REM  worktree - the /api proxy is on both branches.
 REM
 REM  clean removes only regenerable, gitignored output:
 REM    backend\build    Gradle compile output
@@ -52,11 +65,19 @@ if defined BRANCH echo   branch : !BRANCH!
 echo   mode   : !MODE!
 echo.
 
+REM which npm script the frontend window runs. Only the combined launch
+REM (no argument) has a backend to talk to, so only it uses dev:api.
+set "FRONT_SCRIPT=dev"
+if /i "!MODE!"=="all" set "FRONT_SCRIPT=dev:api"
+if /i "!MODE!"=="api" set "FRONT_SCRIPT=dev:api"
+
 if /i "!MODE!"=="front" goto front
+if /i "!MODE!"=="mock"  goto front
+if /i "!MODE!"=="api"   goto front
 if /i "!MODE!"=="back"  goto back
 if /i "!MODE!"=="clean" goto clean
 if /i "!MODE!"=="all"   goto back
-echo  [X] unknown argument "!MODE!"   (use: front ^| back ^| clean ^| no argument)
+echo  [X] unknown argument "!MODE!"   (use: mock ^| api ^| front ^| back ^| clean ^| no argument)
 endlocal
 exit /b 1
 
@@ -125,9 +146,14 @@ REM ------------------------------------------------------------- backend ---
 :back
 if exist "backend\gradlew.bat" goto have_backend
 if /i "!MODE!"=="back" goto no_backend
+REM backend\ lives only on feature/fullstack-migration. Without it there is
+REM nothing for dev:api to talk to, so fall back to mock instead of leaving the
+REM frontend pointed at a dead proxy (every /api call would 500).
+set "FRONT_SCRIPT=dev"
 REM Do not use "!" here: EnableDelayedExpansion consumes it even when escaped.
-echo  [*] backend\ not found - starting frontend only.
+echo  [*] backend\ not found - starting frontend only, MOCK data.
 echo      Need the backend?  git switch feature/fullstack-migration
+echo      Backend already running elsewhere?  dev.bat api
 echo.
 goto front
 
@@ -163,14 +189,16 @@ if not exist "node_modules" (
   call npm install
   if errorlevel 1 goto npm_failed
 )
-echo   frontend starting -^> !FRONT_URL!
-start "NexHub Frontend" cmd /k ""%~f0" _child_front"
+echo   frontend starting -^> !FRONT_URL!   ^(npm run !FRONT_SCRIPT!^)
+start "NexHub Frontend" cmd /k ""%~f0" _child_front "!FRONT_SCRIPT!""
 
 :done
 echo.
 echo  ----------------------------------------------------------
 if /i not "!MODE!"=="back"  echo   frontend : !FRONT_URL!
 if defined STARTED_BACK     echo   backend  : !BACK_URL!    health: !BACK_URL!/actuator/health
+if /i "!FRONT_SCRIPT!"=="dev:api" echo   data     : REAL   (backend query, H2 file db)
+if /i "!FRONT_SCRIPT!"=="dev"     echo   data     : MOCK   (MSW in the browser, no backend)
 echo.
 echo   Each server runs in its own window. Close it or press Ctrl+C to stop.
 echo.
@@ -202,8 +230,11 @@ goto :eof
 
 :child_front
 cd /d "%~dp0"
+set "FRONT_SCRIPT=%~2"
+if "%FRONT_SCRIPT%"=="" set "FRONT_SCRIPT=dev"
 echo  [frontend] cwd=%CD%
-call npm run dev
+echo  [frontend] npm run %FRONT_SCRIPT%
+call npm run %FRONT_SCRIPT%
 echo.
 echo  [frontend] process ended (exit %ERRORLEVEL%)
 goto :eof
