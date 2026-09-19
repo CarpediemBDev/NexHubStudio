@@ -21,7 +21,10 @@
       @init="onGridInit"
     >
       <template #toolbar-right>
-        <span v-if="loading" class="b2b-text-xs text-theme-secondary me-2">
+        <span v-if="exporting" class="b2b-text-xs text-theme-secondary me-2">
+          <i class="bi bi-arrow-repeat me-1"></i>엑셀 준비 중… (전체 제품 열로)
+        </span>
+        <span v-else-if="loading" class="b2b-text-xs text-theme-secondary me-2">
           <i class="bi bi-arrow-repeat me-1"></i>불러오는 중…
         </span>
         <span v-else class="b2b-text-xs text-theme-secondary me-2">
@@ -86,6 +89,8 @@ export default {
       totalCount: 0,
       loading: false,
       loadSeq: 0,
+      // 엑셀 내보내는 중. 그동안 페이지를 통째로 바꿔 놓으므로 표시가 필요하다
+      exporting: false,
       page: 1,
       pageSize: 20,
       gridView: null,
@@ -218,6 +223,69 @@ export default {
         this.$emit('update:selectedRegInfoId', row ? row.regInfoId : null)
       }
       gridView.onCellDblClicked = () => this.$emit('open')
+    },
+    /**
+     * 엑셀은 전체 제품을 열로 내보낸다.
+     *
+     * 화면의 열은 "이 페이지에 나온 제품" 뿐이라 그대로 내보내면 페이지마다 다른 표가
+     * 나온다. 열 구성을 전체 기준으로 만들려면 전체를 한 페이지로 불러오면 된다 —
+     * 서버가 "그 페이지 레코드들이 쓰는 제품" 으로 열을 만들므로, 페이지가 곧 전체면
+     * 열도 전체가 된다. 열 계산 규칙을 화면에 한 벌 더 두지 않으려고 이 방법을 쓴다.
+     *
+     * 끝나면 보던 페이지로 되돌린다.
+     */
+    async exportExcel() {
+      if (this.exporting || !this.totalCount) return
+      const prevPage = this.page
+      const prevSize = this.pageSize
+      this.exporting = true
+      try {
+        this.pageSize = this.totalCount
+        this.page = 1
+        if (!(await this.waitReady())) {
+          throw new Error('그리드가 전체 데이터를 그리지 못했습니다.')
+        }
+        await this.runExport()
+      } finally {
+        this.pageSize = prevSize
+        this.page = prevPage
+        this.exporting = false
+      }
+    },
+    /**
+     * 열이 바뀌면 그리드가 통째로 다시 만들어지고(:key), 데이터도 새로 들어간다.
+     * 컬럼 구성이 우연히 같으면 재생성이 없으므로 init 이벤트를 기다릴 수 없다 —
+     * 그래서 "로딩이 끝났고 그리드에 지금 행이 다 들어갔는지" 를 직접 확인한다.
+     */
+    async waitReady(timeoutMs = 20000) {
+      const t0 = Date.now()
+      while (Date.now() - t0 < timeoutMs) {
+        await this.$nextTick()
+        if (
+          !this.loading &&
+          this.gridView &&
+          this.dataProvider &&
+          this.dataProvider.getRowCount() === this.gridRows.length
+        ) {
+          return true
+        }
+        await new Promise((r) => setTimeout(r, 50))
+      }
+      return false
+    },
+    runExport() {
+      return new Promise((resolve, reject) => {
+        try {
+          this.gridView.exportGrid({
+            type: 'excel',
+            target: 'local',
+            fileName: '규제정보_교차표.xlsx',
+            done: resolve
+          })
+        } catch (e) {
+          reject(e)
+        }
+      })
     },
     ellipsisRenderer() {
       return {
