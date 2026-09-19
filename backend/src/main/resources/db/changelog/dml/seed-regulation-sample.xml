@@ -3462,4 +3462,20 @@
         </update>
     </changeSet>
 
+    <!--
+        시드가 PK 를 명시값으로 넣어서(reg_info 1~25, item 6082, hist 125, conflict 9005)
+        identity 카운터가 그 값들과 어긋나 있다. 그대로 두면 처음 저장하는 순간
+        "Unique index or primary key violation" 으로 죽는다 —
+        시드 직후에는 멀쩡하고 사용자가 첫 저장을 눌러야 터지므로 기동 검사로는 못 잡는다.
+
+        각 테이블의 시드 최대값보다 넉넉히 위에서 다시 시작하게 한다.
+        ALTER TABLE ... ALTER COLUMN ... RESTART WITH 는 H2 와 PostgreSQL 10+ 에서 같은 문법이다.
+    -->
+    <changeSet id="20260919-seed-9-restart-identity" author="dev">
+        <sql>ALTER TABLE reg_info ALTER COLUMN reg_info_id RESTART WITH 1000</sql>
+        <sql>ALTER TABLE reg_info_item ALTER COLUMN item_id RESTART WITH 10000</sql>
+        <sql>ALTER TABLE reg_info_hist ALTER COLUMN hist_id RESTART WITH 1000</sql>
+        <sql>ALTER TABLE reg_conflict_hist ALTER COLUMN conflict_id RESTART WITH 10000</sql>
+    </changeSet>
+
 </databaseChangeLog>

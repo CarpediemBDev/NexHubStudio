@@ -170,12 +170,29 @@ public class RegulationService {
             throw new BusinessException(ErrorCode.REGULATION_FIELD_REQUIRED);
         }
 
+        // 충돌은 서버가 직접 판정한다. 화면이 보낸 conflictType 은 쓰지 않는다 —
+        // 그것만 믿으면 API 를 직접 부르거나 다른 화면이 생겼을 때 충돌을 없는 셈 칠 수 있다.
+        // 화면이 정하는 것은 "무엇을 할지"(decisionCd) 뿐이고, "무엇이 충돌인지"는 여기서 정한다.
+        List<RegulationConflictEngine.Conflict> detected = detectConflicts(req);
+
+        // 화면이 고른 조치를 상대 레코드 기준으로 붙인다
+        Map<Long, RegulationRequest.ConflictDecision> chosen = new LinkedHashMap<>();
+        for (RegulationRequest.ConflictDecision d : nullSafe(req.getDecisions())) {
+            if (d.getExistRecord() != null && d.getExistRecord().getRegInfoId() != null) {
+                chosen.put(d.getExistRecord().getRegInfoId(), d);
+            }
+        }
+
         // 동일범위(SAME)는 중복 등록이라 저장 자체를 막는다.
         // 기존을 개정(REPLACE)하거나 흡수(MERGE)하는 조치를 고른 경우에만 통과시킨다 —
         // 그때는 결과가 한 건으로 남는다. 목업 핸들러도 같은 규칙이다.
-        boolean sameUnresolved = nullSafe(req.getDecisions()).stream()
-                .anyMatch(d -> "SAME".equals(d.getConflictType())
-                        && !List.of("REPLACE", "MERGE", "CANCEL").contains(String.valueOf(d.getDecisionCd())));
+        boolean sameUnresolved = detected.stream()
+                .filter(c -> c.conflictType() == RegulationConflictEngine.ConflictType.SAME)
+                .anyMatch(c -> {
+                    RegulationRequest.ConflictDecision d = chosen.get(c.existRecord().getRegInfoId());
+                    return d == null
+                            || !List.of("REPLACE", "MERGE", "CANCEL").contains(String.valueOf(d.getDecisionCd()));
+                });
         if (sameUnresolved) {
             throw new BusinessException(ErrorCode.REGULATION_SAME_CONFLICT_UNRESOLVED);
         }
@@ -236,7 +253,8 @@ public class RegulationService {
                 .regId(userId)
                 .build());
 
-        insertConflictHistories(decisions, null, record, userId);
+        // 이력에 남는 판정(유형·축·범위)은 서버가 판정한 값이다. 화면 값은 조치만 쓴다
+        insertDetectedConflictHistories(detected, chosen, record, userId);
         applyDecisionSideEffects(decisions, record, userId);
 
         return toRecord(record, targetsOf(regInfoId), countAttachments(record.getAttachGroupId()));
@@ -260,6 +278,94 @@ public class RegulationService {
     public Map<String, List<RegCode>> getCodes() {
         return regulationMapper.findRegCodes().stream()
                 .collect(Collectors.groupingBy(RegCode::getGroupCode, LinkedHashMap::new, Collectors.toList()));
+    }
+
+    /* ============================================================ *
+     * 충돌 판정
+     * ============================================================ */
+
+    /**
+     * 저장하려는 내용 vs 이미 등록된 레코드 → 충돌 목록.
+     *
+     * 화면도 입력하는 동안 같은 판정을 미리 보여주지만, 저장되는 값의 권위는 여기다.
+     * 화면이 준 conflictType 을 그대로 믿으면 API 를 직접 부르거나 다른 화면이 생겼을 때
+     * 충돌을 없는 셈 칠 수 있다.
+     *
+     * 폐지 레코드와 분야가 다른 레코드는 엔진이 걸러낸다.
+     */
+    @Transactional(readOnly = true)
+    public List<RegulationConflictEngine.Conflict> detectConflicts(RegulationRequest.Save req) {
+        RegulationConflictEngine engine = new RegulationConflictEngine(getCodes());
+        return engine.detect(toScoped(req), loadExistingScoped());
+    }
+
+    /** 화면이 쓰는 모양으로. 프론트 detectConflicts() 결과와 필드명을 맞춘다 */
+    public List<RegulationResponse.ConflictPreview> toPreview(List<RegulationConflictEngine.Conflict> list) {
+        return list.stream().map(c -> RegulationResponse.ConflictPreview.builder()
+                .existRecord(RegulationResponse.ExistRef.builder()
+                        .regInfoId(c.existRecord().getRegInfoId())
+                        .regNo(c.existRecord().getRegNo())
+                        .title(c.existRecord().getTitle())
+                        .statusCd(c.existRecord().getStatusCd())
+                        .versionNo(c.existRecord().getVersionNo())
+                        .build())
+                .conflictType(c.conflictType().name())
+                .axisDetails(c.axisDetails().stream().map(this::toAxisDetail).toList())
+                .mainAxis(toAxisDetail(c.mainAxis()))
+                .recommend(RegulationResponse.Recommend.builder()
+                        .decisionCd(c.recommendDecisionCd())
+                        .text(c.recommendText())
+                        .build())
+                .build()).toList();
+    }
+
+    private RegulationResponse.AxisDetail toAxisDetail(RegulationConflictEngine.AxisDetail d) {
+        return RegulationResponse.AxisDetail.builder()
+                .axisKey(d.axisKey())
+                .axisName(d.axisName())
+                .relation(d.relation().name())
+                .newScopeTxt(d.newScopeTxt())
+                .existScopeTxt(d.existScopeTxt())
+                .build();
+    }
+
+    /** 요청 payload 를 판정이 읽을 수 있는 모양으로. 아직 저장 전이라 DB 가 아니라 요청에서 만든다 */
+    private RegulationConflictEngine.Scoped toScoped(RegulationRequest.Save req) {
+        RegulationRequest.Master m = req.getMaster();
+        RegInfo rec = RegInfo.builder()
+                .regInfoId(m.getRegInfoId())
+                .fieldCd(m.getFieldCd())
+                .statusCd(m.getStatusCd())
+                .build();
+        List<RegInfoTarget> targets = nullSafe(req.getTargets()).stream()
+                .map(t -> RegInfoTarget.builder()
+                        .targetType(t.getTargetType())
+                        .targetCd(t.getTargetCd())
+                        .build())
+                .toList();
+        List<RegInfoItem> items = nullSafe(req.getItems()).stream()
+                .map(it -> RegInfoItem.builder()
+                        .itemTypeCd(it.getItemTypeCd())
+                        .itemCd(it.getItemCd())
+                        .build())
+                .toList();
+        return new RegulationConflictEngine.Scoped(rec, targets, items);
+    }
+
+    /**
+     * 기존 레코드 전부를 적용대상·항목과 함께.
+     * 판정이 축을 읽으려면 셋이 다 필요하고, 레코드마다 따로 조회하면 N+1 이 된다.
+     */
+    private List<RegulationConflictEngine.Scoped> loadExistingScoped() {
+        Map<Long, List<RegInfoTarget>> targets = regulationMapper.findAllTargets().stream()
+                .collect(Collectors.groupingBy(RegInfoTarget::getRegInfoId, LinkedHashMap::new, Collectors.toList()));
+        Map<Long, List<RegInfoItem>> items = regulationMapper.findAllItems().stream()
+                .collect(Collectors.groupingBy(RegInfoItem::getRegInfoId, LinkedHashMap::new, Collectors.toList()));
+        return regulationMapper.findAllRecords().stream()
+                .map(r -> new RegulationConflictEngine.Scoped(r,
+                        targets.getOrDefault(r.getRegInfoId(), List.of()),
+                        items.getOrDefault(r.getRegInfoId(), List.of())))
+                .toList();
     }
 
     /* ============================================================ *
@@ -447,6 +553,47 @@ public class RegulationService {
             regulationMapper.attachFilesToGroup(fileGroupId, fileIds);
         }
         regulationMapper.detachFilesNotIn(fileGroupId, fileIds);
+    }
+
+    /**
+     * 서버가 판정한 충돌을 이력으로 남긴다.
+     *
+     * 유형·축·범위 문자열은 전부 판정 결과에서 온다. 화면에서 오는 것은 조치(decisionCd)와
+     * 메모뿐이다 — 판정과 조치를 한 쪽에서 다 받으면 "충돌이 없다고 우기는" 저장을 막을 수 없다.
+     * 화면이 조치를 고르지 않은 충돌은 권고안을 그대로 기록한다(감지 사실은 남아야 한다).
+     */
+    private void insertDetectedConflictHistories(List<RegulationConflictEngine.Conflict> detected,
+                                                 Map<Long, RegulationRequest.ConflictDecision> chosen,
+                                                 RegInfo saved, String userId) {
+        LocalDateTime now = LocalDateTime.now();
+        for (RegulationConflictEngine.Conflict c : detected) {
+            RegInfo exist = c.existRecord();
+            RegulationRequest.ConflictDecision d = chosen.get(exist.getRegInfoId());
+
+            String decisionCd = d != null && !isBlank(d.getDecisionCd())
+                    ? d.getDecisionCd() : c.recommendDecisionCd();
+            String note = d != null && !isBlank(d.getDecisionNote())
+                    ? d.getDecisionNote() : c.recommendText();
+
+            regulationMapper.insertConflict(RegConflictHist.builder()
+                    .newRegInfoId(saved == null ? null : saved.getRegInfoId())
+                    .newRegNo(saved == null ? "(등록취소)" : saved.getRegNo())
+                    .existRegInfoId(exist.getRegInfoId())
+                    .existRegNo(exist.getRegNo())
+                    .conflictType(c.conflictType().name())
+                    .conflictAxis(c.mainAxis().axisKey())
+                    .newScopeTxt(c.mainAxis().newScopeTxt())
+                    .existScopeTxt(c.mainAxis().existScopeTxt())
+                    .decisionCd(decisionCd)
+                    .decisionNote(note)
+                    .detectDt(now)
+                    .decideId(userId)
+                    .decideDt(d != null ? now : null)
+                    // 화면이 조치를 고르지 않았으면 감지만 된 상태로 남긴다.
+                    // 확정(ACTIVE)은 미조치 SAME 이 있으면 막히므로 이 구분이 실제로 작동한다
+                    .statusCd(d != null ? "RESOLVED" : "DETECTED")
+                    .build());
+        }
     }
 
     private void insertConflictHistories(List<RegulationRequest.ConflictDecision> list, String forcedDecision,

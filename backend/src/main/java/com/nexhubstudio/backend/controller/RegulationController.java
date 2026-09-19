@@ -62,6 +62,18 @@ public class RegulationController {
     }
 
     /**
+     * 저장 전 충돌 예측.
+     * 화면이 입력하는 동안 보여주려고 부른다. 저장 시에는 서버가 같은 엔진으로 다시 판정하므로
+     * 이 응답을 고쳐 보내도 저장되는 판정은 바뀌지 않는다.
+     */
+    @PostMapping("/detect-conflicts")
+    public ResponseEntity<ApiResponse<List<RegulationResponse.ConflictPreview>>> detectConflicts(
+            @RequestBody RegulationRequest.Save request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                regulationService.toPreview(regulationService.detectConflicts(request))));
+    }
+
+    /**
      * 상태 변경 — 확정(ACTIVE) · 재검토(REVIEW) · 폐지(EXPIRED) · 복원.
      * 전이마다 엔드포인트를 두지 않고 목적지만 받는다. 갈 수 있는지는 서비스의 전이표가 정한다.
      */

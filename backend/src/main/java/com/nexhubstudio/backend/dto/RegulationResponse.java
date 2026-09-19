@@ -61,6 +61,56 @@ public class RegulationResponse {
     }
 
     /**
+     * POST /api/regulations/detect-conflicts — 저장 전 충돌 예측.
+     * 화면이 입력하는 동안 보여주는 값이고, 저장 시에는 서버가 같은 엔진으로 다시 판정한다.
+     * 모양은 프론트 detectConflicts() 결과와 맞춘다.
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ConflictPreview {
+        private ExistRef existRecord;
+        private String conflictType;
+        private List<AxisDetail> axisDetails;
+        private AxisDetail mainAxis;
+        private Recommend recommend;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ExistRef {
+        private Long regInfoId;
+        private String regNo;
+        private String title;
+        private String statusCd;
+        private Integer versionNo;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AxisDetail {
+        private String axisKey;
+        private String axisName;
+        private String relation;
+        private String newScopeTxt;
+        private String existScopeTxt;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Recommend {
+        private String decisionCd;
+        private String text;
+    }
+
+    /**
      * POST /api/regulations/expanded — 전개(행→열) 결과.
      * 행 한 줄 = (레코드 × 규제 × 규격 × 관리항목 × 제품) 조합 하나.
      */
