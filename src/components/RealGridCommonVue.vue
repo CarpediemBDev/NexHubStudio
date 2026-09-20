@@ -80,6 +80,7 @@ import 'realgrid/dist/realgrid-white.css'
 import { showToast } from '@/utils/toastUtil.js'
 import { useTabStore } from '@/stores/tabStore.js'
 import { captureViewState, applyViewState } from '@/utils/realgridOps'
+import { bindGridTooltip } from '@/utils/realgridTooltip'
 import { bindResizeRepaint } from '@/utils/realgridResizeRepaint'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
@@ -163,12 +164,13 @@ export default {
     })
   },
   beforeUnmount() {
-    if (this._unbindRepaint) this._unbindRepaint()
     if (this.gridId) {
       this.saveGridLayout()
     }
     if (this._fitObserver) this._fitObserver.disconnect()
     cancelAnimationFrame(this._fitRaf)
+    if (this._unbindTooltip) this._unbindTooltip()
+    if (this._unbindRepaint) this._unbindRepaint()
   },
   computed: {
     wrapperHeight() {
@@ -681,6 +683,9 @@ export default {
       if (!gv) return
 
       this.gridView = markRaw(gv)
+      // RealGrid 툴팁을 공통 툴팁으로 표시한다. 표시 여부는 아래 display/header 기본 옵션에서 켜고,
+      // 화면별 options/gridOptions 로 끌 수 있다.
+      if (!this._unbindTooltip) this._unbindTooltip = bindGridTooltip(gv)
       // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
       if (!this._unbindRepaint) this._unbindRepaint = bindResizeRepaint(gv)
       this.dataProvider = markRaw((realGridComp && realGridComp.dataProvider) || (gv.getDataSource && gv.getDataSource()))
@@ -713,11 +718,16 @@ export default {
 
       this.applyControlBars(customOpts)
       this.gridView.setFooter({ visible: this.resolvedUseFooter, ...(customOpts.footer || {}) })
+      this.gridView.setHeader({
+        showTooltip: true,
+        tooltipEllipsisOnly: true,
+        ...(customOpts.header || {})
+      })
 
       // 행 높이는 반드시 그리드에 알린다. CSS 로 행을 키우면 그리드가 모르는 높이가 생겨
       // 셀 선택 표시가 행과 어긋난다(grid-theme.css 참고).
       if (this.resolvedGroupPanelVisible) {
-        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, showTooltip: true, tooltipEllipsisOnly: true, ...(customOpts.displayOptions || {}) })
         // 2단 상하 배치: 1단 상단 서브 툴바와 2단 RealGrid 순수 groupPanel이 각각 100% 가로 폭으로 독립 표출되도록 visible: true 적용
         this.gridView.setGroupPanel({ visible: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupPanel || {}) })
         this.gridView.setGroupingOptions({ enabled: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupingOptions || {}) })
@@ -729,7 +739,7 @@ export default {
           ...(customOpts.rowGroup || {})
         })
       } else {
-        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, showTooltip: true, tooltipEllipsisOnly: true, ...(customOpts.displayOptions || {}) })
       }
 
       if (this.gridId) {

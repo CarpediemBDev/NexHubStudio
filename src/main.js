@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import vValidation from './directives/validation'
 import vValidatedForm from './directives/validatedForm'
+import { vTooltip } from './components/common/tooltip'
 import { showToast } from './utils/toastUtil'
 import './utils/mdEditorLocale' // md-editor-v3 한국어 로케일 전역 등록
 
@@ -62,6 +63,7 @@ enableMocking().then((mocked) => {
   app.use(router)
   app.directive('validation', vValidation)
   app.directive('validated-form', vValidatedForm)
+  app.directive('tooltip', vTooltip)
   app.mount('#app')
   if (!mocked) {
     showToast('목업 모드를 시작하지 못했습니다. 데이터 요청이 백엔드로 전송됩니다.', { type: 'error', duration: 6000 })

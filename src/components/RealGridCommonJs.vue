@@ -70,6 +70,7 @@ import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
 import { captureViewState, applyViewState } from '@/utils/realgridOps'
+import { bindGridTooltip } from '@/utils/realgridTooltip'
 import { bindResizeRepaint } from '@/utils/realgridResizeRepaint'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
@@ -685,6 +686,7 @@ export default {
     },
 
     destroyGrid() {
+      if (this._unbindTooltip) this._unbindTooltip()
       if (this._unbindRepaint) this._unbindRepaint()
       if (this.gridView) {
         try { this.gridView.destroy() } catch (e) { /* noop */ }
@@ -706,6 +708,9 @@ export default {
       this.dataProvider = markRaw(new LocalDataProvider(true))
       this.gridView = markRaw(new GridView(container))
       this.gridView.setDataSource(this.dataProvider)
+      // RealGrid 툴팁을 공통 툴팁으로 표시한다. 표시 여부는 아래 display/header 기본 옵션에서 켜고,
+      // 화면별 options/gridOptions 로 끌 수 있다.
+      this._unbindTooltip = bindGridTooltip(this.gridView)
       // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
       this._unbindRepaint = bindResizeRepaint(this.gridView)
 
@@ -735,11 +740,16 @@ export default {
 
       this.applyControlBars(customOpts)
       this.gridView.setFooter({ visible: this.resolvedUseFooter, ...(customOpts.footer || {}) })
+      this.gridView.setHeader({
+        showTooltip: true,
+        tooltipEllipsisOnly: true,
+        ...(customOpts.header || {})
+      })
 
       // 행 높이는 반드시 그리드에 알린다. CSS 로 행을 키우면 그리드가 모르는 높이가 생겨
       // 셀 선택 표시가 행과 어긋난다(grid-theme.css 참고).
       if (this.resolvedGroupPanelVisible) {
-        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, showTooltip: true, tooltipEllipsisOnly: true, ...(customOpts.displayOptions || {}) })
         this.gridView.setGroupPanel({ visible: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupPanel || {}) })
         this.gridView.setGroupingOptions({ enabled: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupingOptions || {}) })
         this.gridView.setSortingOptions({ enabled: true, ...(customOpts.sortingOptions || {}) })
@@ -750,7 +760,7 @@ export default {
           ...(customOpts.rowGroup || {})
         })
       } else {
-        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, ...(customOpts.displayOptions || {}) })
+        this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, showTooltip: true, tooltipEllipsisOnly: true, ...(customOpts.displayOptions || {}) })
       }
 
       if (this.fields && this.fields.length > 0) {

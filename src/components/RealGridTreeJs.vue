@@ -70,6 +70,7 @@ import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
 import { searchGrid as opsSearchGrid, captureViewState, applyViewState } from '@/utils/realgridOps'
+import { bindGridTooltip } from '@/utils/realgridTooltip'
 import { bindResizeRepaint } from '@/utils/realgridResizeRepaint'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
@@ -904,6 +905,7 @@ export default {
     // 소멸
     // =========================================================
     destroyGrid() {
+      if (this._unbindTooltip) this._unbindTooltip()
       if (this._unbindRepaint) this._unbindRepaint()
       if (this.gridView) {
         try { this.gridView.destroy() } catch (e) { /* noop */ }
@@ -933,6 +935,8 @@ export default {
       this.dataProvider = markRaw(new LocalTreeDataProvider())
       this.gridView = markRaw(new TreeView(container))
       this.gridView.setDataSource(this.dataProvider)
+      // RealGrid 툴팁을 공통 툴팁으로 표시한다. 표시 여부는 아래 display/header 기본 옵션에서 켠다.
+      this._unbindTooltip = bindGridTooltip(this.gridView)
       // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
       this._unbindRepaint = bindResizeRepaint(this.gridView)
 
@@ -951,6 +955,10 @@ export default {
       this.applySortingOptions()
       this.bindTreeEvents()
       this.gridView.setFooter({ visible: this.resolvedUseFooter })
+      this.gridView.setHeader({
+        showTooltip: true,
+        tooltipEllipsisOnly: true
+      })
 
       this.gridView.setDisplayOptions({
         // 행 높이는 반드시 그리드에 알린다. CSS 로 행을 키우면 그리드가 모르는 높이가 생겨
@@ -959,6 +967,8 @@ export default {
         fitStyle: 'evenFill',
         rowHoverType: 'row',
         rowResizable: this.resolvedRowResizable,
+        showTooltip: true,
+        tooltipEllipsisOnly: true,
         selectionStyle: 'block'
       })
       try {

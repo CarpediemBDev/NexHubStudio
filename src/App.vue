@@ -1,9 +1,13 @@
 <template>
   <router-view />
+  <!-- 공통 툴팁 (화면에 하나). 열기: v-tooltip 또는 @/components/common/tooltip 의 showTooltip -->
+  <AppTooltip />
 </template>
 
 <script>
-export default { name: 'App' }
+import AppTooltip from '@/components/common/AppTooltip.vue'
+
+export default { name: 'App', components: { AppTooltip } }
 </script>
 
 <style>
