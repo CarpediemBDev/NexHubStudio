@@ -7,6 +7,10 @@
 >
 > **증상**: 헤더에 마우스를 대면 커서가 `↔` 로 바뀐다. 그런데 드래그해도 컬럼 폭이 안 변한다.
 > (변형) 컬럼 순서를 바꾸면 그제서야 적용된다. / 정렬은 잘 되는데 필터도 안 된다.
+>
+> 📌 **원인 하나는 이미 밝혀져 있습니다 → [부록 A](#부록-a--_updatelock-으로-레이아웃-갱신이-통째로-막히는-경우)**
+> 증상이 "정렬만 되고 리사이즈·필터는 안 되며 순서를 바꾸면 풀린다" 면 부록 A 부터 확인하세요.
+> 거기서 안 걸리면 아래 절차로 내려옵니다.
 
 ---
 
@@ -148,6 +152,8 @@ widthOf(gv, 'regNo')                              // 197  ← 이것만 진짜
     const d = RG.gv.getDisplayOptions ? RG.gv.getDisplayOptions() : {}
     const f = RG.gv.getFixedOptions ? RG.gv.getFixedOptions() : {}
     return {
+      // ★ true 면 레이아웃 갱신이 통째로 막힌다 → 부록 A
+      _updateLock: RG.gv._updateLock, _loading: RG.gv._loading,
       visibilityState: document.visibilityState,
       '조상 transform/zoom': scaled,
       'rg-root 개수': document.querySelectorAll('.rg-root').length,
@@ -249,15 +255,18 @@ gridView.onLayoutPropertyChanged = (grid, layout, prop) => {
 
 **`setTimeout` 지연이 필수입니다.** 핸들러는 드래그가 확정되기 전에 불립니다.
 
-#### 2-4. `beginUpdate()` 불균형 확인
+#### 2-4. `beginUpdate()` 불균형 확인 → **부록 A**
 
-재페인트가 중단된 채 남아 있으면 무엇을 해도 안 그려집니다.
+레이아웃 갱신이 잠긴 채 남아 있으면 무엇을 해도 안 그려집니다.
 
 ```js
+__rg.gv._updateLock                                                  // true 면 확정
 __rg.calls.filter(c => /beginUpdate|endUpdate/.test(c.m)).map(c => c.m)
 // beginUpdate 수 > endUpdate 수 이면 불균형.
 // try/finally 없이 중간에 예외가 나면 이렇게 된다.
 ```
+
+RealGrid 내부 소스와 해결법은 **[부록 A](#부록-a--_updatelock-으로-레이아웃-갱신이-통째로-막히는-경우)** 에 있습니다.
 
 ---
 
@@ -396,3 +405,126 @@ STEP3  : 이벤트 →  / 포인터 →  / 조상 배율 →  / 설정 →
 ```
 
 마지막 줄이 제일 중요합니다. **사람 손으로 확인하지 않은 처방은 처방이 아닙니다.**
+
+
+---
+
+## 부록 A — `_updateLock` 으로 레이아웃 갱신이 통째로 막히는 경우
+
+증상 조합이 **"정렬은 되는데 리사이즈·필터는 안 되고, 컬럼 순서를 바꾸면 그제서야 풀린다"** 라면
+십중팔구 이것입니다. RealGrid 내부 소스로 설명됩니다.
+
+### A-1. 확인된 소스 (realgrid 2.10.0, `dist/main.js`)
+
+난독화된 번들에서 그대로 뽑은 것입니다.
+
+```js
+r.prototype.beginUpdate = function () { this._updateLock = !0 }
+
+r.prototype.endUpdate = function (t) {
+  (t || this._updateLock) && (this._updateLock = !1, this.refreshView())
+}
+
+r.prototype.invalidateLayout = function (t) {
+  (t || !this._updateLock && !this._loading) && i.prototype.invalidateLayout.call(this)
+}
+```
+
+읽는 법:
+
+- `beginUpdate()` 가 `_updateLock = true` 로 잠근다
+- `invalidateLayout(t)` 는 **`t` 가 참이거나, 잠금도 로딩도 아닐 때만** 상위 구현을 부른다
+- 따라서 **`_updateLock` 이 남아 있으면 인자 없는 `invalidateLayout()` 은 통째로 무시된다**
+- `_loading` 도 같은 게이트다 — 데이터 로딩 중에도 레이아웃 갱신이 씹힌다
+
+### A-2. 왜 정렬만 멀쩡한가
+
+| 동작 | 타는 경로 | `_updateLock` 영향 |
+|---|---|---|
+| **정렬** | 데이터 경로 (`refreshView`) | **없음** → 정상 동작 |
+| **컬럼 리사이즈** | 레이아웃 경로 (`invalidateLayout()`) | **막힘** → 폭은 기록되는데 안 그려짐 |
+| **컬럼 필터** | 레이아웃 경로 | **막힘** |
+| **컬럼 순서 변경** | `invalidate()` 를 직접 호출해 게이트를 우회 | **뚫림** → 밀려 있던 폭이 한꺼번에 튀어나옴 |
+
+증상 네 가지가 한 줄로 설명됩니다. 다른 가설로는 이 조합이 설명되지 않습니다.
+
+### A-3. 확인 방법
+
+```js
+// 잠겨 있는가
+__rg.gv._updateLock          // true 면 이것이 원인
+__rg.gv._loading             // true 여도 같은 결과
+
+// beginUpdate / endUpdate 짝이 맞는가 (계측 키트를 심은 뒤)
+__rg.calls.filter(c => /beginUpdate|endUpdate/.test(c.m)).map(c => c.m)
+```
+
+`beginUpdate` 수 > `endUpdate` 수 이면 **짝이 빠진 것**입니다.
+전형적인 원인은 그 사이에서 예외가 터지는 코드입니다.
+
+```js
+// ❌ 중간에 예외가 나면 endUpdate 를 영영 못 탄다 → 그리드가 잠긴 채 남는다
+gv.beginUpdate()
+dp.setFields(fields)
+gv.setColumns(cols)      // 여기서 throw 되면
+dp.setRows(rows)
+gv.endUpdate()           // 여기 못 온다
+```
+
+### A-4. 해결 ① 근본 — `endUpdate()` 를 `finally` 로 옮긴다
+
+```js
+gv.beginUpdate()
+try {
+  dp.setFields(fields)
+  gv.setColumns(cols)
+  dp.setRows(rows)
+} finally {
+  gv.endUpdate()         // ← 예외가 나도 반드시 푼다
+}
+```
+
+이게 진짜 수정입니다. **리사이즈와 필터가 같이 살아납니다.**
+잠긴 채로 이미 떠 있는 화면을 즉시 풀어야 한다면 `gv.endUpdate(true)` 로 강제 해제할 수 있습니다
+(A-1 의 `t` 인자가 그 용도입니다).
+
+### A-5. 해결 ② 보정 — 잠금을 못 건드릴 때
+
+앱 코드를 당장 못 고치거나 `beginUpdate` 를 부르는 곳이 라이브러리 안쪽이라면,
+리사이즈 직후 `resetSize()` 로 화면만 깨웁니다. **`_updateLock` 과 무관하게 동작합니다(실측).**
+
+```js
+gridView.onLayoutPropertyChanged = (grid, layout, prop) => {
+  if (prop !== 'displayWidth') return      // width / cellWidth 로는 안 온다
+  setTimeout(() => grid.resetSize(), 50)   // 즉시·rAF 는 드래그 커밋 전이라 옛 값을 다시 잰다
+}
+```
+
+세 가지 다 지켜야 합니다. 하나라도 틀리면 안 먹습니다.
+`refresh()` 와 `invalidateLayout(true)` 는 둘 다 효과가 없었습니다.
+
+**한계**: 이건 화면만 깨우는 대증요법입니다. 같이 막혀 있는 **컬럼 필터는 못 살립니다.**
+A-4 를 할 수 있으면 A-4 를 하세요.
+
+### A-6. 공통 컴포넌트에 걸 때
+
+그리드를 감싸는 공통 컴포넌트가 있다면 거기 한 번만 걸면 모든 화면이 덮입니다.
+이때 **페이지가 나중에 `gridView.onLayoutPropertyChanged = fn` 으로 자기 콜백을 넣으면
+보정이 지워지므로**, 대입을 가로채 뒤에 이어 붙여야 합니다.
+
+```js
+const handler = (grid, layout, prop) => {
+  if (prop === 'displayWidth') setTimeout(() => grid.resetSize(), 50)
+  return pageCallback ? pageCallback(grid, layout, prop) : undefined
+}
+Object.defineProperty(gridView, 'onLayoutPropertyChanged', {
+  configurable: true,
+  enumerable: true,
+  get: () => handler,
+  set: (fn) => { pageCallback = typeof fn === 'function' ? fn : null }
+})
+```
+
+NexHubStudio 구현: `src/utils/realgridResizeRepaint.js` — `bindResizeRepaint(gridView)` 를
+`RealGridCommonJs` / `RealGridCommonVue` / `RealGridTreeJs` 가 그리드 생성 직후 부릅니다.
+`setResizeRepaint(gridView, false)` 로 껐다 켜며 증상을 대조할 수 있습니다.
