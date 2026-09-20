@@ -70,6 +70,7 @@ import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
 import { searchGrid as opsSearchGrid, captureViewState, applyViewState } from '@/utils/realgridOps'
+import { bindResizeRepaint } from '@/utils/realgridResizeRepaint'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
 /**
@@ -903,6 +904,7 @@ export default {
     // 소멸
     // =========================================================
     destroyGrid() {
+      if (this._unbindRepaint) this._unbindRepaint()
       if (this.gridView) {
         try { this.gridView.destroy() } catch (e) { /* noop */ }
         this.gridView = null
@@ -931,6 +933,8 @@ export default {
       this.dataProvider = markRaw(new LocalTreeDataProvider())
       this.gridView = markRaw(new TreeView(container))
       this.gridView.setDataSource(this.dataProvider)
+      // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
+      this._unbindRepaint = bindResizeRepaint(this.gridView)
 
       this.dataProvider.softDeleting = this.resolvedSoftDeletable
       this.gridView.hideDeletedRows = this.hideDeletedRows

@@ -263,7 +263,10 @@ gridView.onLayoutPropertyChanged = (grid, layout, prop) => {
 __rg.gv._updateLock                                                  // true 면 확정
 __rg.calls.filter(c => /beginUpdate|endUpdate/.test(c.m)).map(c => c.m)
 // beginUpdate 수 > endUpdate 수 이면 불균형.
-// try/finally 없이 중간에 예외가 나면 이렇게 된다.
+
+document.querySelectorAll('.rg-data-cell').length
+//  0  → 주입 도중 잠김 (예외로 endUpdate 를 못 탐)
+// >0  → 주입 뒤 잠김   (짝 없는 beginUpdate 호출)  ← 신고되는 쪽. try/finally 로는 안 고쳐진다
 ```
 
 RealGrid 내부 소스와 해결법은 **[부록 A](#부록-a--_updatelock-으로-레이아웃-갱신이-통째로-막히는-경우)** 에 있습니다.
@@ -375,7 +378,7 @@ NexHubStudio 에서 같은 구조를 만들어 하나씩 껐다 켜며 확인했
 
 | 의심 | 결과 |
 |---|---|
-| 그리드 컴포넌트 **1개**에 동적 컬럼/필드/행을 주입하는 구조 | **무관.** 똑같이 만들어도 리사이즈 정상 |
+| 그리드 컴포넌트 **1개**에 동적 컬럼/필드/행을 주입하는 구조 | **무관.** 같은 화면에서 정적 주입과 나란히 놓고 재확인 → A-7 |
 | `:columns="[]" :fields="[]" :rows="[]"` 로 두고 함수로 채우는 방식 | **무관** |
 | `height: max(700px, calc(100vh - 400px))` | **무관** |
 | `rowHeight: -1` (내용 맞춤) | **무관** |
@@ -460,33 +463,81 @@ __rg.calls.filter(c => /beginUpdate|endUpdate/.test(c.m)).map(c => c.m)
 ```
 
 `beginUpdate` 수 > `endUpdate` 수 이면 **짝이 빠진 것**입니다.
-전형적인 원인은 그 사이에서 예외가 터지는 코드입니다.
+
+여기서 멈추지 마세요. **짝이 빠진 시점이 언제냐**에 따라 증상도 처방도 갈립니다 → A-4.
+가르는 기준은 하나, **행이 그려져 있는가**입니다.
 
 ```js
-// ❌ 중간에 예외가 나면 endUpdate 를 영영 못 탄다 → 그리드가 잠긴 채 남는다
+document.querySelectorAll('.rg-data-cell').length
+//  0    → 주입 도중 잠김 (유형 ①)
+//  >0   → 주입 뒤 잠김   (유형 ②)  ← 리사이즈만 안 된다고 신고되는 쪽
+```
+
+유형 ② 는 호출 **순서**를 봐야 잡힙니다. 데이터가 다 그려진 뒤에 찍히는 `beginUpdate` 가 범인입니다.
+
+```js
+;['beginUpdate', 'endUpdate'].forEach((m) => {
+  const o = gv[m].bind(gv)
+  gv[m] = (...a) => { console.trace('[GV] ' + m); return o(...a) }
+})
+```
+
+`console.trace` 라서 **어느 함수가 불렀는지 스택에 그대로 찍힙니다.**
+화면이 다 그려진 뒤, 사용자가 아무것도 안 했는데 찍히는 `beginUpdate` 를 찾으세요.
+
+### A-4. 해결 ① 근본 — 잠근 쪽을 고친다
+
+잠금은 두 가지입니다. **증상이 다르고, 처방도 다릅니다.** 진단 페이지에서 둘 다 재현해 확인했습니다.
+
+| | 화면의 행 | 정렬 | 리사이즈·필터 | 처방 |
+|---|---|---|---|---|
+| **유형 ① 주입 도중 잠김** | **안 그려짐** | — | — | `try / finally` |
+| **유형 ② 주입 뒤 잠김** | 정상 | 정상 | **죽음** | 호출자를 찾아 제거 |
+
+#### 유형 ① — 주입 도중 예외로 `endUpdate()` 를 못 탄다
+
+```js
+// ❌ setColumns 에서 throw 되면 endUpdate 는 영영 안 불린다
 gv.beginUpdate()
 dp.setFields(fields)
-gv.setColumns(cols)      // 여기서 throw 되면
+gv.setColumns(cols)
 dp.setRows(rows)
 gv.endUpdate()           // 여기 못 온다
 ```
 
-### A-4. 해결 ① 근본 — `endUpdate()` 를 `finally` 로 옮긴다
-
 ```js
+// ✅
 gv.beginUpdate()
 try {
   dp.setFields(fields)
   gv.setColumns(cols)
   dp.setRows(rows)
 } finally {
-  gv.endUpdate()         // ← 예외가 나도 반드시 푼다
+  gv.endUpdate()         // 예외가 나도 반드시 푼다
 }
 ```
 
-이게 진짜 수정입니다. **리사이즈와 필터가 같이 살아납니다.**
+데이터 반영까지 함께 밀리므로 **행이 아예 안 그려집니다.** 금방 들키고, 리사이즈 문제로 신고되지 않습니다.
+
+#### 유형 ② — 주입이 끝난 뒤 누군가 `beginUpdate()` 만 부르고 간다
+
+**신고되는 증상은 거의 이쪽입니다.** 데이터도 정렬도 멀쩡하고 리사이즈·필터만 죽습니다.
+
+```js
+// 주입은 정상적으로 끝났다 (endUpdate 까지 호출됨)
+await fillGrid()
+
+// … 그 뒤 어딘가에서
+gv.beginUpdate()         // ❌ 짝이 없다. 여기서부터 레이아웃이 언다
+showLoadingOverlay()
+```
+
+**`try / finally` 로는 안 고쳐집니다.** 주입 블록에는 문제가 없으니까요.
+A-3 의 `console.trace` 로 호출자를 찾아 `endUpdate()` 를 붙이거나, 그 호출을 없애야 합니다.
+흔한 자리는 **로딩 오버레이 진입, 일괄 편집/선택 모드 진입, 외부 라이브러리·공통 모듈의 훅**입니다.
+
 잠긴 채로 이미 떠 있는 화면을 즉시 풀어야 한다면 `gv.endUpdate(true)` 로 강제 해제할 수 있습니다
-(A-1 의 `t` 인자가 그 용도입니다).
+(A-1 의 `t` 인자가 그 용도입니다). 다만 이건 그때 한 번뿐이라, 호출자를 못 찾으면 다음 번에 또 잠깁니다.
 
 ### A-5. 해결 ② 보정 — 잠금을 못 건드릴 때
 
@@ -528,3 +579,36 @@ Object.defineProperty(gridView, 'onLayoutPropertyChanged', {
 NexHubStudio 구현: `src/utils/realgridResizeRepaint.js` — `bindResizeRepaint(gridView)` 를
 `RealGridCommonJs` / `RealGridCommonVue` / `RealGridTreeJs` 가 그리드 생성 직후 부릅니다.
 `setResizeRepaint(gridView, false)` 로 껐다 켜며 증상을 대조할 수 있습니다.
+
+### A-7. 이 프로젝트에서 직접 보는 법 — `/grid-studio/resize-doctor`
+
+**RealGrid 컬럼 리사이즈 진단** 페이지에 스위치로 다 모아 놨습니다.
+데이터는 흉내가 아니라 **규제정보 교차표 탭과 같은 API** 를 그대로 부릅니다
+(`POST /api/regulations/crosstab`, 컬럼 정의도 `crosstabColumnDefs()` 와 동일 — `mergeRule` 까지).
+페이지를 넘기면 제품 열 구성이 매번 달라지는 것도 같습니다.
+
+| 스위치 | 무엇을 가리나 |
+|---|---|
+| ① 정적 / 동적 주입 | **동적 컬럼 구조가 원인인가** — 아니다. 둘 다 증상이 같다 |
+| ② 잠그지 않음 / 주입 도중 / **주입 뒤** | A-4 의 두 유형을 눈으로 대조 |
+| ③ `resetSize()` 보정 | 공통 그리드가 기본으로 건 보정을 껐다 켠다 |
+
+계기판이 컬럼마다 **기록 폭**(`saveColumnLayout()`)과 **화면 폭**(`getBoundingClientRect()`)을
+300ms 마다 재서 어긋나면 빨갛게 칠하고, `_updateLock` 도 같이 띄웁니다.
+
+실측 (합성 드래그 기준):
+
+```
+정적 주입,  보정 OFF              기록 216 / 화면 150 → 280 / 216     한 박자씩 밀림
+동적 주입,  보정 OFF              기록 216 / 화면 150 → 321 / 216     똑같다 — 차이 없음
+동적 + endUpdate 생략, 보정 OFF   216/150 → 321/150 → 464/150         화면이 150 에 고정
+동적 + endUpdate 생략, 보정 ON    543 / 543                           잠긴 채로도 화면이 따라온다
+보정 ON (잠금 없음)                340 / 340,  391 / 391               즉시 일치
+```
+
+**갈림은 주입 방식이 아니라 잠금 여부입니다.**
+잠기지 않았을 때는 화면이 한 박자 뒤에라도 따라오고, 잠기면 처음 값에 그대로 멈춥니다.
+
+> ⚠ 위 수치는 CDP 합성 드래그로 잰 것입니다. 사람이 마우스로 끌면 드래그 도중 `mousemove` 가
+> 연속으로 들어가 갱신 기회가 많으므로, 같은 조건에서도 **첫 1회만** 어긋나 보일 수 있습니다.
+> 정적/동적 비교는 같은 방식으로 재서 유효하지만, "몇 번째까지 밀리는가"는 사람 손으로 다시 확인하세요(6장).

@@ -88,7 +88,8 @@ const routes = [
           { path: "smart-dnd", name: "RealGridSmartDndSample", component: RealGridSmartDndPage, meta: { title: "RealGrid 스마트 D&D 스튜디오 (Pro)", icon: "bi-magic" } },
           { path: "pivot-a", name: "PivotA", component: PivotAltAPage, meta: { title: "Pivot 분석 A", icon: "bi-pie-chart" } },
           { path: "pivot-real", name: "RealPivot", component: RealPivotPage, meta: { title: "AI 스마트 피벗 (자체개발)", icon: "bi-bar-chart-steps" } },
-          { path: "pivot-sdk", name: "RealPivotSdk", component: RealPivotSdkPage, meta: { title: "RealPivot 공식 SDK 가이드", icon: "bi-box-seam" } }
+          { path: "pivot-sdk", name: "RealPivotSdk", component: RealPivotSdkPage, meta: { title: "RealPivot 공식 SDK 가이드", icon: "bi-box-seam" } },
+          { path: "resize-doctor", name: "RealGridResizeDoctor", component: () => import("../pages/RealGridResizeDoctorPage.vue"), meta: { title: "RealGrid 컬럼 리사이즈 진단", icon: "bi-arrows-angle-expand" } }
         ]
       },
 

@@ -70,6 +70,7 @@ import * as RealGrid from 'realgrid'
 import 'realgrid/dist/realgrid-white.css'
 import { markRaw } from 'vue'
 import { captureViewState, applyViewState } from '@/utils/realgridOps'
+import { bindResizeRepaint } from '@/utils/realgridResizeRepaint'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
 export default {
@@ -684,6 +685,7 @@ export default {
     },
 
     destroyGrid() {
+      if (this._unbindRepaint) this._unbindRepaint()
       if (this.gridView) {
         try { this.gridView.destroy() } catch (e) { /* noop */ }
         this.gridView = null
@@ -704,6 +706,8 @@ export default {
       this.dataProvider = markRaw(new LocalDataProvider(true))
       this.gridView = markRaw(new GridView(container))
       this.gridView.setDataSource(this.dataProvider)
+      // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
+      this._unbindRepaint = bindResizeRepaint(this.gridView)
 
       const customOpts = { ...(this.options || {}), ...(this.gridOptions || {}) }
 

@@ -80,6 +80,7 @@ import 'realgrid/dist/realgrid-white.css'
 import { showToast } from '@/utils/toastUtil.js'
 import { useTabStore } from '@/stores/tabStore.js'
 import { captureViewState, applyViewState } from '@/utils/realgridOps'
+import { bindResizeRepaint } from '@/utils/realgridResizeRepaint'
 import ColumnPickerModal from '@/components/ColumnPickerModal.vue'
 
 export default {
@@ -162,6 +163,7 @@ export default {
     })
   },
   beforeUnmount() {
+    if (this._unbindRepaint) this._unbindRepaint()
     if (this.gridId) {
       this.saveGridLayout()
     }
@@ -679,6 +681,8 @@ export default {
       if (!gv) return
 
       this.gridView = markRaw(gv)
+      // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
+      if (!this._unbindRepaint) this._unbindRepaint = bindResizeRepaint(gv)
       this.dataProvider = markRaw((realGridComp && realGridComp.dataProvider) || (gv.getDataSource && gv.getDataSource()))
 
       const customOpts = { ...(this.options || {}), ...(this.gridOptions || {}) }
