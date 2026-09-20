@@ -161,6 +161,56 @@ try {
 
 ---
 
+## 5-1. Vue 템플릿에 `[]` 리터럴을 직접 넘기지 않는다
+
+동적 컬럼 화면에서 다음 패턴은 피한다.
+
+```vue
+<!-- 나쁨: 렌더링 때마다 새 배열 리터럴이 만들어질 수 있다 -->
+<RealGridCommonJs
+  :fields="[]"
+  :columns="[]"
+  :rows="[]"
+/>
+```
+
+처음에는 빈 배열을 넘기는 것처럼 보이지만, Vue 렌더링 과정에서 새 배열 참조가 계속 만들어질 수 있다. 공통 그리드 컴포넌트가 `fields`, `columns`, `rows` 를 watch 하고 있다면 불필요하게 `setFields()`, `setColumns()`, `setRows([])` 가 다시 호출된다.
+
+특히 `rows` watcher 가 빈 배열에도 `dataProvider.setRows([])` 를 호출하면, API 응답으로 동적 컬럼과 데이터를 넣은 직후 다음 렌더에서 행이 다시 비거나 주입 순서가 꼬일 수 있다.
+
+반드시 상태 변수로 빈 배열을 초기화하고 그 변수를 넘긴다.
+
+```js
+data() {
+  return {
+    currentGridFields: [],
+    currentGridColumns: [],
+    currentGridRows: []
+  }
+}
+```
+
+```vue
+<!-- 좋음: 초기값은 빈 배열이지만, 이후 같은 상태 변수를 명시적으로 교체한다 -->
+<RealGridCommonJs
+  :fields="currentGridFields"
+  :columns="currentGridColumns"
+  :rows="currentGridRows"
+/>
+```
+
+API 응답이 오면 그 상태 변수를 교체한다.
+
+```js
+this.currentGridFields = fields
+this.currentGridColumns = columns
+this.currentGridRows = rows
+```
+
+정리하면, "처음엔 빈 배열, 응답 후 동적 배열" 구조는 맞다. 다만 빈 배열을 템플릿 리터럴로 직접 쓰지 말고, `data()`/`ref()` 상태로 선언한 뒤 교체해야 한다.
+
+---
+
 ## 6. `setColumns()` 는 필요한 때만 호출한다
 
 동적 컬럼 화면에서 자주 하는 실수는 조회나 페이지 변경 때마다 무조건 `setColumns()` 를 부르는 것이다.
@@ -450,8 +500,9 @@ RealGrid 동적 컬럼 화면에서 컬럼 리사이즈가 화면에 바로 반�
 7. onLayoutPropertyChanged를 덮어쓸 때 기존 콜백을 보존하라.
 8. 컬럼 폭 확인은 column.width가 아니라 saveColumnLayout()의 width로 하라.
 9. setColumnLayout에 이름 배열만 넘겨 사용자 폭을 버리지 마라.
-10. setColumns 이후 헤더 DOM/레이어가 다시 만들어질 수 있으니, DOM에 직접 붙인 계측/이벤트 훅은 재바인딩하거나 안정적인 부모/문서 캡처에서 현재 헤더를 다시 찾아라.
-11. 수정 후 실제 브라우저에서 마우스 드래그로 확인하라. 테스트 코드 결과만으로 성공 처리하지 마라.
+10. Vue 템플릿에 :fields="[]" / :columns="[]" / :rows="[]" 처럼 배열 리터럴을 직접 넘기지 마라. data/ref 상태 변수로 빈 배열을 초기화하고, API 응답 후 그 변수를 교체하라.
+11. setColumns 이후 헤더 DOM/레이어가 다시 만들어질 수 있으니, DOM에 직접 붙인 계측/이벤트 훅은 재바인딩하거나 안정적인 부모/문서 캡처에서 현재 헤더를 다시 찾아라.
+12. 수정 후 실제 브라우저에서 마우스 드래그로 확인하라. 테스트 코드 결과만으로 성공 처리하지 마라.
 
 기대 결과:
 - 컬럼 순서 변경 정상
@@ -489,5 +540,6 @@ NexHubStudio 기준 참고 파일:
 - [ ] `onLayoutPropertyChanged` 의 `displayWidth` 이벤트에서 지연 `resetSize()` 를 호출한다.
 - [ ] 페이지별 `onLayoutPropertyChanged` 콜백을 덮어써도 공통 보정이 지워지지 않는다.
 - [ ] 컬럼 레이아웃 저장/복원 시 width가 보존된다.
+- [ ] Vue 템플릿에 `:fields="[]"`, `:columns="[]"`, `:rows="[]"` 같은 배열 리터럴을 직접 넘기지 않는다.
 - [ ] 동적 컬럼 재주입 뒤에도 계측/이벤트 훅이 새 헤더 DOM 기준으로 동작한다.
 - [ ] 실제 브라우저 드래그로 컬럼 순서 변경과 컬럼 리사이즈를 모두 확인했다.

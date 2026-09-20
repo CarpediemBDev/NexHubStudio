@@ -133,7 +133,7 @@
         <span class="fw-bold text-theme-primary">
           <i class="bi bi-shield-check text-primary me-1"></i>규제 정보 목록
         </span>
-        <span class="b2b-badge b2b-badge-secondary">{{ listRows.length }}건</span>
+        <span class="b2b-badge b2b-badge-secondary">{{ displayTotalCount }}건</span>
         <span v-if="selectedRecord" class="b2b-text-xs text-muted ms-1">
           선택: <strong>{{ selectedRecord.regNo }}</strong> · v{{ selectedRecord.versionNo }}
         </span>
@@ -149,7 +149,7 @@
               :class="{ on: viewMode === t.key }"
               :aria-selected="viewMode === t.key"
               :title="t.desc"
-              @click="viewMode = t.key"
+              @click="selectView(t.key)"
             >
               <i class="bi me-1" :class="t.icon"></i>{{ t.label }}
             </button>
@@ -196,17 +196,15 @@
 
       <div class="b2b-card-body p-2">
         <RealGridCommonJs
-          v-if="viewMode === 'flat'"
           ref="grid"
-          grid-id="regInfoGrid"
+          :grid-id="currentGridId"
           height="max(700px, calc(100vh - 400px))"
-          :fields="gridFields"
-          :columns="gridColumns"
-          :rows="pagedRows"
+          :fields="currentGridFields"
+          :columns="currentGridColumns"
+          :rows="currentGridRows"
           :editable="false"
           :checkable="false"
           :state-bar-visible="false"
-          :fixed-col-count="4"
           :sortable="true"
           :filterable="true"
           :group-panel-visible="true"
@@ -215,36 +213,24 @@
           @init="onGridInit"
         >
           <template #toolbar-right>
+            <span v-if="exporting" class="b2b-text-xs text-theme-secondary me-2">
+              <i class="bi bi-arrow-repeat me-1"></i>엑셀 준비 중… (전체 제품 열로)
+            </span>
+            <span v-else-if="gridLoading" class="b2b-text-xs text-theme-secondary me-2">
+              <i class="bi bi-arrow-repeat me-1"></i>불러오는 중…
+            </span>
+            <span v-else-if="viewMode === 'crosstab'" class="b2b-text-xs text-theme-secondary me-2">
+              {{ crosstabTotalCount }}행 · 제품 {{ crosstabProductColumns.length }}열
+              <span class="text-muted">(이 페이지의 제품만)</span>
+            </span>
             <PageSizeSelect v-model="pageSize" size="sm" />
           </template>
         </RealGridCommonJs>
         <Pagination
-          v-if="viewMode === 'flat'"
           v-model:page="page"
           v-model:page-size="pageSize"
-          :total="listRows.length"
+          :total="paginationTotal"
           :show-size-select="false"
-        />
-
-        <!-- 전개 탭. 조회·국가칩까지 걸린 결과(listRowIds)만 서버가 펼친다 -->
-        <RegulationExpandGrid
-          v-else-if="viewMode === 'expand'"
-          ref="expandGrid"
-          :reg-info-ids="listRowIds"
-          :selected-reg-info-id="selectedRegInfoId"
-          :toast="gridToast"
-          @update:selected-reg-info-id="selectedRegInfoId = $event"
-          @open="openDetailOf(selectedRegInfoId)"
-        />
-
-        <!-- 교차표 탭. 제품이 열이 되고 열 구성은 페이지마다 달라진다 -->
-        <RegulationCrosstabGrid
-          v-else
-          ref="crosstabGrid"
-          :reg-info-ids="listRowIds"
-          :toast="gridToast"
-          @update:selected-reg-info-id="selectedRegInfoId = $event"
-          @open="openDetailOf(selectedRegInfoId)"
         />
       </div>
     </div>
@@ -353,8 +339,6 @@ import Pagination from '@/components/Pagination.vue'
 import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import B2bDatePicker from '@/components/common/B2bDatePicker.vue'
 import CountryFilterBar from './components/CountryFilterBar.vue'
-import RegulationExpandGrid from './components/RegulationExpandGrid.vue'
-import RegulationCrosstabGrid from './components/RegulationCrosstabGrid.vue'
 import { showToast } from '@/utils/toastUtil.js'
 import { escapeHtml } from '@/utils/stringUtil.js'
 import {
@@ -382,14 +366,12 @@ const STATUS_BADGE = {
 
 const NO_COUNTRY = '__NONE__'
 /**
- * 보기 전환 탭.
- *  flat   - 지금까지의 목록. 레코드 1건이 1행이라 규제/규격/관리항목·제품은 한 셀에 모인다.
- *  expand - 그 값들을 각각 열로 펴고, 같은 값이 이어지는 앞쪽 축은 세로로 묶는다.
- *           펼치기는 JOIN 이라 화면이 아니라 서버가 한다(POST /regulations/expanded).
+ * 보기 전환 탭. 하나의 RealGridCommonJs 에 fields/columns/rows 를 동적으로 주입한다.
+ *  flat     - 레코드 1건 = 1행.
+ *  crosstab - 제품을 열로 눕힌 교차표. 서버 응답의 columns 로 동적 필드를 만든다.
  */
 const VIEW_TABS = [
   { key: 'flat', label: '평면', icon: 'bi-list-ul', desc: '레코드 1건 = 1행. 규제·규격·관리항목과 제품은 한 셀에 모아 보여준다' },
-  { key: 'expand', label: '전개', icon: 'bi-diagram-3', desc: '분야 · 규제 · 규격 · 관리항목 · 제품을 각각 열로 펴고, 같은 값은 세로로 묶는다' },
   { key: 'crosstab', label: '교차표', icon: 'bi-grid-3x3', desc: '제품을 열로 눕힌다. 열은 그 페이지에 나온 제품만이라 페이지마다 구성이 바뀐다' }
 ]
 // 국가 필터 디자인 6종. 데이터와 그리드 필터는 같고 모양만 다르며, 사용자가 상단 스위치로 고른다
@@ -413,8 +395,10 @@ function loadVariant() {
 }
 // 국가 필터를 거는 컬럼. 화면엔 "한국 외 1" 요약이 보이고, 판정은 countryCds 필드로 한다.
 const COUNTRY_COL = 'countryTxt'
+/** 제품 컬럼의 필드명. 코드가 숫자로 시작할 수 있어 접두사를 붙인다 */
+const prodField = (code) => `p_${code}`
 
-// 컬럼 헤더 묶음. gridColumns 의 컬럼 이름을 그대로 배치한다.
+// 평면 컬럼 헤더 묶음. flatGridColumns 의 컬럼 이름을 그대로 배치한다.
 const COLUMN_LAYOUT = [
   'action', 'statusCd', 'regNo', 'title', 'itemTxt', 'itemCnt', 'fieldNm', 'markNm',
   { name: 'orgGroup', direction: 'horizontal', header: { text: '적용 제품' }, items: ['divisionTxt', 'productGroupTxt', 'productTxt'] },
@@ -430,7 +414,7 @@ const CLAMP_LINES = 5
 const CELL_PAD_X = 18
 export default {
   name: 'RegulationInfoPage',
-  components: { RealGridCommonJs, Pagination, PageSizeSelect, B2bDatePicker, CountryFilterBar, RegulationExpandGrid, RegulationCrosstabGrid },
+  components: { RealGridCommonJs, Pagination, PageSizeSelect, B2bDatePicker, CountryFilterBar },
   data() {
     return {
       fieldCodes,
@@ -470,12 +454,20 @@ export default {
 
       gridView: null,
       dataProvider: null,
+      currentGridFields: [],
+      currentGridColumns: [],
+      currentGridRows: [],
+      gridLoading: false,
+      gridLoadSeq: 0,
+      crosstabProductColumns: [],
+      crosstabTotalCount: 0,
+      exporting: false,
       selectedRegInfoId: null,
       // 상태 변경 모달. null 이면 닫힘
       statusTarget: null,
       statusPick: '',
       statusChanging: false,
-      gridFields: [
+      flatGridFields: [
         { fieldName: 'regInfoId', dataType: 'number' },
         { fieldName: 'statusCd', dataType: 'text' },
         { fieldName: 'regNo', dataType: 'text' },
@@ -510,7 +502,7 @@ export default {
     conflicts() {
       return this.store.conflicts
     },
-    gridColumns() {
+    flatGridColumns() {
       return [
         {
           // 행마다 거는 작업. 필드는 regInfoId 를 빌려 쓴다 — 값이 아니라 대상 식별자가 필요하다
@@ -681,7 +673,7 @@ export default {
     currentVariantDesc() {
       return (FILTER_VARIANTS.find((v) => v.key === this.filterVariant) || {}).desc
     },
-    gridRows() {
+    flatGridRows() {
       return this.filteredRecords.map((r) => ({
         regInfoId: r.regInfoId,
         statusCd: r.statusCd,
@@ -711,10 +703,19 @@ export default {
      * (그리드엔 현재 페이지만 들어가서 컬럼 필터만으로는 페이지 안에서만 걸린다).
      */
     listRows() {
-      return this.gridRows
+      return this.flatGridRows
     },
     pagedRows() {
       return this.listRows.slice(this.pageOffset, this.pageOffset + this.pageSize)
+    },
+    displayTotalCount() {
+      return this.viewMode === 'crosstab' ? this.crosstabTotalCount : this.listRows.length
+    },
+    paginationTotal() {
+      return this.displayTotalCount
+    },
+    currentGridId() {
+      return this.viewMode === 'crosstab' ? 'regInfoCrosstabDynamicGrid' : 'regInfoFlatDynamicGrid'
     },
     /** 상태 모달이 보여줄 충돌이력 */
     statusConflicts() {
@@ -770,29 +771,26 @@ export default {
   watch: {
     // 재조회·국가 칩 변경으로 목록이 바뀌면 1페이지부터
     listRows() {
-      this.page = 1
+      if (this.page === 1) this.syncCurrentGrid()
+      else this.page = 1
     },
     // 행 번호가 페이지를 넘어 전체 기준(21, 22…)으로 이어지게 한다
     pageOffset(offset) {
       if (this.gridView) this.gridView.setRowIndicator({ indexOffset: offset })
     },
-    /**
-     * 탭을 떠나면 평면 그리드는 파괴된다. 참조와 더보기 리스너를 그대로 두면
-     * 이후 호출이 죽은 그리드를 건드리므로 여기서 끊는다.
-     * 돌아오면 onGridInit 이 다시 전부 걸어 준다.
-     */
-    viewMode(mode) {
-      if (mode === 'flat') return
-      if (this.unbindMoreLinks) this.unbindMoreLinks()
-      this.unbindMoreLinks = null
-      this.gridView = null
-      this.dataProvider = null
+    page() {
+      this.syncCurrentGrid()
+    },
+    pageSize() {
+      if (this.page === 1) this.syncCurrentGrid()
+      else this.page = 1
+    },
+    viewMode() {
+      if (this.page === 1) this.syncCurrentGrid()
+      else this.page = 1
     }
   },
   created() {
-    // 서버 스냅샷 적재. 그리드 행은 store.records 를 보고 있으므로 도착하면 알아서 그려진다
-    this.store.ensureLoaded()
-
     // 수정 페이지에서 돌아온 경우 검색조건을 복원한다
     const ctx = this.store.listContext
     if (ctx.filters) {
@@ -804,6 +802,10 @@ export default {
     // 행 순서는 페이지·정렬마다 바뀌므로 itemIndex 가 아니라 regInfoId 로 기억한다.
     // 렌더러가 읽기만 하면 되므로 반응형일 필요 없다.
     this.expandedCells = new Set()
+
+    // 처음에는 빈 배열 상태로 그리드를 만들고, 스냅샷/API 응답 뒤 fields/columns/rows 를 주입한다.
+    this.syncCurrentGrid()
+    this.store.ensureLoaded().then(() => this.syncCurrentGrid())
   },
   beforeUnmount() {
     if (this.unbindMoreLinks) this.unbindMoreLinks()
@@ -813,20 +815,105 @@ export default {
     gridToast(message, opts = {}) {
       showToast(message, opts)
     },
+    selectView(mode) {
+      if (this.viewMode === mode) return
+      this.viewMode = mode
+    },
+    syncCurrentGrid() {
+      if (this.viewMode === 'crosstab') {
+        return this.loadCrosstabGrid()
+      }
+      return this.applyFlatGrid()
+    },
+    async applyFlatGrid() {
+      this.crosstabProductColumns = []
+      this.crosstabTotalCount = 0
+      await this.applyGridPayload({
+        fields: this.flatGridFields,
+        columns: this.flatGridColumns,
+        rows: this.pagedRows
+      })
+    },
+    async loadCrosstabGrid({ page = this.page, size = this.pageSize } = {}) {
+      const seq = ++this.gridLoadSeq
+      this.gridLoading = true
+      try {
+        const res = await this.store.fetchCrosstab(this.listRowIds, { page, size })
+        if (seq !== this.gridLoadSeq || this.viewMode !== 'crosstab') return
+
+        const productColumns = (res && res.columns) || []
+        const rows = (res && res.rows) || []
+        this.crosstabProductColumns = productColumns
+        this.crosstabTotalCount = (res && res.totalCount) || 0
+
+        await this.applyGridPayload({
+          fields: this.createCrosstabFields(productColumns),
+          columns: this.createCrosstabColumns(productColumns),
+          rows: this.createCrosstabRows(rows, productColumns)
+        })
+      } finally {
+        if (seq === this.gridLoadSeq) this.gridLoading = false
+      }
+    },
+    async applyGridPayload({ fields, columns, rows }) {
+      // 하나의 RealGrid 인스턴스에 다른 필드/컬럼 구조를 넣기 전에 행을 먼저 비운다.
+      this.currentGridRows = []
+      if (this.dataProvider) this.dataProvider.setRows([])
+
+      this.currentGridFields = []
+      this.currentGridColumns = []
+      await this.$nextTick()
+
+      this.currentGridFields = fields
+      this.currentGridColumns = columns
+      await this.$nextTick()
+
+      if (this.dataProvider && fields && fields.length) this.dataProvider.setFields(fields)
+      if (this.gridView && columns && columns.length) this.gridView.setColumns(columns)
+
+      this.currentGridRows = rows
+      await this.$nextTick()
+      if (this.dataProvider) this.dataProvider.setRows(rows || [])
+
+      this.configureGridForView()
+    },
+    configureGridForView() {
+      const gv = this.gridView
+      if (!gv) return
+
+      gv.setDisplayOptions({
+        rowHeight: -1,
+        refCalcHeights: false,
+        maxRowHeight: 0,
+        minRowHeight: 40,
+        wheelScrollLines: 1,
+        columnMovable: true
+      })
+      gv.setRowIndicator({ indexOffset: this.pageOffset })
+
+      if (!this.currentGridColumns.length) return
+
+      if (this.viewMode === 'flat') {
+        this.bindMoreLinks(gv.getContainer().parentElement)
+        gv.setColumnLayout(COLUMN_LAYOUT)
+        this.setupCountryFilters()
+        gv.onFilteringChanged = (grid, column) => {
+          if (this.applyingChips || column?.name !== COUNTRY_COL) return
+          this.setCountryChips(grid.getActiveColumnFilters(COUNTRY_COL).map((f) => f.name))
+        }
+        this.applyCountryChips()
+      } else {
+        if (this.unbindMoreLinks) this.unbindMoreLinks()
+        this.unbindMoreLinks = null
+        gv.onFilteringChanged = null
+        gv.setColumnLayout(this.currentGridColumns.map((c) => c.name))
+      }
+
+      if (typeof gv.resetSize === 'function') gv.resetSize()
+    },
     onGridInit({ gridView, dataProvider }) {
       this.gridView = gridView
       this.dataProvider = dataProvider
-
-      // 긴 셀 줄바꿈·더보기용 행 높이 설정은 여기 한곳에 모은다(다른 화면으로 옮길 때 빠지지 않게).
-      // 넘긴 값만 덮어쓰므로 공통 그리드가 먼저 넣은 옵션(fitStyle 등)은 그대로 남는다.
-      gridView.setDisplayOptions({
-        rowHeight: -1, // 행 높이 = 그려진 셀 내용에 맞춤. CSS 나 setRowHeight 로 덮지 않는다(셀렉터가 밀림, -1 이면 무시됨)
-        refCalcHeights: false, // 기본 true 면 처음 잰 높이를 재사용해 refresh() 로 펼쳐도 행이 안 커진다
-        maxRowHeight: 0, // 행 높이 상한 없음 — 걸려 있으면 펼친 셀이 그 높이에서 잘린다
-        minRowHeight: 40, // 한 줄짜리 행 높이
-        wheelScrollLines: 1 // 기본 3행씩 넘기면 높은 행이 섞인 목록에서 휠 한 번에 화면이 크게 튄다
-      })
-      this.bindMoreLinks(gridView.getContainer().parentElement)
 
       gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
         // 행이 비면(clearRows 등) newRow 가 -1 로 온다 — getJsonRow(-1) 은 out of bounds 에러
@@ -838,22 +925,14 @@ export default {
         if (this.selectedRegInfoId) this.openDetailOf(this.selectedRegInfoId)
       }
 
-      gridView.setColumnLayout(COLUMN_LAYOUT)
-
-      this.setupCountryFilters()
-      // 헤더 필터 드롭다운에서 바꿔도 칩이 따라오게 한다
-      gridView.onFilteringChanged = (grid, column) => {
-        if (this.applyingChips || column?.name !== COUNTRY_COL) return
-        this.setCountryChips(grid.getActiveColumnFilters(COUNTRY_COL).map((f) => f.name))
-      }
-      // 목록에서 돌아온 경우 복원된 칩을 그리드에 반영
-      this.applyCountryChips()
+      this.configureGridForView()
     },
     /**
      * 국가마다 컬럼 필터를 하나씩 등록해 둔다(기본 비활성).
      * 같은 컬럼의 필터끼리는 OR 이라 여러 국가를 켜면 "이 중 하나라도 적용" 이 된다.
      */
     setupCountryFilters() {
+      if (!this.gridView || this.viewMode !== 'flat') return
       const defs = [
         ...countryCodes.map((c) => ({ name: c.code, text: c.name })),
         { name: NO_COUNTRY, text: '국가 미지정' }
@@ -868,7 +947,7 @@ export default {
     },
     applyCountryChips() {
       const gv = this.gridView
-      if (!gv) return
+      if (!gv || this.viewMode !== 'flat') return
       const codes = [...this.filters.countryCds]
       // activate 호출이 onFilteringChanged 를 부르더라도 칩을 되덮지 않게 막는다
       this.applyingChips = true
@@ -879,9 +958,90 @@ export default {
         this.applyingChips = false
       }
     },
+    createCrosstabFields(productColumns) {
+      return [
+        { fieldName: 'regInfoId', dataType: 'number' },
+        { fieldName: 'statusCd', dataType: 'text' },
+        { fieldName: 'regNo', dataType: 'text' },
+        { fieldName: 'title', dataType: 'text' },
+        { fieldName: 'fieldNm', dataType: 'text' },
+        { fieldName: 'regulationNm', dataType: 'text' },
+        { fieldName: 'standardNm', dataType: 'text' },
+        { fieldName: 'certNm', dataType: 'text' },
+        { fieldName: 'mandatoryYn', dataType: 'text' },
+        { fieldName: 'fieldKey', dataType: 'text' },
+        { fieldName: 'recKey', dataType: 'text' },
+        { fieldName: 'ruleKey', dataType: 'text' },
+        { fieldName: 'stdKey', dataType: 'text' },
+        ...productColumns.map((c) => ({ fieldName: prodField(c.code), dataType: 'text' }))
+      ]
+    },
+    createCrosstabColumns(productColumns) {
+      const byRecord = { mergeRule: "values['recKey']" }
+      const byRule = { mergeRule: "values['ruleKey']" }
+      const byStd = { mergeRule: "values['stdKey']" }
+
+      return [
+        { name: 'fieldNm', fieldName: 'fieldNm', width: '110', header: { text: '분야' }, styles: { textAlignment: 'center' }, mergeRule: "values['fieldKey']" },
+        {
+          name: 'statusCd',
+          fieldName: 'statusCd',
+          width: '80',
+          header: { text: '상태' },
+          styles: { textAlignment: 'center' },
+          ...byRecord,
+          renderer: {
+            type: 'html',
+            callback: (grid, model) => {
+              const code = model?.value || 'REVIEW'
+              const nm = (statusCodes.find((s) => s.code === code) || {}).name || code
+              return `<span class="b2b-badge b2b-badge-${STATUS_BADGE[code] || 'secondary'}">${escapeHtml(nm)}</span>`
+            }
+          }
+        },
+        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' }, ...byRecord },
+        { name: 'regulationNm', fieldName: 'regulationNm', width: '200', header: { text: '규제' }, ...byRule, renderer: this.ellipsisRenderer() },
+        { name: 'standardNm', fieldName: 'standardNm', width: '200', header: { text: '규격' }, ...byStd, renderer: this.ellipsisRenderer() },
+        { name: 'certNm', fieldName: 'certNm', width: '180', header: { text: '관리항목' }, renderer: this.ellipsisRenderer() },
+        ...productColumns.map((c) => ({
+          name: prodField(c.code),
+          fieldName: prodField(c.code),
+          width: '96',
+          header: { text: c.name },
+          styles: { textAlignment: 'center' },
+          renderer: {
+            type: 'html',
+            callback: (grid, model) =>
+              model?.value === 'Y'
+                ? '<span class="ct-on" title="적용">●</span>'
+                : '<span class="ct-off" title="해당 없음">·</span>'
+          }
+        }))
+      ]
+    },
+    createCrosstabRows(rows, productColumns) {
+      return rows.map((r) => {
+        const row = { ...r }
+        const has = new Set(r.productCds || [])
+        productColumns.forEach((c) => {
+          row[prodField(c.code)] = has.has(c.code) ? 'Y' : 'N'
+        })
+        return row
+      })
+    },
     /* ---------------- 긴 셀: 줄바꿈 + 더보기 ---------------- */
     wrapRenderer() {
       return { type: 'html', callback: (grid, model, width) => this.renderWrapCell(grid, model, width) }
+    },
+    ellipsisRenderer() {
+      return {
+        type: 'html',
+        callback: (grid, model) => {
+          const v = String(model?.value ?? '')
+          if (!v) return '<span class="reg-empty">-</span>'
+          return `<span class="ct-ellip" title="${escapeHtml(v)}">${escapeHtml(v)}</span>`
+        }
+      }
     },
     /**
      * CLAMP_LINES 줄을 넘는 셀만 말줄임 + "더보기". 펼친 셀은 전체 내용 + "접기".
@@ -945,6 +1105,7 @@ export default {
      * 그래서 바깥 요소에서 캡처 단계로 먼저 받아 막는다.
      */
     bindMoreLinks(el) {
+      if (this.unbindMoreLinks) this.unbindMoreLinks()
       const types = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'dblclick', 'touchstart']
       const handler = (e) => {
         const hit = e.target.closest && e.target.closest('.reg-more, .reg-act')
@@ -974,15 +1135,9 @@ export default {
       const codes = (record.targets || []).filter((tg) => tg.targetType === 'COUNTRY').map((tg) => tg.targetCd)
       return `|${(codes.length ? codes : [NO_COUNTRY]).join('|')}|`
     },
-    exportExcel() {
-      // 교차표는 화면 열이 "이 페이지의 제품" 뿐이라, 컴포넌트가 전체를 한 페이지로
-      // 다시 불러 전체 제품 열로 내보낸다
+    async exportExcel() {
       if (this.viewMode === 'crosstab') {
-        if (this.$refs.crosstabGrid) this.$refs.crosstabGrid.exportExcel()
-        return
-      }
-      if (this.viewMode === 'expand') {
-        if (this.$refs.expandGrid) this.$refs.expandGrid.exportExcel()
+        await this.exportCrosstabExcel()
         return
       }
       if (!this.gridView) return
@@ -997,11 +1152,63 @@ export default {
         throw e
       }
     },
+    async exportCrosstabExcel() {
+      if (this.exporting || !this.crosstabTotalCount || !this.gridView) return
+      const prevPage = this.page
+      const prevSize = this.pageSize
+      this.exporting = true
+      try {
+        this.page = 1
+        this.pageSize = this.crosstabTotalCount
+        await this.loadCrosstabGrid({ page: 1, size: this.crosstabTotalCount })
+        if (!(await this.waitGridReady())) {
+          throw new Error('그리드가 전체 데이터를 그리지 못했습니다.')
+        }
+        await this.runGridExport('규제정보_교차표.xlsx')
+      } finally {
+        this.pageSize = prevSize
+        this.page = prevPage
+        this.exporting = false
+        if (this.viewMode === 'crosstab') await this.loadCrosstabGrid()
+      }
+    },
+    waitGridReady(timeoutMs = 20000) {
+      return new Promise((resolve) => {
+        const started = Date.now()
+        const check = async () => {
+          await this.$nextTick()
+          if (
+            !this.gridLoading &&
+            this.gridView &&
+            this.dataProvider &&
+            this.dataProvider.getRowCount() === this.currentGridRows.length
+          ) {
+            resolve(true)
+            return
+          }
+          if (Date.now() - started >= timeoutMs) {
+            resolve(false)
+            return
+          }
+          setTimeout(check, 50)
+        }
+        check()
+      })
+    },
+    runGridExport(fileName) {
+      return new Promise((resolve, reject) => {
+        try {
+          this.gridView.exportGrid({ type: 'excel', target: 'local', fileName, done: resolve })
+        } catch (e) {
+          reject(e)
+        }
+      })
+    },
 
     /* ---------------- 검색 ---------------- */
     search() {
       this.appliedFilters = { ...this.filters }
-      showToast(`조회 완료 (${this.gridRows.length}건)`, { type: 'success' })
+      showToast(`조회 완료 (${this.listRows.length}건)`, { type: 'success' })
     },
     resetFilters() {
       this.filters = {
@@ -1438,5 +1645,21 @@ export default {
 
 .reg-page :deep(.reg-more:hover) {
   text-decoration: underline;
+}
+
+.reg-page :deep(.ct-ellip) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reg-page :deep(.ct-on) {
+  color: var(--b2b-color-primary, #0d6efd);
+  font-size: 13px;
+}
+
+.reg-page :deep(.ct-off) {
+  color: var(--b2b-color-text-faint, #ced4da);
 }
 </style>
