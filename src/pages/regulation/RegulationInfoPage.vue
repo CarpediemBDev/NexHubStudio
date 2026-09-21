@@ -802,6 +802,7 @@ export default {
     // 행 순서는 페이지·정렬마다 바뀌므로 itemIndex 가 아니라 regInfoId 로 기억한다.
     // 렌더러가 읽기만 하면 되므로 반응형일 필요 없다.
     this.expandedCells = new Set()
+    this.initGridOptions = null
 
     // 처음에는 빈 배열 상태로 그리드를 만들고, 스냅샷/API 응답 뒤 fields/columns/rows 를 주입한다.
     this.syncCurrentGrid()
@@ -864,18 +865,26 @@ export default {
       this.currentGridColumns = []
       await this.$nextTick()
 
+      this.restoreInitOptions()
+
       this.currentGridFields = fields
       this.currentGridColumns = columns
       await this.$nextTick()
 
       if (this.dataProvider && fields && fields.length) this.dataProvider.setFields(fields)
-      if (this.gridView && columns && columns.length) this.gridView.setColumns(columns)
 
       this.currentGridRows = rows
       await this.$nextTick()
       if (this.dataProvider) this.dataProvider.setRows(rows || [])
 
       this.configureGridForView()
+    },
+    saveInitOptions(gridView) {
+      this.initGridOptions = typeof gridView?.getOptions === 'function' ? gridView.getOptions() : null
+    },
+    restoreInitOptions() {
+      if (!this.initGridOptions || typeof this.gridView?.setOptions !== 'function') return
+      try { this.gridView.setOptions(this.initGridOptions) } catch (e) { /* noop */ }
     },
     configureGridForView() {
       const gv = this.gridView
@@ -914,6 +923,7 @@ export default {
     onGridInit({ gridView, dataProvider }) {
       this.gridView = gridView
       this.dataProvider = dataProvider
+      this.saveInitOptions(gridView)
 
       gridView.onCurrentRowChanged = (grid, oldRow, newRow) => {
         // 행이 비면(clearRows 등) newRow 가 -1 로 온다 — getJsonRow(-1) 은 out of bounds 에러
