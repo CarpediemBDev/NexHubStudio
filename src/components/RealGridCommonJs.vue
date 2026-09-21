@@ -235,7 +235,7 @@ export default {
       deep: true,
       handler(newColumns) {
         if (this.gridView && newColumns && newColumns.length > 0) {
-          this.gridView.setColumns(newColumns)
+          this.gridView.setColumns(newColumns.map(c => ({ autoFilter: this.resolvedFilterable, ...c })))
           this.syncColumnItems()
           this.applyCellMerging()
         }
@@ -329,7 +329,7 @@ export default {
         return
       }
 
-      const state = captureViewState(this.gridView, { includeGroup: true, dataProvider: this.dataProvider })
+      const state = captureViewState(this.gridView, { includeGroup: this.includeGroupInView, dataProvider: this.dataProvider })
       const defaultName = `내 뷰 ${this.savedViews.length + 1}`
       const viewName = prompt('저장할 뷰 이름을 입력하세요 (컬럼 배치·너비·고정·그룹핑 포함):', defaultName)
       if (!viewName || !viewName.trim()) return
@@ -721,9 +721,9 @@ export default {
 
       this.gridView.setEditOptions({
         editable: this.editable,
-        insertable: true,
-        appendable: true,
-        commitWhenLeave: true,
+        insertable: this.resolvedInsertable,
+        appendable: this.resolvedInsertable,
+        commitWhenLeave: this.resolvedCommitWhenLeave,
         ...(customOpts.editOptions || {})
       })
 
@@ -752,7 +752,6 @@ export default {
         this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, columnMovable: true, fitStyle: fitStyleVal, rowResizable: this.resolvedRowResizable, showTooltip: true, tooltipEllipsisOnly: true, ...(customOpts.displayOptions || {}) })
         this.gridView.setGroupPanel({ visible: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupPanel || {}) })
         this.gridView.setGroupingOptions({ enabled: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupingOptions || {}) })
-        this.gridView.setSortingOptions({ enabled: true, ...(customOpts.sortingOptions || {}) })
         this.gridView.setRowGroup({
           summaryMode: this.resolvedSummaryMode,
           mergeMode: true,
@@ -762,12 +761,14 @@ export default {
       } else {
         this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, showTooltip: true, tooltipEllipsisOnly: true, ...(customOpts.displayOptions || {}) })
       }
+      this.gridView.setSortingOptions({ enabled: this.resolvedSortable, ...(customOpts.sortingOptions || {}) })
+      this.gridView.setFilteringOptions({ enabled: this.resolvedFilterable, ...(customOpts.filteringOptions || {}) })
 
       if (this.fields && this.fields.length > 0) {
         this.dataProvider.setFields(this.fields)
       }
       if (this.columns && this.columns.length > 0) {
-        this.gridView.setColumns(this.columns)
+        this.gridView.setColumns(this.columns.map(c => ({ autoFilter: this.resolvedFilterable, ...c })))
       }
 
       if (this.rows && this.rows.length > 0) {

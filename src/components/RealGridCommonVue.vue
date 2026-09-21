@@ -329,7 +329,7 @@ export default {
         return
       }
 
-      const state = captureViewState(this.gridView, { includeGroup: true, dataProvider: this.dataProvider })
+      const state = captureViewState(this.gridView, { includeGroup: this.includeGroupInView, dataProvider: this.dataProvider })
       const defaultName = `내 뷰 ${this.savedViews.length + 1}`
       const viewName = prompt('저장할 뷰 이름을 입력하세요 (컬럼 배치·너비·고정·그룹핑 포함):', defaultName)
       if (!viewName || !viewName.trim()) return
@@ -699,9 +699,9 @@ export default {
 
       this.gridView.setEditOptions({
         editable: this.editable,
-        insertable: true,
-        appendable: true,
-        commitWhenLeave: true,
+        insertable: this.resolvedInsertable,
+        appendable: this.resolvedInsertable,
+        commitWhenLeave: this.resolvedCommitWhenLeave,
         ...(customOpts.editOptions || {})
       })
 
@@ -731,7 +731,6 @@ export default {
         // 2단 상하 배치: 1단 상단 서브 툴바와 2단 RealGrid 순수 groupPanel이 각각 100% 가로 폭으로 독립 표출되도록 visible: true 적용
         this.gridView.setGroupPanel({ visible: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupPanel || {}) })
         this.gridView.setGroupingOptions({ enabled: true, prompt: '컬럼 헤더를 이 곳으로 끌어다 놓으시면 그룹화됩니다.', ...(customOpts.groupingOptions || {}) })
-        this.gridView.setSortingOptions({ enabled: true, ...(customOpts.sortingOptions || {}) })
         this.gridView.setRowGroup({
           summaryMode: this.resolvedSummaryMode,
           mergeMode: true,
@@ -741,6 +740,12 @@ export default {
       } else {
         this.gridView.setDisplayOptions({ rowHeight: this.rowHeight, fitStyle: fitStyleVal, rowHoverType: 'row', rowResizable: this.resolvedRowResizable, showTooltip: true, tooltipEllipsisOnly: true, ...(customOpts.displayOptions || {}) })
       }
+      this.gridView.setSortingOptions({ enabled: this.resolvedSortable, ...(customOpts.sortingOptions || {}) })
+      this.gridView.setFilteringOptions({ enabled: this.resolvedFilterable, ...(customOpts.filteringOptions || {}) })
+      const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
+      cols.forEach(c => {
+        try { this.gridView.setColumnProperty(c.name, 'autoFilter', this.resolvedFilterable) } catch (e) { /* noop */ }
+      })
 
       if (this.gridId) {
         this.restoreGridLayout()
