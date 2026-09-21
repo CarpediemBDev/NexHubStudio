@@ -10,19 +10,6 @@
           <span class="rd-hint d-none d-lg-inline">
             헤더를 직접 드래그해서 순서 변경은 되고, 리사이즈만 화면에 늦게 반영되는지 확인한다
           </span>
-          <div class="rd-tabs ms-2" role="tablist">
-            <button
-              v-for="t in viewTabs"
-              :key="t.key"
-              type="button"
-              role="tab"
-              :class="{ on: viewMode === t.key }"
-              :aria-selected="viewMode === t.key"
-              @click="selectView(t.key)"
-            >
-              <i class="bi me-1" :class="t.icon"></i>{{ t.label }}
-            </button>
-          </div>
         </div>
         <div class="d-flex align-items-center gap-2 ms-auto">
           <button class="btn-b2b-action" title="그리드를 처음부터 다시 만든다 (새로고침과 같은 상태)" @click="remount">
@@ -99,17 +86,24 @@
     <!-- 그리드 -->
     <div class="b2b-card">
       <div class="b2b-card-header">
-        <span class="rd-title">
-          <i class="bi bi-grid-3x3 text-primary me-1"></i>
-          {{ currentView.label }} · fields {{ gridFields.length }} · columns {{ gridColumns.length }} · rows {{ gridRows.length }}
-        </span>
+        <span v-if="!loading && !loadError" class="rd-title">Total {{ totalCount }}건</span>
         <span v-if="loadError" class="rd-badge rd-badge-danger ms-2">{{ loadError }}</span>
         <span v-else-if="loading" class="rd-hint">API 응답을 기다리는 중</span>
-        <span v-else class="rd-hint">
-          {{ viewMode === 'crosstab'
-            ? `제품 열 ${productColumns.length}개 · 전체 ${totalCount}건 — 교차표 API 응답으로 동적 필드를 만든다`
-            : `스냅샷 ${totalCount}건 — 초기 빈 배열 후 평면 필드·컬럼·행을 주입한다` }}
-        </span>
+        <div class="rd-grid-actions ms-auto">
+          <div class="rd-tabs" role="tablist" aria-label="그리드 보기 전환">
+            <button
+              v-for="t in viewTabs"
+              :key="t.key"
+              type="button"
+              role="tab"
+              :class="{ on: viewMode === t.key }"
+              :aria-selected="viewMode === t.key"
+              @click="selectView(t.key)"
+            >
+              <i class="bi me-1" :class="t.icon"></i>{{ t.label }}
+            </button>
+          </div>
+        </div>
       </div>
       <div class="b2b-card-body p-2">
         <RealGridCommonJs
@@ -632,6 +626,7 @@ export default {
 <style scoped>
 .rd-title { font-size: 0.9rem; font-weight: 600; }
 .rd-hint { font-size: 0.78rem; color: var(--bs-secondary-color); margin-left: 0.5rem; }
+.rd-grid-actions { display: flex; align-items: center; margin-left: auto; }
 .rd-tabs { display: inline-flex; align-items: center; gap: 0.2rem; padding: 0.15rem; border: 1px solid var(--bs-border-color); border-radius: 0.35rem; background: var(--bs-body-bg); }
 .rd-tabs button { border: 0; background: transparent; color: var(--bs-secondary-color); font-size: 0.76rem; font-weight: 600; padding: 0.25rem 0.55rem; border-radius: 0.25rem; }
 .rd-tabs button.on { background: var(--bs-primary-bg-subtle); color: var(--bs-primary-text-emphasis); }
