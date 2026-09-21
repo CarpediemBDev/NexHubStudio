@@ -27,16 +27,7 @@
         <!-- Global Header Component (Compact) -->
         <PageHeader />
         <router-view v-slot="{ Component, route }">
-          <!--
-            meta.keepAlive 라우트(목록/검색 등)만 캐시한다. 판단 기준은 router meta 하나뿐이다.
-            include(컴포넌트 name 목록)로 거르지 않는 이유: 라우트가 lazy import 라 레이아웃 setup 시점의
-            r.components.default 는 로더 함수이고, 그 name 은 SFC name 이 아니라 'component' 같은 추론값이다.
-            키: 캐시 페이지는 path(쿼리가 달라도 인스턴스 하나), 나머지는 fullPath(파라미터가 바뀌면 새로 마운트).
-          -->
-          <keep-alive>
-            <component :is="Component" v-if="route.meta.keepAlive" :key="route.path" />
-          </keep-alive>
-          <component :is="Component" v-if="!route.meta.keepAlive" :key="route.fullPath" />
+          <component :is="Component" :key="route.fullPath" />
         </router-view>
       </main>
     </div>

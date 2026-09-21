@@ -64,8 +64,8 @@ const routes = [
         name: "UserGroup",
         meta: { title: "사용자 & 배정 관리", icon: "bi-people-fill" },
         children: [
-          { path: "users", name: "Users", component: UserPage, meta: { title: "사용자 목록", icon: "bi-person-badge", keepAlive: true } },
-          { path: "search-grid", name: "UserSearchGrid", component: UserSearGridPage, meta: { title: "사용자 검색 그리드", icon: "bi-search", keepAlive: true } },
+          { path: "users", name: "Users", component: UserPage, meta: { title: "사용자 목록", icon: "bi-person-badge" } },
+          { path: "search-grid", name: "UserSearchGrid", component: UserSearGridPage, meta: { title: "사용자 검색 그리드", icon: "bi-search" } },
           { path: "user-assignment-vertical", name: "UserAssignmentVertical", component: UserAssignmentVertical, meta: { title: "사용자 배정(세로)", icon: "bi-person-lines-fill" } },
           { path: "user-assignment-shared", name: "UserAssignmentShared", component: UserAssignmentShared, meta: { title: "사용자 배정(공통)", icon: "bi-person-gear" } },
           { path: "user-assignment-shared-new", name: "UserAssignmentSharedNew", component: () => import("../pages/UserAssignmentSharedNew.vue"), meta: { title: "사용자 배정(신규)", icon: "bi-person-plus" } }
@@ -99,8 +99,8 @@ const routes = [
         name: "WorkGroup",
         meta: { title: "업무 & 게시판 관리", icon: "bi-briefcase-fill" },
         children: [
-          { path: "posts", name: "PostList", component: PostListPage, meta: { title: "게시판 목록", icon: "bi-card-text", keepAlive: true } },
-          { path: "files", name: "FileList", component: FileListPage, meta: { title: "파일 관리", icon: "bi-folder", keepAlive: true } },
+          { path: "posts", name: "PostList", component: PostListPage, meta: { title: "게시판 목록", icon: "bi-card-text" } },
+          { path: "files", name: "FileList", component: FileListPage, meta: { title: "파일 관리", icon: "bi-folder" } },
           { path: "equipment-monitor", name: "EquipmentMonitor", component: EquipmentMonitorPage, meta: { title: "설비 모니터링", icon: "bi-display" } },
           { path: "request-workflow", name: "RequestWorkflow", component: RequestWorkflowPage, meta: { title: "업무 의뢰 워크플로우", icon: "bi-briefcase" } },
           { path: "equipment-support-request", name: "EquipmentSupportRequest", component: () => import("../pages/EquipmentSupportRequestPage.vue"), meta: { title: "설비 지원 요청", icon: "bi-tools" } }
@@ -126,7 +126,7 @@ const routes = [
         name: "RegulationGroup",
         meta: { title: "규격/규제 관리", icon: "bi-shield-check" },
         children: [
-          { path: "info", name: "RegulationInfo", component: () => import("../pages/regulation/RegulationInfoPage.vue"), meta: { title: "규제 정보 관리", icon: "bi-clipboard-check", keepAlive: true } },
+          { path: "info", name: "RegulationInfo", component: () => import("../pages/regulation/RegulationInfoPage.vue"), meta: { title: "규제 정보 관리", icon: "bi-clipboard-check" } },
           // 등록/수정/상세는 한 컴포넌트의 3모드. 메뉴에는 노출하지 않는다(hidden).
           { path: "info/new", name: "RegulationInfoCreate", component: () => import("../pages/regulation/RegulationInfoEditPage.vue"), meta: { title: "규제 정보 신규 등록", icon: "bi-plus-square", hidden: true } },
           { path: "info/:regInfoId(\\d+)", name: "RegulationInfoView", component: () => import("../pages/regulation/RegulationInfoEditPage.vue"), meta: { title: "규제 정보 상세", icon: "bi-file-text", hidden: true } },

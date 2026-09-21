@@ -103,7 +103,6 @@ export function routesToMenuTree(routes, basePath = '') {
       menuName: title,
       path: fullPath || '/',
       icon: meta.icon || '',
-      cache: meta.keepAlive ? 'Y' : 'N',
       visible: meta.hidden ? '숨김' : '표시'
     }
     if (children.length) node.children = children

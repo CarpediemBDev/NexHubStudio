@@ -30,9 +30,7 @@
 
     <!-- Dynamic Tab Component Renderer -->
     <transition name="fade-tab" mode="out-in">
-      <keep-alive>
-        <component :is="activeComponent" :key="activeTab" />
-      </keep-alive>
+      <component :is="activeComponent" :key="activeTab" />
     </transition>
   </div>
 </template>
