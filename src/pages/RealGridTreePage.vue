@@ -220,16 +220,16 @@ export default {
         { fieldName: 'joinDate', dataType: 'datetime', datetimeFormat: 'yyyy-MM-dd' }
       ],
       columns: [
-        { name: 'deptName', fieldName: 'deptName', width: '200', header: { text: '조직명 / 성명' }, styles: { textAlignment: 'near' } },
-        { name: 'deptCode', fieldName: 'deptCode', width: '110', header: { text: '코드 / ID' }, editable: false, styles: { textAlignment: 'center' } },
-        { name: 'manager', fieldName: 'manager', width: '120', header: { text: '책임자' }, styles: { textAlignment: 'center' } },
-        { name: 'rank', fieldName: 'rank', width: '90', header: { text: '직무 / 구분' }, styles: { textAlignment: 'center' } },
+        { name: 'deptName', fieldName: 'deptName', width: '200', header: { text: '조직명 / 성명' }, styleName: 'rg-align-left' },
+        { name: 'deptCode', fieldName: 'deptCode', width: '110', header: { text: '코드 / ID' }, editable: false, styleName: 'rg-align-center' },
+        { name: 'manager', fieldName: 'manager', width: '120', header: { text: '책임자' }, styleName: 'rg-align-center' },
+        { name: 'rank', fieldName: 'rank', width: '90', header: { text: '직무 / 구분' }, styleName: 'rg-align-center' },
         {
           name: 'workStatus',
           fieldName: 'workStatus',
           width: '95',
           header: { text: '근무상태' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           editor: {
             type: 'dropdown',
             dropDownCount: 3,
@@ -243,7 +243,7 @@ export default {
           fieldName: 'employmentType',
           width: '100',
           header: { text: '고용형태' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           editor: {
             type: 'dropdown',
             dropDownCount: 3,
@@ -253,11 +253,11 @@ export default {
           },
           styleCallback: function (grid, dataCell) {
             const v = dataCell.value
-            if (v === '정규직') return 'rg-emp-regular'
-            if (v === '계약직') return 'rg-emp-contract'
-            if (v === '파트타임') return 'rg-emp-parttime'
-            if (v === '인턴') return 'rg-emp-intern'
-            if (v === '소속') return 'rg-emp-dept'
+            if (v === '정규직') return 'rg-align-center rg-emp-regular'
+            if (v === '계약직') return 'rg-align-center rg-emp-contract'
+            if (v === '파트타임') return 'rg-align-center rg-emp-parttime'
+            if (v === '인턴') return 'rg-align-center rg-emp-intern'
+            if (v === '소속') return 'rg-align-center rg-emp-dept'
             return ''
           }
         },
@@ -266,7 +266,7 @@ export default {
           fieldName: 'evalGrade',
           width: '75',
           header: { text: '평가 (선택)' },
-          styles: { textAlignment: 'center', fontWeight: 'bold' },
+          styleName: 'rg-align-center rg-text-bold',
           editor: {
             type: 'dropdown',
             dropDownCount: 5,
@@ -289,7 +289,7 @@ export default {
           fieldName: 'skillScore',
           width: '120',
           header: { text: '역량점수 (바)' },
-          styles: { textAlignment: 'far' },
+          styleName: 'rg-align-right',
           renderer: {
             type: 'bar',
             minimum: 0,
@@ -297,18 +297,18 @@ export default {
             showLabel: true
           }
         },
-        { name: 'headcount', fieldName: 'headcount', width: '65', header: { text: '인원' }, numberFormat: '#,##0', styles: { textAlignment: 'far' } },
-        { name: 'region', fieldName: 'region', width: '80', header: { text: '근무지' }, styles: { textAlignment: 'center' } },
+        { name: 'headcount', fieldName: 'headcount', width: '65', header: { text: '인원' }, numberFormat: '#,##0', styleName: 'rg-align-right' },
+        { name: 'region', fieldName: 'region', width: '80', header: { text: '근무지' }, styleName: 'rg-align-center' },
         {
           name: 'salary',
           fieldName: 'salary',
           width: '100',
           header: { text: '연봉(만원)' },
           numberFormat: '#,##0',
-          styles: { textAlignment: 'far' },
+          styleName: 'rg-align-right',
           styleCallback: function (grid, dataCell) {
             const val = Number(dataCell.value)
-            if (val >= 7000) return 'rg-salary-high'
+            if (val >= 7000) return 'rg-align-right rg-salary-high'
             return ''
           }
         },
@@ -318,7 +318,7 @@ export default {
           width: '115',
           header: { text: '입사/설립일자 (달력)' },
           datetimeFormat: 'yyyy-MM-dd',
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           editor: {
             type: 'date',
             datetimeFormat: 'yyyy-MM-dd',

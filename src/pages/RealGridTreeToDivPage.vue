@@ -274,10 +274,10 @@ export default {
         { fieldName: 'manufacturers', dataType: 'text' }
       ],
       gridColumns: [
-        { name: 'category', fieldName: 'category', width: 220, header: { text: '부모 그룹' }, styles: { textAlignment: 'near', fontBold: true } },
-        { name: 'modelCount', fieldName: 'modelCount', width: 110, header: { text: '자식 모델' }, styles: { textAlignment: 'center' } },
-        { name: 'prefix', fieldName: 'prefix', width: 90, header: { text: '코드' }, styles: { textAlignment: 'center' } },
-        { name: 'manufacturers', fieldName: 'manufacturers', width: 220, header: { text: '제조사' }, styles: { textAlignment: 'near' } }
+        { name: 'category', fieldName: 'category', width: 220, header: { text: '부모 그룹' }, styleName: 'rg-align-left rg-text-bold' },
+        { name: 'modelCount', fieldName: 'modelCount', width: 110, header: { text: '자식 모델' }, styleName: 'rg-align-center' },
+        { name: 'prefix', fieldName: 'prefix', width: 90, header: { text: '코드' }, styleName: 'rg-align-center' },
+        { name: 'manufacturers', fieldName: 'manufacturers', width: 220, header: { text: '제조사' }, styleName: 'rg-align-left' }
       ]
     }
   },

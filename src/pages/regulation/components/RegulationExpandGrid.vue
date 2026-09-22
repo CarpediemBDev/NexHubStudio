@@ -151,7 +151,7 @@ export default {
           fieldName: 'fieldNm',
           width: '110',
           header: { text: '분야' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           ...byField
         },
         {
@@ -159,7 +159,7 @@ export default {
           fieldName: 'statusCd',
           width: '80',
           header: { text: '상태' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           ...byRecord,
           renderer: {
             type: 'html',
@@ -170,7 +170,7 @@ export default {
             }
           }
         },
-        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' }, ...byRecord },
+        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styleName: 'rg-align-center', ...byRecord },
         { name: 'title', fieldName: 'title', width: '260', header: { text: '규제명' }, ...byRecord, renderer: this.ellipsisRenderer() },
         { name: 'regulationNm', fieldName: 'regulationNm', width: '220', header: { text: '규제' }, ...byRule, renderer: this.ellipsisRenderer() },
         { name: 'standardNm', fieldName: 'standardNm', width: '220', header: { text: '규격' }, ...byStd, renderer: this.ellipsisRenderer() },
@@ -180,7 +180,7 @@ export default {
           fieldName: 'mandatoryYn',
           width: '64',
           header: { text: '필수' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) =>
@@ -190,9 +190,9 @@ export default {
           }
         },
         { name: 'divisionTxt', fieldName: 'divisionTxt', width: '150', header: { text: '사업부' }, ...byRecord, renderer: this.ellipsisRenderer() },
-        { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '110', header: { text: '제품군' }, styles: { textAlignment: 'center' }, ...byRecord },
-        { name: 'productNm', fieldName: 'productNm', width: '130', header: { text: '제품' }, styles: { textAlignment: 'center' } },
-        { name: 'regionTxt', fieldName: 'regionTxt', width: '100', header: { text: '권역' }, styles: { textAlignment: 'center' }, ...byRecord },
+        { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '110', header: { text: '제품군' }, styleName: 'rg-align-center', ...byRecord },
+        { name: 'productNm', fieldName: 'productNm', width: '130', header: { text: '제품' }, styleName: 'rg-align-center' },
+        { name: 'regionTxt', fieldName: 'regionTxt', width: '100', header: { text: '권역' }, styleName: 'rg-align-center', ...byRecord },
         {
           name: 'countryTxt',
           fieldName: 'countryTxt',
@@ -213,8 +213,8 @@ export default {
             }
           }
         },
-        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '96', header: { text: '시행일' }, styles: { textAlignment: 'center' }, ...byRecord },
-        { name: 'versionNo', fieldName: 'versionNo', width: '60', header: { text: '버전' }, numberFormat: '#,##0', styles: { textAlignment: 'center' }, ...byRecord }
+        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '96', header: { text: '시행일' }, styleName: 'rg-align-center', ...byRecord },
+        { name: 'versionNo', fieldName: 'versionNo', width: '60', header: { text: '버전' }, numberFormat: '#,##0', styleName: 'rg-align-center', ...byRecord }
       ]
     },
     /**

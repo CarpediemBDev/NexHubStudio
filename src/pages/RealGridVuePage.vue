@@ -85,35 +85,35 @@
             width="120"
             :header="{ text: 'ID' }"
             :editable="false"
-            :styles="{ textAlignment: 'center' }"
+            styleName="rg-align-center"
           />
           <RGDataColumn
             name="name"
             fieldName="name"
             width="110"
             :header="{ text: '성명' }"
-            :styles="{ textAlignment: 'center' }"
+            styleName="rg-align-center"
           />
           <RGDataColumn
             name="dept"
             fieldName="dept"
             width="130"
             :header="{ text: '부서' }"
-            :styles="{ textAlignment: 'near' }"
+            styleName="rg-align-left"
           />
           <RGDataColumn
             name="role"
             fieldName="role"
             width="110"
             :header="{ text: '직무/역할' }"
-            :styles="{ textAlignment: 'near' }"
+            styleName="rg-align-left"
           />
           <RGDataColumn
             name="workStatus"
             fieldName="workStatus"
             width="100"
             :header="{ text: '근무상태 (선택)' }"
-            :styles="{ textAlignment: 'center' }"
+            styleName="rg-align-center"
             :editor="{ type: 'dropdown', dropDownCount: 3, domainOnly: true, labels: ['재직', '휴직', '퇴사'], values: ['재직', '휴직', '퇴사'] }"
           />
           <RGDataColumn
@@ -121,7 +121,7 @@
             fieldName="employmentType"
             width="110"
             :header="{ text: '고용형태 (선택)' }"
-            :styles="{ textAlignment: 'center' }"
+            styleName="rg-align-center"
             :editor="{ type: 'dropdown', dropDownCount: 3, domainOnly: true, labels: ['정규직', '계약직', '파트타임'], values: ['정규직', '계약직', '파트타임'] }"
             :styleCallback="empTypeStyleCallback"
           />
@@ -130,7 +130,7 @@
             fieldName="evalGrade"
             width="80"
             :header="{ text: '평가등급 (선택)' }"
-            :styles="{ textAlignment: 'center', fontWeight: 'bold' }"
+            styleName="rg-align-center rg-text-bold"
             :editor="{ type: 'dropdown', dropDownCount: 5, domainOnly: true, labels: ['S', 'A', 'B', 'C', 'D'], values: ['S', 'A', 'B', 'C', 'D'] }"
             :renderer="evalGradeRenderer"
           />
@@ -139,16 +139,16 @@
             fieldName="skillScore"
             width="130"
             :header="{ text: '역량 점수 (바)' }"
-            :styles="{ textAlignment: 'far' }"
+            styleName="rg-align-right"
             :renderer="{ type: 'bar', minimum: 0, maximum: 100, showLabel: true }"
-            :footer="{ expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }"
+            :footer="{ expression: 'avg', numberFormat: '#,##0', styleName: 'rg-align-right rg-text-bold' }"
           />
           <RGDataColumn
             name="region"
             fieldName="region"
             width="90"
             :header="{ text: '근무지역' }"
-            :styles="{ textAlignment: 'center' }"
+            styleName="rg-align-center"
           />
           <RGDataColumn
             name="salary"
@@ -156,9 +156,9 @@
             width="110"
             :header="{ text: '급여 (만원)' }"
             numberFormat="#,##0"
-            :styles="{ textAlignment: 'far' }"
+            styleName="rg-align-right"
             :styleCallback="salaryStyleCallback"
-            :footer="{ expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }"
+            :footer="{ expression: 'sum', numberFormat: '#,##0', styleName: 'rg-align-right rg-text-bold' }"
           />
           <RGDataColumn
             name="joinDate"
@@ -166,7 +166,7 @@
             width="115"
             :header="{ text: '입사일자 (달력)' }"
             datetimeFormat="yyyy-MM-dd"
-            :styles="{ textAlignment: 'center' }"
+            styleName="rg-align-center"
             :editor="{ type: 'date', datetimeFormat: 'yyyy-MM-dd', commitBySelect: true }"
           />
         </RealGridCommonVue>
@@ -249,17 +249,17 @@ export default {
   methods: {
     empTypeStyleCallback(grid, dataCell) {
       const v = dataCell.value
-      if (v === '정규직') return 'rg-emp-regular'
-      if (v === '계약직') return 'rg-emp-contract'
-      if (v === '파트타임') return 'rg-emp-parttime'
-      if (v === '인턴') return 'rg-emp-intern'
-      if (v === '소속') return 'rg-emp-dept'
+      if (v === '정규직') return 'rg-align-center rg-emp-regular'
+      if (v === '계약직') return 'rg-align-center rg-emp-contract'
+      if (v === '파트타임') return 'rg-align-center rg-emp-parttime'
+      if (v === '인턴') return 'rg-align-center rg-emp-intern'
+      if (v === '소속') return 'rg-align-center rg-emp-dept'
       return ''
     },
 
     salaryStyleCallback(grid, dataCell) {
       const val = Number(dataCell.value)
-      if (val >= 7000) return 'rg-salary-high'
+      if (val >= 7000) return 'rg-align-right rg-salary-high'
       return ''
     },
     onGridInit({ gridView, dataProvider }) {

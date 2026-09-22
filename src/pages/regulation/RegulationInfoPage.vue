@@ -510,7 +510,7 @@ export default {
           fieldName: 'regInfoId',
           width: '168',
           header: { text: '작업' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           sortable: false,
           renderer: {
             type: 'html',
@@ -534,7 +534,7 @@ export default {
           fieldName: 'statusCd',
           width: '80',
           header: { text: '상태' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) => {
@@ -544,25 +544,25 @@ export default {
             }
           }
         },
-        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' } },
+        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styleName: 'rg-align-center' },
         { name: 'title', fieldName: 'title', width: '240', header: { text: '규제명' }, renderer: this.wrapRenderer() },
         { name: 'itemTxt', fieldName: 'itemTxt', width: '260', header: { text: '정보관리항목' }, renderer: this.wrapRenderer() },
-        { name: 'itemCnt', fieldName: 'itemCnt', width: '64', header: { text: '항목수' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
-        { name: 'fieldNm', fieldName: 'fieldNm', width: '90', header: { text: '분야' }, styles: { textAlignment: 'center' } },
+        { name: 'itemCnt', fieldName: 'itemCnt', width: '64', header: { text: '항목수' }, numberFormat: '#,##0', styleName: 'rg-align-center' },
+        { name: 'fieldNm', fieldName: 'fieldNm', width: '90', header: { text: '분야' }, styleName: 'rg-align-center' },
         { name: 'markNm', fieldName: 'markNm', width: '150', header: { text: '인증마크/표시' }, renderer: this.wrapRenderer() },
         // RealGrid2 는 columns 안에 columns 를 넣는 그룹을 만들지 않는다(자식 컬럼이 아예 안 생긴다).
         // 컬럼은 평평하게 두고, "적용 제품 / 적용 지역" 헤더 묶음은 onGridInit 의 setColumnLayout 이 만든다.
-        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '100', header: { text: '사업부' }, styles: { textAlignment: 'center' } },
-        { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '100', header: { text: '제품군' }, styles: { textAlignment: 'center' } },
-        { name: 'productTxt', fieldName: 'productTxt', width: '120', header: { text: '제품' }, styles: { textAlignment: 'center' } },
-        { name: 'regionTxt', fieldName: 'regionTxt', width: '80', header: { text: '권역' }, styles: { textAlignment: 'center' } },
+        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '100', header: { text: '사업부' }, styleName: 'rg-align-center' },
+        { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '100', header: { text: '제품군' }, styleName: 'rg-align-center' },
+        { name: 'productTxt', fieldName: 'productTxt', width: '120', header: { text: '제품' }, styleName: 'rg-align-center' },
+        { name: 'regionTxt', fieldName: 'regionTxt', width: '80', header: { text: '권역' }, styleName: 'rg-align-center' },
         { name: 'countryTxt', fieldName: 'countryTxt', width: '120', header: { text: '국가' }, renderer: this.wrapRenderer() },
         {
           name: 'url',
           fieldName: 'url',
           width: '100',
           header: { text: 'URL' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) => {
@@ -577,7 +577,7 @@ export default {
           fieldName: 'attachCnt',
           width: '70',
           header: { text: '첨부' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) => {
@@ -592,7 +592,7 @@ export default {
           fieldName: 'conflictCnt',
           width: '80',
           header: { text: '충돌' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) => {
@@ -602,9 +602,9 @@ export default {
             }
           }
         },
-        { name: 'versionNo', fieldName: 'versionNo', width: '60', header: { text: '버전' }, numberFormat: '#,##0', styles: { textAlignment: 'center' } },
-        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '96', header: { text: '시행일' }, styles: { textAlignment: 'center' } },
-        { name: 'modDt', fieldName: 'modDt', width: '96', header: { text: '최종수정일' }, styles: { textAlignment: 'center' } }
+        { name: 'versionNo', fieldName: 'versionNo', width: '60', header: { text: '버전' }, numberFormat: '#,##0', styleName: 'rg-align-center' },
+        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '96', header: { text: '시행일' }, styleName: 'rg-align-center' },
+        { name: 'modDt', fieldName: 'modDt', width: '96', header: { text: '최종수정일' }, styleName: 'rg-align-center' }
       ]
     },
     /**
@@ -992,13 +992,13 @@ export default {
       const byStd = { mergeRule: "values['stdKey']" }
 
       return [
-        { name: 'fieldNm', fieldName: 'fieldNm', width: '110', header: { text: '분야' }, styles: { textAlignment: 'center' }, mergeRule: "values['fieldKey']" },
+        { name: 'fieldNm', fieldName: 'fieldNm', width: '110', header: { text: '분야' }, styleName: 'rg-align-center', mergeRule: "values['fieldKey']" },
         {
           name: 'statusCd',
           fieldName: 'statusCd',
           width: '80',
           header: { text: '상태' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           ...byRecord,
           renderer: {
             type: 'html',
@@ -1009,7 +1009,7 @@ export default {
             }
           }
         },
-        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' }, ...byRecord },
+        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styleName: 'rg-align-center', ...byRecord },
         { name: 'regulationNm', fieldName: 'regulationNm', width: '200', header: { text: '규제' }, ...byRule, renderer: this.ellipsisRenderer() },
         { name: 'standardNm', fieldName: 'standardNm', width: '200', header: { text: '규격' }, ...byStd, renderer: this.ellipsisRenderer() },
         { name: 'certNm', fieldName: 'certNm', width: '180', header: { text: '관리항목' }, renderer: this.ellipsisRenderer() },
@@ -1018,7 +1018,7 @@ export default {
           fieldName: prodField(c.code),
           width: '96',
           header: { text: c.name },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) =>

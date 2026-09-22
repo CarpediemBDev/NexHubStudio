@@ -185,7 +185,7 @@ export default {
           fieldName: 'region',
           width: '90',
           header: { text: '근무지역' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           // 이전 행과 값이 같으면 위 셀과 합친다
           mergeRule: "values['region']"
         },
@@ -194,7 +194,7 @@ export default {
           fieldName: 'dept',
           width: '120',
           header: { text: '본부' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           // 지역이 다르면 본부 이름이 같아도 따로 묶이도록 상위 값을 함께 사용
           mergeRule: "values['region'] + '|' + values['dept']"
         },
@@ -203,7 +203,7 @@ export default {
           fieldName: 'team',
           width: '120',
           header: { text: '팀' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           mergeRule: "values['region'] + '|' + values['dept'] + '|' + values['team']",
           breakMergeOnEmpty: true
         },
@@ -212,21 +212,21 @@ export default {
           fieldName: 'name',
           width: '100',
           header: { text: '성명' },
-          styles: { textAlignment: 'center' }
+          styleName: 'rg-align-center'
         },
         {
           name: 'role',
           fieldName: 'role',
           width: '110',
           header: { text: '직무' },
-          styles: { textAlignment: 'near' }
+          styleName: 'rg-align-left'
         },
         {
           name: 'evalGrade',
           fieldName: 'evalGrade',
           width: '80',
           header: { text: '평가등급' },
-          styles: { textAlignment: 'center', fontWeight: 'bold' },
+          styleName: 'rg-align-center rg-text-bold',
           editor: {
             type: 'dropdown',
             dropDownCount: 4,
@@ -241,8 +241,8 @@ export default {
           width: '110',
           header: { text: '급여 (만원)' },
           numberFormat: '#,##0',
-          styles: { textAlignment: 'far' },
-          footer: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
+          styleName: 'rg-align-right',
+          footer: { expression: 'sum', numberFormat: '#,##0', styleName: 'rg-align-right rg-text-bold' }
         },
         {
           name: 'joinDate',
@@ -250,7 +250,7 @@ export default {
           width: '110',
           header: { text: '입사일자' },
           datetimeFormat: 'yyyy-MM-dd',
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           editor: { type: 'date', datetimeFormat: 'yyyy-MM-dd', commitBySelect: true }
         }
       ]

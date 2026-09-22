@@ -330,12 +330,12 @@ export default {
         { fieldName: 'cost', dataType: 'number' }
       ],
       gridColumns: [
-        { name: 'name', fieldName: 'name', width: 90, header: { text: '성명' }, styles: { textAlignment: 'center' } },
-        { name: 'dept', fieldName: 'dept', width: 110, header: { text: '부서' }, styles: { textAlignment: 'near' } },
-        { name: 'role', fieldName: 'role', width: 100, header: { text: '직무' }, styles: { textAlignment: 'near' } },
+        { name: 'name', fieldName: 'name', width: 90, header: { text: '성명' }, styleName: 'rg-align-center' },
+        { name: 'dept', fieldName: 'dept', width: 110, header: { text: '부서' }, styleName: 'rg-align-left' },
+        { name: 'role', fieldName: 'role', width: 100, header: { text: '직무' }, styleName: 'rg-align-left' },
         {
           name: 'evalGrade', fieldName: 'evalGrade', width: 70, header: { text: '등급' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) => {
@@ -347,10 +347,10 @@ export default {
         },
         {
           name: 'skillScore', fieldName: 'skillScore', width: 110, header: { text: '역량' },
-          styles: { textAlignment: 'far' },
+          styleName: 'rg-align-right',
           renderer: { type: 'bar', minimum: 0, maximum: 100, showLabel: true }
         },
-        { name: 'region', fieldName: 'region', width: 70, header: { text: '지역' }, styles: { textAlignment: 'center' } }
+        { name: 'region', fieldName: 'region', width: 70, header: { text: '지역' }, styleName: 'rg-align-center' }
       ]
     }
   },

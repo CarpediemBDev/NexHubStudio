@@ -41,7 +41,7 @@
 - 기존 그리드 하단에 숫자 데이터의 합계(`sum`), 평균(`avg`), 건수(`count`)를 표출해라.
 - **코드 규격**:
   - 기존 옵션 유지 스위치: `gridView.setFooter({ visible: true })` (기존 footer 설정이 있으면 보존)
-  - 수식: `footer: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }`
+  - 수식: `footer: { expression: 'sum', numberFormat: '#,##0', styleName: 'rg-align-right rg-text-bold' }`
 
 ### ③ 마우스 우클릭 동적 행/열 고정 (기존 고정이 없을 경우만 옵션 제공)
 - 기존 행/열 고정이 없을 경우에만 우클릭 컨텍스트 메뉴에 `📌 클릭한 열까지 고정`, `📌 클릭한 행까지 고정`, `❌ 고정 해제` 메뉴를 안전 병합해라.

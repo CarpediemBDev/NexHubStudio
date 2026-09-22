@@ -228,16 +228,16 @@ export default {
         { fieldName: 'colActions', dataType: 'text' }
       ],
       gridColumns: [
-        { name: 'region', fieldName: 'region', width: '70', header: { text: '지역' }, styles: { textAlignment: 'center' } },
-        { name: 'dept', fieldName: 'dept', width: '95', header: { text: '부서명' }, styles: { textAlignment: 'near' } },
-        { name: 'role', fieldName: 'role', width: '85', header: { text: '직급' }, styles: { textAlignment: 'near' } },
-        { name: 'name', fieldName: 'name', width: '80', header: { text: '이름' }, styles: { textAlignment: 'center' } },
+        { name: 'region', fieldName: 'region', width: '70', header: { text: '지역' }, styleName: 'rg-align-center' },
+        { name: 'dept', fieldName: 'dept', width: '95', header: { text: '부서명' }, styleName: 'rg-align-left' },
+        { name: 'role', fieldName: 'role', width: '85', header: { text: '직급' }, styleName: 'rg-align-left' },
+        { name: 'name', fieldName: 'name', width: '80', header: { text: '이름' }, styleName: 'rg-align-center' },
         {
           name: 'workStatus',
           fieldName: 'workStatus',
           width: '90',
           header: { text: '근무상태 (선택)' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           editor: {
             type: 'dropdown',
             dropDownCount: 3,
@@ -251,7 +251,7 @@ export default {
           fieldName: 'employmentType',
           width: '90',
           header: { text: '고용형태 (선택)' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           editor: {
             type: 'dropdown',
             dropDownCount: 3,
@@ -261,11 +261,11 @@ export default {
           },
           styleCallback: function (grid, dataCell) {
             const v = dataCell.value
-            if (v === '정규직') return 'rg-emp-regular'
-            if (v === '계약직') return 'rg-emp-contract'
-            if (v === '파트타임') return 'rg-emp-parttime'
-            if (v === '인턴') return 'rg-emp-intern'
-            if (v === '소속') return 'rg-emp-dept'
+            if (v === '정규직') return 'rg-align-center rg-emp-regular'
+            if (v === '계약직') return 'rg-align-center rg-emp-contract'
+            if (v === '파트타임') return 'rg-align-center rg-emp-parttime'
+            if (v === '인턴') return 'rg-align-center rg-emp-intern'
+            if (v === '소속') return 'rg-align-center rg-emp-dept'
             return ''
           }
         },
@@ -274,7 +274,7 @@ export default {
           fieldName: 'evalGrade',
           width: '65',
           header: { text: '평가' },
-          styles: { textAlignment: 'center', fontWeight: 'bold' },
+          styleName: 'rg-align-center rg-text-bold',
           editor: {
             type: 'dropdown',
             dropDownCount: 5,
@@ -299,15 +299,15 @@ export default {
           fieldName: 'skillScore',
           width: '100',
           header: { text: '역량점수 (바)' },
-          styles: { textAlignment: 'far' },
+          styleName: 'rg-align-right',
           renderer: {
             type: 'bar',
             minimum: 0,
             maximum: 100,
             showLabel: true
           },
-          footer: { expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } },
-          groupFooter: { expression: 'avg', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
+          footer: { expression: 'avg', numberFormat: '#,##0', styleName: 'rg-align-right rg-text-bold' },
+          groupFooter: { expression: 'avg', numberFormat: '#,##0', styleName: 'rg-align-right rg-text-bold' }
         },
         {
           name: 'salary',
@@ -315,14 +315,14 @@ export default {
           width: '95',
           header: { text: '기본급 (만원)' },
           numberFormat: '#,##0',
-          styles: { textAlignment: 'far' },
+          styleName: 'rg-align-right',
           styleCallback: function (grid, dataCell) {
             const val = Number(dataCell.value)
-            if (val >= 7000) return 'rg-salary-high'
+            if (val >= 7000) return 'rg-align-right rg-salary-high'
             return ''
           },
-          footer: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } },
-          groupFooter: { expression: 'sum', numberFormat: '#,##0', styles: { textAlignment: 'far', fontWeight: 'bold' } }
+          footer: { expression: 'sum', numberFormat: '#,##0', styleName: 'rg-align-right rg-text-bold' },
+          groupFooter: { expression: 'sum', numberFormat: '#,##0', styleName: 'rg-align-right rg-text-bold' }
         },
         {
           name: 'joinDate',
@@ -330,7 +330,7 @@ export default {
           width: '105',
           header: { text: '입사일자 (달력)' },
           datetimeFormat: 'yyyy-MM-dd',
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           editor: {
             type: 'date',
             datetimeFormat: 'yyyy-MM-dd',
@@ -343,7 +343,7 @@ export default {
           header: { text: '관리' },
           width: 130,
           editable: false,
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: function (grid, cell) {

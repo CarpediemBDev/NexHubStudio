@@ -85,7 +85,7 @@ export function buildPivotMatrix(data, { rowField, colField, valField, aggType =
       fieldName: rowField,
       width: '160',
       header: { text: getFieldLabel(rowField) },
-      styles: { textAlignment: 'center' }
+      styleName: 'rg-align-center'
     }
   ]
 
@@ -98,11 +98,11 @@ export function buildPivotMatrix(data, { rowField, colField, valField, aggType =
       width: '130',
       header: { text: colKey },
       numberFormat: '#,##0',
-      styles: { textAlignment: 'far' },
+      styleName: 'rg-align-right',
       footer: {
         expression: aggType === 'avg' ? 'avg' : (aggType === 'count' ? 'sum' : 'sum'),
         numberFormat: '#,##0',
-        styles: { textAlignment: 'far' }
+        styleName: 'rg-align-right'
       }
     })
   })
@@ -115,11 +115,11 @@ export function buildPivotMatrix(data, { rowField, colField, valField, aggType =
     width: '140',
     header: { text: '총계 (' + getAggLabel(aggType) + ')' },
     numberFormat: '#,##0',
-    styles: { textAlignment: 'far', fontWeight: 'bold', backgroundColor: '#f8fafc' },
+    styleName: 'rg-align-right rg-text-bold rg-cell-total',
     footer: {
       expression: 'sum',
       numberFormat: '#,##0',
-      styles: { textAlignment: 'far', fontWeight: 'bold' }
+      styleName: 'rg-align-right rg-text-bold'
     }
   })
 

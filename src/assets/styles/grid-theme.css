@@ -315,6 +315,19 @@ html .rg-vscrollbar .rg-scroll-down:hover {
 .rg-salary-high  { --rg-cell-color: var(--b2b-color-danger); }
 
 /* ==========================================================================
+   셀 정렬·굵기 — 컬럼의 styleName 으로 붙인다
+   RealGrid2 는 RealGrid1 의 styles: { textAlignment } 를 읽지 않는다(오류 없이 무시).
+   기본은 realgrid-white.css 의 .rg-data-cell { text-align: center } (푸터는 right).
+   그 파일이 이 파일보다 늦게 붙으므로 html 을 붙여 (0,1,1) 로 (0,1,0) 을 이긴다.
+   styleCallback 을 쓰는 컬럼은 콜백 반환값이 styleName 을 대체하므로 정렬 클래스도 같이 돌려준다.
+   ========================================================================== */
+html .rg-align-left   { text-align: left; }
+html .rg-align-center { text-align: center; }
+html .rg-align-right  { text-align: right; }
+html .rg-text-bold    { font-weight: 700; }
+html .rg-cell-total   { --rg-cell-bg: var(--rg-header-surface); }
+
+/* ==========================================================================
    STATE BAR — 행 상태 컬러 뱃지 (추가=초록, 수정=파랑, 삭제=빨강)
    RealGrid가 state cell에 부여하는 data-rowstate 속성 기반 CSS
    ========================================================================== */

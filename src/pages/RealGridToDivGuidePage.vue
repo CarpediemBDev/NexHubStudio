@@ -212,11 +212,11 @@ export default {
         { fieldName: 'manufacturer', dataType: 'text' }
       ],
       gridColumns: [
-        { name: 'modelCode', fieldName: 'modelCode', width: 110, header: { text: '모델 코드' }, styles: { textAlignment: 'center' } },
-        { name: 'modelName', fieldName: 'modelName', width: 170, header: { text: '모델명' }, styles: { textAlignment: 'near' } },
-        { name: 'category', fieldName: 'category', width: 110, header: { text: '카테고리' }, styles: { textAlignment: 'center' } },
-        { name: 'grade', fieldName: 'grade', width: 80, header: { text: '등급' }, styles: { textAlignment: 'center' } },
-        { name: 'manufacturer', fieldName: 'manufacturer', width: 110, header: { text: '제조사' }, styles: { textAlignment: 'center' } }
+        { name: 'modelCode', fieldName: 'modelCode', width: 110, header: { text: '모델 코드' }, styleName: 'rg-align-center' },
+        { name: 'modelName', fieldName: 'modelName', width: 170, header: { text: '모델명' }, styleName: 'rg-align-left' },
+        { name: 'category', fieldName: 'category', width: 110, header: { text: '카테고리' }, styleName: 'rg-align-center' },
+        { name: 'grade', fieldName: 'grade', width: 80, header: { text: '등급' }, styleName: 'rg-align-center' },
+        { name: 'manufacturer', fieldName: 'manufacturer', width: 110, header: { text: '제조사' }, styleName: 'rg-align-center' }
       ]
     }
   },

@@ -343,7 +343,7 @@ export default {
           fieldName: 'statusCd',
           width: '80',
           header: { text: '상태' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) => {
@@ -352,18 +352,18 @@ export default {
             }
           }
         },
-        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' } },
+        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styleName: 'rg-align-center' },
         { name: 'title', fieldName: 'title', width: '240', header: { text: '규제명' } },
         { name: 'itemTxt', fieldName: 'itemTxt', width: '260', header: { text: '정보관리항목' } },
-        { name: 'fieldNm', fieldName: 'fieldNm', width: '90', header: { text: '분야' }, styles: { textAlignment: 'center' } },
+        { name: 'fieldNm', fieldName: 'fieldNm', width: '90', header: { text: '분야' }, styleName: 'rg-align-center' },
         { name: 'markNm', fieldName: 'markNm', width: '150', header: { text: '인증마크/표시' } },
-        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '100', header: { text: '사업부' }, styles: { textAlignment: 'center' } },
-        { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '100', header: { text: '제품군' }, styles: { textAlignment: 'center' } },
-        { name: 'productTxt', fieldName: 'productTxt', width: '120', header: { text: '제품' }, styles: { textAlignment: 'center' } },
-        { name: 'regionTxt', fieldName: 'regionTxt', width: '80', header: { text: '권역' }, styles: { textAlignment: 'center' } },
+        { name: 'divisionTxt', fieldName: 'divisionTxt', width: '100', header: { text: '사업부' }, styleName: 'rg-align-center' },
+        { name: 'productGroupTxt', fieldName: 'productGroupTxt', width: '100', header: { text: '제품군' }, styleName: 'rg-align-center' },
+        { name: 'productTxt', fieldName: 'productTxt', width: '120', header: { text: '제품' }, styleName: 'rg-align-center' },
+        { name: 'regionTxt', fieldName: 'regionTxt', width: '80', header: { text: '권역' }, styleName: 'rg-align-center' },
         { name: 'countryTxt', fieldName: 'countryTxt', width: '140', header: { text: '국가' } },
-        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '96', header: { text: '시행일' }, styles: { textAlignment: 'center' } },
-        { name: 'modDt', fieldName: 'modDt', width: '96', header: { text: '최종수정일' }, styles: { textAlignment: 'center' } }
+        { name: 'effectiveDt', fieldName: 'effectiveDt', width: '96', header: { text: '시행일' }, styleName: 'rg-align-center' },
+        { name: 'modDt', fieldName: 'modDt', width: '96', header: { text: '최종수정일' }, styleName: 'rg-align-center' }
       ]
     },
 
@@ -389,13 +389,13 @@ export default {
     createCrosstabColumns(cols) {
       const byRecord = { mergeRule: "values['recKey']" }
       return [
-        { name: 'fieldNm', fieldName: 'fieldNm', width: '110', header: { text: '분야' }, styles: { textAlignment: 'center' }, mergeRule: "values['fieldKey']" },
+        { name: 'fieldNm', fieldName: 'fieldNm', width: '110', header: { text: '분야' }, styleName: 'rg-align-center', mergeRule: "values['fieldKey']" },
         {
           name: 'statusCd',
           fieldName: 'statusCd',
           width: '80',
           header: { text: '상태' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           ...byRecord,
           renderer: {
             type: 'html',
@@ -405,7 +405,7 @@ export default {
             }
           }
         },
-        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' }, ...byRecord },
+        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styleName: 'rg-align-center', ...byRecord },
         { name: 'regulationNm', fieldName: 'regulationNm', width: '200', header: { text: '규제' }, mergeRule: "values['ruleKey']" },
         { name: 'standardNm', fieldName: 'standardNm', width: '200', header: { text: '규격' }, mergeRule: "values['stdKey']" },
         { name: 'certNm', fieldName: 'certNm', width: '180', header: { text: '관리항목' } },
@@ -414,7 +414,7 @@ export default {
           fieldName: prodField(c.code),
           width: '96',
           header: { text: c.name },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) => (model?.value === 'Y'

@@ -84,10 +84,10 @@ export default {
         { fieldName: 'manufacturer', dataType: 'text' }
       ],
       gridColumns: [
-        { name: 'modelName', fieldName: 'modelName', width: 250, header: { text: '그룹 / 모델명' }, styles: { textAlignment: 'near' } },
-        { name: 'modelCode', fieldName: 'modelCode', width: 120, header: { text: '모델 코드' }, styles: { textAlignment: 'center' } },
-        { name: 'grade', fieldName: 'grade', width: 90, header: { text: '등급' }, styles: { textAlignment: 'center' } },
-        { name: 'manufacturer', fieldName: 'manufacturer', width: 180, header: { text: '제조사' }, styles: { textAlignment: 'center' } }
+        { name: 'modelName', fieldName: 'modelName', width: 250, header: { text: '그룹 / 모델명' }, styleName: 'rg-align-left' },
+        { name: 'modelCode', fieldName: 'modelCode', width: 120, header: { text: '모델 코드' }, styleName: 'rg-align-center' },
+        { name: 'grade', fieldName: 'grade', width: 90, header: { text: '등급' }, styleName: 'rg-align-center' },
+        { name: 'manufacturer', fieldName: 'manufacturer', width: 180, header: { text: '제조사' }, styleName: 'rg-align-center' }
       ]
     }
   },

@@ -141,13 +141,13 @@ export default {
       const byStd = { mergeRule: "values['stdKey']" }
 
       return [
-        { name: 'fieldNm', fieldName: 'fieldNm', width: '110', header: { text: '분야' }, styles: { textAlignment: 'center' }, mergeRule: "values['fieldKey']" },
+        { name: 'fieldNm', fieldName: 'fieldNm', width: '110', header: { text: '분야' }, styleName: 'rg-align-center', mergeRule: "values['fieldKey']" },
         {
           name: 'statusCd',
           fieldName: 'statusCd',
           width: '80',
           header: { text: '상태' },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           ...byRecord,
           renderer: {
             type: 'html',
@@ -158,7 +158,7 @@ export default {
             }
           }
         },
-        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styles: { textAlignment: 'center' }, ...byRecord },
+        { name: 'regNo', fieldName: 'regNo', width: '120', header: { text: '규제번호' }, styleName: 'rg-align-center', ...byRecord },
         { name: 'regulationNm', fieldName: 'regulationNm', width: '200', header: { text: '규제' }, ...byRule, renderer: this.ellipsisRenderer() },
         { name: 'standardNm', fieldName: 'standardNm', width: '200', header: { text: '규격' }, ...byStd, renderer: this.ellipsisRenderer() },
         { name: 'certNm', fieldName: 'certNm', width: '180', header: { text: '관리항목' }, renderer: this.ellipsisRenderer() },
@@ -168,7 +168,7 @@ export default {
           fieldName: prodField(c.code),
           width: '96',
           header: { text: c.name },
-          styles: { textAlignment: 'center' },
+          styleName: 'rg-align-center',
           renderer: {
             type: 'html',
             callback: (grid, model) =>
