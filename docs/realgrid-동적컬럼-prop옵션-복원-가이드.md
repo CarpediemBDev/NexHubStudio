@@ -4,6 +4,7 @@
 
 - 공통 컴포넌트: `src/components/RealGridCommonJs.vue` — `bindColumnDefaults`, `initGrid`
 - 트리 컴포넌트: `src/components/RealGridTreeJs.vue` — 같은 `bindColumnDefaults` (셀 병합 없음, autoFilter 만)
+- realgrid-vue 컴포넌트: `src/components/RealGridCommonVue.vue` — `setColumns` 와 함께 **`addColumn` 도 감싼다**. realgrid-vue 는 `<RealGridColumn>` 자식이 마운트될 때마다 `addColumn` 을 부르므로 `setColumns` 만 감싸면 효과가 없다
 - 동적 화면: `src/pages/regulation/RegulationInfoPage.vue` — `onGridInit`, `applyGridPayload`, `configureGridForView`
 
 ---
@@ -168,6 +169,147 @@ trace(dataProvider, 'setRows', rows => (rows || []).length + '행');
 | `[xxx] 예외` 뒤로 로그가 끊김 | 그 호출에서 교체 함수가 멈췄다. 빈 그리드의 직접 원인 |
 | `[setRows] 20행` 다음에 `[setFields]` | 행이 지워진다. `setFields` 를 앞으로 |
 | `[setRows] 0행` 이후 아무것도 없음 | 새 데이터를 넣는 코드가 실행되지 않음 (조건문, await 누락, 예외) |
+
+### 5-4. 감싸기 안쪽에서 바로 판정하기
+
+2장 코드가 있는데도 실패하면 바깥 추적만으로는 부족하다. 잠깐 `bindColumnDefaults()` 를 아래처럼 바꿔서 **감싼 함수 안쪽**을 본다. 진단이 끝나면 원래 코드로 되돌린다.
+
+```js
+bindColumnDefaults() {
+  const gv = this.gridView
+  if (!gv || gv.__columnDefaultsBound) return
+
+  const rawSetColumns = gv.setColumns.bind(gv)
+  gv.__columnDefaultsBound = true
+
+  gv.setColumns = (cols) => {
+    const input = Array.isArray(cols) ? cols : []
+    const patched = input.map(c => ({ autoFilter: this.resolvedFilterable, ...c }))
+
+    console.groupCollapsed(`[RealGrid setColumns] in=${input.length}, filterable=${this.resolvedFilterable}`)
+    console.log('입력 컬럼', input.map(c => ({
+      name: c.name,
+      fieldName: c.fieldName,
+      autoFilter: c.autoFilter
+    })))
+    console.log('보정 후 false/누락', patched
+      .filter(c => c.autoFilter !== true)
+      .map(c => ({ name: c.name, autoFilter: c.autoFilter })))
+
+    try {
+      const result = rawSetColumns(patched)
+      const after = typeof gv.getColumns === 'function' ? (gv.getColumns() || []) : []
+      const readAutoFilter = (col) => {
+        try {
+          return typeof gv.getColumnProperty === 'function'
+            ? gv.getColumnProperty(col.name, 'autoFilter')
+            : col.autoFilter
+        } catch (e) {
+          return col.autoFilter
+        }
+      }
+
+      console.log('적용 후 false/누락', after
+        .filter(c => readAutoFilter(c) !== true)
+        .map(c => ({ name: c.name, autoFilter: readAutoFilter(c) })))
+
+      if (typeof this.applyCellMerging === 'function') this.applyCellMerging()
+      return result
+    } catch (e) {
+      console.error('[RealGrid setColumns] 예외', e)
+      throw e
+    } finally {
+      console.groupEnd()
+    }
+  }
+}
+```
+
+판정은 이렇게 한다.
+
+| 로그 | 원인 | 조치 |
+| --- | --- | --- |
+| 로그가 아예 안 찍힘 | 실제 화면의 `gridView` 가 이 공통 컴포넌트 인스턴스의 `gridView` 가 아님, 또는 `bindColumnDefaults()` 호출 전/후가 잘못됨 | `initGrid` 에서 `this.gridView` 만든 직후, 첫 `setColumns` 보다 먼저 호출 |
+| `filterable=false` | 화면 prop 이 false 로 들어왔거나 resolver 가 잘못됨 | 선언부 `:filterable="true"` 와 `resolvedFilterable` 확인 |
+| `입력 컬럼` 에 이미 `autoFilter: false` | 컬럼 생성 함수가 false 를 명시함. `...c` 가 뒤라 명시값이 우선한다 | 해당 컬럼 정의 제거 또는 의도 확인 |
+| `보정 후 false/누락` 이 있음 | `name` 없는 그룹/가짜 컬럼이 섞였거나 컬럼 구조가 예상과 다름 | leaf 컬럼만 `setColumns` 에 넣는지 확인 |
+| `보정 후` 는 비었는데 `적용 후 false/누락` 이 있음 | RealGrid 가 컬럼 정의를 받는 과정에서 속성을 버렸거나, `getColumns()` 로는 안 보이는 버전 | `getColumnProperty(name, 'autoFilter')` 결과를 우선 신뢰. 그래도 false 면 `setColumnProperty` 후처리 방식으로 변경 |
+| `rawSetColumns` 예외 | 컬럼 정의 자체가 RealGrid 형식과 맞지 않음 | 예외가 난 컬럼명/fieldName 을 보고 컬럼 생성 함수 확인 |
+
+`setColumns` 감싸기를 여러 번 호출하면 감싸기 위에 감싸기가 쌓여 로그가 헷갈린다. 그래서 진단 코드처럼 `gv.__columnDefaultsBound` 마커를 둔다. 운영 코드에도 이 가드를 넣어두면 중복 감싸기를 피할 수 있다.
+
+### 5-5. 누가 나중에 덮는지 추적하기
+
+5-4 에서 `적용 후 false/누락` 은 없는데 화면에서는 아이콘이 사라지면, `setColumns` 이후 다른 코드가 다시 덮는 것이다. 이때는 아래를 `onGridInit` 에 임시로 넣는다.
+
+```js
+const traceMethod = (obj, name, fmt) => {
+  if (!obj || typeof obj[name] !== 'function') return
+  const raw = obj[name].bind(obj)
+  obj[name] = (...args) => {
+    const msg = fmt ? fmt(...args) : ''
+    if (msg !== false) {
+      console.log(`[${name}]`, msg)
+      console.trace()
+    }
+    return raw(...args)
+  }
+}
+
+traceMethod(gridView, 'setColumnProperty', (col, prop, value) => {
+  if (prop !== 'autoFilter' && prop !== 'visible' && prop !== 'filters') return false
+  return { col, prop, value }
+})
+traceMethod(gridView, 'setFilteringOptions', opts => opts)
+traceMethod(gridView, 'setColumnLayout', layout => layout)
+traceMethod(gridView, 'setColumnFilters', (col, filters) => ({
+  col,
+  count: (filters || []).length
+}))
+traceMethod(gridView, 'setOptions', () => 'setOptions 호출됨')
+```
+
+판정:
+
+| 로그 | 의미 |
+| --- | --- |
+| `[setColumnProperty] { prop: 'autoFilter', value: false }` | 누군가 컬럼 필터를 끄고 있다 |
+| `[setFilteringOptions] { enabled: false }` | 필터 기능 자체가 꺼졌다 |
+| `[setOptions]` | 옵션 스냅샷 복원 코드가 남아 있다. 이 가이드에서는 제거 대상 |
+| `[setColumnLayout]` 이후 특정 컬럼만 안 보임 | 레이아웃에 없는 컬럼이 숨거나 헤더 묶음이 잘못됨 |
+| `[setColumnFilters]` 예외 또는 잘못된 컬럼명 | 커스텀 필터가 이전 컬럼 기준으로 적용됨. `configureGridForView()` 에서 새 컬럼 뒤 다시 설정 |
+
+### 5-6. 중첩 컬럼 구조를 쓰는 프로젝트
+
+이 프로젝트는 컬럼 배열을 평평하게 만들고 헤더 묶음은 `setColumnLayout()` 으로 만든다. 다른 프로젝트가 아래처럼 중첩 컬럼을 `setColumns()` 에 직접 넣는다면 단순 `map` 으로는 leaf 컬럼까지 기본값이 들어가지 않을 수 있다.
+
+```js
+[
+  {
+    name: 'productGroup',
+    header: { text: '제품' },
+    columns: [
+      { name: 'productCd', fieldName: 'productCd' },
+      { name: 'productNm', fieldName: 'productNm' }
+    ]
+  }
+]
+```
+
+그 경우에는 leaf 컬럼까지 내려가서 보정한다.
+
+```js
+const withColumnDefaults = (cols) => (cols || []).map(c => {
+  const next = { autoFilter: this.resolvedFilterable, ...c }
+  if (Array.isArray(c.columns)) next.columns = withColumnDefaults(c.columns)
+  if (Array.isArray(c.items)) next.items = withColumnDefaults(c.items)
+  return next
+})
+
+gv.setColumns = (cols) => rawSetColumns(withColumnDefaults(cols))
+```
+
+다만 RealGrid2 에서는 보통 컬럼 정의는 평평하게 두고, 헤더 그룹은 `setColumnLayout()` 으로 만든다. 중첩 컬럼을 실제로 지원하는지 프로젝트의 기존 코드와 버전을 먼저 확인한다.
 
 ---
 

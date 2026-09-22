@@ -677,6 +677,32 @@ export default {
       }
     },
 
+    /**
+     * gridView 의 컬럼 추가 경로를 감싸, 컬럼마다 autoFilter(:filterable 값)·mergeRule(:merge-mode)을 다시 적용한다.
+     * 이 둘은 컬럼 정의 안에 있어서 새 컬럼을 넣으면 사라진다. 컬럼에 autoFilter 를 직접 적으면 그 값이 우선한다.
+     *  · addColumn  — realgrid-vue 는 <RealGridColumn> 자식이 마운트될 때마다 이걸 부른다 (v-for 동적 컬럼 포함)
+     *  · setColumns — 화면의 @init gridView 직접 호출
+     * onInitialized 이전에 이미 들어온 컬럼은 initGrid 아래 forEach 가 처리한다.
+     */
+    bindColumnDefaults() {
+      const gv = this.gridView
+      if (gv._columnDefaultsBound) return
+      gv._columnDefaultsBound = true
+      const withDefaults = c => ({ autoFilter: this.resolvedFilterable, ...c })
+      const rawSetColumns = gv.setColumns.bind(gv)
+      gv.setColumns = (cols) => {
+        const result = rawSetColumns((cols || []).map(withDefaults))
+        this.applyCellMerging()
+        return result
+      }
+      const rawAddColumn = gv.addColumn.bind(gv)
+      gv.addColumn = (col, ...rest) => {
+        const result = rawAddColumn(col && typeof col === 'object' ? withDefaults(col) : col, ...rest)
+        this.applyCellMerging()
+        return result
+      }
+    },
+
     initGrid(arg) {
       const realGridComp = this.$refs.realGridComp
       const gv = (realGridComp && realGridComp.gridView) || arg
@@ -688,6 +714,7 @@ export default {
       if (!this._unbindTooltip) this._unbindTooltip = bindGridTooltip(gv)
       // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
       if (!this._unbindRepaint) this._unbindRepaint = bindResizeRepaint(gv)
+      this.bindColumnDefaults()
       this.dataProvider = markRaw((realGridComp && realGridComp.dataProvider) || (gv.getDataSource && gv.getDataSource()))
 
       const customOpts = { ...(this.options || {}), ...(this.gridOptions || {}) }
