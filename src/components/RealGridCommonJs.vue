@@ -235,9 +235,7 @@ export default {
       deep: true,
       handler(newColumns) {
         if (this.gridView && newColumns && newColumns.length > 0) {
-          this.gridView.setColumns(newColumns.map(c => ({ autoFilter: this.resolvedFilterable, ...c })))
-          this.syncColumnItems()
-          this.applyCellMerging()
+          this.gridView.setColumns(newColumns) // autoFilter·병합은 bindColumnDefaults 가 처리
         }
       }
     }
@@ -698,6 +696,22 @@ export default {
       }
     },
 
+    /**
+     * gridView.setColumns 를 감싸, 누가 어디서 부르든(watcher, 화면의 @init gridView 직접 호출)
+     * 컬럼 단위 prop 을 다시 적용한다. autoFilter·mergeRule 은 그리드 옵션이 아니라 컬럼 정의 안에 있어서
+     * 새 컬럼을 넣으면 사라지고 getOptions/setOptions 로도 복원되지 않는다.
+     * 컬럼에 autoFilter 를 직접 적으면 그 값이 우선한다.
+     */
+    bindColumnDefaults() {
+      const gv = this.gridView
+      const rawSetColumns = gv.setColumns.bind(gv)
+      gv.setColumns = (cols) => {
+        const result = rawSetColumns((cols || []).map(c => ({ autoFilter: this.resolvedFilterable, ...c })))
+        this.applyCellMerging()
+        return result
+      }
+    },
+
     initGrid() {
       const container = this.$refs.gridElement
       if (!container) return
@@ -713,6 +727,7 @@ export default {
       this._unbindTooltip = bindGridTooltip(this.gridView)
       // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
       this._unbindRepaint = bindResizeRepaint(this.gridView)
+      this.bindColumnDefaults()
 
       const customOpts = { ...(this.options || {}), ...(this.gridOptions || {}) }
 
@@ -768,7 +783,7 @@ export default {
         this.dataProvider.setFields(this.fields)
       }
       if (this.columns && this.columns.length > 0) {
-        this.gridView.setColumns(this.columns.map(c => ({ autoFilter: this.resolvedFilterable, ...c })))
+        this.gridView.setColumns(this.columns)
       }
 
       if (this.rows && this.rows.length > 0) {
