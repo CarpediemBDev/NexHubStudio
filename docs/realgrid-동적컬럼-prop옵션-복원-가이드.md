@@ -3,6 +3,7 @@
 예제는 이 프로젝트 소스를 본다.
 
 - 공통 컴포넌트: `src/components/RealGridCommonJs.vue` — `bindColumnDefaults`, `initGrid`
+- 트리 컴포넌트: `src/components/RealGridTreeJs.vue` — 같은 `bindColumnDefaults` (셀 병합 없음, autoFilter 만)
 - 동적 화면: `src/pages/regulation/RegulationInfoPage.vue` — `onGridInit`, `applyGridPayload`, `configureGridForView`
 
 ---

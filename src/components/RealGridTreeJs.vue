@@ -939,6 +939,7 @@ export default {
       this._unbindTooltip = bindGridTooltip(this.gridView)
       // 리사이즈 후 화면이 안 따라오는 것을 보정 (첫 1회 / beginUpdate 잠김) — realgridResizeRepaint.js
       this._unbindRepaint = bindResizeRepaint(this.gridView)
+      this.bindColumnDefaults()
 
       this.dataProvider.softDeleting = this.resolvedSoftDeletable
       this.gridView.hideDeletedRows = this.hideDeletedRows
@@ -1090,20 +1091,25 @@ export default {
     },
 
     /**
-     * 헤더 컬럼 필터 활성화. resolvedFilterable(기본 true)면 filteringOptions 를 켜고
-     * (TreeView 는 includeParentItem:true 로 매칭 노드의 조상 경로를 유지) 각 컬럼
-     * autoFilter=true 로 설정 → 필터 아이콘 클릭 시 distinct 값 목록 자동 생성.
+     * gridView.setColumns 를 감싸, 누가 어디서 부르든(watcher, resetGridLayout, 화면의 @init gridView 직접 호출)
+     * 컬럼마다 autoFilter 를 :filterable 값으로 붙인다. autoFilter 는 컬럼 정의 안에 있어서
+     * 새 컬럼을 넣으면 사라진다. 컬럼에 autoFilter 를 직접 적으면 그 값이 우선한다.
+     */
+    bindColumnDefaults() {
+      const gv = this.gridView
+      const rawSetColumns = gv.setColumns.bind(gv)
+      gv.setColumns = (cols) => rawSetColumns((cols || []).map(c => ({ autoFilter: this.resolvedFilterable, ...c })))
+    },
+
+    /**
+     * 헤더 컬럼 필터 활성화. resolvedFilterable(기본 true)면 filteringOptions 를 켠다
+     * (TreeView 는 includeParentItem:true 로 매칭 노드의 조상 경로를 유지).
+     * 컬럼별 autoFilter 는 bindColumnDefaults 가 setColumns 때마다 붙인다.
      */
     applyColumnFilters() {
       if (!this.gridView) return
       try {
         this.gridView.setFilteringOptions({ enabled: this.resolvedFilterable, includeParentItem: true })
-        if (this.resolvedFilterable) {
-          const cols = typeof this.gridView.getColumns === 'function' ? (this.gridView.getColumns() || []) : []
-          cols.forEach(c => {
-            try { this.gridView.setColumnProperty(c.name, 'autoFilter', true) } catch (e) { /* noop */ }
-          })
-        }
       } catch (e) {
         console.warn('[RealGridTree] applyColumnFilters error:', e)
       }
