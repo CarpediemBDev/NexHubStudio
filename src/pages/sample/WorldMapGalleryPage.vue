@@ -4,37 +4,41 @@
 
     <!-- 선택한 디자인 크게 보기 -->
     <div class="b2b-card shadow-sm border border-theme rounded-3 bg-theme-card p-3">
-      <!-- 지도 레이아웃: 투영법 · 가운데 기준 (지구본 디자인에는 해당 없음) -->
-      <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-        <span class="wm-tool-label">투영법</span>
-        <div class="wm-seg" role="group" aria-label="투영법">
-          <button
-            v-for="p in PROJECTIONS"
-            :key="p.key"
-            type="button"
-            :class="{ on: projKey === p.key }"
-            :disabled="isGlobe"
-            :title="p.desc"
-            @click="setView(p.key, centerKey)"
-          >
-            {{ p.label }}
-          </button>
+      <!-- 지도 레이아웃: 투영법 · 지도 중심 (지구본 디자인에는 해당 없음). 라벨은 버튼 묶음 위에 둬서 버튼과 헷갈리지 않게 -->
+      <div class="d-flex align-items-end gap-3 mb-2 flex-wrap">
+        <div class="wm-field">
+          <span id="wm-label-proj" class="wm-tool-label"><i class="bi bi-map" aria-hidden="true"></i>투영법</span>
+          <div class="wm-seg" role="group" aria-labelledby="wm-label-proj">
+            <button
+              v-for="p in PROJECTIONS"
+              :key="p.key"
+              type="button"
+              :class="{ on: projKey === p.key }"
+              :disabled="isGlobe"
+              :title="p.desc"
+              @click="setView(p.key, centerKey)"
+            >
+              {{ p.label }}
+            </button>
+          </div>
         </div>
-        <span class="wm-tool-label ms-2">가운데</span>
-        <div class="wm-seg" role="group" aria-label="지도 가운데 기준">
-          <button
-            v-for="c in CENTERS"
-            :key="c.key"
-            type="button"
-            :class="{ on: centerKey === c.key }"
-            :disabled="isGlobe"
-            :title="c.desc"
-            @click="setView(projKey, c.key)"
-          >
-            {{ c.label }}
-          </button>
+        <div class="wm-field">
+          <span id="wm-label-center" class="wm-tool-label"><i class="bi bi-crosshair" aria-hidden="true"></i>지도 중심</span>
+          <div class="wm-seg" role="group" aria-labelledby="wm-label-center">
+            <button
+              v-for="c in CENTERS"
+              :key="c.key"
+              type="button"
+              :class="{ on: centerKey === c.key }"
+              :disabled="isGlobe"
+              :title="c.desc"
+              @click="setView(projKey, c.key)"
+            >
+              {{ c.label }}
+            </button>
+          </div>
         </div>
-        <span class="wm-stat">{{ isGlobe ? '지구본 디자인은 투영법이 정해져 있어요 (정사영)' : viewDesc }}</span>
+        <span class="wm-stat pb-1">{{ isGlobe ? '지구본 디자인은 투영법이 정해져 있어요 (정사영)' : viewDesc }}</span>
       </div>
 
       <!-- 렌더링 방식 비교 도구: Canvas / SVG / 나란히. 확대는 지도 위에서 휠·드래그로 -->
@@ -57,6 +61,11 @@
             <i class="bi me-1" :class="pngBusy ? 'bi-hourglass-split' : 'bi-download'"></i>파일 저장<i class="bi bi-chevron-down ms-1 small"></i>
           </button>
           <div v-if="saveOpen" class="wm-save-menu" @click.stop>
+            <!-- 한 쌍: 같은 디자인의 라이트·다크 두 파일을 zip 하나로. 끄면 지금 보이는 테마 한 장 -->
+            <label class="wm-save-pair">
+              <input v-model="savePair" type="checkbox" />
+              <span><b>다크·라이트 한 쌍으로 저장</b><small>{{ savePair ? '라이트·다크 두 파일을 zip 하나로' : `지금 보이는 ${tone === 'dark' ? '다크' : '라이트'} 한 장` }}</small></span>
+            </label>
             <button type="button" @click="saveAs('svg')">
               <i class="bi bi-filetype-svg"></i><span><b>SVG</b><small>벡터 · 클릭 가능 · 웹 화면용</small></span>
             </button>
@@ -181,7 +190,8 @@ import { buildSvg, isGlobeStyle } from './worldMap/svgEngine'
 import RegionTileLayer from './worldMap/RegionTileLayer.vue'
 import { loadTileLL, saveTileLL } from './worldMap/regionTiles'
 import { regCountryOf } from './worldMap/countryLink'
-import { worldMapDesign, withMarkers } from './worldMap/designSelection'
+import { worldMapDesign, withMarkers, themedStyle, currentTone } from './worldMap/designSelection'
+import { zipFiles } from './worldMap/zipFiles'
 import WorldMapStyleCarousel from './worldMap/WorldMapStyleCarousel.vue'
 import WorldMapTileCarousel from './worldMap/WorldMapTileCarousel.vue'
 import MapFxToggles from './worldMap/MapFxToggles.vue'
@@ -218,6 +228,8 @@ export default {
       PNG_SCALES,
       PNG_HINT,
       saveOpen: false,
+      // 다크·라이트 한 쌍으로 저장 (zip)
+      savePair: false,
       pngBusy: false,
       // 끌어 옮긴 타일 위치 { R_ASIA: [lon, lat] }. 경위도라 투영법을 바꿔도 같은 땅 위에 남는다
       tileLL: loadTileLL(),
@@ -255,8 +267,12 @@ export default {
     drawStyle() {
       return withMarkers(this.active, this.showMarkers)
     },
+    // 지금 테마(자동이면 사이트 테마)의 색을 입힌 디자인. 무대·저장·타일이 모두 이걸 쓴다
+    tone() {
+      return currentTone()
+    },
     active() {
-      return this.styles[this.current]
+      return themedStyle(this.styles[this.current], this.tone)
     },
     rendererDef() {
       return RENDERERS.find((r) => r.key === this.renderer) || RENDERERS[0]
@@ -308,6 +324,9 @@ export default {
       this.renderStage()
     },
     showMarkers() {
+      this.renderStage()
+    },
+    tone() {
       this.renderStage()
     }
   },
@@ -493,9 +512,10 @@ export default {
     exportTiles() {
       return this.showTiles && !this.isGlobe
     },
-    // 저장 파일도 화면의 애니메이션·거점·연결선 ON/OFF 를 그대로 따른다
-    exportSvgMarkup() {
-      return buildSvg(this.drawStyle, 1.4, 'wm', {
+    // 저장 파일도 화면의 애니메이션·거점·연결선 ON/OFF 를 그대로 따른다. tone 을 주면 그 테마 색으로
+    exportSvgMarkup(tone = this.tone) {
+      const style = withMarkers(themedStyle(this.styles[this.current], tone), this.showMarkers)
+      return buildSvg(style, 1.4, 'wm', {
         tiles: this.exportTiles(),
         tileLL: this.tileLL,
         tileStyle: this.tileStyle,
@@ -503,11 +523,21 @@ export default {
       })
     },
     // 투영·가운데·옵션별로 여러 장 저장해도 이름이 겹치지 않게 붙인다 (지구본은 투영이 정해져 있어 디자인 이름만)
-    //   -tiles: 권역 타일 포함, -static: 애니메이션 없음, -nomarkers: 거점·연결선 없음
-    exportBaseName() {
-      const opts = `${this.exportTiles() ? '-tiles' : ''}${this.playing ? '' : '-static'}${this.showMarkers ? '' : '-nomarkers'}`
+    //   -light/-dark: 테마 (한 쌍 zip 은 테마 없이), -tiles: 권역 타일 포함, -static: 애니메이션 없음, -nomarkers: 거점·연결선 없음
+    exportBaseName(tone) {
+      const opts = `${tone ? `-${tone}` : ''}${this.exportTiles() ? '-tiles' : ''}${this.playing ? '' : '-static'}${this.showMarkers ? '' : '-nomarkers'}`
       if (this.isGlobe) return `worldmap-${this.active.key}${opts}`
       return `worldmap-${this.active.key}-${this.projKey}-${this.centerKey}${opts}`
+    },
+    // 저장할 테마: 한 쌍이면 라이트·다크 둘, 아니면 지금 테마 하나
+    exportTones() {
+      return this.savePair ? ['light', 'dark'] : [this.tone]
+    },
+    // 파일 하나면 그대로, 여러 개(한 쌍)면 zip 으로 묶어 내려받는다
+    async saveFiles(files) {
+      if (files.length === 1) return this.saveBlob(files[0].blob, files[0].name)
+      const entries = await Promise.all(files.map(async (f) => ({ name: f.name, data: new Uint8Array(await f.blob.arrayBuffer()) })))
+      this.saveBlob(zipFiles(entries), `${this.exportBaseName()}.zip`)
     },
     saveBlob(blob, name) {
       const a = document.createElement('a')
@@ -520,8 +550,11 @@ export default {
       // 파일에는 고정 크기(width/height)를 빼고 viewBox 만 남긴다.
       // 고정 크기가 있으면 브라우저로 열었을 때 960x480 그대로 왼쪽 위에 붙고,
       // viewBox 만 있으면 넣는 곳(창·img·문서) 너비에 맞춰 비율을 지키며 가운데로 늘어난다
-      const markup = this.exportSvgMarkup().replace(' width="960" height="480"', '')
-      this.saveBlob(new Blob([markup], { type: 'image/svg+xml' }), `${this.exportBaseName()}.svg`)
+      const files = this.exportTones().map((tone) => ({
+        name: `${this.exportBaseName(tone)}.svg`,
+        blob: new Blob([this.exportSvgMarkup(tone).replace(' width="960" height="480"', '')], { type: 'image/svg+xml' })
+      }))
+      this.saveFiles(files)
     },
     /**
      * PNG 는 SVG 를 한 번 만들고 그걸 고른 배율의 캔버스에 그려 픽셀로 굳힌다.
@@ -531,7 +564,20 @@ export default {
     async downloadPng(scale = 2) {
       if (this.pngBusy) return
       this.pngBusy = true
-      const url = URL.createObjectURL(new Blob([this.exportSvgMarkup()], { type: 'image/svg+xml' }))
+      try {
+        const files = []
+        for (const tone of this.exportTones()) {
+          files.push({ name: `${this.exportBaseName(tone)}@${scale}x.png`, blob: await this.pngBlob(this.exportSvgMarkup(tone), scale) })
+        }
+        await this.saveFiles(files)
+      } catch (e) {
+        showToast(`PNG 저장에 실패했어요. ${e.message}`, { type: 'danger' })
+      } finally {
+        this.pngBusy = false
+      }
+    },
+    async pngBlob(markup, k) {
+      const url = URL.createObjectURL(new Blob([markup], { type: 'image/svg+xml' }))
       try {
         const img = new Image()
         await new Promise((resolve, reject) => {
@@ -539,18 +585,13 @@ export default {
           img.onerror = () => reject(new Error('SVG 를 이미지로 읽지 못했어요'))
           img.src = url
         })
-        const k = scale
         const cv = document.createElement('canvas')
         cv.width = W * k
         cv.height = H * k
         cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height)
-        const blob = await new Promise((resolve) => cv.toBlob(resolve, 'image/png'))
-        this.saveBlob(blob, `${this.exportBaseName()}@${k}x.png`)
-      } catch (e) {
-        showToast(`PNG 저장에 실패했어요. ${e.message}`, { type: 'danger' })
+        return await new Promise((resolve) => cv.toBlob(resolve, 'image/png'))
       } finally {
         URL.revokeObjectURL(url)
-        this.pngBusy = false
       }
     },
     /* ---- 파일 저장 메뉴 ---- */
@@ -816,10 +857,27 @@ export default {
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
 }
 
+/* 라벨 + 버튼 묶음 한 세트. 라벨을 위에 올려 버튼과 구분한다 */
+.wm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .wm-tool-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--b2b-color-text-main, #212529);
+}
+
+.wm-tool-label .bi {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--b2b-color-text-muted, #6c757d);
+  color: var(--b2b-color-primary, #0d6efd);
 }
 
 .wm-seg button:disabled {
@@ -930,6 +988,25 @@ export default {
 
 .wm-save-menu button:hover {
   background: var(--b2b-color-hover-bg, #f1f3f5);
+}
+
+/* 한 쌍 저장 체크: 메뉴 맨 위, 아래 저장 버튼들과 선으로 구분 */
+.wm-save-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 4px;
+  padding: 7px 10px 9px;
+  border-bottom: 1px solid var(--b2b-color-border, #dee2e6);
+  color: var(--b2b-color-text-main, #212529);
+  cursor: pointer;
+}
+
+.wm-save-pair input {
+  width: 15px;
+  height: 15px;
+  margin: 0 2px;
+  accent-color: var(--b2b-color-primary, #0d6efd);
 }
 
 .wm-save-menu .bi {

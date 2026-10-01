@@ -5,11 +5,28 @@
 
     SVG 안에 이미 들어 있는 표시를 이용한다
       data-region="R_ASIA" : 권역 타일 → 누르면 옆에 주요 국가 드롭다운
-      data-cid="410"       : 나라 땅   → 누르면 'country' 이벤트 (영문 2자리 코드로 바꿔서)
+      data-code="KR"       : 나라 땅   → 누르면 'country' 이벤트 (규제 국가만 붙어 있다)
+      class="wm-fx"        : 거점·연결선·본사 표시 묶음 → 거점·연결선 OFF 면 숨긴다
+
+    다크·라이트: light-svg / dark-svg 로 두 파일을 주면 사이트 테마(<html data-theme="dark...">)를 지켜보다
+    알아서 바꿔 끼운다. 사이트가 다른 방식으로 테마를 정하면 theme="dark" 처럼 직접 넘긴다.
+    파일이 하나뿐이면 svg 하나만 줘도 된다.
+
+    controls 를 주면 지도 왼쪽 위에 애니메이션 / 거점·연결선 ON/OFF 버튼이 생긴다.
+    파일을 다시 만들지 않고 화면에서 켜고 끈다 (애니메이션은 SVG 의 pauseAnimations, 거점·연결선은 CSS)
   -->
   <div ref="box" class="wms" @mousemove="onMove" @mouseleave="tip = null" @click="onClick">
     <!-- <img> 로 넣으면 그림 한 장이라 클릭할 요소가 없다. 반드시 HTML 안에 직접(인라인) 넣는다 -->
-    <div ref="host" class="wms-svg" v-html="svg"></div>
+    <div ref="host" class="wms-svg" :class="{ 'no-fx': !showMarkers }" v-html="markup"></div>
+
+    <div v-if="controls" class="wms-fx" @click.stop>
+      <button type="button" :class="{ off: !playing }" :aria-pressed="playing" :title="playing ? '애니메이션 멈추기' : '애니메이션 켜기'" @click="setPlaying(!playing)">
+        <i class="bi" :class="playing ? 'bi-pause-fill' : 'bi-play-fill'" aria-hidden="true"></i>애니메이션 {{ playing ? 'ON' : 'OFF' }}
+      </button>
+      <button type="button" :class="{ off: !showMarkers }" :aria-pressed="showMarkers" :title="showMarkers ? '거점·연결선 숨기기' : '거점·연결선 보이기'" @click="setMarkers(!showMarkers)">
+        <i class="bi bi-geo-alt" aria-hidden="true"></i>거점·연결선 {{ showMarkers ? 'ON' : 'OFF' }}
+      </button>
+    </div>
 
     <div v-if="tip" class="wms-tip" :style="{ left: `${tip.x}px`, top: `${tip.y}px` }">{{ tip.text }}</div>
 
@@ -38,13 +55,19 @@
 </template>
 
 <script>
-import { alpha2OfCid } from './isoNumeric'
+/** 사이트가 다크 테마인지: <html data-theme="dark | dark-navy"> */
+const readSiteDark = () => (document.documentElement.getAttribute('data-theme') || '').startsWith('dark')
 
 export default {
   name: 'WorldMapSvg',
   props: {
-    /** 갤러리에서 저장한 SVG 파일 내용 (Vite: import svg from './map.svg?raw') */
-    svg: { type: String, required: true },
+    /** 갤러리에서 저장한 SVG 파일 내용 (Vite: import lightSvg from './map-light.svg?raw') */
+    lightSvg: { type: String, default: '' },
+    darkSvg: { type: String, default: '' },
+    /** 파일이 하나뿐일 때 (테마와 상관없이 이 파일) */
+    svg: { type: String, default: '' },
+    /** 'auto' 면 사이트 테마를 따라가고, 'light' | 'dark' 면 고정 */
+    theme: { type: String, default: 'auto' },
     /**
      * 권역 타일을 눌렀을 때 드롭다운에 보여 줄 내용. 키는 SVG 의 data-region 값
      * { R_ASIA: { name: '아시아', summary: '규제 15건', countries: [{ code: 'KR', name: '한국', badge: '12건' }], allCodes: ['KR', 'JP', ...] } }
@@ -52,17 +75,35 @@ export default {
      */
     regions: { type: Object, default: () => ({}) },
     /** 클릭할 수 있는 나라 (영문 2자리 → 이름). 여기 없는 나라는 눌러도 반응하지 않는다 */
-    countries: { type: Object, default: () => ({}) }
+    countries: { type: Object, default: () => ({}) },
+    /** 지도 왼쪽 위에 애니메이션 / 거점·연결선 ON/OFF 버튼을 보일지 */
+    controls: { type: Boolean, default: false },
+    /** 처음 상태. v-model:animate / v-model:markers 로 바깥에서 쥘 수도 있다 */
+    animate: { type: Boolean, default: true },
+    markers: { type: Boolean, default: true }
   },
-  emits: ['country', 'region'],
+  emits: ['country', 'region', 'update:animate', 'update:markers'],
   data() {
+    // 움직임 줄이기를 켠 사용자(OS 설정)에게는 애니메이션을 끈 채로 시작한다
+    const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     return {
+      playing: this.animate && !reduced,
+      showMarkers: this.markers,
+      siteDark: readSiteDark(),
       tip: null,
       // 열린 드롭다운 { cd, x, y(타일 오른쪽/왼쪽 끝, px), left(왼쪽으로 펼칠지), below } — 위치는 이 컴포넌트 기준
       open: null
     }
   },
   computed: {
+    dark() {
+      return this.theme === 'auto' ? this.siteDark : this.theme === 'dark'
+    },
+    // 지금 테마의 파일. 한쪽 파일만 있으면 그걸 쓴다
+    markup() {
+      if (this.svg) return this.svg
+      return this.dark ? this.darkSvg || this.lightSvg : this.lightSvg || this.darkSvg
+    },
     openRegion() {
       if (!this.open) return null
       const r = this.regions[this.open.cd]
@@ -78,10 +119,20 @@ export default {
     }
   },
   watch: {
-    // 파일을 바꿔 끼우면 클릭 가능한 나라 표시를 다시 붙인다
-    svg() {
+    // 파일을 바꿔 끼우면(테마 전환 포함) 클릭 가능한 나라 표시를 다시 붙이고 애니메이션 상태도 다시 적용한다
+    markup() {
       this.open = null
-      this.$nextTick(this.markCountries)
+      this.$nextTick(() => {
+        this.markCountries()
+        this.applyPlaying()
+      })
+    },
+    animate(v) {
+      this.playing = v
+      this.applyPlaying()
+    },
+    markers(v) {
+      this.showMarkers = v
     },
     countries() {
       this.markCountries()
@@ -89,28 +140,48 @@ export default {
   },
   mounted() {
     this.markCountries()
+    this.applyPlaying()
     document.addEventListener('click', this.onDocClick)
     document.addEventListener('keydown', this.onKey)
+    // 사이트 테마 버튼을 누르면 <html data-theme> 이 바뀐다 → 지켜보다 파일을 바꿔 끼운다
+    this.themeObserver = new MutationObserver(() => { this.siteDark = readSiteDark() })
+    this.themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
   },
   beforeUnmount() {
+    this.themeObserver?.disconnect()
     document.removeEventListener('click', this.onDocClick)
     document.removeEventListener('keydown', this.onKey)
   },
   methods: {
+    /* ---- 애니메이션 · 거점·연결선 ---- */
+    applyPlaying() {
+      const svgEl = this.$refs.host?.querySelector('svg')
+      if (!svgEl) return
+      if (this.playing) svgEl.unpauseAnimations()
+      else svgEl.pauseAnimations()
+    },
+    setPlaying(on) {
+      this.playing = on
+      this.applyPlaying()
+      this.$emit('update:animate', on)
+    },
+    setMarkers(on) {
+      this.showMarkers = on
+      this.$emit('update:markers', on)
+    },
     /** 클릭할 수 있는 나라 땅에만 클래스를 붙인다 (커서·호버 효과를 CSS 로) */
     markCountries() {
       const host = this.$refs.host
       if (!host) return
-      host.querySelectorAll('[data-cid]').forEach((el) => {
-        el.classList.toggle('wms-link', !!this.countries[alpha2OfCid(el.dataset.cid)])
+      host.querySelectorAll('[data-code]').forEach((el) => {
+        el.classList.toggle('wms-link', !!this.countries[el.dataset.code])
       })
     },
     // 마우스 아래 무엇이 있는지: 권역 타일이 나라보다 위에 그려져 있으니 먼저 본다
     targetOf(e) {
       const tile = e.target.closest?.('[data-region]')
       if (tile) return { tile, cd: tile.dataset.region }
-      const land = e.target.closest?.('[data-cid]')
-      const code = land && alpha2OfCid(land.dataset.cid)
+      const code = e.target.closest?.('[data-code]')?.dataset.code
       if (code && this.countries[code]) return { code }
       return null
     },
@@ -179,6 +250,54 @@ export default {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* 거점·연결선 OFF: 저장할 때 SVG 에 넣어 둔 묶음(class="wm-fx")만 숨긴다 */
+.wms-svg.no-fx :deep(.wm-fx) {
+  display: none;
+}
+
+/* 지도 왼쪽 위 ON/OFF 버튼 */
+.wms-fx {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 5;
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(6px);
+}
+
+.wms-fx button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px 0 8px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.wms-fx button:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.wms-fx button.off {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.wms-fx button:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 1px;
 }
 
 /* 클릭할 수 있는 나라: 올리면 밝아진다 */

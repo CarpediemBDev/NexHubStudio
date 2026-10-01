@@ -23,6 +23,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { geoInterpolate, geoDistance, geoCentroid } from 'd3-geo'
 import * as engine from './mapEngine'
 import { regCountryOf } from './countryLink'
+import { themeKeyOf } from './themeVariant'
 
 // 필요한 부분만 등록해 번들을 줄인다 (echarts 전체 import 대비 절반 이하)
 echarts.use([MapChart, LinesChart, ScatterChart, EffectScatterChart, GeoComponent, TooltipComponent, CanvasRenderer])
@@ -59,8 +60,10 @@ function ensureGL() {
 const textureCache = new Map()
 // echarts-gl 은 캔버스 요소를 텍스처로 줄 때 첫 장면에 비어 있는 경우가 있어 이미지 주소(dataURL)로 넘긴다
 function textureOf(s) {
-  if (!textureCache.has(s.key)) textureCache.set(s.key, engine.drawEquirectTexture(s, 2048).toDataURL('image/png'))
-  return textureCache.get(s.key)
+  // 같은 디자인이라도 다크·라이트 텍스처가 다르다
+  const id = themeKeyOf(s)
+  if (!textureCache.has(id)) textureCache.set(id, engine.drawEquirectTexture(s, 2048).toDataURL('image/png'))
+  return textureCache.get(id)
 }
 
 /** 지구본 칸 배경. echarts-gl 층은 그라데이션 배경을 못 그려서 칸(div)의 CSS 배경으로 깐다 */

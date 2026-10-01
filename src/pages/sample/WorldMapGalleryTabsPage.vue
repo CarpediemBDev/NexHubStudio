@@ -37,7 +37,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import WorldMapGalleryPage from './WorldMapGalleryPage.vue'
 import WorldMapStyleCarousel from './worldMap/WorldMapStyleCarousel.vue'
 import WorldMapTileCarousel from './worldMap/WorldMapTileCarousel.vue'
-import { worldMapDesign } from './worldMap/designSelection'
+import { worldMapDesign, themedStyle } from './worldMap/designSelection'
 import { MAP_STYLES } from './worldMap/mapStyles'
 import { isGlobeStyle } from './worldMap/svgEngine'
 import { WORLD_MAP_LAYOUTS } from './worldMap/layouts'
@@ -47,7 +47,8 @@ const AtlasSplitPage = defineAsyncComponent(() => import('./WorldMapAtlasSplitPa
 const RegionGridPage = defineAsyncComponent(() => import('./WorldMapRegionGridPage.vue'))
 
 const route = useRoute()
-const selectedStyle = computed(() => MAP_STYLES.find((style) => style.key === worldMapDesign.styleKey) || MAP_STYLES[0])
+// 타일 카드 미리보기 색을 지도와 맞추려고 테마를 입힌 디자인을 쓴다
+const selectedStyle = computed(() => themedStyle(MAP_STYLES.find((style) => style.key === worldMapDesign.styleKey) || MAP_STYLES[0]))
 const isLayout = computed(() => WORLD_MAP_LAYOUTS.some((item) => item.id === route.query.layout))
 const activeLayout = computed(() => (isLayout.value ? route.query.layout : WORLD_MAP_LAYOUTS[0].id))
 const styleRoute = computed(() => {

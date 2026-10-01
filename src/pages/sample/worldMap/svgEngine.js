@@ -14,6 +14,7 @@ import {
   gridSamples, getGlobePts, toneOf, isAccent, alpha
 } from './mapEngine'
 import { tilePositions } from './regionTiles'
+import { regCountryOf } from './countryLink'
 import { layoutTile, tileSvg, tileDefs } from './tileRender'
 
 const r1 = (v) => Math.round(v * 10) / 10
@@ -97,8 +98,10 @@ function bgLayer(s, id) {
 }
 
 /* ---------------- 육지 ---------------- */
+// data-code: 규제 국가면 영문 2자리(KR). 저장한 SVG 를 쓰는 쪽이 숫자 코드 변환표 없이 바로 쓸 수 있게
 function countryAttrs(f) {
-  return `data-cid="${f.cid}" data-name="${esc(f.properties.name)}"`
+  const reg = regCountryOf(f.cid)
+  return `data-cid="${f.cid}"${reg ? ` data-code="${reg.code}"` : ''} data-name="${esc(f.properties.name)}"`
 }
 
 function gridLand(s, id) {
@@ -172,7 +175,8 @@ function fx(s, id, proj, t, center, smil, still = false) {
   if (s.fx === false) return ''
   const path = geoPath(proj)
   const visible = (ll) => !center || geoDistance(ll, center) < 1.5
-  let out = '<g pointer-events="none">'
+  // class="wm-fx": 거점·연결선·본사 표시 묶음. 저장한 SVG 를 넣은 화면에서 CSS 로 이 묶음만 숨길 수 있다
+  let out = '<g class="wm-fx" pointer-events="none">'
   if (s.arc) {
     const glow = s.glow ? ` filter="url(#${id}gl)"` : ''
     ROUTES.forEach((m, i) => {

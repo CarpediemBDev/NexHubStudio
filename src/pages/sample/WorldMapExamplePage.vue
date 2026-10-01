@@ -9,8 +9,8 @@
             세계지도 적용 예제
           </h5>
           <p class="b2b-text-body text-theme-secondary mb-0">
-            세계지도 갤러리에서 저장한 <b>SVG 파일 하나</b>로 만든 실제 화면입니다. 지도 패키지(d3 등)를 설치하지 않고
-            파일과 컴포넌트 하나만 복사하면 다른 프로젝트에서도 똑같이 동작합니다.
+            세계지도 갤러리에서 저장한 <b>SVG 파일(라이트·다크 한 쌍)</b>로 만든 실제 화면입니다. 지도 패키지(d3 등)를 설치하지 않고
+            SVG 파일과 컴포넌트 하나(<code>WorldMapSvg.vue</code>)만 복사하면 다른 프로젝트에서도 똑같이 동작합니다.
           </p>
         </div>
         <RouterLink :to="{ name: 'WorldMapGallery' }" class="btn btn-sm btn-outline-primary">
@@ -48,7 +48,9 @@
 
       <WorldMapSvg
         class="wx-map"
-        :svg="file.svg"
+        controls
+        :light-svg="FILES.light.svg"
+        :dark-svg="FILES.dark.svg"
         :regions="regionMenus"
         :countries="clickableCountries"
         @country="goCountry"
@@ -58,7 +60,8 @@
       <p class="b2b-text-sm text-theme-muted mt-2 mb-0">
         <i class="bi bi-hand-index me-1"></i>
         권역 타일을 누르면 주요 국가가 나오고, 국가를 누르면 그 나라 규제 목록으로 이동해요. 지도의 나라 땅을 직접 눌러도 이동해요.
-        사이트 테마를 다크/라이트로 바꾸면 지도도 그 테마용 SVG 파일로 바로 바뀌어요 (코드는 그대로, 파일만 둘).
+        사이트 테마를 다크/라이트로 바꾸면 지도도 같은 디자인의 다크/라이트 SVG 파일로 바로 바뀌어요 (컴포넌트가 알아서, 파일만 둘).
+        지도 왼쪽 위에서 애니메이션과 거점·연결선을 켜고 끌 수 있어요 — 파일을 따로 만들지 않고 화면에서 바로.
       </p>
     </div>
 
@@ -84,21 +87,20 @@
 <script>
 import WorldMapSvg from './worldMapExample/WorldMapSvg.vue'
 import worldMapComponentSrc from './worldMapExample/WorldMapSvg.vue?raw'
-import isoNumericSrc from './worldMapExample/isoNumeric.js?raw'
-import siteThemeSrc from './worldMapExample/siteTheme.js?raw'
-import { isSiteDark, onSiteThemeChange } from './worldMapExample/siteTheme'
-// 갤러리 "SVG 파일 저장"으로 받은 파일을 그대로 넣었다. ?raw = 파일 내용을 문자열로 (Vite)
-import darkSvg from '@/assets/worldmap/worldmap-midnight-dot-naturalEarth-pacific-tiles.svg?raw'
-import lightSvg from '@/assets/worldmap/worldmap-duotone-naturalEarth-pacific-tiles.svg?raw'
+// 갤러리 "파일 저장 → 다크·라이트 한 쌍으로 저장"으로 받은 두 파일을 그대로 넣었다. ?raw = 파일 내용을 문자열로 (Vite)
+import lightSvg from '@/assets/worldmap/worldmap-midnight-dot-naturalEarth-pacific-light-tiles.svg?raw'
+import darkSvg from '@/assets/worldmap/worldmap-midnight-dot-naturalEarth-pacific-dark-tiles.svg?raw'
 import { regionCodes, countryCodes } from '@/data/regulationMock'
 import { useRegulationStore } from '@/stores/regulationStore'
 import { showToast } from '@/utils/toastUtil.js'
 
-// 테마별 지도 파일. 사이트가 다크면 dark, 아니면 light
+// 같은 디자인(미드나잇 도트)의 테마별 파일. 어느 쪽을 보일지는 WorldMapSvg 가 사이트 테마를 보고 정한다
 const FILES = {
-  dark: { name: 'worldmap-midnight-dot-naturalEarth-pacific-tiles.svg', svg: darkSvg },
-  light: { name: 'worldmap-duotone-naturalEarth-pacific-tiles.svg', svg: lightSvg }
+  light: { name: 'worldmap-midnight-dot-naturalEarth-pacific-light-tiles.svg', svg: lightSvg },
+  dark: { name: 'worldmap-midnight-dot-naturalEarth-pacific-dark-tiles.svg', svg: darkSvg }
 }
+// 아래 파일 이름 칩 표시용 (지도 파일 선택과는 상관없음)
+const readSiteDark = () => (document.documentElement.getAttribute('data-theme') || '').startsWith('dark')
 Object.values(FILES).forEach((f) => (f.kb = Math.round(f.svg.length / 1024)))
 
 // 지도 SVG 에 들어 있는 권역 타일 (갤러리 권역 타일과 같은 5개)
@@ -106,16 +108,20 @@ const TILE_REGIONS = ['R_NA', 'R_LA', 'R_EU', 'R_MEA', 'R_ASIA']
 const TOP_N = 6
 
 const STEPS = [
-  { title: '디자인 고르기', desc: '세계지도 갤러리에서 <b>다크용·라이트용</b> 지도를 하나씩 골라 <b>SVG 파일 저장</b> (권역 타일 켠 채로)' },
-  { title: '파일 넣기', desc: '받은 <code>.svg</code> 두 개를 <code>src/assets/worldmap/</code> 에 복사' },
-  { title: '컴포넌트 복사', desc: '<code>WorldMapSvg.vue</code>, <code>isoNumeric.js</code>, <code>siteTheme.js</code> 세 파일을 프로젝트로 복사' },
-  { title: '화면에 연결', desc: '<code>?raw</code> 로 SVG 두 개를 불러와 사이트 테마에 맞는 쪽을 컴포넌트에 넘기고, 권역·국가 데이터와 클릭 이동을 연결' }
+  { title: '디자인 고르기', desc: '세계지도 갤러리에서 디자인을 골라 <b>파일 저장 → 다크·라이트 한 쌍으로 저장 → SVG</b> (권역 타일 켠 채로)' },
+  { title: '파일 넣기', desc: '받은 zip 을 풀어 <code>-light</code>·<code>-dark</code> <code>.svg</code> 두 개를 <code>src/assets/worldmap/</code> 에 복사' },
+  { title: '컴포넌트 복사', desc: '<code>WorldMapSvg.vue</code> 파일 하나만 프로젝트로 복사 (나라 코드·좌표는 SVG 안에 다 들어 있어요)' },
+  { title: '화면에 연결', desc: '<code>?raw</code> 로 SVG 두 개를 불러와 <code>light-svg</code>·<code>dark-svg</code> 로 넘기고, 권역·국가 데이터와 클릭 이동을 연결' }
 ]
 
 // 화면 쪽 사용 코드: 이 페이지에서 지도에 관련된 부분만 추린 것
 const USAGE_SRC = `<template>
+  <!-- controls: 지도 왼쪽 위에 애니메이션 / 거점·연결선 ON/OFF 버튼 -->
+  <!-- light-svg / dark-svg: 사이트 테마(<html data-theme>)를 따라 컴포넌트가 알아서 바꿔 끼운다 -->
   <WorldMapSvg
-    :svg="siteDark ? darkSvg : lightSvg"
+    controls
+    :light-svg="lightSvg"
+    :dark-svg="darkSvg"
     :regions="regionMenus"
     :countries="clickableCountries"
     @country="goCountry"
@@ -125,26 +131,17 @@ const USAGE_SRC = `<template>
 
 <script>
 import WorldMapSvg from '@/components/worldmap/WorldMapSvg.vue'
-import { isSiteDark, onSiteThemeChange } from '@/components/worldmap/siteTheme'
-// 갤러리에서 저장한 SVG 파일 (다크용·라이트용). ?raw 를 붙이면 파일 내용이 문자열로 들어온다 (Vite)
-import darkSvg from '@/assets/worldmap/worldmap-midnight-dot-naturalEarth-pacific-tiles.svg?raw'
-import lightSvg from '@/assets/worldmap/worldmap-duotone-naturalEarth-pacific-tiles.svg?raw'
+// 갤러리에서 "다크·라이트 한 쌍"으로 저장한 SVG 두 파일. ?raw 를 붙이면 파일 내용이 문자열로 들어온다 (Vite)
+import lightSvg from '@/assets/worldmap/worldmap-midnight-dot-naturalEarth-pacific-light-tiles.svg?raw'
+import darkSvg from '@/assets/worldmap/worldmap-midnight-dot-naturalEarth-pacific-dark-tiles.svg?raw'
 
 export default {
   components: { WorldMapSvg },
   data: () => ({
-    darkSvg,
     lightSvg,
-    siteDark: isSiteDark(), // 사이트 테마가 다크인지
+    darkSvg,
     records: [] /* 규제 목록 API 결과 */
   }),
-  created() {
-    // 상단 테마 버튼으로 테마를 바꾸면 지도 파일도 바로 바뀐다
-    this.stopTheme = onSiteThemeChange((dark) => (this.siteDark = dark))
-  },
-  beforeUnmount() {
-    this.stopTheme()
-  },
   computed: {
     // 나라별 규제 건수 { KR: 12, JP: 2, ... }
     countryCounts() {
@@ -187,9 +184,7 @@ export default {
 
 const CODES = [
   { key: 'usage', label: '화면 코드 (사용 예)', path: 'src/pages/xxx/MainPage.vue — 지도 부분만', src: USAGE_SRC },
-  { key: 'component', label: 'WorldMapSvg.vue', path: 'src/components/worldmap/WorldMapSvg.vue', src: worldMapComponentSrc },
-  { key: 'iso', label: 'isoNumeric.js', path: 'src/components/worldmap/isoNumeric.js', src: isoNumericSrc },
-  { key: 'theme', label: 'siteTheme.js', path: 'src/components/worldmap/siteTheme.js', src: siteThemeSrc }
+  { key: 'component', label: 'WorldMapSvg.vue', path: 'src/components/worldmap/WorldMapSvg.vue', src: worldMapComponentSrc }
 ]
 
 export default {
@@ -199,8 +194,9 @@ export default {
     return {
       STEPS,
       CODES,
-      // 사이트 테마가 다크인지. 테마가 바뀌면 지도 파일도 따라 바뀐다
-      siteDark: isSiteDark(),
+      FILES,
+      // 사이트 테마가 다크인지 (파일 이름 칩 표시용)
+      siteDark: readSiteDark(),
       codeKey: 'usage',
       copied: false,
       store: useRegulationStore()
@@ -253,10 +249,11 @@ export default {
   },
   created() {
     this.store.ensureLoaded()
-    this.stopTheme = onSiteThemeChange((dark) => (this.siteDark = dark))
+    this.themeObserver = new MutationObserver(() => (this.siteDark = readSiteDark()))
+    this.themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
   },
   beforeUnmount() {
-    this.stopTheme?.()
+    this.themeObserver?.disconnect()
   },
   methods: {
     goCountry(code) {

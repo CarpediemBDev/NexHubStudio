@@ -29,7 +29,7 @@ import { flatProj } from './worldMap/mapEngine'
 import { TILE_REGIONS, regionName } from './worldMap/regionTiles'
 import { regCountryOf } from './worldMap/countryLink'
 import { MAP_STYLES } from './worldMap/mapStyles'
-import { worldMapDesign, withMarkers } from './worldMap/designSelection'
+import { worldMapDesign, withMarkers, themedStyle, currentTone } from './worldMap/designSelection'
 import MapFxToggles from './worldMap/MapFxToggles.vue'
 import { regionMenuOf } from './worldMap/regionMenu'
 import { useRegulationStore } from '@/stores/regulationStore'
@@ -108,8 +108,9 @@ const TWEEN_MS = 520
 let viewBox = FULL.slice()
 let raf = 0
 
+// 고른 디자인을 지금 테마(자동이면 사이트 테마) 색으로
 function selectedStyle() {
-  return MAP_STYLES.find((item) => item.key === worldMapDesign.styleKey) || MAP_STYLES[0]
+  return themedStyle(MAP_STYLES.find((item) => item.key === worldMapDesign.styleKey) || MAP_STYLES[0])
 }
 const isGlobe = (s) => s.kind === 'globe' || s.kind === 'dotglobe'
 
@@ -256,7 +257,7 @@ watch(() => props.regionCode, (cd) => {
   if (openCd.value && openCd.value !== cd) closeDrop()
   renderAndFocus(true)
 })
-watch(() => [props.zoom, worldMapDesign.styleKey, worldMapDesign.tileStyleKey, worldMapDesign.tilesEnabled, worldMapDesign.showMarkers], () => renderAndFocus(false))
+watch(() => [props.zoom, worldMapDesign.styleKey, worldMapDesign.tileStyleKey, worldMapDesign.tilesEnabled, worldMapDesign.showMarkers, currentTone()], () => renderAndFocus(false))
 watch(() => worldMapDesign.playing, applyPlaying)
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocClick)

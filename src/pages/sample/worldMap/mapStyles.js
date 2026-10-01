@@ -6,7 +6,9 @@
  *   bg     : 배경색 또는 그라데이션 색 배열 (bgRadial 이면 방사형)
  *   land   : 일반 국가 색, mk : 거점 국가 색, hq : 본사(한국) 색
  *   arc    : 서울발 연결선 색 (없으면 연결선 생략), glow : 거점·연결선 빛 번짐 세기
- *   tone   : 'dark' | 'light' — 갤러리 태그 표시용
+ *   tone   : 'dark' | 'light' — 이 디자인의 기본 테마
+ *   variants: { light | dark: { 바꿀 값 } } — 반대 테마 색을 손으로 맞춘 경우. 없으면 themeVariant.js 가 자동으로 만든다
+ *             (값을 null 로 주면 그 항목을 뺀다. 예: 라이트에서 빛 번짐 glow: null)
  *   focusRegion : 강조할 규제 권역 코드. 해당 국가 면은 mk, 한국은 hq 색으로 표시
  *   fx     : false 이면 연결선·거점 핀·본사 펄스·도시 라벨 생략
  */
@@ -18,7 +20,10 @@ export const MAP_STYLES = [
     desc: '짙은 남색 위에 점으로 찍은 대륙. 거점만 밝게 빛나고 서울에서 연결선이 뻗어 나가요. 메인 히어로 영역에 가장 임팩트가 커요.',
     kind: 'dot', step: 7.5, r: 2.2, rMk: 2.7,
     bg: ['#081428', '#0E2347', '#0A1A36'], vignette: 'rgba(0,0,0,.35)',
-    land: '#264776', mk: '#5AB0FF', hq: '#FFFFFF', arc: '#7CC4FF', glow: 8, pinRing: '#0A1A36'
+    land: '#264776', mk: '#5AB0FF', hq: '#FFFFFF', arc: '#7CC4FF', glow: 8, pinRing: '#0A1A36',
+    variants: {
+      light: { bg: ['#FFFFFF', '#F4F7FC'], vignette: null, land: '#C9DDF3', mk: '#1F6FD1', hq: '#0A2A5C', arc: '#3D8BEB', glow: null, pinRing: null }
+    }
   },
   {
     key: 'white-blue-dot',
@@ -26,7 +31,10 @@ export const MAP_STYLES = [
     tone: 'light',
     desc: '흰 바탕에 블루 계열 도트. 전자 업계 코퍼레이트 블루 느낌이라 밝은 대시보드 카드 안에 자연스럽게 들어가요.',
     kind: 'dot', step: 7.5, r: 2.2, rMk: 2.7,
-    bg: '#FFFFFF', land: '#C9DDF3', mk: '#1F6FD1', hq: '#0A2A5C', arc: '#3D8BEB'
+    bg: '#FFFFFF', land: '#C9DDF3', mk: '#1F6FD1', hq: '#0A2A5C', arc: '#3D8BEB',
+    variants: {
+      dark: { bg: ['#081428', '#0E2347', '#0A1A36'], vignette: 'rgba(0,0,0,.35)', land: '#264776', mk: '#5AB0FF', hq: '#FFFFFF', arc: '#7CC4FF', glow: 8, pinRing: '#0A1A36' }
+    }
   },
   {
     key: 'hex-tile',
@@ -90,23 +98,21 @@ export const MAP_STYLES = [
     bg: '#F6F7F9', land: '#D5DAE1', mk: '#2563EB', hq: '#0F172A', arc: '#2563EB'
   },
   {
-    key: 'globe-dark-dot',
-    name: '다크 도트 지구본',
+    key: 'globe-dot',
+    name: '도트 지구본',
     tone: 'dark',
-    desc: '우주 같은 배경에 점으로 이뤄진 지구본이 돌아요. 대기광이 감싸서 가장 "있어 보이는" 연출이에요.',
+    desc: '점으로 이뤄진 지구본이 돌아요. 다크는 우주 같은 배경에 대기광, 라이트는 흰 지구본에 블루 도트로 차분해요.',
     kind: 'dotglobe', spin: 6, r: 1.6, rMk: 2,
     bg: ['#0D1B38', '#050A16'], bgRadial: true,
     ocean: ['#10264D', '#0A1630'], atmosphere: 'rgba(59,130,246,.45)', graticule: 'rgba(147,197,253,.06)',
-    land: '#3B6FC4', mk: '#93C5FD', hq: '#FFFFFF', rim: 'rgba(147,197,253,.35)', arc: '#60A5FA', glow: 8, pinRing: '#0A1630'
-  },
-  {
-    key: 'globe-light-dot',
-    name: '라이트 도트 지구본',
-    tone: 'light',
-    desc: '흰 지구본에 블루 도트. 다크 지구본보다 차분해서 밝은 테마 메인화면에 두기 좋아요.',
-    kind: 'dotglobe', spin: 6, r: 1.6, rMk: 2,
-    bg: ['#FFFFFF', '#F1F5FB'], ocean: ['#FFFFFF', '#EEF4FC'], atmosphere: 'rgba(31,111,209,.12)',
-    land: '#9DB8DA', mk: '#1F6FD1', hq: '#0A2A5C', rim: '#D3E1F2', shade: 'rgba(15,40,90,.06)', arc: '#1F6FD1'
+    land: '#3B6FC4', mk: '#93C5FD', hq: '#FFFFFF', rim: 'rgba(147,197,253,.35)', arc: '#60A5FA', glow: 8, pinRing: '#0A1630',
+    variants: {
+      // 예전 "라이트 도트 지구본"
+      light: {
+        bg: ['#FFFFFF', '#F1F5FB'], bgRadial: null, ocean: ['#FFFFFF', '#EEF4FC'], atmosphere: 'rgba(31,111,209,.12)', graticule: null,
+        land: '#9DB8DA', mk: '#1F6FD1', hq: '#0A2A5C', rim: '#D3E1F2', shade: 'rgba(15,40,90,.06)', arc: '#1F6FD1', glow: null, pinRing: null
+      }
+    }
   },
   {
     key: 'night-lights',
@@ -116,7 +122,15 @@ export const MAP_STYLES = [
     kind: 'fill',
     bg: ['#020409', '#070C18'], land: '#111827', mk: '#141C2E', hq: '#1A2338', stroke: '#1C2537', lw: 0.6,
     heat: ['rgba(255,196,107,.75)', 'rgba(255,170,70,.22)', 'rgba(255,150,50,0)'], heatBlend: 'lighter',
-    arc: '#FFC46B', hqPulse: '#FFD58A', pin: '#FFD58A', pinRing: '#070C18', glow: 10
+    arc: '#FFC46B', hqPulse: '#FFD58A', pin: '#FFD58A', pinRing: '#070C18', glow: 10,
+    variants: {
+      // 라이트: 낮의 지도. 크림색 대륙에 거점 도시만 주황빛으로 데워진다
+      light: {
+        bg: ['#FBF7EF', '#F3EDE1'], land: '#E6DFD0', mk: '#DCD3C0', hq: '#D4C8B0', stroke: '#FBF7EF',
+        heat: ['rgba(234,140,40,.55)', 'rgba(234,140,40,.2)', 'rgba(234,140,40,0)'],
+        arc: '#D9822B', hqPulse: '#C2410C', pin: '#C2410C', pinRing: '#FBF7EF'
+      }
+    }
   },
   {
     key: 'blueprint',
@@ -126,7 +140,15 @@ export const MAP_STYLES = [
     kind: 'fill',
     bg: ['#0B3B75', '#0E4C92'], screenGrid: 'rgba(255,255,255,.05)', graticule: 'rgba(255,255,255,.12)', sphere: 'rgba(255,255,255,.35)',
     land: 'rgba(255,255,255,.05)', mk: 'rgba(255,255,255,.2)', hq: 'rgba(255,255,255,.55)', stroke: 'rgba(255,255,255,.75)', lw: 0.55,
-    arc: '#FFFFFF', hqPulse: '#FFFFFF', pinRing: '#0E4C92'
+    arc: '#FFFFFF', hqPulse: '#FFFFFF', pinRing: '#0E4C92',
+    variants: {
+      // 라이트: 흰 종이 도면에 파란 선
+      light: {
+        bg: ['#F2F7FD', '#E6EFFA'], screenGrid: 'rgba(14,76,146,.05)', graticule: 'rgba(14,76,146,.12)', sphere: 'rgba(14,76,146,.35)',
+        land: 'rgba(14,76,146,.04)', mk: 'rgba(14,76,146,.16)', hq: 'rgba(14,76,146,.45)', stroke: 'rgba(14,76,146,.7)',
+        arc: '#0E4C92', hqPulse: '#0E4C92', pinRing: '#F2F7FD'
+      }
+    }
   },
   {
     key: 'gradient-fill',
@@ -153,7 +175,11 @@ export const MAP_STYLES = [
     desc: '진한 차콜 대륙에 레드 한 색만 포인트로. 잡지 인포그래픽처럼 단단하고 자신감 있는 인상이에요.',
     kind: 'fill',
     bg: '#F5F5F2', land: '#2B2F36', mk: '#4A505A', hq: '#E5484D', stroke: '#F5F5F2', lw: 0.5,
-    arc: '#E5484D', pin: '#E5484D'
+    arc: '#E5484D', pin: '#E5484D',
+    variants: {
+      // 다크: 대륙을 뒤집지 않고 차콜 그대로, 바탕만 더 어둡게
+      dark: { bg: '#121418', land: '#3A3F47', mk: '#59606B', hq: '#F0565B', stroke: '#121418', arc: '#F0565B', pin: '#F0565B', pinRing: '#121418' }
+    }
   },
   {
     key: 'halftone',
@@ -243,25 +269,22 @@ export const MAP_STYLES = [
     bg: '#FFFFFF', land: '#D9E2EC', mk: '#0EA5E9', hq: '#075985', arc: '#0EA5E9'
   },
   {
-    key: 'atlas-focus-light',
-    name: 'Atlas Focus 라이트',
+    key: 'atlas-focus',
+    name: 'Atlas Focus',
     tone: 'light',
     desc: '차분한 회색 육지와 또렷한 국경선. 아시아 규제 대상 국가를 부드러운 블루로, 한국을 진한 블루로 강조해요. 거점·연결선을 끄면 권역 라벨이 잘 읽히는 담백한 지도가 돼요.',
     kind: 'fill', focusRegion: 'R_ASIA',
     bg: '#F6F9FD', land: '#DCE4EE', mk: '#9EBCED', hq: '#3268D5',
     stroke: '#F6F9FD', lw: 0.75, graticule: 'rgba(117,129,150,.10)',
     // 거점·연결선 ON 일 때 색: 한국 강조색과 같은 블루로 절제
-    arc: '#3268D5', arcBase: 0.28, pinRing: '#F6F9FD'
-  },
-  {
-    key: 'atlas-focus-dark',
-    name: 'Atlas Focus 다크',
-    tone: 'dark',
-    desc: '짙은 네이비 바탕에 회청색 육지와 절제된 블루 강조. 아시아 규제 대상 국가와 한국이 드러나고, 작은 권역 라벨을 얹어도 복잡하지 않은 Atlas Focus의 다크 버전이에요.',
-    kind: 'fill', focusRegion: 'R_ASIA',
-    bg: '#111D30', land: '#33445B', mk: '#496C9F', hq: '#89B1FF',
-    stroke: '#111D30', lw: 0.75, graticule: 'rgba(157,172,191,.08)',
-    arc: '#89B1FF', arcBase: 0.3, pinRing: '#111D30'
+    arc: '#3268D5', arcBase: 0.28, pinRing: '#F6F9FD',
+    variants: {
+      // 예전 "Atlas Focus 다크"
+      dark: {
+        bg: '#111D30', land: '#33445B', mk: '#496C9F', hq: '#89B1FF',
+        stroke: '#111D30', graticule: 'rgba(157,172,191,.08)', arc: '#89B1FF', arcBase: 0.3, pinRing: '#111D30'
+      }
+    }
   },
   {
     // 국내 전자 대기업(삼성 등) 글로벌 사이트의 코퍼레이트 톤: 흰 바탕 + 연회색 도트 + 단일 브랜드 블루(#1428A0)
