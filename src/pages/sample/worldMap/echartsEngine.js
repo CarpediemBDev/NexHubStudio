@@ -14,7 +14,9 @@
  *   - scatter3D 시리즈: 본사·거점 핀, 그리고 규제 대상 나라마다 클릭용 점
  *     (텍스처는 그림이라 나라를 알 수 없어서, 나라 중심에 점을 두고 그 점을 누르면 규제 화면으로 간다)
  *
- * ECharts 로 안 되는 것: 국경선 빛 번짐(outlineGlow), 엠보스 그림자 일부.
+ * 육지 아래 깔리는 층(페이퍼 레이어 장, 그림자)은 같은 지도를 쓰는 geo 를 더 만들어 아래로 밀어 그린다.
+ *
+ * ECharts 로 안 되는 것: 국경선 빛 번짐(outlineGlow), 윗면 하이라이트(topLight).
  */
 import * as echarts from 'echarts/core'
 import { MapChart, LinesChart, ScatterChart, EffectScatterChart } from 'echarts/charts'
@@ -61,7 +63,7 @@ const textureCache = new Map()
 // echarts-gl 은 캔버스 요소를 텍스처로 줄 때 첫 장면에 비어 있는 경우가 있어 이미지 주소(dataURL)로 넘긴다
 function textureOf(s) {
   // 같은 디자인이라도 다크·라이트 텍스처가 다르다
-  const id = themeKeyOf(s)
+  const id = `${themeKeyOf(s)}${s.fx === false ? ':nofx' : ''}`
   if (!textureCache.has(id)) textureCache.set(id, engine.drawEquirectTexture(s, 2048).toDataURL('image/png'))
   return textureCache.get(id)
 }
@@ -196,8 +198,8 @@ function bgColor(s) {
 }
 
 function landColor(s, f) {
-  if (s.landGradient && f.cid !== '410') {
-    const stops = engine.isAccent(f) ? s.mkGradient : s.landGradient
+  if (s.landGradient && !engine.isHq(f, s)) {
+    const stops = engine.isAccent(f, s) ? s.mkGradient : s.landGradient
     return { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: stops.map((c, i) => ({ offset: i / (stops.length - 1), color: c })) }
   }
   // 오로라는 경도 따라 색이 바뀌는 그라데이션이라 면 지도에서는 대표색으로
@@ -230,7 +232,7 @@ function gridSeries(s, k) {
   const hp = engine.flatProj(engine.HQ.ll)
   const groups = new Map()
   samplePoints(s).forEach((p) => {
-    const accent = engine.isAccent(p.f)
+    const accent = engine.isAccent(p.f, s)
     const color = engine.toneOf(s, p.f, p.x)
     let r = accent ? s.rMk ?? s.r : s.r ?? 2
     if (s.kind === 'halftone' && !accent) r = Math.max(0.5, s.r * (1 - Math.hypot(p.x - hp[0], (p.y - hp[1]) * 1.6) / 760))
@@ -298,7 +300,7 @@ function fxSeries(s, k) {
       z: 4
     })
   }
-  if (s.heat) {
+  if (s.heat && s.fx !== false) {
     series.push({
       type: 'scatter',
       coordinateSystem: 'geo',
@@ -376,11 +378,34 @@ export function buildOption(s, k = 1) {
       silent: !reg, // 규제 대상이 아닌 나라는 호버·클릭에 반응하지 않는다 (커서도 그대로)
       itemStyle: {
         areaColor: isGrid ? 'rgba(0,0,0,0)' : landColor(s, f),
-        borderColor: isGrid ? 'rgba(0,0,0,0)' : s.mkStroke && engine.isAccent(f) ? s.mkStroke : s.stroke || 'rgba(0,0,0,0)',
+        borderColor: isGrid ? 'rgba(0,0,0,0)' : s.mkStroke && engine.isAccent(f, s) ? s.mkStroke : s.stroke || 'rgba(0,0,0,0)',
         borderWidth: isGrid ? 0 : (s.lw || 0.6) * k
       }
     }
   })
+  // 모든 geo 가 같은 투영·같은 자리를 쓰고, 아래 층만 dy 만큼 내려 그린다
+  const frame = (dy = 0) => ({
+    map: MAP_NAME,
+    roam: false,
+    projection: {
+      project: (pt) => proj(pt),
+      unproject: (pt) => proj.invert(pt),
+      // 태평양 중심처럼 회전한 투영은 날짜변경선에서 도형이 찢어지므로 d3 스트림으로 잘라 그린다
+      stream: (out) => proj.stream(out)
+    },
+    left: `${(14 / 960) * 100}%`,
+    right: `${(14 / 960) * 100}%`,
+    top: `${((14 + dy) / 480) * 100}%`,
+    bottom: `${((10 - dy) / 480) * 100}%`,
+    label: { show: false }
+  })
+  // 육지 아래 층: 그림자(엠보스·퓨어 미니멀) → 페이퍼 레이어 장. 나라별 그림자가 서로 겹쳐도 위 육지가 덮어 바깥쪽만 보인다
+  const under = (dy, itemStyle) => ({ ...frame(dy), z: 0, silent: true, tooltip: { show: false }, emphasis: { disabled: true }, select: { disabled: true }, itemStyle: { borderWidth: 0, ...itemStyle } })
+  const underlays = []
+  if (!isGrid && s.shadow) {
+    underlays.push(under(0, { areaColor: s.land, shadowColor: s.shadow.color, shadowBlur: s.shadow.blur * k, shadowOffsetY: s.shadow.dy * k }))
+  }
+  if (!isGrid && s.layers) engine.paperLayers(s).forEach(({ dy, color }) => underlays.push(under(dy, { areaColor: color })))
   return {
     backgroundColor: bgColor(s),
     animation: false,
@@ -392,20 +417,10 @@ export function buildOption(s, k = 1) {
       borderWidth: 0,
       textStyle: { color: '#fff', fontSize: 12 }
     },
-    geo: {
-      map: MAP_NAME,
-      roam: false,
-      projection: {
-        project: (pt) => proj(pt),
-        unproject: (pt) => proj.invert(pt),
-        // 태평양 중심처럼 회전한 투영은 날짜변경선에서 도형이 찢어지므로 d3 스트림으로 잘라 그린다
-        stream: (out) => proj.stream(out)
-      },
-      left: `${(14 / 960) * 100}%`,
-      right: `${(14 / 960) * 100}%`,
-      top: `${(14 / 480) * 100}%`,
-      bottom: `${(10 / 480) * 100}%`,
-      label: { show: false },
+    // 첫 geo(0번)가 클릭·툴팁을 받는 진짜 지도. 시리즈도 기본으로 0번 geo 좌표를 쓴다
+    geo: [{
+      ...frame(),
+      z: 1,
       itemStyle: { areaColor: 'rgba(0,0,0,0)', borderWidth: 0 },
       emphasis: {
         label: { show: false },
@@ -421,7 +436,7 @@ export function buildOption(s, k = 1) {
         }
       },
       regions
-    },
+    }, ...underlays],
     series: [...(isGrid ? gridSeries(s, k) : []), ...fxSeries(s, k)]
   }
 }

@@ -24,7 +24,7 @@ import {
   geoCentroid
 } from 'd3-geo'
 import { geoRobinson, geoWinkel3, geoMiller } from 'd3-geo-projection'
-import { feature } from 'topojson-client'
+import { feature, merge } from 'topojson-client'
 import { regCountryOf } from './countryLink'
 import world from 'world-atlas/countries-110m.json'
 
@@ -71,6 +71,9 @@ export const features = feature(world, world.objects.countries)
     f.region = regionOf(geoCentroid(f))
     return f
   })
+
+// 나라를 합친 육지 하나 (국경 없이 해안선만). 윗면 하이라이트처럼 해안에만 긋는 선에 쓴다
+export const landOutline = merge(world, world.objects.countries.geometries.filter((g) => g.properties.name !== 'Antarctica'))
 
 /* ---------------- 평면 지도 투영 ----------------
  * 둥근 지구를 평면에 펴는 방식(투영법)과 가운데 둘 경도(중심)를 고를 수 있다.
@@ -231,19 +234,34 @@ export function getGlobePts() {
   return globePts
 }
 
-/* ---------------- 색 결정 ---------------- */
+/* ---------------- 색 결정 ----------------
+ * 거점 나라(MARKETS)·본사(한국) 강조는 거점·연결선 표시의 일부다.
+ * 거점·연결선을 끈 디자인(fx: false)에서는 거점·본사 나라도 일반 나라와 같은 색·크기로 그린다.
+ * (Atlas Focus 의 규제 권역, 파스텔 권역처럼 거점과 상관없는 색칠은 그대로) */
+export const isAccent = (f, s) => s?.fx !== false && !!MARKETS[f.cid]
+export const isHq = (f, s) => s?.fx !== false && f.cid === HQ_ID
 export function toneOf(s, f, x) {
-  const hq = f.cid === HQ_ID
-  const mk = !!MARKETS[f.cid]
+  const hq = isHq(f, s)
+  const mk = isAccent(f, s)
   if (s.focusRegion) return hq ? s.hq : regCountryOf(f.cid)?.regionCd === s.focusRegion ? s.mk : s.land
   if (s.palette === 'region') return hq ? s.hq : s.regions[f.region]
+  if (s.palette === 'mosaic') return hq ? s.hq : mosaicTone(s, f)
   if (s.palette === 'aurora') {
     const c = mix(s.aurora, Math.max(0, Math.min(1, x / W)))
     return hq ? s.hq : mk ? c : alpha(c, s.landAlpha ?? 0.45)
   }
   return hq ? s.hq : mk ? s.mk : s.land
 }
-export const isAccent = (f) => !!MARKETS[f.cid]
+
+// 모자이크: 나라 코드로 팔레트 색을 하나 고른다. 같은 나라는 늘 같은 색이라 저장 파일도 매번 같다
+function mosaicTone(s, f) {
+  let h = 7
+  for (const ch of f.cid) h = (h * 31 + ch.charCodeAt(0)) % 9973
+  return s.mosaic[h % s.mosaic.length]
+}
+
+/** 페이퍼 레이어: 먼 장부터 [{ dy, color }]. 세 엔진이 같은 간격으로 쌓도록 여기서만 계산 */
+export const paperLayers = (s) => s.layers.colors.map((color, i, a) => ({ dy: s.layers.step * (a.length - i), color }))
 
 /* ---------------- 배경 ---------------- */
 function drawBg(ctx, s) {
@@ -319,7 +337,7 @@ function drawGridLand(ctx, s) {
   }
   if (shape === 'scan') {
     pts.forEach((sg) => {
-      const p = add(toneOf(s, sg.f, sg.x1), isAccent(sg.f))
+      const p = add(toneOf(s, sg.f, sg.x1), isAccent(sg.f, s))
       p.moveTo(sg.x1, sg.y)
       p.lineTo(sg.x2, sg.y)
     })
@@ -340,13 +358,13 @@ function drawGridLand(ctx, s) {
   const hx = HQ.ll
   const hp = flatProj(hx)
   pts.forEach(({ x, y, f }) => {
-    let r = isAccent(f) ? s.rMk ?? s.r : s.r
+    let r = isAccent(f, s) ? s.rMk ?? s.r : s.r
     if (s.kind === 'halftone') {
       // 서울에서 멀어질수록 점이 작아지는 하프톤
       const d = Math.hypot(x - hp[0], (y - hp[1]) * 1.6)
-      r = isAccent(f) ? s.rMk : Math.max(0.5, s.r * (1 - d / 760))
+      r = isAccent(f, s) ? s.rMk : Math.max(0.5, s.r * (1 - d / 760))
     }
-    shapeInto(add(toneOf(s, f, x), isAccent(f)), shape, x, y, r)
+    shapeInto(add(toneOf(s, f, x), isAccent(f, s)), shape, x, y, r)
   })
   groups.forEach((g) => {
     ctx.save()
@@ -363,9 +381,8 @@ function drawGridLand(ctx, s) {
 /* ---------------- 면 지도 ---------------- */
 function landFill(ctx, s, f) {
   if (s.landGradient) {
-    const hq = f.cid === HQ_ID
-    if (hq) return s.hq
-    const stops = isAccent(f) ? s.mkGradient : s.landGradient
+    if (isHq(f, s)) return s.hq
+    const stops = isAccent(f, s) ? s.mkGradient : s.landGradient
     const g = ctx.createLinearGradient(0, 0, W, 0)
     stops.forEach((c, i) => g.addColorStop(i / (stops.length - 1), c))
     return g
@@ -412,6 +429,18 @@ function drawFillLand(ctx, s) {
     ctx.stroke()
     ctx.restore()
   }
+  // 페이퍼 레이어: 전체 육지를 아래로 조금씩 밀어 먼 장부터 쌓는다 (맨 위 면은 아래 나라별 칠하기)
+  if (s.layers) {
+    paperLayers(s).forEach(({ dy, color }) => {
+      ctx.save()
+      ctx.translate(0, dy)
+      ctx.beginPath()
+      features.forEach((f) => path(f))
+      ctx.fillStyle = color
+      ctx.fill()
+      ctx.restore()
+    })
+  }
   ctx.lineJoin = 'round'
   features.forEach((f) => {
     ctx.beginPath()
@@ -419,12 +448,26 @@ function drawFillLand(ctx, s) {
     ctx.fillStyle = landFill(ctx, s, f)
     ctx.fill()
     if (s.stroke) {
-      ctx.strokeStyle = s.mkStroke && isAccent(f) ? s.mkStroke : s.stroke
+      ctx.strokeStyle = s.mkStroke && isAccent(f, s) ? s.mkStroke : s.stroke
       ctx.lineWidth = s.lw || 0.6
       ctx.stroke()
     }
   })
-  if (s.heat) {
+  // 윗면 하이라이트: 육지 안쪽에서 해안선을 1px 아래로 밀어 그리면 위쪽 가장자리에만 밝은 선이 남는다
+  if (s.topLight) {
+    ctx.save()
+    ctx.beginPath()
+    features.forEach((f) => path(f))
+    ctx.clip()
+    ctx.translate(0, 1)
+    ctx.beginPath()
+    path(landOutline)
+    ctx.strokeStyle = s.topLight
+    ctx.lineWidth = 1.6
+    ctx.stroke()
+    ctx.restore()
+  }
+  if (s.heat && s.fx !== false) {
     // 거점마다 방사형 그라데이션을 겹쳐 히트맵처럼 보이게
     ctx.save()
     ctx.globalCompositeOperation = s.heatBlend || 'source-over'
@@ -489,9 +532,9 @@ function drawGlobe(ctx, s, t) {
       if (geoDistance(ll, center) > 1.55) return
       const [x, y] = proj(ll)
       const c = toneOf(s, f, 0)
-      if (!groups.has(c)) groups.set(c, { p: new Path2D(), glow: isAccent(f) })
+      if (!groups.has(c)) groups.set(c, { p: new Path2D(), glow: isAccent(f, s) })
       const p = groups.get(c).p
-      const r = isAccent(f) ? s.rMk ?? s.r : s.r
+      const r = isAccent(f, s) ? s.rMk ?? s.r : s.r
       p.moveTo(x + r, y)
       p.arc(x, y, r, 0, Math.PI * 2)
     })
@@ -572,7 +615,7 @@ export function drawEquirectTexture(s, w = 2048) {
       const p = groups.get(c)
       const x = ((ll[0] + 180) / 360) * w
       const y = ((90 - ll[1]) / 180) * h
-      const r = (isAccent(f) ? s.rMk ?? s.r : s.r) * k
+      const r = (isAccent(f, s) ? s.rMk ?? s.r : s.r) * k
       // 위도가 높을수록 구에 감을 때 가로로 눌리므로 미리 가로로 늘려 둔다
       const sx = 1 / Math.max(0.2, Math.cos((ll[1] * Math.PI) / 180))
       p.moveTo(x + r * sx, y)

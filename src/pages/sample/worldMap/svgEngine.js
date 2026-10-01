@@ -11,7 +11,7 @@
 import { geoOrthographic, geoPath, geoGraticule10, geoDistance } from 'd3-geo'
 import {
   W, H, GR, MARKETS, HQ, ROUTES, features, flatProj,
-  gridSamples, getGlobePts, toneOf, isAccent, alpha
+  gridSamples, getGlobePts, toneOf, isAccent, isHq, alpha, paperLayers, landOutline
 } from './mapEngine'
 import { tilePositions } from './regionTiles'
 import { regCountryOf } from './countryLink'
@@ -104,6 +104,20 @@ function countryAttrs(f) {
   return `data-cid="${f.cid}"${reg ? ` data-code="${reg.code}"` : ''} data-name="${esc(f.properties.name)}"`
 }
 
+/*
+ * 저장 파일용 "거점 ON/OFF 두 벌" (buildSvg opts.fxSwitch).
+ * 저장한 SVG 를 쓰는 쪽(WorldMapSvg)은 파일을 다시 그릴 수 없어서, 거점·본사 나라만
+ *   class="c wm-on"  : 거점 색 (평소 보임)
+ *   class="c wm-off" : 일반 나라 색, display="none" (거점·연결선 OFF 때 CSS 로 바꿔 보인다)
+ * 두 벌을 넣어 둔다. 12개국만 겹치므로 파일 크기 차이는 작다.
+ */
+let fxSwitch = false
+function countryVariants(s, f, make) {
+  if (!fxSwitch || s.fx === false || !(isAccent(f, s) || isHq(f, s))) return make(s, '', '')
+  const off = { ...s, fx: false }
+  return make(s, ' wm-on', '') + make(off, ' wm-off', ' display="none"')
+}
+
 function gridLand(s, id) {
   const shape = s.kind === 'halftone' ? 'dot' : s.kind
   const pts = gridSamples(shape, s.step)
@@ -111,30 +125,32 @@ function gridLand(s, id) {
   const hp = flatProj(HQ.ll)
   pts.forEach((p) => {
     if (!byCountry.has(p.f)) byCountry.set(p.f, [])
-    let d
-    if (shape === 'scan') d = `M${r1(p.x1)} ${r1(p.y)}H${r1(p.x2)}`
-    else {
-      let r = isAccent(p.f) ? s.rMk ?? s.r : s.r
-      if (s.kind === 'halftone' && !isAccent(p.f)) {
-        r = Math.max(0.5, s.r * (1 - Math.hypot(p.x - hp[0], (p.y - hp[1]) * 1.6) / 760))
-      }
-      d = shapeD(shape, p.x, p.y, r)
-    }
-    byCountry.get(p.f).push(d)
+    byCountry.get(p.f).push(p)
   })
-  let out = ''
-  byCountry.forEach((ds, f) => {
-    let paint = toneOf(s, f, 0)
-    let extra = ''
-    if (s.palette === 'aurora' && f.cid !== '410') {
-      paint = `url(#${id}au)`
-      if (!isAccent(f)) extra = shape === 'scan' ? ` stroke-opacity="${s.landAlpha ?? 0.45}"` : ` fill-opacity="${s.landAlpha ?? 0.45}"`
+  const pointD = (sv, p) => {
+    if (shape === 'scan') return `M${r1(p.x1)} ${r1(p.y)}H${r1(p.x2)}`
+    let r = isAccent(p.f, sv) ? sv.rMk ?? sv.r : sv.r
+    if (sv.kind === 'halftone' && !isAccent(p.f, sv)) {
+      r = Math.max(0.5, sv.r * (1 - Math.hypot(p.x - hp[0], (p.y - hp[1]) * 1.6) / 760))
     }
-    if (s.glow && isAccent(f)) extra += ` filter="url(#${id}gl)"`
-    const paintAttr = shape === 'scan'
-      ? `fill="none" stroke="${paint}" stroke-width="${s.lw || 2}" stroke-linecap="round"`
-      : `fill="${paint}"`
-    out += `<path class="c" ${countryAttrs(f)} ${paintAttr}${extra} d="${ds.join('')}"/>`
+    return shapeD(shape, p.x, p.y, r)
+  }
+  let out = ''
+  byCountry.forEach((list, f) => {
+    out += countryVariants(s, f, (s, cls, attr) => {
+      const ds = list.map((p) => pointD(s, p))
+      let paint = toneOf(s, f, 0)
+      let extra = ''
+      if (s.palette === 'aurora' && !isHq(f, s)) {
+        paint = `url(#${id}au)`
+        if (!isAccent(f, s)) extra = shape === 'scan' ? ` stroke-opacity="${s.landAlpha ?? 0.45}"` : ` fill-opacity="${s.landAlpha ?? 0.45}"`
+      }
+      if (s.glow && isAccent(f, s)) extra += ` filter="url(#${id}gl)"`
+      const paintAttr = shape === 'scan'
+        ? `fill="none" stroke="${paint}" stroke-width="${s.lw || 2}" stroke-linecap="round"`
+        : `fill="${paint}"`
+      return `<path class="c${cls}" ${countryAttrs(f)} ${paintAttr}${extra}${attr} d="${ds.join('')}"/>`
+    })
   })
   return out
 }
@@ -147,15 +163,24 @@ function fillLand(s, id) {
   const all = features.map((f) => path(f)).join('')
   if (s.shadow) out += `<path d="${all}" fill="${s.land}" filter="url(#${id}sh)"/>`
   if (s.outlineGlow) out += `<path d="${all}" fill="none" stroke="${s.outlineGlow}" stroke-width="${(s.lw || 0.6) + 1.2}" filter="url(#${id}og)"/>`
+  if (s.layers) paperLayers(s).forEach(({ dy, color }) => (out += `<path d="${all}" fill="${color}" transform="translate(0 ${r1(dy)})"/>`))
   features.forEach((f) => {
-    let fill = toneOf(s, f, 0)
-    if (s.landGradient && f.cid !== '410') fill = `url(#${id}${isAccent(f) ? 'mg' : 'lg'})`
-    const stroke = s.stroke ? ` stroke="${s.mkStroke && isAccent(f) ? s.mkStroke : s.stroke}" stroke-width="${s.lw || 0.6}" stroke-linejoin="round"` : ''
-    out += `<path class="c" ${countryAttrs(f)} fill="${fill}"${stroke} d="${path(f)}"/>`
+    const d = path(f)
+    out += countryVariants(s, f, (s, cls, attr) => {
+      let fill = toneOf(s, f, 0)
+      if (s.landGradient && !isHq(f, s)) fill = `url(#${id}${isAccent(f, s) ? 'mg' : 'lg'})`
+      const stroke = s.stroke ? ` stroke="${s.mkStroke && isAccent(f, s) ? s.mkStroke : s.stroke}" stroke-width="${s.lw || 0.6}" stroke-linejoin="round"` : ''
+      return `<path class="c${cls}" ${countryAttrs(f)} fill="${fill}"${stroke}${attr} d="${d}"/>`
+    })
   })
-  if (s.heat) {
+  // 거점 도시 주변 번짐도 거점 표시라 wm-fx 묶음에 넣는다 (WorldMapSvg 의 거점·연결선 OFF 때 같이 숨김)
+  if (s.topLight) {
+    out += `<clipPath id="${id}tl"><path d="${all}"/></clipPath>`
+    out += `<path d="${path(landOutline)}" fill="none" stroke="${s.topLight}" stroke-width="1.6" transform="translate(0 1)" clip-path="url(#${id}tl)" pointer-events="none"/>`
+  }
+  if (s.heat && s.fx !== false) {
     const blend = s.heatBlend === 'lighter' ? ' style="mix-blend-mode:screen"' : ''
-    out += `<g${blend} pointer-events="none">`
+    out += `<g class="wm-fx"${blend} pointer-events="none">`
     Object.values(MARKETS).forEach((m, i) => {
       const [x, y] = flatProj(m.ll)
       const r = m === HQ ? 70 : 34 + (i % 4) * 9
@@ -240,19 +265,22 @@ function globe(s, id, t, still = false) {
     const byCountry = new Map()
     getGlobePts().forEach(({ ll, f }) => {
       if (geoDistance(ll, center) > 1.55) return
-      const [x, y] = proj(ll)
       if (!byCountry.has(f)) byCountry.set(f, [])
-      byCountry.get(f).push(shapeD('dot', x, y, isAccent(f) ? s.rMk ?? s.r : s.r))
+      byCountry.get(f).push(proj(ll))
     })
-    byCountry.forEach((ds, f) => {
-      const glow = s.glow && isAccent(f) ? ` filter="url(#${id}gl)"` : ''
-      out += `<path class="c" ${countryAttrs(f)} fill="${toneOf(s, f, 0)}"${glow} d="${ds.join('')}"/>`
+    byCountry.forEach((xy, f) => {
+      out += countryVariants(s, f, (s, cls, attr) => {
+        const ds = xy.map(([x, y]) => shapeD('dot', x, y, isAccent(f, s) ? s.rMk ?? s.r : s.r))
+        const glow = s.glow && isAccent(f, s) ? ` filter="url(#${id}gl)"` : ''
+        return `<path class="c${cls}" ${countryAttrs(f)} fill="${toneOf(s, f, 0)}"${glow}${attr} d="${ds.join('')}"/>`
+      })
     })
   } else {
     features.forEach((f) => {
       const d = path(f)
       if (!d) return
-      out += `<path class="c" ${countryAttrs(f)} fill="${toneOf(s, f, 0)}"${s.stroke ? ` stroke="${s.stroke}" stroke-width="0.5"` : ''} d="${d}"/>`
+      out += countryVariants(s, f, (s, cls, attr) =>
+        `<path class="c${cls}" ${countryAttrs(f)} fill="${toneOf(s, f, 0)}"${s.stroke ? ` stroke="${s.stroke}" stroke-width="0.5"` : ''}${attr} d="${d}"/>`)
     })
   }
   if (s.shade) out += `<circle cx="480" cy="240" r="${GR}" fill="url(#${id}sd)" pointer-events="none"/>`
@@ -284,10 +312,12 @@ let seq = 0
  * @param opts.tileLL 사용자가 옮긴 타일 위치 { R_ASIA: [lon, lat] }
  * @param opts.tileStyle 타일 디자인 키 (tileRender.TILE_STYLES)
  * @param opts.animate false 면 애니메이션 없는 정지 버전 (흐르는 빛·본사 펄스 없이 연결선과 거점만)
+ * @param opts.fxSwitch 저장 파일용. 거점·본사 나라를 ON/OFF 두 벌로 넣어 파일을 쓰는 쪽에서 거점 색도 끌 수 있게
  */
 export function buildSvg(s, t = 1.4, idPrefix = `wm${++seq}`, opts = {}) {
   const id = idPrefix
   const still = opts.animate === false
+  fxSwitch = !!opts.fxSwitch
   let body = bgLayer(s, id)
   let extraDefs = ''
   if (isGlobeStyle(s)) body += globe(s, id, t, still)
@@ -301,6 +331,7 @@ export function buildSvg(s, t = 1.4, idPrefix = `wm${++seq}`, opts = {}) {
       extraDefs = tiles.defs
     }
   }
+  fxSwitch = false
   const defsMarkup = defs(s, id).replace('</defs>', `${extraDefs}</defs>`)
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${defsMarkup}${body}</svg>`
 }

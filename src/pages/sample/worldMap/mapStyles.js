@@ -11,6 +11,11 @@
  *             (값을 null 로 주면 그 항목을 뺀다. 예: 라이트에서 빛 번짐 glow: null)
  *   focusRegion : 강조할 규제 권역 코드. 해당 국가 면은 mk, 한국은 hq 색으로 표시
  *   fx     : false 이면 연결선·거점 핀·본사 펄스·도시 라벨 생략
+ *   (면 지도 kind: 'fill' 전용)
+ *   shadow : { color, blur, dy } 육지 전체 아래 그림자
+ *   layers : { step, colors } 페이퍼 레이어. 육지를 step 간격으로 아래로 밀어 colors(먼 장부터) 순서로 쌓는다
+ *   topLight : 육지 윗가장자리 하이라이트 색 (위에서 빛을 받는 두께감)
+ *   palette: 'mosaic' + mosaic: [색...] — 나라마다 팔레트에서 색 하나 (나라 코드로 정해져 늘 같다)
  */
 export const MAP_STYLES = [
   {
@@ -295,5 +300,57 @@ export const MAP_STYLES = [
     kind: 'dot', step: 6.5, r: 1.9, rMk: 2.3,
     bg: ['#FFFFFF', '#F7F8FB'], land: '#D5DAE3', mk: '#1428A0', hq: '#1428A0',
     arc: '#1428A0', arcBase: 0.22, pin: '#1428A0', pinRing: '#FFFFFF', hqPulse: '#1428A0'
+  },
+  {
+    // 애플 지도처럼 덜어낸 톤: 연회색 면 + 옅은 그림자 + 윗면 하이라이트. 연결선 없이 본사 핀 하나만 블루
+    key: 'pure-minimal',
+    name: '퓨어 미니멀',
+    tone: 'light',
+    desc: '연회색 대륙에 옅은 그림자와 윗면 하이라이트만. 연결선 없이 서울 핀 하나만 블루로 둬서, 여백이 곧 디자인인 가장 조용한 지도예요.',
+    kind: 'fill',
+    bg: '#F5F5F7', land: '#E3E3E8', mk: '#E3E3E8', hq: '#0071E3', stroke: '#F5F5F7', lw: 0.6,
+    shadow: { color: 'rgba(0,0,0,.10)', blur: 8, dy: 2.5 }, topLight: 'rgba(255,255,255,.9)',
+    pin: '#A1A1A6', pinRing: '#F5F5F7', hqPulse: '#0071E3',
+    variants: {
+      dark: {
+        bg: '#1C1C1E', land: '#3A3A3C', mk: '#3A3A3C', hq: '#0A84FF', stroke: '#1C1C1E',
+        shadow: { color: 'rgba(0,0,0,.55)', blur: 10, dy: 3 }, topLight: 'rgba(255,255,255,.10)',
+        pin: '#8E8E93', pinRing: '#1C1C1E', hqPulse: '#0A84FF', glow: null
+      }
+    }
+  },
+  {
+    key: 'paper-layer',
+    name: '페이퍼 레이어',
+    tone: 'light',
+    desc: '대륙을 두꺼운 종이 여러 장처럼 겹겹이 쌓았어요. 평면 지도인데 입체감이 확실하고, 밝고 차분해서 업무 화면에도 잘 어울려요.',
+    kind: 'fill',
+    bg: '#EEF2F8', land: '#FFFFFF', mk: '#FFFFFF', hq: '#2F5BD3', stroke: '#E3E9F2', lw: 0.6,
+    layers: { step: 1.1, colors: ['#A9B9D1', '#A9B9D1', '#A9B9D1', '#D2DCEB', '#C6D2E4', '#B9C7DC'] },
+    arc: '#2F5BD3', arcBase: 0.25, pin: '#2F5BD3', pinRing: '#FFFFFF',
+    variants: {
+      dark: {
+        bg: '#0F1724', land: '#33425E', mk: '#33425E', hq: '#7FA6FF', stroke: '#2A3852',
+        layers: { step: 1.1, colors: ['#070C16', '#070C16', '#070C16', '#1A2436', '#1E293D', '#232F45'] },
+        arc: '#7FA6FF', arcBase: 0.3, pin: '#7FA6FF', pinRing: '#0F1724', glow: null
+      }
+    }
+  },
+  {
+    key: 'mosaic',
+    name: '모자이크 면',
+    tone: 'light',
+    desc: '나라마다 톤만 살짝 다른 블루 조각을 넓은 흰 틈으로 나눴어요. 국경이 또렷하면서도 한 가지 색이라 차분하고, 한국만 진한 블루로 강조돼요.',
+    kind: 'fill', palette: 'mosaic',
+    mosaic: ['#C9DAF2', '#B4CCEC', '#A2C0E6', '#D6E3F5', '#BCD2EE', '#AFC6E9'],
+    bg: '#FFFFFF', land: '#C9DAF2', mk: '#C9DAF2', hq: '#1F5FD1', stroke: '#FFFFFF', lw: 1.8,
+    arc: '#1F5FD1', arcBase: 0.25, pin: '#1F5FD1', pinRing: '#FFFFFF',
+    variants: {
+      dark: {
+        mosaic: ['#1E3354', '#22395E', '#264069', '#1B2E4C', '#2A4573', '#203760'],
+        bg: '#0F1724', land: '#1E3354', mk: '#1E3354', hq: '#5B9BFF', stroke: '#0F1724',
+        arc: '#5B9BFF', arcBase: 0.3, pin: '#5B9BFF', pinRing: '#0F1724'
+      }
+    }
   }
 ]

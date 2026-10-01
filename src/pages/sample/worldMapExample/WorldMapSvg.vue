@@ -7,6 +7,7 @@
       data-region="R_ASIA" : 권역 타일 → 누르면 옆에 주요 국가 드롭다운
       data-code="KR"       : 나라 땅   → 누르면 'country' 이벤트 (규제 국가만 붙어 있다)
       class="wm-fx"        : 거점·연결선·본사 표시 묶음 → 거점·연결선 OFF 면 숨긴다
+      class="wm-on/wm-off" : 거점·본사 나라의 거점 색 / 일반 색 두 벌 → OFF 면 일반 색으로 바꿔 보인다
 
     다크·라이트: light-svg / dark-svg 로 두 파일을 주면 사이트 테마(<html data-theme="dark...">)를 지켜보다
     알아서 바꿔 끼운다. 사이트가 다른 방식으로 테마를 정하면 theme="dark" 처럼 직접 넘긴다.
@@ -437,9 +438,17 @@ export default {
   height: auto;
 }
 
-/* 거점·연결선 OFF: 저장할 때 SVG 에 넣어 둔 묶음(class="wm-fx")만 숨긴다 */
-.wms-svg.no-fx :deep(.wm-fx) {
+/* 거점·연결선 OFF: 저장할 때 SVG 에 넣어 둔 표시를 바꾼다
+   wm-fx  : 본사·거점 핀, 연결선, 거점 도시 번짐 → 숨김
+   wm-on  : 거점·본사 나라 (거점 색)        → 숨김
+   wm-off : 같은 나라의 일반 색 버전(평소 display="none") → 보임 */
+.wms-svg.no-fx :deep(.wm-fx),
+.wms-svg.no-fx :deep(.wm-on) {
   display: none;
+}
+
+.wms-svg.no-fx :deep(.wm-off) {
+  display: inline;
 }
 
 /* 지도 왼쪽 위 ON/OFF 버튼 */

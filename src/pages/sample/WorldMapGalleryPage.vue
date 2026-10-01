@@ -518,7 +518,9 @@ export default {
         tiles: this.exportTiles(),
         tileLL: this.tileLL,
         tileStyle: this.tileStyle,
-        animate: this.playing
+        animate: this.playing,
+        // 파일을 쓰는 쪽(WorldMapSvg)에서 거점·연결선을 끄면 거점 나라 색도 일반 색으로 바뀌게 두 벌로
+        fxSwitch: true
       })
     },
     // 투영·가운데·옵션별로 여러 장 저장해도 이름이 겹치지 않게 붙인다 (지구본은 투영이 정해져 있어 디자인 이름만)
