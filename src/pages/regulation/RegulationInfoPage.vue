@@ -788,6 +788,10 @@ export default {
     viewMode() {
       if (this.page === 1) this.syncCurrentGrid()
       else this.page = 1
+    },
+    // 이 화면이 떠 있는 채로 지도에서 다른 나라를 눌러 들어온 경우
+    '$route.query.country'() {
+      this.applyCountryQuery()
     }
   },
   created() {
@@ -798,6 +802,8 @@ export default {
       this.appliedFilters = { ...this.filters }
       this.selectedRegInfoId = ctx.selectedRegInfoId
     }
+    // 메인 지도 등 다른 화면에서 ?country=KR,JP 로 들어오면 그 국가 조건이 복원값보다 우선한다
+    this.applyCountryQuery()
     // 펼친 셀 'regInfoId|필드명'. 누른 셀만 펼친다(같은 행의 다른 긴 셀은 접힌 채).
     // 행 순서는 페이지·정렬마다 바뀌므로 itemIndex 가 아니라 regInfoId 로 기억한다.
     // 렌더러가 읽기만 하면 되므로 반응형일 필요 없다.
@@ -1242,6 +1248,14 @@ export default {
     },
     removeCountry(cd) {
       this.setCountryChips(this.filters.countryCds.filter((c) => c !== cd))
+    },
+    /** ?country=KR,JP 를 국가 조건으로. 모르는 코드는 버린다 */
+    applyCountryQuery() {
+      const raw = this.$route.query.country
+      if (!raw) return
+      const known = new Set(countryCodes.map((c) => c.code))
+      const codes = String(raw).split(',').map((c) => c.trim().toUpperCase()).filter((c) => known.has(c))
+      if (codes.length) this.setCountryChips(codes)
     },
     /** 국가 미지정 칩은 코드가 아니라 "COUNTRY 타겟이 하나도 없음" 을 뜻한다 */
     matchCountry(record, code) {

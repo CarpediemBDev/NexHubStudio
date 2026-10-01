@@ -146,7 +146,9 @@ const routes = [
           { path: "component-guide", name: "ComponentGuide", component: ComponentGuidePage, meta: { title: "UI 컴포넌트 가이드", icon: "bi-book" } },
           { path: "datepicker-gallery", name: "DatePickerGallery", component: () => import("../pages/sample/DatePickerGalleryPage.vue"), meta: { title: "DatePicker 갤러리", icon: "bi-calendar-week" } },
           { path: "barcode-equipment", name: "BarcodeEquipment", component: () => import("../pages/sample/BarcodeEquipment.vue"), meta: { title: "설비 바코드 샘플", icon: "bi-upc-scan" } },
-          { path: "portal", name: "PortalSample", component: () => import("../pages/sample/PortalSample.vue"), meta: { title: "포털 메인 샘플", icon: "bi-layout-text-window" } }
+          { path: "portal", name: "PortalSample", component: () => import("../pages/sample/PortalSample.vue"), meta: { title: "포털 메인 샘플", icon: "bi-layout-text-window" } },
+          { path: "world-map-gallery", name: "WorldMapGallery", component: () => import("../pages/sample/WorldMapGalleryTabsPage.vue"), meta: { title: "세계지도 디자인 갤러리", icon: "bi-globe-asia-australia" } },
+          { path: "world-map-example", name: "WorldMapExample", component: () => import("../pages/sample/WorldMapExamplePage.vue"), meta: { title: "세계지도 적용 예제", icon: "bi-map" } }
         ]
       },
 
