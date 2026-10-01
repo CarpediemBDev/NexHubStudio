@@ -12,20 +12,44 @@
     알아서 바꿔 끼운다. 사이트가 다른 방식으로 테마를 정하면 theme="dark" 처럼 직접 넘긴다.
     파일이 하나뿐이면 svg 하나만 줘도 된다.
 
-    controls 를 주면 지도 왼쪽 위에 애니메이션 / 거점·연결선 ON/OFF 버튼이 생긴다.
-    파일을 다시 만들지 않고 화면에서 켜고 끈다 (애니메이션은 SVG 의 pauseAnimations, 거점·연결선은 CSS)
+    지도 위 도구는 prop 으로 하나씩 켠다 (모두 기본 false):
+      :animate-toggle="true"  → 왼쪽 위 애니메이션 ON/OFF 버튼 (SVG 의 pauseAnimations)
+      :markers-toggle="true"  → 왼쪽 위 거점·연결선 ON/OFF 버튼 (CSS 로 wm-fx 묶음 숨김)
+      :zoomable="true"        → 오른쪽 아래 확대 도구(− / % / + / 원래 크기). 확대하면 끌어서 이동.
+                                 휠 확대는 Ctrl+휠(노트북 터치패드는 두 손가락 벌리기)만 — 그냥 휠은 페이지 스크롤
   -->
-  <div ref="box" class="wms" @mousemove="onMove" @mouseleave="tip = null" @click="onClick">
-    <!-- <img> 로 넣으면 그림 한 장이라 클릭할 요소가 없다. 반드시 HTML 안에 직접(인라인) 넣는다 -->
-    <div ref="host" class="wms-svg" :class="{ 'no-fx': !showMarkers }" v-html="markup"></div>
+  <div
+    ref="box"
+    class="wms"
+    :class="{ panning: !!pan, pannable: zoomable && view.k > 1.001 }"
+    @mousemove="onMove"
+    @mouseleave="tip = null"
+    @click="onClick"
+    @click.capture="onClickCapture"
+    @wheel="onWheel"
+    @pointerdown="onPanStart"
+  >
+    <!-- 확대한 지도가 칸 밖으로 넘치지 않게 자르는 틀. 드롭다운은 이 틀 바깥에 있어 잘리지 않는다 -->
+    <div class="wms-clip">
+      <!-- <img> 로 넣으면 그림 한 장이라 클릭할 요소가 없다. 반드시 HTML 안에 직접(인라인) 넣는다 -->
+      <div ref="host" class="wms-svg" :class="{ 'no-fx': !showMarkers }" :style="zoomStyle" v-html="markup"></div>
+    </div>
 
-    <div v-if="controls" class="wms-fx" @click.stop>
-      <button type="button" :class="{ off: !playing }" :aria-pressed="playing" :title="playing ? '애니메이션 멈추기' : '애니메이션 켜기'" @click="setPlaying(!playing)">
+    <div v-if="animateToggle || markersToggle" class="wms-fx" @click.stop @pointerdown.stop>
+      <button v-if="animateToggle" type="button" :class="{ off: !playing }" :aria-pressed="playing" :title="playing ? '애니메이션 멈추기' : '애니메이션 켜기'" @click="setPlaying(!playing)">
         <i class="bi" :class="playing ? 'bi-pause-fill' : 'bi-play-fill'" aria-hidden="true"></i>애니메이션 {{ playing ? 'ON' : 'OFF' }}
       </button>
-      <button type="button" :class="{ off: !showMarkers }" :aria-pressed="showMarkers" :title="showMarkers ? '거점·연결선 숨기기' : '거점·연결선 보이기'" @click="setMarkers(!showMarkers)">
+      <button v-if="markersToggle" type="button" :class="{ off: !showMarkers }" :aria-pressed="showMarkers" :title="showMarkers ? '거점·연결선 숨기기' : '거점·연결선 보이기'" @click="setMarkers(!showMarkers)">
         <i class="bi bi-geo-alt" aria-hidden="true"></i>거점·연결선 {{ showMarkers ? 'ON' : 'OFF' }}
       </button>
+    </div>
+
+    <!-- 확대 도구 (오른쪽 아래) -->
+    <div v-if="zoomable" class="wms-zoom" @click.stop @pointerdown.stop>
+      <button type="button" title="축소" aria-label="축소" :disabled="view.k <= 1.001" @click="zoomBy(1 / 1.5)"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+      <span class="wms-zoom-val" title="Ctrl+휠로 확대·축소, 확대하면 끌어서 이동">{{ Math.round(view.k * 100) }}%</span>
+      <button type="button" title="확대" aria-label="확대" :disabled="view.k >= ZOOM_MAX" @click="zoomBy(1.5)"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+      <button type="button" title="원래 크기" aria-label="원래 크기" :disabled="view.k <= 1.001" @click="resetZoom"><i class="bi bi-arrows-angle-contract" aria-hidden="true"></i></button>
     </div>
 
     <div v-if="tip" class="wms-tip" :style="{ left: `${tip.x}px`, top: `${tip.y}px` }">{{ tip.text }}</div>
@@ -57,6 +81,8 @@
 <script>
 /** 사이트가 다크 테마인지: <html data-theme="dark | dark-navy"> */
 const readSiteDark = () => (document.documentElement.getAttribute('data-theme') || '').startsWith('dark')
+// 확대 한계 (100% ~ 400%)
+const ZOOM_MAX = 4
 
 export default {
   name: 'WorldMapSvg',
@@ -76,8 +102,12 @@ export default {
     regions: { type: Object, default: () => ({}) },
     /** 클릭할 수 있는 나라 (영문 2자리 → 이름). 여기 없는 나라는 눌러도 반응하지 않는다 */
     countries: { type: Object, default: () => ({}) },
-    /** 지도 왼쪽 위에 애니메이션 / 거점·연결선 ON/OFF 버튼을 보일지 */
-    controls: { type: Boolean, default: false },
+    /** 지도 왼쪽 위 애니메이션 ON/OFF 버튼 */
+    animateToggle: { type: Boolean, default: false },
+    /** 지도 왼쪽 위 거점·연결선 ON/OFF 버튼 */
+    markersToggle: { type: Boolean, default: false },
+    /** 지도 오른쪽 아래 확대 도구 + Ctrl+휠 확대 + 끌어서 이동 */
+    zoomable: { type: Boolean, default: false },
     /** 처음 상태. v-model:animate / v-model:markers 로 바깥에서 쥘 수도 있다 */
     animate: { type: Boolean, default: true },
     markers: { type: Boolean, default: true }
@@ -90,6 +120,10 @@ export default {
       playing: this.animate && !reduced,
       showMarkers: this.markers,
       siteDark: readSiteDark(),
+      ZOOM_MAX,
+      // 확대 상태. x·y 는 칸 크기에 대한 비율(0 ~ 1-k)이라 칸 크기가 바뀌어도 같은 곳을 본다
+      view: { k: 1, x: 0, y: 0 },
+      pan: null,
       tip: null,
       // 열린 드롭다운 { cd, x, y(타일 오른쪽/왼쪽 끝, px), left(왼쪽으로 펼칠지), below } — 위치는 이 컴포넌트 기준
       open: null
@@ -103,6 +137,12 @@ export default {
     markup() {
       if (this.svg) return this.svg
       return this.dark ? this.darkSvg || this.lightSvg : this.lightSvg || this.darkSvg
+    },
+    // 왼쪽 위 기준으로 키운 뒤 칸 크기 비율만큼 옮긴다 (translate % 는 자기 크기 기준)
+    zoomStyle() {
+      const { k, x, y } = this.view
+      if (k <= 1.001) return null
+      return { transform: `translate(${x * 100}%, ${y * 100}%) scale(${k})`, transformOrigin: '0 0' }
     },
     openRegion() {
       if (!this.open) return null
@@ -134,6 +174,10 @@ export default {
     markers(v) {
       this.showMarkers = v
     },
+    // 확대 도구를 끄면 원래 크기로
+    zoomable(on) {
+      if (!on) this.resetZoom()
+    },
     countries() {
       this.markCountries()
     }
@@ -149,6 +193,7 @@ export default {
   },
   beforeUnmount() {
     this.themeObserver?.disconnect()
+    this.endPan()
     document.removeEventListener('click', this.onDocClick)
     document.removeEventListener('keydown', this.onKey)
   },
@@ -168,6 +213,72 @@ export default {
     setMarkers(on) {
       this.showMarkers = on
       this.$emit('update:markers', on)
+    },
+    /* ---- 확대 · 이동 (zoomable) ---- */
+    clampView(k, x, y) {
+      const min = 1 - k
+      return { k, x: Math.min(0, Math.max(min, x)), y: Math.min(0, Math.max(min, y)) }
+    },
+    // (fx, fy): 칸 안 비율 위치. 그 지점이 제자리에 있도록 배율만 바꾼다
+    zoomAt(fx, fy, k2) {
+      const { k, x, y } = this.view
+      const nk = Math.min(ZOOM_MAX, Math.max(1, k2))
+      if (Math.abs(nk - k) < 1e-4) return
+      this.view = this.clampView(nk, fx - (fx - x) * (nk / k), fy - (fy - y) * (nk / k))
+      // 드롭다운·툴팁 위치는 확대 전 기준이라 닫는다
+      this.open = null
+      this.tip = null
+    },
+    // 버튼 확대는 지도 가운데 기준
+    zoomBy(f) {
+      this.zoomAt(0.5, 0.5, this.view.k * f)
+    },
+    resetZoom() {
+      this.view = { k: 1, x: 0, y: 0 }
+      this.open = null
+    },
+    // Ctrl+휠만 확대. 그냥 휠은 페이지 스크롤을 그대로 둔다
+    onWheel(e) {
+      if (!this.zoomable || !(e.ctrlKey || e.metaKey)) return
+      e.preventDefault()
+      const r = this.$refs.box.getBoundingClientRect()
+      this.zoomAt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, this.view.k * Math.exp(-e.deltaY * 0.0015))
+    },
+    onPanStart(e) {
+      if (!this.zoomable || this.view.k <= 1.001 || e.button !== 0) return
+      if (e.target.closest?.('.wms-drop')) return
+      const r = this.$refs.box.getBoundingClientRect()
+      this.pan = { sx: e.clientX, sy: e.clientY, x: this.view.x, y: this.view.y, w: r.width, h: r.height, moved: false }
+      window.addEventListener('pointermove', this.onPanMove)
+      window.addEventListener('pointerup', this.endPan)
+      window.addEventListener('pointercancel', this.endPan)
+    },
+    onPanMove(e) {
+      const p = this.pan
+      if (!p) return
+      const dx = e.clientX - p.sx
+      const dy = e.clientY - p.sy
+      if (!p.moved && Math.hypot(dx, dy) < 4) return
+      if (!p.moved) {
+        p.moved = true
+        this.open = null
+        this.tip = null
+      }
+      this.view = this.clampView(this.view.k, p.x + dx / p.w, p.y + dy / p.h)
+    },
+    endPan() {
+      window.removeEventListener('pointermove', this.onPanMove)
+      window.removeEventListener('pointerup', this.endPan)
+      window.removeEventListener('pointercancel', this.endPan)
+      if (this.pan?.moved) this.justPanned = true
+      this.pan = null
+    },
+    // 끌어서 옮긴 직후의 click 은 타일·나라 클릭으로 보지 않는다
+    onClickCapture(e) {
+      if (!this.justPanned) return
+      this.justPanned = false
+      e.stopPropagation()
+      e.preventDefault()
     },
     /** 클릭할 수 있는 나라 땅에만 클래스를 붙인다 (커서·호버 효과를 CSS 로) */
     markCountries() {
@@ -244,6 +355,80 @@ export default {
 <style scoped>
 .wms {
   position: relative;
+}
+
+/* 확대한 지도를 칸 안으로 자른다 */
+.wms-clip {
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.wms-svg {
+  transition: transform 0.12s ease-out;
+}
+
+.wms.panning .wms-svg {
+  transition: none;
+}
+
+.wms.pannable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.wms.panning {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* 오른쪽 아래 확대 도구 */
+.wms-zoom {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(6px);
+}
+
+.wms-zoom button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+}
+
+.wms-zoom button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.wms-zoom button:disabled {
+  opacity: 0.35;
+}
+
+.wms-zoom button:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 1px;
+}
+
+.wms-zoom-val {
+  min-width: 40px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
 }
 
 .wms-svg :deep(svg) {

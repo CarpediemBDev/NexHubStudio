@@ -29,7 +29,7 @@
         <div class="rd-map">
           <span class="rd-map-caption">{{ selectedRegionEnglish }} · REGION VIEW</span>
           <!-- 지도 스타일 탭에서 고른 디자인으로, 고른 권역에 확대 (세 레이아웃 공용 지도) -->
-          <WorldMapLayoutMap :region-code="selectedRegion" @select-region="selectRegion" />
+          <WorldMapLayoutMap :region-code="selectedRegion" :animate-toggle="true" :markers-toggle="true" :zoomable="true" @select-region="selectRegion" />
         </div>
         <section class="rd-country-area" :aria-label="`${selectedRegionName} 국가`">
           <div class="rd-country-head">

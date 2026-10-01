@@ -7,7 +7,7 @@
     <div class="as-board">
       <section class="as-map-pane" aria-label="선택한 권역 지도">
         <div class="as-map-top"><span>GLOBAL OVERVIEW</span><strong>{{ selected.name }}</strong></div>
-        <WorldMapLayoutMap :region-code="selected.cd" @select-region="selectRegion" />
+        <WorldMapLayoutMap :region-code="selected.cd" :animate-toggle="true" :markers-toggle="true" :zoomable="true" @select-region="selectRegion" />
         <div class="as-map-foot"><span class="as-key"></span>{{ selected.name }} · {{ countries.length }}개 국가</div>
       </section>
       <aside class="as-directory" aria-label="권역 및 국가 탐색">

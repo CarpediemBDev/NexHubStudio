@@ -1,6 +1,15 @@
 <template>
-  <div ref="wrap" class="layout-map-wrap">
-    <MapFxToggles />
+  <div
+    ref="wrap"
+    class="layout-map-wrap"
+    :class="{ pannable: zoomable && view.k > 1.001, panning: !!pan }"
+    @wheel="onWheel"
+    @pointerdown="onPanStart"
+    @click.capture="onClickCapture"
+  >
+    <!-- 지도 위 도구: 왼쪽 위 애니메이션·거점·연결선 ON/OFF, 오른쪽 아래 확대 -->
+    <MapFxToggles :animate-toggle="animateToggle" :markers-toggle="markersToggle" />
+    <MapZoomTools v-if="zoomable" :k="view.k" :max="ZOOM_MAX" hint="Ctrl+휠로 확대·축소, 확대하면 끌어서 이동" @zoom="zoomBy" @reset="resetZoom" />
     <div ref="host" class="layout-map" role="img" :aria-label="`${regionName(regionCode)} 지도`" @click="onClick"></div>
 
     <!-- 권역 타일을 누르면: 그 권역으로 확대한 뒤 타일 옆에 주요 국가 드롭다운 -->
@@ -31,6 +40,7 @@ import { regCountryOf } from './worldMap/countryLink'
 import { MAP_STYLES } from './worldMap/mapStyles'
 import { worldMapDesign, withMarkers, themedStyle, currentTone } from './worldMap/designSelection'
 import MapFxToggles from './worldMap/MapFxToggles.vue'
+import MapZoomTools from './worldMap/MapZoomTools.vue'
 import { regionMenuOf } from './worldMap/regionMenu'
 import { useRegulationStore } from '@/stores/regulationStore'
 
@@ -38,11 +48,17 @@ import { useRegulationStore } from '@/stores/regulationStore'
  * 레이아웃 3종이 같이 쓰는 지도.
  * 권역을 고르면 그 권역으로 확대된다(SVG viewBox 를 부드럽게 옮김). 지도는 다시 그리지 않고 보는 범위만 바꾼다.
  * 확대돼도 권역 타일은 원래 크기로 보이게 타일마다 역배율을 건다.
+ * 사용자 확대(zoomable)도 같은 방식: 권역 범위(baseBox) 안에서 viewBox 를 한 번 더 좁힌다 → 타일은 그대로 원래 크기.
  */
 const props = defineProps({
   regionCode: { type: String, required: true },
-  // false 면 세계 전체를 보여 준다
-  zoom: { type: Boolean, default: true }
+  // false 면 세계 전체를 보여 준다 (권역을 골라도 다가가지 않음)
+  zoom: { type: Boolean, default: true },
+  // 지도 위 도구 (모두 기본 false): 왼쪽 위 애니메이션 / 거점·연결선 ON/OFF, 오른쪽 아래 확대 도구
+  animateToggle: { type: Boolean, default: false },
+  markersToggle: { type: Boolean, default: false },
+  // 확대 도구 + Ctrl+휠 확대 + 확대하면 끌어서 이동 (그냥 휠은 페이지 스크롤)
+  zoomable: { type: Boolean, default: false }
 })
 const emit = defineEmits(['select-region'])
 const host = ref(null)
@@ -107,6 +123,83 @@ const FULL = [0, 0, 960, 480]
 const TWEEN_MS = 520
 let viewBox = FULL.slice()
 let raf = 0
+
+/* ---- 사용자 확대 (zoomable) ----
+ * view: 배율 k 와 보는 위치 x·y(칸 크기 비율, 0 ~ 1-k). 권역 범위 baseBox 에 겹쳐 viewBox 를 만든다 */
+const ZOOM_MAX = 4
+const view = ref({ k: 1, x: 0, y: 0 })
+const pan = ref(null)
+let baseBox = FULL.slice()
+let justPanned = false
+function zoomedBox() {
+  const { k, x, y } = view.value
+  const [bx, by, bw, bh] = baseBox
+  return [bx - (bw * x) / k, by - (bh * y) / k, bw / k, bh / k]
+}
+function clampView(k, x, y) {
+  const min = 1 - k
+  return { k, x: Math.min(0, Math.max(min, x)), y: Math.min(0, Math.max(min, y)) }
+}
+function setView(next) {
+  view.value = next
+  cancelAnimationFrame(raf)
+  clearTimeout(finishTimer)
+  applyBox(zoomedBox())
+  // 드롭다운 위치는 확대 전 기준이라 닫는다
+  closeDrop()
+}
+// (fx, fy): 칸 안 비율 위치. 그 지점이 제자리에 있도록 배율만 바꾼다
+function zoomAt(fx, fy, k2) {
+  const { k, x, y } = view.value
+  const nk = Math.min(ZOOM_MAX, Math.max(1, k2))
+  if (Math.abs(nk - k) < 1e-4) return
+  setView(clampView(nk, fx - (fx - x) * (nk / k), fy - (fy - y) * (nk / k)))
+}
+function zoomBy(f) {
+  zoomAt(0.5, 0.5, view.value.k * f)
+}
+function resetZoom() {
+  setView({ k: 1, x: 0, y: 0 })
+}
+// Ctrl+휠만 확대. 그냥 휠은 페이지 스크롤을 그대로 둔다
+function onWheel(e) {
+  if (!props.zoomable || !(e.ctrlKey || e.metaKey)) return
+  e.preventDefault()
+  const r = wrap.value.getBoundingClientRect()
+  zoomAt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, view.value.k * Math.exp(-e.deltaY * 0.0015))
+}
+function onPanStart(e) {
+  if (!props.zoomable || view.value.k <= 1.001 || e.button !== 0) return
+  if (e.target.closest?.('.lm-drop, .mfx, .mzt')) return
+  const r = wrap.value.getBoundingClientRect()
+  pan.value = { sx: e.clientX, sy: e.clientY, x: view.value.x, y: view.value.y, w: r.width, h: r.height, moved: false }
+  window.addEventListener('pointermove', onPanMove)
+  window.addEventListener('pointerup', endPan)
+  window.addEventListener('pointercancel', endPan)
+}
+function onPanMove(e) {
+  const p = pan.value
+  if (!p) return
+  const dx = e.clientX - p.sx
+  const dy = e.clientY - p.sy
+  if (!p.moved && Math.hypot(dx, dy) < 4) return
+  p.moved = true
+  setView(clampView(view.value.k, p.x + dx / p.w, p.y + dy / p.h))
+}
+function endPan() {
+  window.removeEventListener('pointermove', onPanMove)
+  window.removeEventListener('pointerup', endPan)
+  window.removeEventListener('pointercancel', endPan)
+  if (pan.value?.moved) justPanned = true
+  pan.value = null
+}
+// 끌어서 옮긴 직후의 click 은 타일·나라 클릭으로 보지 않는다
+function onClickCapture(e) {
+  if (!justPanned) return
+  justPanned = false
+  e.stopPropagation()
+  e.preventDefault()
+}
 
 // 고른 디자인을 지금 테마(자동이면 사이트 테마) 색으로
 function selectedStyle() {
@@ -214,12 +307,15 @@ function applyPlaying() {
 function renderAndFocus(animate) {
   render()
   applyBox(viewBox)
-  const box = targetBox()
+  baseBox = targetBox()
   if (animate) {
+    // 다른 권역으로 옮길 때는 사용자 확대를 풀고 그 권역 범위로 부드럽게
+    view.value = { k: 1, x: 0, y: 0 }
     drop.value = null // 확대하는 동안은 숨겼다가 끝나면 타일 옆에 다시
-    tweenTo(box)
+    tweenTo(baseBox)
   } else {
-    applyBox(box)
+    // 디자인·테마만 바뀌면 보던 확대 상태 그대로
+    applyBox(zoomedBox())
     placeDrop()
   }
 }
@@ -252,6 +348,10 @@ onMounted(() => {
   observer = new MutationObserver(() => renderAndFocus(false))
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
 })
+// 확대 도구를 끄면 원래 크기로
+watch(() => props.zoomable, (on) => {
+  if (!on && view.value.k > 1.001) resetZoom()
+})
 // 권역이 바뀌면 부드럽게, 디자인이 바뀌면 바로. 왼쪽 메뉴·카드로 다른 권역을 고르면 열린 드롭다운은 닫는다
 watch(() => props.regionCode, (cd) => {
   if (openCd.value && openCd.value !== cd) closeDrop()
@@ -266,11 +366,14 @@ onBeforeUnmount(() => {
   observer?.disconnect()
   cancelAnimationFrame(raf)
   clearTimeout(finishTimer)
+  endPan()
 })
 </script>
 
 <style scoped>
 .layout-map-wrap { position: relative; }
+.layout-map-wrap.pannable { cursor: grab; touch-action: none; }
+.layout-map-wrap.panning { cursor: grabbing; user-select: none; }
 .layout-map { overflow: hidden; }
 .layout-map :deep(svg) { display: block; width: 100%; height: auto; }
 .layout-map :deep(path.layout-map-link) { cursor: pointer; }

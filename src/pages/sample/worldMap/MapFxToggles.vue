@@ -4,9 +4,11 @@
       애니메이션 : 흐르는 빛·본사 펄스·지구본 회전
       거점·연결선 : 서울 본사·해외 거점 점과 서울에서 전 세계로 뻗는 연결선
     SVG·PNG 저장도 이 상태를 그대로 따른다
+    버튼은 prop 으로 하나씩 켠다 (모두 기본 false): :animate-toggle="true" :markers-toggle="true"
   -->
-  <div class="mfx" @pointerdown.stop @dblclick.stop>
+  <div v-if="animateToggle || markersToggle" class="mfx" @pointerdown.stop @dblclick.stop>
     <button
+      v-if="animateToggle"
       type="button"
       :class="{ off: !worldMapDesign.playing }"
       :aria-pressed="worldMapDesign.playing"
@@ -17,6 +19,7 @@
       애니메이션 {{ worldMapDesign.playing ? 'ON' : 'OFF' }}
     </button>
     <button
+      v-if="markersToggle"
       type="button"
       :class="{ off: !worldMapDesign.showMarkers }"
       :aria-pressed="worldMapDesign.showMarkers"
@@ -31,6 +34,13 @@
 
 <script setup>
 import { worldMapDesign } from './designSelection'
+
+defineProps({
+  /** 애니메이션 ON/OFF 버튼 */
+  animateToggle: { type: Boolean, default: false },
+  /** 거점·연결선 ON/OFF 버튼 */
+  markersToggle: { type: Boolean, default: false }
+})
 </script>
 
 <style scoped>

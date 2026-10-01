@@ -91,14 +91,10 @@
         @dblclick="onStageDblClick"
         @click.capture="onStageClickCapture"
       >
-        <MapFxToggles />
-        <!-- 확대 도구: 휠·끌기로도 되지만 처음 보는 사람·마우스 없이 쓰는 사람을 위해 -->
-        <div class="wm-zoom-tools" @pointerdown.stop @dblclick.stop>
-          <button type="button" title="축소" aria-label="축소" :disabled="view.k <= 1.001" @click="zoomBy(1 / 1.5)"><i class="bi bi-dash-lg"></i></button>
-          <span class="wm-zoom-val" title="휠로 확대·축소, 끌어서 이동, 더블클릭으로 확대">{{ Math.round(view.k * 100) }}%</span>
-          <button type="button" title="확대" aria-label="확대" :disabled="view.k >= ZOOM_MAX" @click="zoomBy(1.5)"><i class="bi bi-plus-lg"></i></button>
-          <button type="button" title="원래 크기" aria-label="원래 크기" :disabled="view.k <= 1.001" @click="resetZoom"><i class="bi bi-arrows-angle-contract"></i></button>
-        </div>
+        <!-- 지도 위 도구: 왼쪽 위 애니메이션·거점·연결선 ON/OFF -->
+        <MapFxToggles :animate-toggle="true" :markers-toggle="true" />
+        <!-- 오른쪽 아래 확대 도구: 휠·끌기로도 되지만 처음 보는 사람·마우스 없이 쓰는 사람을 위해 -->
+        <MapZoomTools v-if="zoomable" :k="view.k" :max="ZOOM_MAX" hint="휠로 확대·축소, 끌어서 이동, 더블클릭으로 확대" @zoom="zoomBy" @reset="resetZoom" />
         <div
           v-show="panes.canvas"
           ref="canvasPane"
@@ -195,6 +191,7 @@ import { zipFiles } from './worldMap/zipFiles'
 import WorldMapStyleCarousel from './worldMap/WorldMapStyleCarousel.vue'
 import WorldMapTileCarousel from './worldMap/WorldMapTileCarousel.vue'
 import MapFxToggles from './worldMap/MapFxToggles.vue'
+import MapZoomTools from './worldMap/MapZoomTools.vue'
 import { showToast } from '@/utils/toastUtil.js'
 
 // 보여 줄 칸과 타일을 올릴 칸. 나란히 비교에서는 드롭다운이 두 칸에서 같이 열리지 않게 타일을 한 칸에만 둔다
@@ -213,12 +210,14 @@ const PNG_HINT = { 1: '가벼운 미리보기', 2: 'PPT·보고서 권장', 3: '
 
 export default {
   name: 'WorldMapGalleryPage',
-  components: { RegionTileLayer, WorldMapStyleCarousel, WorldMapTileCarousel, MapFxToggles },
+  components: { RegionTileLayer, WorldMapStyleCarousel, WorldMapTileCarousel, MapFxToggles, MapZoomTools },
   data() {
     return {
       styles: MAP_STYLES,
       RENDERERS,
       ZOOM_MAX,
+      // 지도 확대(휠·끌기·더블클릭·오른쪽 아래 도구)를 쓸지
+      zoomable: true,
       renderer: 'split',
       // 지도 확대 상태. x·y 는 칸 크기에 대한 비율(0 ~ 1-k)이라 칸 크기가 바뀌어도 같은 곳을 본다
       view: { k: 1, x: 0, y: 0 },
@@ -625,7 +624,7 @@ export default {
       return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]
     },
     onStageWheel(e) {
-      if (e.ctrlKey && Math.abs(e.deltaY) < 1) return
+      if (!this.zoomable || (e.ctrlKey && Math.abs(e.deltaY) < 1)) return
       const zoomOut = e.deltaY > 0
       if (zoomOut && this.view.k <= 1.001) return // 이미 원래 크기면 페이지 스크롤을 막지 않는다
       e.preventDefault()
@@ -633,6 +632,7 @@ export default {
       this.zoomAt(fx, fy, this.view.k * Math.exp(-e.deltaY * 0.0015))
     },
     onStageDblClick(e) {
+      if (!this.zoomable) return
       if (e.target.closest?.('.rt-tile, .rt-drop, .mfx')) return
       const [fx, fy] = this.paneFraction(e)
       this.zoomAt(fx, fy, this.view.k * 2)
@@ -646,7 +646,7 @@ export default {
     },
     onPanStart(e) {
       if (this.view.k <= 1.001 || e.button !== 0) return
-      if (e.target.closest?.('.rt-tile, .rt-drop, .mfx, .wm-zoom-tools')) return
+      if (e.target.closest?.('.rt-tile, .rt-drop, .mfx, .mzt')) return
       const pane = e.target.closest?.('.wm-pane')
       if (!pane) return
       const r = pane.getBoundingClientRect()
@@ -1059,50 +1059,6 @@ export default {
 
 .wm-stage-row.panning .wm-pane {
   cursor: grabbing;
-}
-
-.wm-zoom-tools {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(6px);
-}
-
-.wm-zoom-tools button {
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: #fff;
-  font-size: 13px;
-}
-
-.wm-zoom-tools button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.wm-zoom-tools button:disabled {
-  opacity: 0.35;
-}
-
-.wm-zoom-val {
-  min-width: 42px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #fff;
-  font-variant-numeric: tabular-nums;
 }
 
 .wm-stage-row.split {

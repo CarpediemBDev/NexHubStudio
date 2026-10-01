@@ -48,7 +48,9 @@
 
       <WorldMapSvg
         class="wx-map"
-        controls
+        :animate-toggle="true"
+        :markers-toggle="true"
+        :zoomable="true"
         :light-svg="FILES.light.svg"
         :dark-svg="FILES.dark.svg"
         :regions="regionMenus"
@@ -61,7 +63,8 @@
         <i class="bi bi-hand-index me-1"></i>
         권역 타일을 누르면 주요 국가가 나오고, 국가를 누르면 그 나라 규제 목록으로 이동해요. 지도의 나라 땅을 직접 눌러도 이동해요.
         사이트 테마를 다크/라이트로 바꾸면 지도도 같은 디자인의 다크/라이트 SVG 파일로 바로 바뀌어요 (컴포넌트가 알아서, 파일만 둘).
-        지도 왼쪽 위에서 애니메이션과 거점·연결선을 켜고 끌 수 있어요 — 파일을 따로 만들지 않고 화면에서 바로.
+        지도 왼쪽 위에서 애니메이션과 거점·연결선을 켜고 끄고, 오른쪽 아래에서 확대할 수 있어요 (Ctrl+휠 확대, 확대하면 끌어서 이동).
+        세 도구 모두 prop 으로 true/false 를 줘서 필요한 것만 보이게 해요.
       </p>
     </div>
 
@@ -116,10 +119,15 @@ const STEPS = [
 
 // 화면 쪽 사용 코드: 이 페이지에서 지도에 관련된 부분만 추린 것
 const USAGE_SRC = `<template>
-  <!-- controls: 지도 왼쪽 위에 애니메이션 / 거점·연결선 ON/OFF 버튼 -->
   <!-- light-svg / dark-svg: 사이트 테마(<html data-theme>)를 따라 컴포넌트가 알아서 바꿔 끼운다 -->
+  <!-- 지도 위 도구: 필요한 것만 true (모두 기본 false)
+       animate-toggle : 왼쪽 위 애니메이션 ON/OFF
+       markers-toggle : 왼쪽 위 거점·연결선 ON/OFF
+       zoomable       : 오른쪽 아래 확대 도구 (Ctrl+휠 확대, 확대하면 끌어서 이동) -->
   <WorldMapSvg
-    controls
+    :animate-toggle="true"
+    :markers-toggle="true"
+    :zoomable="true"
     :light-svg="lightSvg"
     :dark-svg="darkSvg"
     :regions="regionMenus"
@@ -381,10 +389,9 @@ export default {
   border: 1px solid var(--b2b-color-border, #dee2e6);
 }
 
-/* 모서리 자르기는 지도 그림에만. 바깥까지 자르면 드롭다운이 칸 밖으로 나갈 때 잘린다 */
-.wx-map :deep(.wms-svg) {
+/* 모서리 자르기는 지도 틀에만 (확대해도 둥근 모서리 유지). 바깥까지 자르면 드롭다운이 칸 밖으로 나갈 때 잘린다 */
+.wx-map :deep(.wms-clip) {
   border-radius: 13px;
-  overflow: hidden;
 }
 
 .wx-code-path {

@@ -10,7 +10,7 @@
     </div>
     <section class="rg-stage" aria-label="권역 지도와 국가">
       <div class="rg-stage-top"><div><span>WORLD VIEW</span><strong>{{ selected.name }}</strong></div><p>선택한 권역으로 확대해 보여 줍니다.</p></div>
-      <WorldMapLayoutMap :region-code="selectedCode" @select-region="selectRegion" />
+      <WorldMapLayoutMap :region-code="selectedCode" :animate-toggle="true" :markers-toggle="true" :zoomable="true" @select-region="selectRegion" />
       <div class="rg-country-strip">
         <div><strong>{{ selected.name }} 국가</strong><span>{{ countries.length }}개 국가</span></div>
         <div class="rg-countries">
