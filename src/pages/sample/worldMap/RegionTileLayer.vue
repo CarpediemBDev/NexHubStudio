@@ -1,7 +1,7 @@
 <template>
   <!-- 지도(Canvas/SVG/ECharts) 위에 겹치는 HTML 층. 타일 모양은 tileRender 가 SVG 로 그려 버튼 안에 넣는다
        (SVG·PNG 저장 파일과 같은 디자인) -->
-  <div ref="layer" class="rt-layer" :class="{ editing: editable }">
+  <div ref="layer" class="rt-layer" :class="{ editing: editable }" :style="{ '--rt-inv': inv }">
     <button
       v-for="t in tiles"
       :key="t.cd"
@@ -61,7 +61,9 @@ export default {
     // 타일 디자인 키 (tileRender.TILE_STYLES)
     tileStyle: { type: String, default: 'weather' },
     // 지도 밝기. 어두운 지도면 글자가 안 보이지 않게 밝은 색 변형을 쓴다
-    mapTone: { type: String, default: 'light' }
+    mapTone: { type: String, default: 'light' },
+    // 지도가 확대된 배율의 역수. 이 층이 지도와 같이 확대될 때 타일·드롭다운은 원래 크기로 보이게 되돌린다
+    inv: { type: Number, default: 1 }
   },
   emits: ['move'],
   data() {
@@ -127,9 +129,11 @@ export default {
       const t = this.openTile
       const right = t.x <= 62
       const dy = t.y > 50 ? 'calc(-100% + 24px)' : '-24px'
+      // 타일은 inv 배로 줄어 보이므로 타일 끝 위치도 그만큼
+      const half = t.halfW * this.inv
       return right
-        ? { left: `calc(${t.x + t.halfW}% + 10px)`, top: `${t.y}%`, transform: `translate(0, ${dy})` }
-        : { left: `calc(${t.x - t.halfW}% - 10px)`, top: `${t.y}%`, transform: `translate(-100%, ${dy})` }
+        ? { left: `calc(${t.x + half}% + ${10 * this.inv}px)`, top: `${t.y}%`, transform: `translate(0, ${dy})` }
+        : { left: `calc(${t.x - half}% - ${10 * this.inv}px)`, top: `${t.y}%`, transform: `translate(-100%, ${dy})` }
     }
   },
   created() {
@@ -242,6 +246,8 @@ export default {
   border: none;
   background: none;
   cursor: pointer;
+  /* 지도가 확대돼도 타일은 원래 크기로 (scale 속성은 hover 의 transform 과 따로 적용된다) */
+  scale: var(--rt-inv, 1);
   transition: transform 0.15s ease, filter 0.15s ease;
 }
 
@@ -275,6 +281,8 @@ export default {
 .rt-drop {
   position: absolute;
   pointer-events: auto;
+  scale: var(--rt-inv, 1);
+  transform-origin: 0 0;
   z-index: 3;
   width: 210px;
   background: var(--b2b-color-bg-card, #fff);

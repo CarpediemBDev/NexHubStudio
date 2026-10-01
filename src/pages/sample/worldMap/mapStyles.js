@@ -246,18 +246,31 @@ export const MAP_STYLES = [
     key: 'atlas-focus-light',
     name: 'Atlas Focus 라이트',
     tone: 'light',
-    desc: '차분한 회색 육지와 또렷한 국경선. 아시아 규제 대상 국가를 부드러운 블루로, 한국을 진한 블루로 강조해요. 연결선과 빛 효과 없이 권역 라벨이 잘 읽히는 지도예요.',
-    kind: 'fill', focusRegion: 'R_ASIA', fx: false,
+    desc: '차분한 회색 육지와 또렷한 국경선. 아시아 규제 대상 국가를 부드러운 블루로, 한국을 진한 블루로 강조해요. 거점·연결선을 끄면 권역 라벨이 잘 읽히는 담백한 지도가 돼요.',
+    kind: 'fill', focusRegion: 'R_ASIA',
     bg: '#F6F9FD', land: '#DCE4EE', mk: '#9EBCED', hq: '#3268D5',
-    stroke: '#F6F9FD', lw: 0.75, graticule: 'rgba(117,129,150,.10)'
+    stroke: '#F6F9FD', lw: 0.75, graticule: 'rgba(117,129,150,.10)',
+    // 거점·연결선 ON 일 때 색: 한국 강조색과 같은 블루로 절제
+    arc: '#3268D5', arcBase: 0.28, pinRing: '#F6F9FD'
   },
   {
     key: 'atlas-focus-dark',
     name: 'Atlas Focus 다크',
     tone: 'dark',
     desc: '짙은 네이비 바탕에 회청색 육지와 절제된 블루 강조. 아시아 규제 대상 국가와 한국이 드러나고, 작은 권역 라벨을 얹어도 복잡하지 않은 Atlas Focus의 다크 버전이에요.',
-    kind: 'fill', focusRegion: 'R_ASIA', fx: false,
+    kind: 'fill', focusRegion: 'R_ASIA',
     bg: '#111D30', land: '#33445B', mk: '#496C9F', hq: '#89B1FF',
-    stroke: '#111D30', lw: 0.75, graticule: 'rgba(157,172,191,.08)'
+    stroke: '#111D30', lw: 0.75, graticule: 'rgba(157,172,191,.08)',
+    arc: '#89B1FF', arcBase: 0.3, pinRing: '#111D30'
+  },
+  {
+    // 국내 전자 대기업(삼성 등) 글로벌 사이트의 코퍼레이트 톤: 흰 바탕 + 연회색 도트 + 단일 브랜드 블루(#1428A0)
+    key: 'enterprise-blue',
+    name: '엔터프라이즈 블루',
+    tone: 'light',
+    desc: '삼성 같은 전자 대기업 글로벌 사이트의 정제된 톤. 흰 바탕에 연회색 도트, 거점과 연결선만 브랜드 블루 한 색으로 절제해 신뢰감과 고급스러움을 줘요.',
+    kind: 'dot', step: 6.5, r: 1.9, rMk: 2.3,
+    bg: ['#FFFFFF', '#F7F8FB'], land: '#D5DAE3', mk: '#1428A0', hq: '#1428A0',
+    arc: '#1428A0', arcBase: 0.22, pin: '#1428A0', pinRing: '#FFFFFF', hqPulse: '#1428A0'
   }
 ]

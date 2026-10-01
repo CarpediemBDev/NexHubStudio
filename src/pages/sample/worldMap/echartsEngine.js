@@ -148,7 +148,8 @@ function globeOption(s, { playing }) {
         effect: { show: true, period: 3, trailWidth: 2.5, trailLength: 0.18, trailOpacity: 1, trailColor: s.arc },
         // 기본 곡선은 먼 거리일수록 지구본 밖으로 크게 솟아서, 대권을 따라 점을 찍고 높이를 직접 준다
         polyline: true,
-        data: arcs.map((coords) => ({ coords })),
+        // 거점·연결선을 끈 디자인(fx: false)이면 선을 그리지 않는다
+        data: s.fx !== false && s.arc ? arcs.map((coords) => ({ coords })) : [],
         silent: true
       },
       {
@@ -166,7 +167,8 @@ function globeOption(s, { playing }) {
         silent: true,
         symbolSize: 7,
         itemStyle: { color: s.pin || s.arc, opacity: 1 },
-        data: engine.ROUTES.map((m) => [...m.ll, 0])
+        // 거점·연결선을 끈 디자인(fx: false)이면 거점 점도 뺀다
+        data: s.fx !== false ? engine.ROUTES.map((m) => [...m.ll, 0]) : []
       },
       {
         type: 'scatter3D',
@@ -175,7 +177,7 @@ function globeOption(s, { playing }) {
         symbolSize: 13,
         itemStyle: { color: s.hqPulse || s.hq, opacity: 1 },
         label: { show: true, formatter: HQ.city, position: 'right', textStyle: { color: dark ? '#fff' : s.hq, fontSize: 12, fontWeight: 700, backgroundColor: 'transparent' } },
-        data: [[...HQ.ll, 0]]
+        data: s.fx !== false ? [[...HQ.ll, 0]] : []
       }
     ]
   }

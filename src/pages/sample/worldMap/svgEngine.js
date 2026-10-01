@@ -165,8 +165,10 @@ function fillLand(s, id) {
 
 /* ---------------- 효과 ----------------
  * smil=true  : 평면 지도. <animate> 로 브라우저가 알아서 움직인다
- * smil=false : 지구본. 매 프레임 다시 만들므로 시간 t 로 위치를 계산해 박아 넣는다 */
-function fx(s, id, proj, t, center, smil) {
+ * smil=false : 지구본. 매 프레임 다시 만들므로 시간 t 로 위치를 계산해 박아 넣는다
+ * still=true : 애니메이션 없는 정지 버전. 흐르는 빛 조각·본사 펄스 고리를 아예 넣지 않는다
+ *              (멈춘 장면을 넣으면 선 중간에 빛 조각이 박혀 보여 어색하다) */
+function fx(s, id, proj, t, center, smil, still = false) {
   if (s.fx === false) return ''
   const path = geoPath(proj)
   const visible = (ll) => !center || geoDistance(ll, center) < 1.5
@@ -177,6 +179,7 @@ function fx(s, id, proj, t, center, smil) {
       const d = path({ type: 'LineString', coordinates: [HQ.ll, m.ll] })
       if (!d) return
       out += `<path d="${d}" fill="none" stroke="${alpha(s.arc, s.arcBase ?? 0.35)}" stroke-width="1.1"/>`
+      if (still) return
       // pathLength=1000 으로 선 길이를 정규화해 두면 길이를 재지 않고도 빛 조각을 같은 속도로 흘릴 수 있다
       const comet = `d="${d}" fill="none" stroke="${s.arc}" stroke-width="2.2" stroke-linecap="round" pathLength="1000" stroke-dasharray="30 3000"${glow}`
       if (smil) {
@@ -197,7 +200,7 @@ function fx(s, id, proj, t, center, smil) {
   if (visible(HQ.ll)) {
     const [hx, hy] = proj(HQ.ll).map(r1)
     const pc = s.hqPulse || s.hq
-    for (let k = 0; k < 2; k++) {
+    for (let k = 0; k < (still ? 0 : 2); k++) {
       if (smil) {
         out += `<circle cx="${hx}" cy="${hy}" r="6" fill="none" stroke="${pc}" stroke-width="1.6"><animate attributeName="r" values="6;30" dur="1.8s" begin="${-k * 0.9}s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;0" dur="1.8s" begin="${-k * 0.9}s" repeatCount="indefinite"/></circle>`
       } else {
@@ -220,7 +223,7 @@ function fx(s, id, proj, t, center, smil) {
 }
 
 /* ---------------- 지구본 ---------------- */
-function globe(s, id, t) {
+function globe(s, id, t, still = false) {
   const rot = [-100 - t * (s.spin ?? 6), -20]
   const proj = geoOrthographic().scale(GR).translate([480, 240]).rotate(rot).clipAngle(90)
   const path = geoPath(proj)
@@ -250,7 +253,7 @@ function globe(s, id, t) {
   }
   if (s.shade) out += `<circle cx="480" cy="240" r="${GR}" fill="url(#${id}sd)" pointer-events="none"/>`
   if (s.rim) out += `<circle cx="480" cy="240" r="${GR}" fill="none" stroke="${s.rim}" stroke-width="1"/>`
-  out += fx(s, id, proj, t, center, false)
+  out += fx(s, id, proj, t, center, false, still)
   return out
 }
 
@@ -276,16 +279,18 @@ let seq = 0
  * @param opts.tiles  권역 타일을 넣을지 (평면 지도만. 지구본은 돌아가서 위치가 맞지 않는다)
  * @param opts.tileLL 사용자가 옮긴 타일 위치 { R_ASIA: [lon, lat] }
  * @param opts.tileStyle 타일 디자인 키 (tileRender.TILE_STYLES)
+ * @param opts.animate false 면 애니메이션 없는 정지 버전 (흐르는 빛·본사 펄스 없이 연결선과 거점만)
  */
 export function buildSvg(s, t = 1.4, idPrefix = `wm${++seq}`, opts = {}) {
   const id = idPrefix
+  const still = opts.animate === false
   let body = bgLayer(s, id)
   let extraDefs = ''
-  if (isGlobeStyle(s)) body += globe(s, id, t)
+  if (isGlobeStyle(s)) body += globe(s, id, t, still)
   else {
     body += s.kind === 'fill' ? fillLand(s, id) : gridLand(s, id)
     if (s.vignette) body += `<rect width="${W}" height="${H}" fill="url(#${id}vg)" pointer-events="none"/>`
-    body += fx(s, id, flatProj, t, null, true)
+    body += fx(s, id, flatProj, t, null, true, still)
     if (opts.tiles) {
       const tiles = tilesSvg(id, flatProj, opts.tileLL, opts.tileStyle, s.tone)
       body += tiles.body
